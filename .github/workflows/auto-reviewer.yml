@@ -1,0 +1,45 @@
+name: Auto Reviewers
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  assign-reviewers:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Assign reviewers
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const reviewers = [
+              'pwc2002',
+              'ssolsh',
+              'nyewon',
+              'twossu',
+              'mimizae',
+              'haeni82',
+            ]
+
+            const pr = context.payload.pull_request
+            const author = pr.user.login
+
+            if (pr.draft) {
+              console.log('Draft PR은 리뷰어를 지정하지 않습니다.')
+              return
+            }
+
+            const selectedReviewers = reviewers.filter(
+              (reviewer) => reviewer !== author
+            )
+
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              reviewers: selectedReviewers,
+            })
