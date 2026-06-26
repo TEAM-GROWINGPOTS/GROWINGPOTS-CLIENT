@@ -1,0 +1,141 @@
+name: Auto Label PR and Issue
+
+on:
+  issues:
+    types: [opened, edited]
+
+  pull_request:
+    types: [opened, edited, reopened, ready_for_review]
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Add labels by title and author
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const payload = context.payload
+
+            const isPR = Boolean(payload.pull_request)
+
+            const target = isPR
+              ? payload.pull_request
+              : payload.issue
+
+            const title = target.title
+            const author = target.user.login
+            const issueNumber = target.number
+
+            const TYPE_LABELS = [
+              '✨ Feat',
+              '♻️ Refactor',
+              '🐛 Fix',
+              '📝 Docs',
+              '🔧 Chore',
+              '🎨 Style',
+              '🚨 Hotfix',
+              '🥔 Init',
+            ]
+
+            const authorLabelMap = {
+              'nyewon': '🐻 예원',
+              'pwc2002': '🐨 우찬',
+              'ssolsh': '🐰 소희',
+              'mimizae': '🐶 민재',
+              'twossu': '🐹 윤하',
+              'haeni82': '🐱 해니',
+            }
+
+            const MEMBER_LABELS = Object.values(authorLabelMap)
+
+            const labels = []
+
+            const typeLabelMap = [
+              {
+                pattern: isPR ? /^Feat/i : /^\[Feat\]/i,
+                label: '✨ Feat',
+              },
+              {
+                pattern: isPR ? /^Refactor/i : /^\[Refactor\]/i,
+                label: '♻️ Refactor',
+              },
+              {
+                pattern: isPR ? /^Fix/i : /^\[Fix\]/i,
+                label: '🐛 Fix',
+              },
+              {
+                pattern: isPR ? /^Docs/i : /^\[Docs\]/i,
+                label: '📝 Docs',
+              },
+              {
+                pattern: isPR ? /^Chore/i : /^\[Chore\]/i,
+                label: '🔧 Chore',
+              },
+              {
+                pattern: isPR ? /^Style/i : /^\[Style\]/i,
+                label: '🎨 Style',
+              },
+              {
+                pattern: isPR ? /^Hotfix/i : /^\[Hotfix\]/i,
+                label: '🚨 Hotfix',
+              },
+              {
+                pattern: isPR ? /^Init/i : /^\[Init\]/i,
+                label: '🥔 Init',
+              },
+            ]
+
+            for (const { pattern, label } of typeLabelMap) {
+              if (pattern.test(title)) {
+                labels.push(label)
+                break
+              }
+            }
+
+            if (authorLabelMap[author]) {
+              labels.push(authorLabelMap[author])
+            }
+
+            const currentLabels = target.labels.map(
+              (label) => label.name
+            )
+
+            const labelsToRemove = currentLabels.filter(
+              (label) =>
+                (TYPE_LABELS.includes(label) ||
+                  MEMBER_LABELS.includes(label)) &&
+                !labels.includes(label)
+            )
+
+            const labelsToAdd = labels.filter(
+              (label) => !currentLabels.includes(label)
+            )
+
+            for (const label of labelsToRemove) {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  name: label,
+                })
+              } catch {
+                console.log(`Failed to remove label: ${label}`)
+              }
+            }
+
+            if (labelsToAdd.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                labels: labelsToAdd,
+              })
+            }
