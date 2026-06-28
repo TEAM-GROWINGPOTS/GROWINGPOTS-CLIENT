@@ -10,11 +10,12 @@
 
 | 단계 | 할 일 | 볼 섹션 |
 |------|--------|---------|
-| 1. 범위 파악 | 어디에 코드를 둘지 결정. 요청 범위만 수정 | **Project** > Folder Structure, **Boundaries** |
-| 2. 기존 코드 확인 | 같은 feature의 api/components/hooks 패턴 따르기 | **Conventions**, Notion [코딩](https://app.notion.com/p/1f932c07e25c821fa4b981c97a4ab60e) |
-| 3. 구현 | 명명·코드 스타일 준수. `app/`에는 라우팅만 | **Conventions** > Naming, Code Style |
-| 4. 검증 | lint → build 실행, 오류 수정 | **Project** > Commands, **Done** |
-| 5. 마무리 | 커밋·PR 컨벤션. ⚠️ 항목은 사용자 확인 후 | **Conventions** > Git, **Boundaries** |
+| 1. 요청·범위 | 무엇을 할지 확인. **어디에** 둘지 결정 (`app` / `features` / `shared`) | **Project** > Overview, Folder Structure |
+| 2. 조사 | 같은 feature 기존 패턴·컨벤션·Notion. **Pending** 항목(ky 등) 적용 여부 확인 | **Conventions**, Notion [코딩](https://app.notion.com/p/1f932c07e25c821fa4b981c97a4ab60e), **Done** > Pending |
+| 3. 사전 확인 | 패키지 추가·`shared/` 변경 등 해당 시 **구현 전** 사용자에게 확인 | **Boundaries** > Ask First |
+| 4. 구현 | Naming · Code Style 준수. Never 위반 금지 (env 등) | **Conventions**, **Boundaries** > Never |
+| 5. 검증 | `pnpm lint` → `pnpm build` + **Definition of Done** + diff(env·범위 밖 파일 없음) | **Project** > Commands, **Done**, **Boundaries** |
+| 6. 마무리 | 커밋·PR (Git). `git push`는 사용자 확인 후 | **Conventions** > Git |
 
 ---
 
@@ -67,7 +68,7 @@ pnpm lint             # ESLint
 # pnpm format         # Prettier — Pending
 ```
 
-테스트 프레임워크 미구축. 검증은 `pnpm lint` → `pnpm build`.
+테스트 프레임워크 미구축. 검증은 Workflow **5단계** — `pnpm lint` → `pnpm build` + Definition of Done.
 
 ---
 
@@ -162,7 +163,7 @@ Conventions에 없는 **판단·금지** 사항. 코드 스타일 중복은 **Co
 
 - `pnpm` 사용 (`npm`/`yarn` 금지).
 - 변경 범위를 요청/task에 맞게 **최소화**.
-- Workflow 4단계(검증) 실행 후 완료 보고.
+- Workflow **5단계(검증)** 실행 후 완료 보고.
 
 ### ⚠️ Ask First
 
