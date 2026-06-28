@@ -3,7 +3,7 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
-import { createQueryClient } from '@/shared/libs/query-client';
+import { createQueryClient } from '@shared/libs/query-client';
 
 const queryClient = createQueryClient();
 
