@@ -12,18 +12,23 @@ if (files.length === 0) {
 }
 
 const symbols = files.map((file) => {
-  const name = path.basename(file, '.svg');
+  const isColorIcon = file.endsWith('.color.svg');
+  const name = path.basename(file, isColorIcon ? '.color.svg' : '.svg');
   const content = fs.readFileSync(path.join(svgsDir, file), 'utf-8');
 
   const viewBoxMatch = content.match(/viewBox="([^"]+)"/);
   const viewBox = viewBoxMatch ? viewBoxMatch[1] : '0 0 24 24';
 
-  const innerContent = content
-    .replace(/<svg[^>]*>/, '')
+  const rawInner = content
+    .replace(/<svg[^>]*>/s, '')
     .replace(/<\/svg>/, '')
-    .replace(/fill="(?!none)[^"]+"/g, 'fill="currentColor"')
-    .replace(/stroke="(?!none)[^"]+"/g, 'stroke="currentColor"')
     .trim();
+
+  const innerContent = isColorIcon
+    ? rawInner
+    : rawInner
+        .replace(/fill="(?!none)[^"]+"/g, 'fill="currentColor"')
+        .replace(/stroke="(?!none)[^"]+"/g, 'stroke="currentColor"');
 
   return `  <symbol id="${name}" viewBox="${viewBox}">\n    ${innerContent}\n  </symbol>`;
 });
