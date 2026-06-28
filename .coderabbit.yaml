@@ -1,0 +1,84 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "ko-KR"
+early_access: false
+tone_instructions: |
+  당신은 Next.js/TypeScript/React 코드 리뷰어다.
+  한국어로 명확하고 건설적인 피드백을 제공한다.
+  학사 정보(학번, 이름, 졸업이수현황 PDF 파싱 데이터 등 개인 식별정보)를 다루는 서비스를 전제로,
+  보안, 안정성, 유지보수성에 우선순위를 둔다.
+  불필요한 장문은 피하고, 수정 방향과 근거를 함께 제시한다.
+
+reviews:
+  profile: "assertive"
+  abort_on_close: true
+  request_changes_workflow: false
+  high_level_summary: true
+  review_status: true
+  assess_linked_issues: true
+  related_prs: true
+  changed_files_summary: true
+  poem: false
+
+  path_filters:
+    - "!node_modules/**"
+    - "!dist/**"
+    - "!build/**"
+    - "!coverage/**"
+    - "!pnpm-lock.yaml"
+    - "!**/*.generated.*"
+    - "src/**"
+    - ".github/**"
+    - "docs/**"
+
+  instructions: |
+    - 개인 식별정보(학번, 이름, 졸업이수현황 데이터)가 console.log나 클라이언트 에러 메시지에 노출되는 패턴을 엄격히 점검할 것.
+    - PDF 업로드/파싱 결과, 카카오 로그인 토큰 등 민감 데이터가 불필요하게 localStorage/sessionStorage에 저장되는지 검토할 것.
+    - XSS/CSRF 취약점이 발생할 수 있는 DOM 조작 및 API 호출 패턴을 점검할 것.
+    - 컴포넌트는 PascalCase, 함수/변수는 camelCase, 폴더명은 kebab-case.
+    - 유니온/튜플/리터럴 타입처럼 interface로 표현이 불가능한 경우가 아니라면, type보다 interface 사용을 우선할 것. Props 타입은 ComponentNameProps 형식.
+    - 이벤트 핸들러는 handle 접두사, 화살표 함수, 구조 분해 할당 사용.
+    - any 타입 사용을 지양하고, 필요한 경우 unknown 사용 후 타입 narrowing을 제안할 것.
+    - 동적 리스트 렌더링에서 index를 key로 사용하는 패턴을 점검할 것.
+    - 텍스트 없는 버튼에는 aria-label이 있는지 확인할 것.
+    - input에는 label 또는 aria-label이 연결되어 있는지 확인할 것.
+    - ESLint/Prettier가 포매팅을 처리하므로 들여쓰기·세미콜론 등 스타일 이슈는 언급하지 않을 것.
+
+  path_instructions:
+    - path: "src/app/**"
+      instructions: |
+        app은 Next.js 라우팅 + 페이지 조합 레이어다 (pages/widgets 레이어 미사용).
+        - 비즈니스 로직(useEffect, fetch, 계산 로직)이 직접 들어있지 않고 features를 조합만 하는지
+        - 'use client' 경계가 필요한 최소 범위로 좁혀져 있는지
+        - layout.tsx의 중첩이 라우트 구조와 일치하는지
+        - 라우트 폴더 안에 _components 폴더를 새로 만들지 않는지 — 단순 마크업/로직 있는 컴포넌트 구분 없이 모두 features로 분리해야 함
+
+    - path: "src/features/**"
+      instructions: |
+        features는 도메인 단위 책임을 가진다 (entities 레이어 없이 통합 사용).
+        - zustand 상태, API 호출, 계산 로직 중 하나라도 있는 코드가 맞게 위치했는지
+        - index.ts로 public API만 노출하고 다른 슬라이스가 내부 파일을 직접 import하지 않는지
+        - 같은 레이어의 다른 feature를 직접 import하지 않는지
+    - path: "src/shared/**"
+      instructions: |
+        shared는 도메인 지식이 없는 순수 재사용 코드 영역이다.
+        - 비즈니스 로직이 섞여있지 않은지 (섞여있으면 features로 이동 제안)
+        - 접근성(a11y) 준수 (aria, role, keyboard)
+        - 불필요한 리렌더 유발 여부 (memo/useMemo/useCallback 남용 포함)
+
+  auto_review:
+    enabled: true
+    drafts: false
+    ignore_title_keywords:
+      - "Docs:"
+      - "[skip-review]"
+
+  tools:
+    markdownlint:
+      enabled: true
+    actionlint:
+      enabled: true
+    gitleaks:
+      enabled: true
+
+chat:
+  auto_reply: true
