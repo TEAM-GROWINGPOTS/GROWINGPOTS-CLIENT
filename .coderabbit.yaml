@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
-language: "ko-KR"
+language: 'ko-KR'
 early_access: false
 tone_instructions: |
   당신은 Next.js/TypeScript/React 코드 리뷰어다.
@@ -9,7 +9,7 @@ tone_instructions: |
   불필요한 장문은 피하고, 수정 방향과 근거를 함께 제시한다.
 
 reviews:
-  profile: "assertive"
+  profile: 'assertive'
   abort_on_close: true
   request_changes_workflow: false
   high_level_summary: true
@@ -20,15 +20,15 @@ reviews:
   poem: false
 
   path_filters:
-    - "!node_modules/**"
-    - "!dist/**"
-    - "!build/**"
-    - "!coverage/**"
-    - "!pnpm-lock.yaml"
-    - "!**/*.generated.*"
-    - "src/**"
-    - ".github/**"
-    - "docs/**"
+    - '!node_modules/**'
+    - '!dist/**'
+    - '!build/**'
+    - '!coverage/**'
+    - '!pnpm-lock.yaml'
+    - '!**/*.generated.*'
+    - 'src/**'
+    - '.github/**'
+    - 'docs/**'
 
   instructions: |
     - 개인 식별정보(학번, 이름, 졸업이수현황 데이터)가 console.log나 클라이언트 에러 메시지에 노출되는 패턴을 엄격히 점검할 것.
@@ -44,7 +44,7 @@ reviews:
     - ESLint/Prettier가 포매팅을 처리하므로 들여쓰기·세미콜론 등 스타일 이슈는 언급하지 않을 것.
 
   path_instructions:
-    - path: "src/app/**"
+    - path: 'src/app/**'
       instructions: |
         app은 Next.js 라우팅 + 페이지 조합 레이어다 (pages/widgets 레이어 미사용).
         - 비즈니스 로직(useEffect, fetch, 계산 로직)이 직접 들어있지 않고 features를 조합만 하는지
@@ -52,13 +52,13 @@ reviews:
         - layout.tsx의 중첩이 라우트 구조와 일치하는지
         - 라우트 폴더 안에 _components 폴더를 새로 만들지 않는지 — 단순 마크업/로직 있는 컴포넌트 구분 없이 모두 features로 분리해야 함
 
-    - path: "src/features/**"
+    - path: 'src/features/**'
       instructions: |
         features는 도메인 단위 책임을 가진다 (entities 레이어 없이 통합 사용).
         - zustand 상태, API 호출, 계산 로직 중 하나라도 있는 코드가 맞게 위치했는지
         - index.ts로 public API만 노출하고 다른 슬라이스가 내부 파일을 직접 import하지 않는지
         - 같은 레이어의 다른 feature를 직접 import하지 않는지
-    - path: "src/shared/**"
+    - path: 'src/shared/**'
       instructions: |
         shared는 도메인 지식이 없는 순수 재사용 코드 영역이다.
         - 비즈니스 로직이 섞여있지 않은지 (섞여있으면 features로 이동 제안)
@@ -69,8 +69,8 @@ reviews:
     enabled: true
     drafts: false
     ignore_title_keywords:
-      - "Docs:"
-      - "[skip-review]"
+      - 'Docs:'
+      - '[skip-review]'
 
   tools:
     markdownlint:
