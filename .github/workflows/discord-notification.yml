@@ -43,6 +43,8 @@ jobs:
           }
 
           send_discord_message() {
+            DESC="${DESC:0:400}"
+
             jq -n \
               --arg title "$TITLE" \
               --arg url "$URL" \
@@ -51,6 +53,7 @@ jobs:
               --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
               --argjson color "$COLOR" \
               '{
+                allowed_mentions: { parse: [] },
                 embeds: [{
                   title:$title,
                   url:$url,
@@ -65,7 +68,13 @@ jobs:
                 }]
               }' > payload.json
 
-            curl -f \
+            curl \
+              --fail-with-body \
+              --silent --show-error \
+              --connect-timeout 5 \
+              --max-time 20 \
+              --retry 3 \
+              --retry-all-errors \
               -H "Content-Type: application/json" \
               -X POST \
               -d @payload.json \
@@ -82,7 +91,7 @@ jobs:
               [
                 .[]
                 | select(.draft == false)
-                | select(((now - (.created_at | fromdateiso8601)) / 3600) >= 48)
+                | select(((now - (.updated_at | fromdateiso8601)) / 3600) >= 48)
               ]
             ')
 
