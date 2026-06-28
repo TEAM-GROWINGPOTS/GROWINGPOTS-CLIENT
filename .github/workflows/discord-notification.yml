@@ -26,15 +26,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          EVENT_NAME: ${{ github.event_name }}
+          ACTION: ${{ github.event.action }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           if [ -z "$DISCORD_WEBHOOK_URL" ]; then
             echo "DISCORD_WEBHOOK_URL is not set."
             exit 1
           fi
 
-          EVENT_NAME="${{ github.event_name }}"
-          ACTION="${{ github.event.action }}"
-          REPOSITORY="${{ github.repository }}"
           REPO_API_URL="https://api.github.com/repos/$REPOSITORY"
 
           get_github_mention() {
@@ -113,12 +113,13 @@ jobs:
           fi
 
           if [ "$EVENT_NAME" = "pull_request" ]; then
-            PR_TITLE="${{ github.event.pull_request.title }}"
-            PR_NUMBER="${{ github.event.pull_request.number }}"
-            IS_MERGED="${{ github.event.pull_request.merged }}"
-            BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
-            HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
-            AUTHOR="${{ github.event.pull_request.user.login }}"
+            PR_TITLE=$(jq -r '.pull_request.title' "$GITHUB_EVENT_PATH")
+            PR_NUMBER=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
+            IS_MERGED=$(jq -r '.pull_request.merged // false' "$GITHUB_EVENT_PATH")
+            BASE_BRANCH=$(jq -r '.pull_request.base.ref' "$GITHUB_EVENT_PATH")
+            HEAD_BRANCH=$(jq -r '.pull_request.head.ref' "$GITHUB_EVENT_PATH")
+            AUTHOR=$(jq -r '.pull_request.user.login' "$GITHUB_EVENT_PATH")
+            PR_URL=$(jq -r '.pull_request.html_url' "$GITHUB_EVENT_PATH")
             AUTHOR_MENTION=$(get_github_mention "$AUTHOR")
             COMMON_DESC="**PR:** #$PR_NUMBER $PR_TITLE"$'\n'"**작성자:** $AUTHOR_MENTION"
 
@@ -146,18 +147,20 @@ jobs:
                 ;;
             esac
 
-            URL="${{ github.event.pull_request.html_url }}"
+            URL="$PR_URL"
             send_discord_message
             exit 0
           fi
 
           if [ "$EVENT_NAME" = "pull_request_review" ]; then
-            [ "${{ github.event.review.state }}" != "approved" ] && exit 0
+            REVIEW_STATE=$(jq -r '.review.state' "$GITHUB_EVENT_PATH")
+            [ "$REVIEW_STATE" != "approved" ] && exit 0
 
-            PR_TITLE="${{ github.event.pull_request.title }}"
-            PR_NUMBER="${{ github.event.pull_request.number }}"
-            PR_AUTHOR="${{ github.event.pull_request.user.login }}"
-            REVIEWER="${{ github.event.review.user.login }}"
+            PR_TITLE=$(jq -r '.pull_request.title' "$GITHUB_EVENT_PATH")
+            PR_NUMBER=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
+            PR_AUTHOR=$(jq -r '.pull_request.user.login' "$GITHUB_EVENT_PATH")
+            REVIEWER=$(jq -r '.review.user.login' "$GITHUB_EVENT_PATH")
+            PR_URL=$(jq -r '.pull_request.html_url' "$GITHUB_EVENT_PATH")
 
             REVIEWS=$(curl -s \
               -H "Authorization: Bearer $GITHUB_TOKEN" \
@@ -174,7 +177,7 @@ jobs:
             [ "$APPROVED_REVIEW_COUNT" -ne 2 ] && exit 0
 
             TITLE="✅ PR 머지 가능 상태가 되었어요"
-            URL="${{ github.event.pull_request.html_url }}"
+            URL="$PR_URL"
             DESC="**PR:** #$PR_NUMBER $PR_TITLE"$'\n'"**작성자:** @${PR_AUTHOR}"$'\n'"Approve 2명이 완료되었습니다."
             AUTHOR="$REVIEWER"
             COLOR=5763719
