@@ -1,15 +1,16 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 language: "ko-KR"
-early_access: true
+early_access: false
 tone_instructions: |
-  당신은 TypeScript/React 코드 리뷰어다.
+  당신은 Next.js/TypeScript/React 코드 리뷰어다.
   한국어로 명확하고 건설적인 피드백을 제공한다.
   학사 정보(학번, 이름, 졸업이수현황 PDF 파싱 데이터 등 개인 식별정보)를 다루는 서비스를 전제로,
   보안, 안정성, 유지보수성에 우선순위를 둔다.
   불필요한 장문은 피하고, 수정 방향과 근거를 함께 제시한다.
 
 reviews:
-  profile: "chill"
+  profile: "assertive"
+  abort_on_close: true
   request_changes_workflow: false
   high_level_summary: true
   review_status: true
@@ -34,8 +35,12 @@ reviews:
     - PDF 업로드/파싱 결과, 카카오 로그인 토큰 등 민감 데이터가 불필요하게 localStorage/sessionStorage에 저장되는지 검토할 것.
     - XSS/CSRF 취약점이 발생할 수 있는 DOM 조작 및 API 호출 패턴을 점검할 것.
     - 컴포넌트는 PascalCase, 함수/변수는 camelCase, 폴더명은 kebab-case.
-    - type보다 interface 사용, Props 타입은 ComponentNameProps 형식.
+    - 유니온/튜플/리터럴 타입처럼 interface로 표현이 불가능한 경우가 아니라면, type보다 interface 사용을 우선할 것. Props 타입은 ComponentNameProps 형식.
     - 이벤트 핸들러는 handle 접두사, 화살표 함수, 구조 분해 할당 사용.
+    - any 타입 사용을 지양하고, 필요한 경우 unknown 사용 후 타입 narrowing을 제안할 것.
+    - 동적 리스트 렌더링에서 index를 key로 사용하는 패턴을 점검할 것.
+    - 텍스트 없는 버튼에는 aria-label이 있는지 확인할 것.
+    - input에는 label 또는 aria-label이 연결되어 있는지 확인할 것.
     - ESLint/Prettier가 포매팅을 처리하므로 들여쓰기·세미콜론 등 스타일 이슈는 언급하지 않을 것.
 
   path_instructions:
