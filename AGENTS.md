@@ -85,26 +85,72 @@ pnpm lint             # ESLint
 
 ### Code Style
 
-포맷·import 정렬 — ESLint/Prettier (Pending). 팀 규칙:
+포맷·import 정렬 — ESLint/Prettier (Pending).
 
-**컴포넌트** — PascalCase, **default export**, **화살표 함수**, 최상단 **Fragment**, self-closing, **시맨틱 태그** (`header`, `main`, `section` …). `'use client'`는 필요할 때만.
+#### 컴포넌트
 
-**타입** — PascalCase, **`interface` 우선**, Props → `*Props`, type alias → `*Types`, `any` 금지.
+- PascalCase, default export, 화살표 함수
+- 최상단 Fragment (`<>...</>`), children 없으면 self-closing
+- 의미 없는 `<div>` 지양 → 시맨틱 태그 (`header`, `main`, `section`, `nav` …)
+- `'use client'` — 상태·이벤트·브라우저 API 필요할 때만
 
-**변수·함수** — 동사+명사 (`get`, `create`, `check`, `convert`, `filter` …). 이벤트만 `handle`. boolean 유틸 `is`.
+#### 타입
 
-**패턴** — 스프레드 복사, `map`/`forEach` (`for` X), props·map 아이템 **구조 분해**.
+- PascalCase, `interface` 우선 (유니언·리터럴 등 불가피할 때만 `type`)
+- Props → `*Props` (`HeaderProps`), type alias → `*Types` (`StatusTypes`)
+- `any` 금지
 
-**스타일** — Tailwind utility 우선. 전역 CSS — `src/shared/styles/globals.css`만.
+#### 변수·함수
+
+- 동사+명사: `get`, `create`, `check`, `convert`, `add`, `minus`, `filter`
+- 이벤트 핸들러만 `handle` (`handleSubmitClick`)
+- boolean 반환 유틸 → `is` (`isEmail`)
+
+#### 패턴
+
+- 배열 복사 → 스프레드 (`[...items]`)
+- `for` 대신 `map` / `forEach`
+- props·map 아이템 → 구조 분해 할당
+
+#### 스타일
+
+- Tailwind utility class 우선
+- 전역 CSS — `src/shared/styles/globals.css`만
 
 ### Git
 
-**Commit** — `{type}: {subject}` (소문자 type, 특수기호 X, **기능별 작게**)
+#### Commit
 
-허용 type: `feat`, `fix`, `chore`, `ci`, `docs`, `init`, `refactor`, `style`, `test`, `perf`, `build`, `revert`  
-Notion `asset`/`type` — commitlint 반영 전 `chore`/`style` 등으로 대체.
+- 형식: `{type}: {subject}`
+- type 소문자, 특수기호 X, 기능별로 작게 쪼개기
+- 허용 type:
 
-**PR** — **한 PR = 한 기능**. 제목 `{Type}: {설명}` (대문자 Type). 본문 Summary · Tasks · Describe. **라벨** 필수. approve **2명 이상**. 신뢰 머지 X.
+| type | 의미 |
+|------|------|
+| `feat` | 기능 추가 |
+| `fix` | 버그 수정 |
+| `chore` | 설정·패키지 등 |
+| `refactor` | 리팩터링 |
+| `docs` | 문서 |
+| `style` | 스타일 (로직 변경 없음) |
+| `test` | 테스트 |
+| `init` | 초기 세팅 |
+| `ci` / `build` / `perf` / `revert` | CI·빌드·성능·되돌리기 |
+
+- Notion `asset`/`type` — commitlint 반영 전 `chore`/`style` 등으로 대체
+
+```
+feat: 로그인 폼 UI 추가
+fix: app 라우터 그룹 구조 수정
+```
+
+#### PR
+
+- 한 PR = 한 기능
+- 제목: `{Type}: {설명}` — Type 대문자 시작 (`Feat:`, `Fix:` …)
+- 본문: Summary, Tasks, Describe
+- 라벨 필수 (CI 자동화)
+- approve 2명 이상 후 merge, 신뢰 머지 X
 
 ---
 
