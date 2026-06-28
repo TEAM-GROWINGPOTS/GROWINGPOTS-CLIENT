@@ -42,20 +42,6 @@ export const kyClient = ky.create({
       },
     ],
 
-    // beforeRetry: 재시도가 확정된 직후, 재요청 보내기 직전에 실행
-    // - 재시도 로깅, beforeRequest에서 갱신된 토큰 확인 등
-    // - shouldRetry가 false면 실행되지 않음
-    beforeRetry: [
-      ({ request, retryCount, error }) => {
-        if (process.env.NODE_ENV === "development") {
-          console.debug(
-            `[API] retry #${retryCount} ${request.url}`,
-            error.name,
-          );
-        }
-      },
-    ],
-
     // beforeError: 실패한 경우! HTTP/네트워크/타임아웃 에러가 throw되기 직전에 실행
     // - HTTP 에러, 네트워크 끊김, 타임아웃 에러 발생이 아니면 훅 생성 조차 되지 않음
     // - 401 -> 로그인 페이지 리다이렉트
