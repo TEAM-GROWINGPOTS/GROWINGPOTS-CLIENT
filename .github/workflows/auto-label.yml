@@ -126,8 +126,13 @@ jobs:
                   issue_number: issueNumber,
                   name: label,
                 })
-              } catch {
-                console.log(`Failed to remove label: ${label}`)
+              } catch (error) {
+                if (error.status === 404) {
+                  console.log(`Label already removed: ${label}`)
+                  continue
+                }
+
+                throw error
               }
             }
 

@@ -2,7 +2,7 @@ name: Auto Assign Author
 
 on:
   issues:
-    types: [opened]
+    types: [opened, reopened]
   pull_request:
     types: [opened, ready_for_review, reopened]
 
