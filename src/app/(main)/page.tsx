@@ -8,7 +8,7 @@ export default function Page() {
 
   return (
     <div className="p-4">
-      <TextField placeholder="옹심아화이팅" value={value} onChange={setValue} />
+      <TextField placeholder="옹심아화이팅" value={value} onChange={setValue} maxLength={10} />
     </div>
   );
 }
