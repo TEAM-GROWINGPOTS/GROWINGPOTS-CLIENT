@@ -1,6 +1,6 @@
-import '@shared/styles/globals.css';
-
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
+import { pretendard } from "@shared/styles/fonts";
+import "@shared/styles/globals.css";
 
 import Providers from './providers';
 
@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" className={pretendard.variable}>
       <body>
         <Providers>{children}</Providers>
       </body>
