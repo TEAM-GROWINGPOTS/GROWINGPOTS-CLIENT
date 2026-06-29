@@ -24,9 +24,12 @@ export const kyClient = ky.create({
     beforeRequest: [
       ({ request }) => {
         request.headers.set("Accept", "application/json");
-        const token = localStorage.getItem("accessToken"); // 토큰 관리 방식에 따라 수정
-        if (token) {
-          request.headers.set("Authorization", `Bearer ${token}`);
+        if (typeof window !== "undefined") {
+          const token = localStorage.getItem("accessToken");
+
+          if (token) {
+            request.headers.set("Authorization", `Bearer ${token}`);
+          }
         }
       },
     ],
