@@ -94,12 +94,12 @@
   --color-blue-300: #7dc9ff;
   --color-blue-400: #64beff;
   --color-blue-500: #3daeff;
-  --color-blue-600: #389eeb;
+  --color-blue-600: #389ee8;
   --color-blue-700: #2b7cb5;
   --color-blue-800: #22608c;
   --color-blue-900: #1a496b;
 
-  --color-gray-50: #fefefe;
+  --color-gray-50: #f9fafb;
   --color-gray-100: #f0f2f3;
   --color-gray-200: #e0e3e5;
   --color-gray-300: #bbc2c7;
@@ -114,4 +114,8 @@
   --color-success: #0ad04d;
   --color-notice: #fa8537;
   --color-negative: #fa3737;
+
+
+  --color-black: #000000;
+  --color-white: #ffffff;
 }
