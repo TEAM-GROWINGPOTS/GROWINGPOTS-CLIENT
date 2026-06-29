@@ -28,4 +28,6 @@
 
   --color-black: #000000;
   --color-white: #ffffff;
+
+  --color-black-40: rgb(0 0 0 / 0.4);
 }
