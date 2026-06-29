@@ -1,6 +1,6 @@
 import { type Options } from "ky";
+import { kyClient } from "./ky-client";
 
-import { kyClient } from "@/shared/api/ky-client";
 
 type RequestOptions = Pick<
   Options,
