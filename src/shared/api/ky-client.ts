@@ -1,7 +1,15 @@
 import ky, { isHTTPError } from "ky";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+
+if (!API_BASE_URL) {
+  throw new Error(
+    "NEXT_PUBLIC_API_BASE_URL is not defined. Add it to .env.local",
+  );
+}
+
 export const kyClient = ky.create({
-  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseUrl: API_BASE_URL,
   timeout: 10000,
   retry: {
     limit: 2,
