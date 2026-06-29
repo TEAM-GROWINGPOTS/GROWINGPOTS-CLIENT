@@ -18,6 +18,6 @@ export type ErrorResponse = ApiResponseBase & {
   data: null;
 };
 
-export type BaseResponse<T> = SuccessResponse<T> | EmptySuccessResponse;
+export type SuccessUnion<T> = SuccessResponse<T> | EmptySuccessResponse;
 
-export type ApiResponse<T> = BaseResponse<T> | ErrorResponse;
+export type ApiResponse<T> = SuccessUnion<T> | ErrorResponse;
