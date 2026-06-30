@@ -19,6 +19,9 @@ const symbols = files.map((file) => {
   const viewBoxMatch = content.match(/viewBox="([^"]+)"/);
   const viewBox = viewBoxMatch ? viewBoxMatch[1] : '0 0 24 24';
 
+  const svgFillMatch = content.match(/<svg[^>]*\sfill="([^"]+)"/s);
+  const svgFill = svgFillMatch ? svgFillMatch[1] : null;
+
   const rawInner = content
     .replace(/<svg[^>]*>/s, '')
     .replace(/<\/svg>/, '')
@@ -30,7 +33,8 @@ const symbols = files.map((file) => {
         .replace(/fill="(?!none)[^"]+"/g, 'fill="currentColor"')
         .replace(/stroke="(?!none)[^"]+"/g, 'stroke="currentColor"');
 
-  return `  <symbol id="${name}" viewBox="${viewBox}">\n    ${innerContent}\n  </symbol>`;
+  const fillAttr = svgFill ? ` fill="${svgFill}"` : '';
+  return `  <symbol id="${name}" viewBox="${viewBox}"${fillAttr}>\n    ${innerContent}\n  </symbol>`;
 });
 
 const sprite = `<svg xmlns="http://www.w3.org/2000/svg" style="display:none">\n${symbols.join('\n')}\n</svg>`;
