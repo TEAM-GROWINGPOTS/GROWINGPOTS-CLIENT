@@ -8,7 +8,7 @@ export const Toaster = () => (
     toastOptions={{
       unstyled: true,
       classNames: {
-        toast: 'w-95',
+        toast: 'min-w-95',
       },
     }}
   />
