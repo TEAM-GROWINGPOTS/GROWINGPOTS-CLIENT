@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
+import { useEffect, useRef, useState } from 'react';
 
 interface SelectOption {
   value: string;
