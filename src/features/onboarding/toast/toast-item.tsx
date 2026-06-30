@@ -1,6 +1,5 @@
+import Icon from '@shared/components/icon/icon';
 import { ReactNode } from 'react';
-
-import Icon from '../icon/icon';
 
 export type ToastVariant = 'information' | 'success' | 'notice' | 'negative';
 
