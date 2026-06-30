@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
@@ -22,9 +22,20 @@ interface SelectProps {
 export const Select = ({ options, value, onChange, placeholder, disabled, className }: SelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const hasValue = value !== '';
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
-    <div className={cn('relative w-full', className)}>
+    <div ref={ref} className={cn('relative w-full', className)}>
       <button
         type="button"
         disabled={disabled}
