@@ -1,0 +1,44 @@
+name: PR Title Check
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v6
+        id: lint_pr_title
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            Init
+            Feat
+            Fix
+            Refactor
+            Chore
+            Docs
+            Style
+            Test
+            Perf
+            Design
+          requireScope: false
+
+      - uses: marocchino/sticky-pull-request-comment@v2
+        if: always() && (steps.lint_pr_title.outputs.error_message != null)
+        with:
+          header: pr-title-lint-error
+          message: |
+            PR 제목이 컨벤션에 안 맞아요 👀
+            `${{ steps.lint_pr_title.outputs.error_message }}`
+
+      - uses: marocchino/sticky-pull-request-comment@v2
+        if: always() && (steps.lint_pr_title.outputs.error_message == null)
+        with:
+          header: pr-title-lint-error
+          delete: true

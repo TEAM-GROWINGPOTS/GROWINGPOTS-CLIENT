@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
-import { pretendard } from "@shared/styles/fonts";
 import "@shared/styles/globals.css";
+
+import { pretendard } from "@shared/styles/fonts";
+import type { Metadata } from "next";
 
 import Providers from './providers';
 

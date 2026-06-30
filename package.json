@@ -1,13 +1,17 @@
 {
+  "packageManager": "pnpm@11.0.8",
   "name": "growingpots-client",
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/generate-sprite.mjs",
+    "prebuild": "node scripts/generate-sprite.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "generate-sprite": "node scripts/generate-sprite.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
