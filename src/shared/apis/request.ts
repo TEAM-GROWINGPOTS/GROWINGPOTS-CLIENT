@@ -1,15 +1,10 @@
-import { type Options } from "ky";
-import { kyClient } from "./ky-client";
+import { type Options } from 'ky';
 
+import { kyClient } from './ky-client';
 
-type RequestOptions = Pick<
-  Options,
-  "searchParams" | "retry" | "timeout" | "headers"
->;
+type RequestOptions = Pick<Options, 'searchParams' | 'retry' | 'timeout' | 'headers'>;
 
-function resolveBody(
-  body?: unknown,
-): { json: unknown } | { body: FormData } | object {
+function resolveBody(body?: unknown): { json: unknown } | { body: FormData } | object {
   if (body === undefined) return {};
   if (body instanceof FormData) return { body };
   return { json: body };
