@@ -1,11 +1,9 @@
-import ky, { isHTTPError } from "ky";
+import ky, { isHTTPError } from 'ky';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
 
 if (!API_BASE_URL) {
-  throw new Error(
-    "NEXT_PUBLIC_API_BASE_URL is not defined. Add it to .env.local",
-  );
+  throw new Error('NEXT_PUBLIC_API_BASE_URL is not defined. Add it to .env.local');
 }
 
 export const kyClient = ky.create({
@@ -31,12 +29,12 @@ export const kyClient = ky.create({
     // - HttpOnly 쿠키 기반이면 대부분 생략 가능 (credentials: "include" 옵션만 추가)
     beforeRequest: [
       ({ request }) => {
-        request.headers.set("Accept", "application/json");
-        if (typeof window !== "undefined") {
-          const token = localStorage.getItem("accessToken");
+        request.headers.set('Accept', 'application/json');
+        if (typeof window !== 'undefined') {
+          const token = localStorage.getItem('accessToken');
 
           if (token) {
-            request.headers.set("Authorization", `Bearer ${token}`);
+            request.headers.set('Authorization', `Bearer ${token}`);
           }
         }
       },
@@ -47,7 +45,7 @@ export const kyClient = ky.create({
     // - 4xx/5xx: throw 직전 커스텀 처리 (토큰 refresh + 재요청 등)
     afterResponse: [
       async ({ response }) => {
-        if (process.env.NODE_ENV === "development") {
+        if (process.env.NODE_ENV === 'development') {
           console.debug(`[API] ${response.status} ${response.url}`);
         }
       },
@@ -60,7 +58,7 @@ export const kyClient = ky.create({
     beforeError: [
       ({ error }) => {
         if (isHTTPError(error) && error.response.status === 401) {
-          console.error("인증 에러 발생! 로그인이 필요합니다.");
+          console.error('인증 에러 발생! 로그인이 필요합니다.');
         }
         return error;
       },
