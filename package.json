@@ -1,17 +1,23 @@
 {
+  "packageManager": "pnpm@11.0.8",
   "name": "growingpots-client",
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/generate-sprite.mjs",
+    "prebuild": "node scripts/generate-sprite.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prepare": "husky",
+    "generate-sprite": "node scripts/generate-sprite.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "ky": "^2.0.2",
     "@tanstack/react-query": "^5.101.2",
     "next": "16.2.9",
     "react": "19.2.4",
@@ -19,7 +25,15 @@
     "tailwind-merge": "^3.6.0",
     "zustand": "^5.0.14"
   },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
   "devDependencies": {
+    "@commitlint/cli": "^21.1.0",
+    "@commitlint/config-conventional": "^21.1.0",
     "@tailwindcss/postcss": "^4",
     "@tanstack/react-query-devtools": "^5.101.2",
     "@types/node": "^20",
@@ -27,6 +41,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.8",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "eslint-plugin-unused-imports": "^4.4.1",
