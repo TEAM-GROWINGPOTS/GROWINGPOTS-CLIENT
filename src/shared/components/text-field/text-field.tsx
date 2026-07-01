@@ -21,11 +21,11 @@ export const TextField = ({ value, onChange, maxLength, placeholder, icon, class
   return (
     <div
       className={cn(
-        'flex h-12 items-center rounded-[10px] border border-gray-200 bg-white px-4 focus-within:border-blue-300',
+        'flex h-48 items-center rounded-[10px] border border-gray-200 bg-white px-16 focus-within:border-blue-300',
         className,
       )}
     >
-      {icon && <Icon name={icon} size={24} className="mr-3" />}
+      {icon && <Icon name={icon} size={24} className="mr-12" />}
       <input
         value={value}
         className="text-body-r-16 min-w-0 flex-1 text-gray-800 outline-none placeholder:text-gray-300"
@@ -33,7 +33,7 @@ export const TextField = ({ value, onChange, maxLength, placeholder, icon, class
         placeholder={placeholder}
         {...props}
       />
-      <span className="text-body-r-14 ml-2 shrink-0 text-gray-300">
+      <span className="text-body-r-14 ml-8 shrink-0 text-gray-300">
         <span className={cn(value.length >= 1 && 'text-blue-500')}>{value.length}</span>/{maxLength}
       </span>
     </div>
