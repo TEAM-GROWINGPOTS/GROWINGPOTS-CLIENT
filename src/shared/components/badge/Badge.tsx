@@ -26,7 +26,7 @@ const badgeSizeClass: Record<BadgeSizeTypes, string> = {
   medium: 'h-10 px-5 text-body-sb-16',
 };
 
-export const Badge = ({ children, className, variant = 'primary', size = 'xsmall', ...props }: BadgeProps) => {
+export const Badge = ({ children, className, variant = 'primary', size = 'medium', ...props }: BadgeProps) => {
   return (
     <span className={cn(badgeBaseClass, badgeVariantClass[variant], badgeSizeClass[size], className)} {...props}>
       {children}
