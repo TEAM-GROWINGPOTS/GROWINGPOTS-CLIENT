@@ -27,9 +27,9 @@ const buttonVariants = cva('flex cursor-pointer items-center disabled:cursor-not
 });
 
 const buttonLabelClassName: Record<ButtonSize, string> = {
-  sm: 'body-m-14',
-  md: 'body-sb-16',
-  lg: 'body-sb-16',
+  sm: 'text-body-m-14',
+  md: 'text-body-sb-16',
+  lg: 'text-body-sb-16',
 };
 
 interface ButtonProps
