@@ -50,14 +50,13 @@ interface TooltipProps {
   content: string;
   variant?: TooltipVariant;
   size?: TooltipSize;
-  defaultOpen?: boolean;
 }
 
-export const Tooltip = ({ trigger, content, variant = 'bottom-center', size = 'sm', defaultOpen }: TooltipProps) => {
+export const Tooltip = ({ trigger, content, variant = 'bottom-center', size = 'sm' }: TooltipProps) => {
   const { side, align } = variantMap[variant];
 
   return (
-    <RadixTooltip.Root defaultOpen={defaultOpen}>
+    <RadixTooltip.Root>
       <RadixTooltip.Trigger asChild>{trigger}</RadixTooltip.Trigger>
       <RadixTooltip.Portal>
         <RadixTooltip.Content side={side} align={align} sideOffset={sideOffsetMap[size]} className="relative">
