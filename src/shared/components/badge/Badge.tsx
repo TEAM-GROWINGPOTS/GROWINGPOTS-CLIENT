@@ -21,9 +21,9 @@ const badgeVariantClass: Record<BadgeVariantTypes, string> = {
 };
 
 const badgeSizeClass: Record<BadgeSizeTypes, string> = {
-  xsmall: 'h-6 px-2 text-caption-m-12',
-  small: 'h-8 px-3 text-body-m-14',
-  medium: 'h-10 px-5 text-body-sb-16',
+  xsmall: 'h-24 px-8 text-caption-m-12',
+  small: 'h-32 px-12 text-body-m-14',
+  medium: 'h-40 px-20 text-body-sb-16',
 };
 
 export const Badge = ({ children, className, variant = 'primary', size = 'medium', ...props }: BadgeProps) => {
