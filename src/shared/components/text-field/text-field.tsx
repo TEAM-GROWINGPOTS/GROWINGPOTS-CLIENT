@@ -21,7 +21,7 @@ export const TextField = ({ value, onChange, maxLength, placeholder, icon, class
   return (
     <div
       className={cn(
-        'flex h-48 items-center rounded-[10px] border border-gray-200 bg-white px-16 focus-within:border-blue-300',
+        'flex h-48 items-center rounded-[10px] border border-gray-200 bg-white px-16 focus-within:border-blue-500',
         className,
       )}
     >
