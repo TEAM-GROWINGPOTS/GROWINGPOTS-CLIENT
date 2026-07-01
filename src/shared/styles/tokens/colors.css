@@ -21,10 +21,10 @@
   --color-gray-800: #1d1f21;
   --color-gray-900: #131414;
 
-  --color-negative-50: #fff6f7;
-  --color-negative-100: #ffeaed;
-  --color-negative: #ff3451;
-  --color-negative-900: #6e1f2b;
+  --color-negative-10: #fff6f7;
+  --color-negative-20: #ffeaed;
+  --color-negative-30: #ff3451;
+  --color-negative-40: #6e1f2b;
 
   --color-information: #3daeff;
   --color-success: #0ad04d;
