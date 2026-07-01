@@ -3,5 +3,5 @@
 @import './tokens/colors.css';
 
 @theme {
-  --spacing: 1px;
+  --spacing: 0.0625rem;
 }
