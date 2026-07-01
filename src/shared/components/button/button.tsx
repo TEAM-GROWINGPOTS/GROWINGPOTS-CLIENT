@@ -8,9 +8,9 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
 const buttonVariants = cva('flex cursor-pointer items-center disabled:cursor-not-allowed', {
   variants: {
     size: {
-      sm: 'gap-6 rounded-md px-12 py-6',
-      md: 'gap-6 rounded-lg px-14 py-8',
-      lg: 'gap-10 rounded-[10px] px-20 py-12',
+      sm: 'gap-6 rounded-md px-12 py-6 text-body-m-14',
+      md: 'gap-6 rounded-lg px-14 py-8 text-body-sb-16',
+      lg: 'gap-10 rounded-[10px] px-20 py-12 text-body-sb-16',
     },
     mode: {
       primary_solid: 'bg-blue-500 text-white enabled:hover:bg-blue-600 disabled:bg-blue-200',
@@ -25,12 +25,6 @@ const buttonVariants = cva('flex cursor-pointer items-center disabled:cursor-not
     mode: 'primary_solid',
   },
 });
-
-const buttonLabelClassName: Record<ButtonSize, string> = {
-  sm: 'text-body-m-14',
-  md: 'text-body-sb-16',
-  lg: 'text-body-sb-16',
-};
 
 interface ButtonProps
   extends Omit<ComponentPropsWithoutRef<'button'>, 'children'>, VariantProps<typeof buttonVariants> {
@@ -52,7 +46,7 @@ export const Button = ({
   return (
     <button type="button" disabled={disabled} className={cn(buttonVariants({ size, mode }), className)} {...props}>
       {icon}
-      <span className={buttonLabelClassName[size]}>{label}</span>
+      <span>{label}</span>
     </button>
   );
 };
