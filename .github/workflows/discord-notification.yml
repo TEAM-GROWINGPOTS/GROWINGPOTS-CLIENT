@@ -1,0 +1,186 @@
+name: Automated Discord Notification
+
+on:
+  pull_request:
+    types: [opened, reopened, closed]
+
+  pull_request_review:
+    types: [submitted]
+
+  schedule:
+    - cron: '0 1 * * *'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Discord notification
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          EVENT_NAME: ${{ github.event_name }}
+          ACTION: ${{ github.event.action }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "DISCORD_WEBHOOK_URL is not set."
+            exit 1
+          fi
+
+          REPO_API_URL="https://api.github.com/repos/$REPOSITORY"
+
+          get_github_mention() {
+            [ -z "$1" ] && { echo "없음"; return; }
+            echo "@$1"
+          }
+
+          send_discord_message() {
+            DESC="${DESC:0:400}"
+
+            jq -n \
+              --arg title "$TITLE" \
+              --arg url "$URL" \
+              --arg desc "$DESC" \
+              --arg author "$AUTHOR" \
+              --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+              --argjson color "$COLOR" \
+              '{
+                allowed_mentions: { parse: [] },
+                embeds: [{
+                  title:$title,
+                  url:$url,
+                  description:$desc,
+                  color:$color,
+                  author:{
+                    name:$author,
+                    icon_url:("https://github.com/"+$author+".png")
+                  },
+                  footer:{text:"GitHub Automation"},
+                  timestamp:$timestamp
+                }]
+              }' > payload.json
+
+            curl \
+              --fail-with-body \
+              --silent --show-error \
+              --connect-timeout 5 \
+              --max-time 20 \
+              --retry 3 \
+              --retry-all-errors \
+              -H "Content-Type: application/json" \
+              -X POST \
+              -d @payload.json \
+              "$DISCORD_WEBHOOK_URL"
+          }
+
+          if [ "$EVENT_NAME" = "schedule" ] || [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            OPEN_PRS=$(curl -s \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "$REPO_API_URL/pulls?state=open&per_page=100")
+
+            STALE_PRS=$(echo "$OPEN_PRS" | jq -c '
+              [
+                .[]
+                | select(.draft == false)
+                | select(((now - (.updated_at | fromdateiso8601)) / 3600) >= 48)
+              ]
+            ')
+
+            [ "$(echo "$STALE_PRS" | jq length)" -eq 0 ] && exit 0
+
+            PR_LIST=$(echo "$STALE_PRS" | jq -r '
+              .[]
+              | "#\(.number) \(.title)\n작성자: @\(.user.login)\n링크: \(.html_url)\n"
+            ')
+
+            TITLE="⏰ 2일 이상 머지되지 않은 PR이 있어요."
+            URL="https://github.com/$REPOSITORY/pulls"
+            DESC="$PR_LIST"
+            AUTHOR="github-actions"
+            COLOR=15844367
+
+            send_discord_message
+            exit 0
+          fi
+
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            PR_TITLE=$(jq -r '.pull_request.title' "$GITHUB_EVENT_PATH")
+            PR_NUMBER=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
+            IS_MERGED=$(jq -r '.pull_request.merged // false' "$GITHUB_EVENT_PATH")
+            BASE_BRANCH=$(jq -r '.pull_request.base.ref' "$GITHUB_EVENT_PATH")
+            HEAD_BRANCH=$(jq -r '.pull_request.head.ref' "$GITHUB_EVENT_PATH")
+            AUTHOR=$(jq -r '.pull_request.user.login' "$GITHUB_EVENT_PATH")
+            PR_URL=$(jq -r '.pull_request.html_url' "$GITHUB_EVENT_PATH")
+            AUTHOR_MENTION=$(get_github_mention "$AUTHOR")
+            COMMON_DESC="**PR:** #$PR_NUMBER $PR_TITLE"$'\n'"**작성자:** $AUTHOR_MENTION"
+
+            case "$ACTION" in
+              opened)
+                TITLE="🚀 새로운 PR이 생성되었어요."
+                COLOR=3066993
+                DESC="$COMMON_DESC"
+                ;;
+              reopened)
+                TITLE="🔄 PR이 다시 열렸어요."
+                COLOR=3447003
+                DESC="$COMMON_DESC"
+                ;;
+              closed)
+                if [ "$IS_MERGED" = "true" ]; then
+                  TITLE="🎉 PR이 머지되었어요."
+                  COLOR=5763719
+                  DESC="$COMMON_DESC"$'\n'"**브랜치:** $HEAD_BRANCH → $BASE_BRANCH"
+                else
+                  TITLE="🗑️ PR이 닫혔어요."
+                  COLOR=15158332
+                  DESC="$COMMON_DESC"
+                fi
+                ;;
+            esac
+
+            URL="$PR_URL"
+            send_discord_message
+            exit 0
+          fi
+
+          if [ "$EVENT_NAME" = "pull_request_review" ]; then
+            REVIEW_STATE=$(jq -r '.review.state' "$GITHUB_EVENT_PATH")
+            [ "$REVIEW_STATE" != "approved" ] && exit 0
+
+            PR_TITLE=$(jq -r '.pull_request.title' "$GITHUB_EVENT_PATH")
+            PR_NUMBER=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
+            PR_AUTHOR=$(jq -r '.pull_request.user.login' "$GITHUB_EVENT_PATH")
+            REVIEWER=$(jq -r '.review.user.login' "$GITHUB_EVENT_PATH")
+            PR_URL=$(jq -r '.pull_request.html_url' "$GITHUB_EVENT_PATH")
+
+            REVIEWS=$(curl -s \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "$REPO_API_URL/pulls/$PR_NUMBER/reviews?per_page=100")
+
+            APPROVED_REVIEW_COUNT=$(echo "$REVIEWS" | jq '
+              group_by(.user.login)
+              | map(max_by(.submitted_at))
+              | map(select(.state=="APPROVED"))
+              | length
+            ')
+
+            [ "$APPROVED_REVIEW_COUNT" -ne 2 ] && exit 0
+
+            TITLE="✅ PR 머지 가능 상태가 되었어요"
+            URL="$PR_URL"
+            DESC="**PR:** #$PR_NUMBER $PR_TITLE"$'\n'"**작성자:** @${PR_AUTHOR}"$'\n'"Approve 2명이 완료되었습니다."
+            AUTHOR="$REVIEWER"
+            COLOR=5763719
+
+            send_discord_message
+          fi
