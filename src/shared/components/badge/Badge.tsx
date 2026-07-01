@@ -1,7 +1,7 @@
 import { cn } from '@shared/utils/cn';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
-type BadgeVariantTypes = 'primary' | 'secondary' | 'outline' | 'disabled';
+type BadgeVariantTypes = 'primary' | 'secondary' | 'outline' | 'disabled' | 'negative';
 type BadgeSizeTypes = 'xsmall' | 'small' | 'medium';
 
 interface BadgeProps extends Omit<ComponentPropsWithoutRef<'span'>, 'children'> {
@@ -17,6 +17,7 @@ const badgeVariantClass: Record<BadgeVariantTypes, string> = {
   secondary: 'bg-gray-100 text-gray-700',
   outline: 'border border-gray-200 bg-white text-gray-700',
   disabled: 'bg-gray-100 text-gray-400',
+  negative: 'bg-negative-50 text-negative',
 };
 
 const badgeSizeClass: Record<BadgeSizeTypes, string> = {

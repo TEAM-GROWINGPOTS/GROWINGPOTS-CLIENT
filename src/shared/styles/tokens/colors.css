@@ -24,7 +24,9 @@
   --color-information: #3daeff;
   --color-success: #0ad04d;
   --color-notice: #fa8537;
-  --color-negative: #fa3737;
+
+  --color-negative-50: #ffeaed;
+  --color-negative: #fa3451;
 
   --color-black: #000000;
   --color-white: #ffffff;
