@@ -92,7 +92,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
           hasValue ? 'text-gray-700' : 'text-gray-300',
         )}
       >
-        <span>{hasValue ? (options.find((opt) => opt.value === value)?.label ?? placeholder) : placeholder}</span>
+        <span className="truncate">{hasValue ? (options.find((opt) => opt.value === value)?.label ?? placeholder) : placeholder}</span>
         <Icon name="ic_chevron_down" size={20} className="pointer-events-none shrink-0 text-gray-600" />
       </button>
 
@@ -115,7 +115,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
                 opt.value === value && 'rounded-lg border border-white bg-gray-50 text-body-m-16 text-blue-500',
               )}
             >
-              {opt.label}
+              <span className="overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">{opt.label}</span>
             </li>
           ))}
         </ul>
