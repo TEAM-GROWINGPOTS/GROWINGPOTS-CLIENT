@@ -35,7 +35,7 @@ const buttonLabelClassName: Record<ButtonSize, string> = {
 interface ButtonProps
   extends Omit<ComponentPropsWithoutRef<'button'>, 'children'>, VariantProps<typeof buttonVariants> {
   icon?: ReactNode;
-  label: ReactNode;
+  label: string;
 }
 
 export const Button = ({
