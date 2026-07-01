@@ -13,14 +13,17 @@ interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'on
   icon?: string;
 }
 
-export const TextField = ({ value, onChange, maxLength, placeholder, icon, ...props }: TextFieldProps) => {
+export const TextField = ({ value, onChange, maxLength, placeholder, icon, className, ...props }: TextFieldProps) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value.slice(0, maxLength));
   };
 
   return (
     <div
-      className={`flex h-12 items-center rounded-[10px] border border-gray-200 bg-white px-4 focus-within:border-blue-300`}
+      className={cn(
+        'flex h-12 items-center rounded-[10px] border border-gray-200 bg-white px-4 focus-within:border-blue-300',
+        className,
+      )}
     >
       {icon && <Icon name={icon} size={24} className="mr-3" />}
       <input
