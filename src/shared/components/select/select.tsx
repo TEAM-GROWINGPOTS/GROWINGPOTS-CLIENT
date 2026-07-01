@@ -41,7 +41,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
         e.preventDefault();
         setIsOpen(true);
-        setFocusedIndex(0);
+        setFocusedIndex(options.length > 0 ? 0 : -1);
       }
       return;
     }
@@ -57,7 +57,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
         break;
       case 'Enter':
         e.preventDefault();
-        if (focusedIndex >= 0) {
+        if (focusedIndex >= 0 && options[focusedIndex]) {
           onChange(options[focusedIndex].value);
           setIsOpen(false);
           setFocusedIndex(-1);
