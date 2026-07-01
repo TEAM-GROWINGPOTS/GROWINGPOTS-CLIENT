@@ -24,6 +24,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
   const hasValue = value !== '';
   const ref = useRef<HTMLDivElement>(null);
   const listboxId = useId();
+  const optionId = (index: number) => `${listboxId}-option-${index}`;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -35,6 +36,12 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleSelect = (optValue: string) => {
+    onChange(optValue);
+    setIsOpen(false);
+    setFocusedIndex(-1);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen) {
@@ -58,9 +65,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
       case 'Enter':
         e.preventDefault();
         if (focusedIndex >= 0 && options[focusedIndex]) {
-          onChange(options[focusedIndex].value);
-          setIsOpen(false);
-          setFocusedIndex(-1);
+          handleSelect(options[focusedIndex].value);
         }
         break;
       case 'Escape':
@@ -81,6 +86,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-controls={listboxId}
+        aria-activedescendant={isOpen && focusedIndex >= 0 ? optionId(focusedIndex) : undefined}
         className={cn(
           'flex h-12 w-full items-center justify-between rounded-[10px] border border-gray-200 bg-white py-3 pl-4 pr-3.5 text-body-r-16',
           hasValue ? 'text-gray-700' : 'text-gray-300',
@@ -99,13 +105,10 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
           {options.map((opt, index) => (
             <li
               key={opt.value}
+              id={optionId(index)}
               role="option"
               aria-selected={opt.value === value}
-              onClick={() => {
-                onChange(opt.value);
-                setIsOpen(false);
-                setFocusedIndex(-1);
-              }}
+              onClick={() => handleSelect(opt.value)}
               className={cn(
                 'flex h-12 w-full shrink-0 cursor-pointer items-center gap-3 pl-4 pr-3.5 text-body-r-16 text-gray-700 hover:rounded-lg hover:border hover:border-white hover:bg-gray-50',
                 focusedIndex === index && 'rounded-lg border border-white bg-gray-50',
