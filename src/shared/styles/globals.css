@@ -1,10 +1,4 @@
-<<<<<<< HEAD
 @import "tailwindcss";
 @import "./tokens/typography.css";
 @import "./tokens/colors.css";
 @import "./tokens/z-index.css";
-=======
-@import 'tailwindcss';
-@import './tokens/typography.css';
-@import './tokens/colors.css';
->>>>>>> origin/develop
