@@ -88,11 +88,11 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
         aria-controls={listboxId}
         aria-activedescendant={isOpen && focusedIndex >= 0 ? optionId(focusedIndex) : undefined}
         className={cn(
-          'flex h-12 w-full items-center justify-between rounded-[10px] border border-gray-200 bg-white py-3 pl-4 pr-3.5 text-body-r-16',
+          'text-body-r-16 flex h-12 w-full items-center justify-between rounded-[10px] border border-gray-200 bg-white px-4',
           hasValue ? 'text-gray-700' : 'text-gray-300',
         )}
       >
-        <span className="truncate">{hasValue ? (options.find((opt) => opt.value === value)?.label ?? placeholder) : placeholder}</span>
+        <span className="truncate">{options.find((opt) => opt.value === value)?.label ?? placeholder}</span>
         <Icon name="ic_chevron_down" size={20} className="pointer-events-none shrink-0 text-gray-600" />
       </button>
 
@@ -100,7 +100,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
         <ul
           id={listboxId}
           role="listbox"
-          className="absolute left-0 top-full z-10 mt-1 w-full flex flex-col rounded-xl border border-gray-200 bg-white p-2"
+          className="absolute top-full left-0 z-dropdown mt-1 flex max-h-[200px] w-full flex-col overflow-y-auto rounded-xl border border-gray-200 bg-white p-2"
         >
           {options.map((opt, index) => (
             <li
@@ -110,12 +110,14 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
               aria-selected={opt.value === value}
               onClick={() => handleSelect(opt.value)}
               className={cn(
-                'flex h-12 w-full shrink-0 cursor-pointer items-center gap-3 pl-4 pr-3.5 text-body-r-16 text-gray-700 hover:rounded-lg hover:border hover:border-white hover:bg-gray-50',
-                focusedIndex === index && 'rounded-lg border border-white bg-gray-50',
-                opt.value === value && 'rounded-lg border border-white bg-gray-50 text-body-m-16 text-blue-500',
+                'text-body-m-16 flex h-12 w-full shrink-0 cursor-pointer items-center rounded-lg bg-white px-4 text-gray-700 hover:bg-gray-50',
+                focusedIndex === index && 'bg-gray-50',
+                opt.value === value && 'bg-gray-50 text-blue-500',
               )}
             >
-              <span className="overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">{opt.label}</span>
+              <span className="[scrollbar-width:none] overflow-x-auto whitespace-nowrap [&::-webkit-scrollbar]:hidden">
+                {opt.label}
+              </span>
             </li>
           ))}
         </ul>
