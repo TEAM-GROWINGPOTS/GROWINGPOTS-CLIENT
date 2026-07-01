@@ -2,7 +2,7 @@
 
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 interface SelectOption {
   value: string;
@@ -23,7 +23,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const hasValue = value !== '';
   const ref = useRef<HTMLDivElement>(null);
-  const listboxId = 'select-listbox';
+  const listboxId = useId();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
