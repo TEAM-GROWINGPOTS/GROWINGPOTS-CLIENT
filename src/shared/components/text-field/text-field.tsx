@@ -15,10 +15,7 @@ interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'on
 
 export const TextField = ({ value, onChange, maxLength, placeholder, icon, ...props }: TextFieldProps) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value.length > maxLength) {
-      e.target.value = e.target.value.slice(0, maxLength);
-    }
-    onChange(e.target.value);
+    onChange(e.target.value.slice(0, maxLength));
   };
 
   return (
@@ -30,8 +27,6 @@ export const TextField = ({ value, onChange, maxLength, placeholder, icon, ...pr
         value={value}
         className="text-body-r-16 min-w-0 flex-1 text-gray-800 outline-none placeholder:text-gray-300"
         onChange={handleChange}
-        maxLength={maxLength}
-        aria-label={placeholder}
         placeholder={placeholder}
         {...props}
       />
