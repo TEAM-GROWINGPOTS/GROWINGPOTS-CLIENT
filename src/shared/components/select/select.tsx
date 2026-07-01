@@ -109,6 +109,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
               className={cn(
                 'flex h-12 w-full shrink-0 cursor-pointer items-center gap-3 pl-4 pr-3.5 text-body-r-16 text-gray-700 hover:rounded-lg hover:border hover:border-white hover:bg-gray-50',
                 focusedIndex === index && 'rounded-lg border border-white bg-gray-50',
+                opt.value === value && 'rounded-lg border border-white bg-gray-50 text-body-m-16 text-blue-500',
               )}
             >
               {opt.label}
