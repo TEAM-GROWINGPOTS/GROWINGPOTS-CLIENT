@@ -17,7 +17,7 @@ const badgeVariantClass: Record<BadgeVariantTypes, string> = {
   secondary: 'bg-gray-100 text-gray-700',
   outline: 'border border-gray-200 bg-white text-gray-700',
   disabled: 'bg-gray-100 text-gray-400',
-  negative: 'bg-negative-50 text-negative',
+  negative: 'bg-negative-100 text-negative',
 };
 
 const badgeSizeClass: Record<BadgeSizeTypes, string> = {
