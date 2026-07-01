@@ -1,6 +1,7 @@
-@import 'tailwindcss';
-@import './tokens/typography.css';
-@import './tokens/colors.css';
+@import "tailwindcss";
+@import "./tokens/typography.css";
+@import "./tokens/colors.css";
+@import "./tokens/z-index.css";
 
 @theme {
   --spacing: 0.0625rem;
