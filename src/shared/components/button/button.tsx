@@ -33,7 +33,7 @@ interface ButtonProps
 }
 
 export const Button = ({
-  size: sizeProp,
+  size = 'md',
   mode = 'primary_solid',
   className,
   icon,
@@ -41,8 +41,6 @@ export const Button = ({
   disabled,
   ...props
 }: ButtonProps) => {
-  const size = sizeProp ?? 'md';
-
   return (
     <button type="button" disabled={disabled} className={cn(buttonVariants({ size, mode }), className)} {...props}>
       {icon}
