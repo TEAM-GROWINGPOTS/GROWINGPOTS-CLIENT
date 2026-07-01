@@ -14,7 +14,8 @@ const buttonVariants = cva('flex cursor-pointer items-center disabled:cursor-not
     },
     mode: {
       primary_solid: 'bg-blue-500 text-white enabled:hover:bg-blue-600 disabled:bg-blue-200',
-      primary_outline: 'border border-blue-500 bg-blue-50 text-blue-500 enabled:hover:bg-blue-100',
+      primary_outline:
+        'border border-blue-500 bg-blue-50 text-blue-500 enabled:hover:bg-blue-100 disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-300',
       secondary_solid: 'bg-gray-100 text-gray-700',
       secondary_outline: 'border border-gray-300 bg-white text-gray-500 enabled:hover:bg-gray-100',
     },
