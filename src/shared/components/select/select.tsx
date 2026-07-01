@@ -88,7 +88,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
         aria-controls={listboxId}
         aria-activedescendant={isOpen && focusedIndex >= 0 ? optionId(focusedIndex) : undefined}
         className={cn(
-          'text-body-r-16 flex h-12 w-full items-center justify-between rounded-[10px] border border-gray-200 bg-white px-4',
+          'text-body-r-16 flex h-48 w-full items-center justify-between rounded-[10px] border border-gray-200 bg-white px-16',
           hasValue ? 'text-gray-700' : 'text-gray-300',
         )}
       >
@@ -100,7 +100,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
         <ul
           id={listboxId}
           role="listbox"
-          className="absolute top-full left-0 z-dropdown mt-1 flex max-h-[200px] w-full flex-col overflow-y-auto rounded-xl border border-gray-200 bg-white p-2"
+          className="z-dropdown absolute top-full left-0 mt-4 flex max-h-[208px] w-full flex-col overflow-y-auto rounded-xl border border-gray-200 bg-white p-8"
         >
           {options.map((opt, index) => (
             <li
@@ -110,7 +110,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
               aria-selected={opt.value === value}
               onClick={() => handleSelect(opt.value)}
               className={cn(
-                'text-body-m-16 flex h-12 w-full shrink-0 cursor-pointer items-center rounded-lg bg-white px-4 text-gray-700 hover:bg-gray-50',
+                'text-body-m-16 flex h-48 w-full shrink-0 cursor-pointer items-center rounded-lg bg-white px-16 text-gray-700 hover:bg-gray-50',
                 focusedIndex === index && 'bg-gray-50',
                 opt.value === value && 'bg-gray-50 text-blue-500',
               )}
