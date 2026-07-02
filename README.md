@@ -85,7 +85,7 @@
 
 ---
 
-## 기술 스택
+## 🛠️ 기술 스택
 
 <table width="100%">
   <tr><th width="20%">카테고리</th><th>기술 스택</th></tr>
@@ -235,6 +235,11 @@ init: ESLint flat config 세팅
 
 ## 🔍 코드 리뷰
 
+그로잉팟은 신뢰 머지를 하지 않는 것을 원칙으로 해요.  
+코드를 작성하는 것으로 개발이 끝나는 게 아니라 리뷰를 거쳐 merge되는 순간까지가 개발이라고 생각해요.  
+그래서 코드 리뷰는 단순히 실수를 걸러내는 절차가 아니라 서로의 코드를 통해 배우고 지식을 나누며 함께 성장하는 과정이에요.  
+아무리 급해도 리뷰 없이 merge하지 않고 리뷰를 통해 팀 전체가 코드에 대한 이해와 책임을 함께 나눠요.
+
 ### Merge 조건
 
 - ✅ **최소 2명 Approve** 필요
@@ -290,6 +295,20 @@ init: ESLint flat config 세팅
 
 - 일반 함수에는 `handle` 사용 안 해요
 
+**Export**
+
+- `default export` 대신 `named export` 사용
+
+</details>
+
+<details>
+<summary><b>🗂️ 폴더명</b></summary>
+<br/>
+
+- `kebab-case` 사용 (파일명도 동일)
+- 소문자로 시작
+- 복수형은 뒤에 `s` 붙이기
+
 </details>
 
 <details>
@@ -314,7 +333,7 @@ type ButtonVariant = 'primary' | 'secondary';
 </details>
 
 <details>
-<summary><b>🌎 함수</b></summary>
+<summary><b>🔧 함수</b></summary>
 <br/>
 
 **네이밍 prefix 통일**
@@ -331,5 +350,19 @@ type ButtonVariant = 'primary' | 'secondary';
 
 - 화살표 함수를 우선 사용해요
 - `key`에 랜덤 값 금지 — 동적 리스트는 고유 `id` 사용
+
+</details>
+
+<details>
+<summary><b>🔁 메소드</b></summary>
+<br/>
+
+- 배열 복사 시 스프레드 연산자(`...`) 사용: `const copies = [...originals]`
+- `for`보다 `forEach` / `map` 우선 사용
+- 구조 분해 할당 사용 — `props.xxx` 반복을 줄이고, 함수 시그니처만 봐도 어떤 값을 쓰는지 드러나요
+
+```ts
+function checkIsUser({ userName, userBirth }: UserDataProps) { ... }
+```
 
 </details>
