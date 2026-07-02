@@ -2,9 +2,6 @@ import { cn } from '@shared/utils/cn';
 import { cva, type VariantProps } from 'class-variance-authority';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
-type BadgeVariantTypes = 'primary' | 'secondary' | 'outline' | 'disabled' | 'negative';
-type BadgeSizeTypes = 'xsmall' | 'small' | 'medium';
-
 const badgeVariants = cva('inline-flex w-fit items-center justify-center rounded-[0.25rem] whitespace-nowrap', {
   variants: {
     size: {
@@ -28,8 +25,6 @@ const badgeVariants = cva('inline-flex w-fit items-center justify-center rounded
 
 interface BadgeProps extends Omit<ComponentPropsWithoutRef<'span'>, 'children'>, VariantProps<typeof badgeVariants> {
   children: ReactNode;
-  variant?: BadgeVariantTypes;
-  size?: BadgeSizeTypes;
 }
 
 export const Badge = ({ children, className, variant = 'primary', size = 'medium', ...props }: BadgeProps) => {
