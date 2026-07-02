@@ -18,30 +18,30 @@
 
 ## TEAM-GROWINGPOTS-CLIENT
 
-<table>
+<table width="100%">
   <tr>  
-    <td align="center" style="padding:10px">
+    <td align="center" width="33.33%" style="padding:10px">
       <img src="https://github.com/twossu.png" width="180"/><br/>
       <a href="https://github.com/twossu" target="_blank" rel="noopener noreferrer"><strong>최윤하</strong></a>
-    </td> <td align="center" style="padding:10px">
+    </td> <td align="center" width="33.33%" style="padding:10px">
       <img src="https://github.com/nyewon.png" width="180"/><br/>
       <a href="https://github.com/nyewon" target="_blank" rel="noopener noreferrer"><strong>노예원</strong></a>  
     </td>
-    <td align="center" style="padding:10px">
+    <td align="center" width="33.33%" style="padding:10px">
       <img src="https://github.com/pwc2002.png" width="180"/><br/>
       <a href="https://github.com/pwc2002" target="_blank" rel="noopener noreferrer"><strong>박우찬</strong></a>
     </td>
   </tr>
   <tr> 
-    <td align="center" style="padding:10px">
+    <td align="center" width="33.33%" style="padding:10px">
       <img src="https://github.com/ssolsh.png" width="180"/><br/>
       <a href="https://github.com/ssolsh" target="_blank" rel="noopener noreferrer"><strong>이소희</strong></a>
     </td>
-    <td align="center" style="padding:10px">
+    <td align="center" width="33.33%" style="padding:10px">
       <img src="https://github.com/haeni82.png" width="180"/><br/>
       <a href="https://github.com/haeni82" target="_blank" rel="noopener noreferrer"><strong>이해니</strong></a>
     </td>
-    <td align="center" style="padding:10px">
+    <td align="center" width="33.33%" style="padding:10px">
       <img src="https://github.com/mimizae.png" width="180"/><br/>
       <a href="https://github.com/mimizae" target="_blank" rel="noopener noreferrer"><strong>지민재</strong></a>
     </td>
@@ -56,7 +56,7 @@
 진짜 성장을 만들어내기 위해 아래 원칙을 중심으로 협업해요.
 
 <br/>
-<table>
+<table width="100%">
   <tr>
     <td align="center" width="25%">
       <h3>🚀 새로운 시도</h3>
@@ -81,20 +81,69 @@
 
 ## 기술 스택
 
-| 카테고리                    | 기술 스택                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Framework**               | ![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white&style=for-the-badge)                                                                                                                                                                                                                                                                                                                 |
-| **UI Library**              | ![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=white&style=for-the-badge)                                                                                                                                                                                                                                                                                                                         |
-| **Language**                | ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white&style=for-the-badge)                                                                                                                                                                                                                                                                                                          |
-| **Styling**                 | ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-06B6D4?logo=tailwindcss&logoColor=white&style=for-the-badge)                                                                                                                                                                                                                                                                                                   |
-| **Server State Management** | ![TanStack Query](https://img.shields.io/badge/TanStack%20Query-FF4154?logo=reactquery&logoColor=white&style=for-the-badge)                                                                                                                                                                                                                                                                                                |
-| **Client State Management** | ![Zustand](https://img.shields.io/badge/Zustand-000000?style=for-the-badge)                                                                                                                                                                                                                                                                                                                                                |
-| **HTTP Client**             | ![ky](https://img.shields.io/badge/ky-000000?style=for-the-badge)                                                                                                                                                                                                                                                                                                                                                          |
-| **Package Manager**         | ![Pnpm](https://img.shields.io/badge/Pnpm-F69220?logo=pnpm&logoColor=white&style=for-the-badge)                                                                                                                                                                                                                                                                                                                            |
-| **Version Control**         | ![Git](https://img.shields.io/badge/Git-F05033?logo=git&logoColor=white&style=for-the-badge) ![GitHub](https://img.shields.io/badge/GitHub-121011?logo=github&logoColor=white&style=for-the-badge)                                                                                                                                                                                                                         |
-| **Cooperation**             | ![Notion](https://img.shields.io/badge/Notion-000000?logo=notion&logoColor=white&style=for-the-badge) ![Discord](https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white&style=for-the-badge) ![Figma](https://img.shields.io/badge/Figma-F24E1E?logo=figma&logoColor=white&style=for-the-badge) ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?logo=swagger&logoColor=black&style=for-the-badge) |
-| **Formatting**              | ![ESLint](https://img.shields.io/badge/ESLint-4B3263?logo=eslint&logoColor=white&style=for-the-badge) ![Prettier](https://img.shields.io/badge/Prettier-1A2C34?logo=prettier&logoColor=F7BA3E&style=for-the-badge) ![Husky](https://img.shields.io/badge/Husky-000000?style=for-the-badge) ![commitlint](https://img.shields.io/badge/commitlint-000000?style=for-the-badge)                                               |
-| **CI/CD**                   | ![Vercel ](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white&style=for-the-badge) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?logo=githubactions&logoColor=white&style=for-the-badge)                                                                                                                                                                                      |
+<table width="100%">
+  <tr><th width="20%">카테고리</th><th>기술 스택</th></tr>
+  <tr><td><b>Framework</b></td><td>
+
+![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white&style=for-the-badge)
+
+</td></tr>
+  <tr><td><b>UI Library</b></td><td>
+
+![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=white&style=for-the-badge)
+
+</td></tr>
+  <tr><td><b>Language</b></td><td>
+
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white&style=for-the-badge)
+
+</td></tr>
+  <tr><td><b>Styling</b></td><td>
+
+![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-06B6D4?logo=tailwindcss&logoColor=white&style=for-the-badge)
+
+</td></tr>
+  <tr><td><b>Server State Management</b></td><td>
+
+![TanStack Query](https://img.shields.io/badge/TanStack%20Query-FF4154?logo=reactquery&logoColor=white&style=for-the-badge)
+
+</td></tr>
+  <tr><td><b>Client State Management</b></td><td>
+
+![Zustand](https://img.shields.io/badge/Zustand-000000?style=for-the-badge)
+
+</td></tr>
+  <tr><td><b>HTTP Client</b></td><td>
+
+![ky](https://img.shields.io/badge/ky-000000?style=for-the-badge)
+
+</td></tr>
+  <tr><td><b>Package Manager</b></td><td>
+
+![Pnpm](https://img.shields.io/badge/Pnpm-F69220?logo=pnpm&logoColor=white&style=for-the-badge)
+
+</td></tr>
+  <tr><td><b>Version Control</b></td><td>
+
+![Git](https://img.shields.io/badge/Git-F05033?logo=git&logoColor=white&style=for-the-badge) ![GitHub](https://img.shields.io/badge/GitHub-121011?logo=github&logoColor=white&style=for-the-badge)
+
+</td></tr>
+  <tr><td><b>Cooperation</b></td><td>
+
+![Notion](https://img.shields.io/badge/Notion-000000?logo=notion&logoColor=white&style=for-the-badge) ![Discord](https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white&style=for-the-badge) ![Figma](https://img.shields.io/badge/Figma-F24E1E?logo=figma&logoColor=white&style=for-the-badge) ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?logo=swagger&logoColor=black&style=for-the-badge)
+
+</td></tr>
+  <tr><td><b>Formatting</b></td><td>
+
+![ESLint](https://img.shields.io/badge/ESLint-4B3263?logo=eslint&logoColor=white&style=for-the-badge) ![Prettier](https://img.shields.io/badge/Prettier-1A2C34?logo=prettier&logoColor=F7BA3E&style=for-the-badge) ![Husky](https://img.shields.io/badge/Husky-000000?style=for-the-badge) ![commitlint](https://img.shields.io/badge/commitlint-000000?style=for-the-badge)
+
+</td></tr>
+  <tr><td><b>CI/CD</b></td><td>
+
+![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white&style=for-the-badge) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?logo=githubactions&logoColor=white&style=for-the-badge)
+
+</td></tr>
+</table>
 
 ---
 
@@ -219,7 +268,7 @@ init: ESLint flat config 세팅
 - 이벤트 핸들러 함수는 반드시 `handle` prefix
 
 ```ts
-handleSubmit, handleResetClick
+(handleSubmit, handleResetClick);
 ```
 
 - 일반 함수에는 `handle` 사용 안 해요
@@ -242,7 +291,7 @@ interface HeaderProps { ... }
 - 유니언·튜플·리터럴은 `type` 사용
 
 ```ts
-type ButtonVariant = 'primary' | 'secondary'
+type ButtonVariant = 'primary' | 'secondary';
 ```
 
 </details>
