@@ -8,10 +8,14 @@ interface UploadedFileCardProps {
   onRemove: () => void;
 }
 
+const KB = 1_000;
 const MB = 1_000_000;
 
-const formatFileSize = (bytes: number) =>
-  bytes < MB ? `${Math.round(bytes / 1000)} kb` : `${Number((bytes / MB).toFixed(1))} mb`;
+const formatFileSize = (bytes: number) => {
+  if (bytes < KB) return `${bytes} bytes`;
+  if (bytes < MB) return `${Math.round(bytes / KB)} kb`;
+  return `${Number((bytes / MB).toFixed(1))} mb`;
+};
 
 export const UploadedFileCard = ({ fileName, fileSizeBytes, onRemove }: UploadedFileCardProps) => (
   <div className="flex h-69 items-center rounded-xl border border-gray-100 bg-gray-50 p-12">
