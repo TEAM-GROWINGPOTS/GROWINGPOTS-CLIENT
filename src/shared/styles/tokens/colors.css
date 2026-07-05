@@ -21,10 +21,14 @@
   --color-gray-800: #1d1f21;
   --color-gray-900: #131414;
 
+  --color-negative-10: #fff6f7;
+  --color-negative-20: #ffeaed;
+  --color-negative-30: #ff3451;
+  --color-negative-40: #6e1f2b;
+
   --color-information: #3daeff;
   --color-success: #0ad04d;
   --color-notice: #fa8537;
-  --color-negative: #fa3737;
 
   --color-black: #000000;
   --color-white: #ffffff;
