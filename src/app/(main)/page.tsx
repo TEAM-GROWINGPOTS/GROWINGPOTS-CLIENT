@@ -15,21 +15,19 @@ export default function Page() {
 
       <Modal open={isDefaultModalOpen} onOpenChange={setIsDefaultModalOpen}>
         <Modal.Content className="w-480">
-          <Modal.Header title="기본 모달" className="text-title-sb-24" />
-          <Modal.Description className="text-body-r-16">
-            모달 내용을 children으로 자유롭게 구성할 수 있습니다.
-          </Modal.Description>
-
-          <Modal.Footer>
-            <Button label="확인" className="w-full justify-center" onClick={() => setIsDefaultModalOpen(false)} />
+          <Modal.Header title="헤더 타이틀입니다" className="text-title-sb-24" />
+          <Modal.Description className="mt-4 mb-40">서브 텍스트입니다.</Modal.Description>
+          <div className="h-240 bg-gray-50" />
+          <Modal.Footer className="mt-80">
+            <Button label="다음" className="w-full justify-center" onClick={() => setIsDefaultModalOpen(false)} />
           </Modal.Footer>
         </Modal.Content>
       </Modal>
 
       <Modal open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
         <Modal.Content className="w-418">
-          <Modal.Title className="text-title-sb-18 text-center">정말 삭제할까요?</Modal.Title>
-
+          <Modal.Title className="text-title-sb-18 text-center">헤더 타이틀입니다</Modal.Title>
+          <Modal.Description className="mt-8 mb-40 text-center">서브 텍스트입니다.</Modal.Description>
           <Modal.Footer>
             <Button
               label="취소"

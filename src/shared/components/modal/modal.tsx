@@ -86,7 +86,7 @@ const ModalContent = ({ children, className, container, ...props }: ModalContent
 
 const ModalHeader = ({ title, onClose, className }: ModalHeaderProps) => {
   return (
-    <div className={cn('mb-40 flex items-center justify-between', className)}>
+    <div className={cn('flex items-center justify-between', className)}>
       <Dialog.Title className="text-gray-900">{title}</Dialog.Title>
       <Dialog.Close
         type="button"
@@ -101,15 +101,15 @@ const ModalHeader = ({ title, onClose, className }: ModalHeaderProps) => {
 };
 
 const ModalFooter = ({ children, className }: ModalFooterProps) => {
-  return <div className={cn('mt-40 flex gap-8', className)}>{children}</div>;
+  return <div className={cn('flex gap-8', className)}>{children}</div>;
 };
 
 const ModalTitle = ({ children, className }: ModalTitleProps) => {
-  return <Dialog.Title className={className}>{children}</Dialog.Title>;
+  return <Dialog.Title className={cn('text-gray-900', className)}>{children}</Dialog.Title>;
 };
 
 const ModalDescription = ({ children, className }: ModalDescriptionProps) => {
-  return <Dialog.Description className={className}>{children}</Dialog.Description>;
+  return <Dialog.Description className={cn('text-body-r-16 text-gray-600', className)}>{children}</Dialog.Description>;
 };
 
 export const Modal = Object.assign(ModalRoot, {
