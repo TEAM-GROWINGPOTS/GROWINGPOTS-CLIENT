@@ -4,6 +4,7 @@ import { toast } from '@features/onboarding/toast';
 import { Button } from '@shared/components/button/button';
 import { cn } from '@shared/utils/cn';
 import { cva } from 'class-variance-authority';
+import Image from 'next/image';
 import { type ChangeEvent, type DragEvent, useRef, useState } from 'react';
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
@@ -11,11 +12,11 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 const isPdf = (file: File) => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 
 const dropzoneVariants = cva(
-  'flex h-220 w-full flex-col items-center justify-start rounded-xl border border-dashed border-gray-200 transition-colors pt-32',
+  'flex w-full flex-col items-center justify-start rounded-xl border border-dashed border-gray-200 transition-colors pt-32 pb-12',
   {
     variants: {
       isDragOver: {
-        true: 'bg-gray-50',
+        true: 'bg-blue-100',
         false: 'bg-white',
       },
     },
@@ -66,20 +67,28 @@ export const PdfUploader = ({ onFileSelect }: PdfUploaderProps) => {
   };
 
   return (
-    <div
-      className={cn(dropzoneVariants({ isDragOver }))}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      <div className="size-48 bg-gray-50" />
-      <p className="text-body-r-16 mt-8 mb-28 text-center text-gray-900">
-        파일을 끌어다 놓거나
-        <br />
-        ‘파일선택’을 눌러 업로드해 주세요.
-      </p>
-      <Button mode="primary_outline" size="sm" label="파일선택" onClick={() => inputRef.current?.click()} />
-      <input ref={inputRef} type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleFileChange} />
+    <div className="flex rounded-lg border border-gray-200 bg-blue-50 p-8">
+      <div
+        className={cn(dropzoneVariants({ isDragOver }))}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <Image src="/images/file_upload.png" alt="upload-file" width={80} height={80} />
+        <p className="text-body-r-16 mb-20 text-center text-gray-900">
+          파일을 끌어다 놓거나
+          <br />
+          ‘파일선택’을 눌러 업로드해 주세요.
+        </p>
+        <Button mode="primary_outline" size="sm" label="파일선택" onClick={() => inputRef.current?.click()} />
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".pdf,application/pdf"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+      </div>
     </div>
   );
 };
