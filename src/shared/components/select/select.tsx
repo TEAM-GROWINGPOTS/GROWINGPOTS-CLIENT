@@ -80,11 +80,19 @@ export const Select = (props: SelectProps) => {
     }
   };
 
+  const openDropdown = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setOpenUpward(window.innerHeight - rect.bottom < 220);
+    }
+    setIsOpen(true);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen) {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
         e.preventDefault();
-        setIsOpen(true);
+        openDropdown();
         setFocusedIndex(options.length > 0 ? 0 : -1);
       }
       return;
@@ -119,11 +127,8 @@ export const Select = (props: SelectProps) => {
         type="button"
         disabled={disabled}
         onClick={() => {
-          if (!isOpen && ref.current) {
-            const rect = ref.current.getBoundingClientRect();
-            setOpenUpward(window.innerHeight - rect.bottom < 220);
-          }
-          setIsOpen((prev) => !prev);
+          if (!isOpen) openDropdown();
+          else setIsOpen(false);
         }}
         onKeyDown={handleKeyDown}
         aria-expanded={isOpen}
