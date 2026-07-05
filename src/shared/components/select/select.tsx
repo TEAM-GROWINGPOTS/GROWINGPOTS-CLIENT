@@ -1,8 +1,11 @@
 'use client';
 
+import { Badge } from '@shared/components/badge/badge';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { useEffect, useId, useRef, useState } from 'react';
+
+import { SelectOptionItem } from './select-option';
 
 interface SelectOption {
   value: string;
@@ -17,15 +20,17 @@ type BaseProps = {
 };
 
 type SingleSelectProps = BaseProps & {
-  showCheckbox?: false;
+  multiple?: false;
   value: string;
   onChange: (value: string) => void;
 };
 
 type MultiSelectProps = BaseProps & {
-  showCheckbox: true;
+  multiple: true;
   value: string[];
   onChange: (value: string[]) => void;
+  badgeVariant?: 'primary' | 'secondary' | 'outline' | 'disabled' | 'negative';
+  badgeSize?: 'xsmall' | 'small' | 'medium';
 };
 
 type SelectProps = SingleSelectProps | MultiSelectProps;
@@ -39,18 +44,17 @@ export const Select = (props: SelectProps) => {
   const listboxId = useId();
   const optionId = (index: number) => `${listboxId}-option-${index}`;
 
-  const hasValue = props.showCheckbox ? props.value.length > 0 : props.value !== '';
+  const isMulti = props.multiple === true;
+  const hasValue = isMulti ? (props as MultiSelectProps).value.length > 0 : (props as SingleSelectProps).value !== '';
 
   const isSelected = (optValue: string): boolean => {
-    if (props.showCheckbox) return props.value.includes(optValue);
+    if (props.multiple) return props.value.includes(optValue);
     return props.value === optValue;
   };
 
-  const triggerLabel = (() => {
-    if (!props.showCheckbox) return options.find((opt) => opt.value === props.value)?.label ?? placeholder;
-    if (props.value.length === 0) return placeholder;
-    return props.value.map((v) => options.find((opt) => opt.value === v)?.label ?? v).join(', ');
-  })();
+  const triggerLabel = isMulti
+    ? placeholder
+    : (options.find((opt) => opt.value === (props as SingleSelectProps).value)?.label ?? placeholder);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -64,7 +68,7 @@ export const Select = (props: SelectProps) => {
   }, []);
 
   const handleSelect = (optValue: string) => {
-    if (props.showCheckbox) {
+    if (props.multiple) {
       const newValue = props.value.includes(optValue)
         ? props.value.filter((v) => v !== optValue)
         : [...props.value, optValue];
@@ -125,14 +129,31 @@ export const Select = (props: SelectProps) => {
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-controls={listboxId}
-        aria-multiselectable={props.showCheckbox || undefined}
         aria-activedescendant={isOpen && focusedIndex >= 0 ? optionId(focusedIndex) : undefined}
         className={cn(
-          'text-body-r-16 flex h-48 w-full items-center justify-between rounded-[10px] border border-gray-200 bg-white pr-14 pl-16',
+          'text-body-r-16 flex w-full justify-between rounded-[10px] border border-gray-200 bg-white pr-14 pl-16',
+          isMulti ? 'min-h-48 items-start py-12' : 'h-48 items-center',
           hasValue ? 'text-gray-700' : 'text-gray-300',
         )}
       >
-        <span className="truncate">{triggerLabel}</span>
+        {isMulti && hasValue ? (
+          <div className="flex flex-wrap gap-4">
+            {(props as MultiSelectProps).value.map((v) => {
+              const label = options.find((opt) => opt.value === v)?.label ?? v;
+              return (
+                <Badge
+                  key={v}
+                  variant={(props as MultiSelectProps).badgeVariant ?? 'primary'}
+                  size={(props as MultiSelectProps).badgeSize ?? 'xsmall'}
+                >
+                  {label}
+                </Badge>
+              );
+            })}
+          </div>
+        ) : (
+          <span className="truncate">{triggerLabel}</span>
+        )}
         <Icon name="ic_chevron_down" size={20} className="pointer-events-none shrink-0 text-gray-600" />
       </button>
 
@@ -140,36 +161,22 @@ export const Select = (props: SelectProps) => {
         <ul
           id={listboxId}
           role="listbox"
-          aria-multiselectable={props.showCheckbox || undefined}
+          aria-multiselectable={isMulti || undefined}
           className={cn(
             'absolute left-0 z-50 flex max-h-[208px] w-full flex-col overflow-y-auto rounded-xl border border-gray-200 bg-white p-8',
             openUpward ? 'bottom-full mb-4' : 'top-full mt-4',
           )}
         >
           {options.map((opt, index) => (
-            <li
+            <SelectOptionItem
               key={opt.value}
               id={optionId(index)}
-              role="option"
-              aria-selected={isSelected(opt.value)}
+              label={opt.label}
+              isSelected={isSelected(opt.value)}
+              isFocused={focusedIndex === index}
+              isMulti={isMulti}
               onClick={() => handleSelect(opt.value)}
-              className={cn(
-                'text-body-m-16 flex h-48 w-full shrink-0 cursor-pointer items-center rounded-lg bg-white px-12 text-gray-700 hover:bg-gray-50',
-                focusedIndex === index && 'bg-gray-50',
-                isSelected(opt.value) && 'bg-gray-50 text-blue-500',
-              )}
-            >
-              {props.showCheckbox && (
-                <Icon
-                  name={isSelected(opt.value) ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'}
-                  size={20}
-                  className="mr-8 shrink-0"
-                />
-              )}
-              <span className="[scrollbar-width:none] overflow-x-auto whitespace-nowrap [&::-webkit-scrollbar]:hidden">
-                {opt.label}
-              </span>
-            </li>
+            />
           ))}
         </ul>
       )}
