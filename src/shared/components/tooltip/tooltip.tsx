@@ -19,25 +19,29 @@ const sizeClass: Record<TooltipSize, string> = {
   md: 'px-12 py-8 text-body-m-14',
 };
 
-const arrowBorderClass: Record<'top' | 'bottom', Record<TooltipSize, string>> = {
-  top: {
-    sm: 'border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-gray-700',
-    md: 'border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-gray-700',
-  },
-  bottom: {
-    sm: 'border-l-[6px] border-r-[6px] border-b-[6px] border-l-transparent border-r-transparent border-b-gray-700',
-    md: 'border-l-[8px] border-r-[8px] border-b-[8px] border-l-transparent border-r-transparent border-b-gray-700',
-  },
+const arrowWrapperSizeClass: Record<TooltipSize, string> = {
+  sm: 'h-[7px] w-[14px]',
+  md: 'h-[9px] w-[17px]',
 };
 
-const arrowOffsetClass: Record<'top' | 'bottom', Record<TooltipSize, string>> = {
-  top: { sm: 'bottom-[-6px]', md: 'bottom-[-8px]' },
-  bottom: { sm: 'top-[-6px]', md: 'top-[-8px]' },
+const arrowWrapperSideClass: Record<'top' | 'bottom', string> = {
+  top: 'top-full -translate-y-[2px]',
+  bottom: 'bottom-full translate-y-[2px]',
 };
 
-const arrowAlignClass: Record<'center' | 'start', string> = {
-  center: 'left-1/2 -translate-x-1/2',
-  start: 'left-[12px]',
+const arrowSquareSizeClass: Record<TooltipSize, string> = {
+  sm: 'size-[10px]',
+  md: 'size-[12px]',
+};
+
+const arrowSquareSideClass: Record<'top' | 'bottom', string> = {
+  top: 'top-0 -translate-y-1/2',
+  bottom: 'bottom-0 translate-y-1/2',
+};
+
+const arrowAlignClass: Record<'center' | 'start', Record<TooltipSize, string>> = {
+  center: { sm: 'left-1/2 -translate-x-1/2', md: 'left-1/2 -translate-x-1/2' },
+  start: { sm: 'left-[12px] -translate-x-1/2', md: 'left-[16px] -translate-x-1/2' },
 };
 
 const sideOffsetMap: Record<TooltipSize, number> = {
@@ -63,12 +67,20 @@ export const Tooltip = ({ trigger, content, variant = 'bottom-center', size = 's
           <div className={cn('rounded-sm bg-gray-700 text-gray-50', sizeClass[size])}>{content}</div>
           <div
             className={cn(
-              'absolute h-0 w-0',
-              arrowBorderClass[side][size],
-              arrowOffsetClass[side][size],
-              arrowAlignClass[align],
+              'absolute overflow-hidden',
+              arrowWrapperSizeClass[size],
+              arrowWrapperSideClass[side],
+              arrowAlignClass[align][size],
             )}
-          />
+          >
+            <div
+              className={cn(
+                'absolute left-1/2 -translate-x-1/2 rotate-45 rounded-xs bg-gray-700',
+                arrowSquareSizeClass[size],
+                arrowSquareSideClass[side],
+              )}
+            />
+          </div>
         </RadixTooltip.Content>
       </RadixTooltip.Portal>
     </RadixTooltip.Root>
