@@ -21,7 +21,7 @@ export const TextField = ({ value, onChange, maxLength, placeholder, icon, class
   return (
     <div
       className={cn(
-        'flex h-48 items-center rounded-[10px] border border-gray-200 bg-white px-16 focus-within:border-blue-500',
+        'flex h-48 items-center rounded-lg border border-gray-200 bg-white px-16 focus-within:border-gray-600',
         className,
       )}
     >
@@ -34,7 +34,7 @@ export const TextField = ({ value, onChange, maxLength, placeholder, icon, class
         {...props}
       />
       <span className="text-body-r-14 ml-8 shrink-0 text-gray-300">
-        <span className={cn(value.length >= 1 && 'text-blue-500')}>{value.length}</span>/{maxLength}
+        <span className={cn(value.length >= 1 && 'text-lime-600')}>{value.length}</span>/{maxLength}
       </span>
     </div>
   );
