@@ -1,4 +1,4 @@
 @theme {
-  --z-dropdown: 10;
-  --z-modal: 20;
+  --z-index-dropdown: 10;
+  --z-index-modal: 20;
 }
