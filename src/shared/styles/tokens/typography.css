@@ -61,6 +61,11 @@
   --text-body-r-16--font-weight: 400;
   --text-body-r-16--letter-spacing: -0.01em;
 
+  --text-body-sb-14: 0.875rem;
+  --text-body-sb-14--line-height: 1.5;
+  --text-body-sb-14--font-weight: 600;
+  --text-body-sb-14--letter-spacing: -0.01em;
+
   --text-body-m-14: 0.875rem;
   --text-body-m-14--line-height: 1.5;
   --text-body-m-14--font-weight: 500;
@@ -70,6 +75,11 @@
   --text-body-r-14--line-height: 1.5;
   --text-body-r-14--font-weight: 400;
   --text-body-r-14--letter-spacing: -0.01em;
+
+  --text-caption-sb-12: 0.75rem;
+  --text-caption-sb-12--line-height: 1.5;
+  --text-caption-sb-12--font-weight: 600;
+  --text-caption-sb-12--letter-spacing: -0.01em;
 
   --text-caption-m-12: 0.75rem;
   --text-caption-m-12--line-height: 1.5;
