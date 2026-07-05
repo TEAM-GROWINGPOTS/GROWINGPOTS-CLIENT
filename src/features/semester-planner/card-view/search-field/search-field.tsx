@@ -16,7 +16,7 @@ export const SearchField = ({ value, onChange, placeholder, className, ...props 
   };
 
   return (
-    <div className={cn('flex h-44 items-center gap-8 rounded-sm border border-gray-200 bg-white px-12', className)}>
+    <label className={cn('flex h-44 items-center gap-8 rounded-sm border border-gray-200 bg-white px-12', className)}>
       <Icon name="ic_search" size={24} className="text-gray-400" />
       <input
         type="text"
@@ -26,6 +26,6 @@ export const SearchField = ({ value, onChange, placeholder, className, ...props 
         placeholder={placeholder}
         {...props}
       />
-    </div>
+    </label>
   );
 };
