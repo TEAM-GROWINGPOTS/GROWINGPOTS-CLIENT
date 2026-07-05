@@ -45,16 +45,16 @@ export const Select = (props: SelectProps) => {
   const optionId = (index: number) => `${listboxId}-option-${index}`;
 
   const isMulti = props.multiple === true;
-  const hasValue = isMulti ? (props as MultiSelectProps).value.length > 0 : (props as SingleSelectProps).value !== '';
+  const hasValue = props.multiple ? props.value.length > 0 : props.value !== '';
 
   const isSelected = (optValue: string): boolean => {
     if (props.multiple) return props.value.includes(optValue);
     return props.value === optValue;
   };
 
-  const triggerLabel = isMulti
+  const triggerLabel = props.multiple
     ? placeholder
-    : (options.find((opt) => opt.value === (props as SingleSelectProps).value)?.label ?? placeholder);
+    : (options.find((opt) => opt.value === props.value)?.label ?? placeholder);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -136,16 +136,12 @@ export const Select = (props: SelectProps) => {
           hasValue ? 'text-gray-700' : 'text-gray-300',
         )}
       >
-        {isMulti && hasValue ? (
+        {props.multiple && hasValue ? (
           <div className="flex flex-wrap gap-4">
-            {(props as MultiSelectProps).value.map((v) => {
+            {props.value.map((v) => {
               const label = options.find((opt) => opt.value === v)?.label ?? v;
               return (
-                <Badge
-                  key={v}
-                  variant={(props as MultiSelectProps).badgeVariant ?? 'primary'}
-                  size={(props as MultiSelectProps).badgeSize ?? 'xsmall'}
-                >
+                <Badge key={v} variant={props.badgeVariant ?? 'primary'} size={props.badgeSize ?? 'xsmall'}>
                   {label}
                 </Badge>
               );
