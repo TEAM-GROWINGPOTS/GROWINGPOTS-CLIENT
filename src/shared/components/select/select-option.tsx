@@ -1,5 +1,6 @@
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
+import { useEffect, useRef } from 'react';
 
 interface SelectOptionItemProps {
   id: string;
@@ -11,8 +12,15 @@ interface SelectOptionItemProps {
 }
 
 export const SelectOptionItem = ({ id, label, isSelected, isFocused, isMulti, onClick }: SelectOptionItemProps) => {
+  const ref = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    if (isFocused) ref.current?.scrollIntoView({ block: 'nearest' });
+  }, [isFocused]);
+
   return (
     <li
+      ref={ref}
       id={id}
       role="option"
       aria-selected={isSelected}
