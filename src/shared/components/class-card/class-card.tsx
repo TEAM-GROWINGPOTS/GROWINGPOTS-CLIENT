@@ -32,18 +32,20 @@ export const ClassCard = ({ department, title, tags, type = 'default', className
         {title}
         {type === 'disabled' && <span className="sr-only">(비활성)</span>}
       </h3>
-      <div className="mt-12 flex flex-wrap items-center gap-4">
-        {tags.map((tag, index) => (
-          <Badge
-            key={`${tag}-${index}`}
-            size="xsmall"
-            variant={index == 0 ? 'primary' : 'disabled'}
-            color={index == 0 ? 'lime01' : null}
-          >
-            {tag}
-          </Badge>
-        ))}
-      </div>
+      {tags.length > 0 && (
+        <div className="mt-12 flex flex-wrap items-center gap-4">
+          {tags.map((tag, index) => (
+            <Badge
+              key={`${tag}-${index}`}
+              size="xsmall"
+              variant={index == 0 ? 'primary' : 'disabled'}
+              color={index == 0 ? 'lime01' : null}
+            >
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      )}
       {type === 'disabled' && <div className="bg-white-50 absolute inset-0 rounded-[inherit]" />}
     </article>
   );
