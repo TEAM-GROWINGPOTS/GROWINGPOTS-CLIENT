@@ -21,8 +21,8 @@ interface FolderListProps {
 export const FolderList = ({ folders, onAddFolder, className }: FolderListProps) => {
   return (
     <div className={cn('flex w-160 flex-col rounded-[6px] border border-gray-200 bg-white p-8', className)}>
-      {folders.map((folder) => (
-        <FolderItem key={folder.id} name={folder.name} />
+      {folders.map(({ id, name }) => (
+        <FolderItem key={id} name={name} />
       ))}
       <Button
         label="추가"
