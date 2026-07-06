@@ -3,7 +3,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
-import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, ReactElement, ReactNode } from 'react';
 
 interface ModalRootProps {
   defaultOpen?: boolean;
@@ -13,7 +13,7 @@ interface ModalRootProps {
 }
 
 interface ModalTriggerProps {
-  children: ReactNode;
+  children: ReactElement;
 }
 
 interface ModalContentProps extends ComponentPropsWithoutRef<typeof Dialog.Content> {
