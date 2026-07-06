@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
 import type { ReactNode } from 'react';
