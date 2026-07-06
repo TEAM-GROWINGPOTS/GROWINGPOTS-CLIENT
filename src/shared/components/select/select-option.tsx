@@ -34,7 +34,7 @@ export const SelectOptionItem = ({ id, label, isSelected, isFocused, isMulti, on
       {isMulti && (
         <Icon name={isSelected ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'} size={20} className="mr-8 shrink-0" />
       )}
-      <span className="[scrollbar-width:none] overflow-x-auto whitespace-nowrap [&::-webkit-scrollbar]:hidden">
+      <span title={label} className="min-w-0 truncate">
         {label}
       </span>
     </li>

@@ -1,10 +1,10 @@
 'use client';
 
-import { Badge } from '@shared/components/badge/badge';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { useEffect, useId, useRef, useState } from 'react';
 
+import { SelectedBadgeList } from './select-badge-list';
 import { SelectOptionItem } from './select-option';
 
 interface SelectOption {
@@ -30,7 +30,7 @@ type MultiSelectProps = BaseProps & {
   value: string[];
   onChange: (value: string[]) => void;
   badgeVariant?: 'primary' | 'secondary' | 'outline' | 'disabled' | 'negative';
-  badgeSize?: 'xsmall' | 'small' | 'medium';
+  badgeSize?: 'xsmall';
 };
 
 type SelectProps = SingleSelectProps | MultiSelectProps;
@@ -108,6 +108,7 @@ export const Select = (props: SelectProps) => {
         setFocusedIndex((prev) => Math.max(prev - 1, 0));
         break;
       case 'Enter':
+      case ' ':
         e.preventDefault();
         if (focusedIndex >= 0 && options[focusedIndex]) {
           handleSelect(options[focusedIndex].value);
@@ -142,16 +143,12 @@ export const Select = (props: SelectProps) => {
         )}
       >
         {props.multiple && hasValue ? (
-          <div className="flex flex-wrap gap-4">
-            {props.value.map((v) => {
-              const label = options.find((opt) => opt.value === v)?.label ?? v;
-              return (
-                <Badge key={v} variant={props.badgeVariant ?? 'primary'} size={props.badgeSize ?? 'xsmall'}>
-                  {label}
-                </Badge>
-              );
-            })}
-          </div>
+          <SelectedBadgeList
+            values={props.value}
+            options={options}
+            variant={props.badgeVariant}
+            size={props.badgeSize}
+          />
         ) : (
           <span className="truncate">{triggerLabel}</span>
         )}
