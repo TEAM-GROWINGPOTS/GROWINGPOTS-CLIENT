@@ -18,7 +18,7 @@ export const Tabs = ({ items, value, onChange, className }: TabsProps) => {
   return (
     <ul role="tablist" className={cn('flex items-center gap-20', className)}>
       {items.map(({ value: itemValue, label }) => (
-        <li key={itemValue}>
+        <li key={itemValue} role="presentation">
           <button
             type="button"
             role="tab"
