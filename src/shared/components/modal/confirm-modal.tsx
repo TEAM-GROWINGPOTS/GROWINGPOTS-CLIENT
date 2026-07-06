@@ -47,27 +47,25 @@ export const ConfirmModal = ({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <Modal.Content className="w-440">
-        <div className="flex flex-col items-center">
-          <Icon name={iconName} size={40} className="mb-16" />
-          <Modal.Title className="text-title-sb-18 mb-8 text-center">{title}</Modal.Title>
-          {description && <Modal.Description>{description}</Modal.Description>}
-          <Modal.Footer className="mt-40 w-full">
-            <Button
-              label="취소"
-              mode="secondary_solid"
-              size="lg"
-              className="flex-1 justify-center"
-              onClick={() => onOpenChange(false)}
-            />
-            <Button
-              label={confirmLabel ?? defaultConfirmLabel}
-              size="lg"
-              className="flex-1 justify-center"
-              onClick={handleConfirmClick}
-            />
-          </Modal.Footer>
-        </div>
+      <Modal.Content className="flex w-440 flex-col items-center">
+        <Icon name={iconName} size={40} className="mb-16" />
+        <Modal.Title className="text-title-sb-18 mb-8 text-center">{title}</Modal.Title>
+        {description && <Modal.Description>{description}</Modal.Description>}
+        <Modal.Footer className="mt-40 w-full">
+          <Button
+            label="취소"
+            mode="secondary_solid"
+            size="lg"
+            className="flex-1 justify-center"
+            onClick={() => onOpenChange(false)}
+          />
+          <Button
+            label={confirmLabel ?? defaultConfirmLabel}
+            size="lg"
+            className="flex-1 justify-center"
+            onClick={handleConfirmClick}
+          />
+        </Modal.Footer>
       </Modal.Content>
     </Modal>
   );
