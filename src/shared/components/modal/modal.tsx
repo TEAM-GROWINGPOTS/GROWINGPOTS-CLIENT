@@ -16,17 +16,12 @@ interface ModalTriggerProps {
   children: ReactNode;
 }
 
-interface ModalCloseProps {
-  children: ReactNode;
-}
-
 interface ModalContentProps extends ComponentPropsWithoutRef<typeof Dialog.Content> {
   children: ReactNode;
 }
 
 interface ModalHeaderProps {
   title: string;
-  onClose?: () => void;
   className?: string;
 }
 
@@ -57,10 +52,6 @@ const ModalTrigger = ({ children }: ModalTriggerProps) => {
   return <Dialog.Trigger asChild>{children}</Dialog.Trigger>;
 };
 
-const ModalClose = ({ children }: ModalCloseProps) => {
-  return <Dialog.Close asChild>{children}</Dialog.Close>;
-};
-
 const ModalContent = ({ children, className, ...props }: ModalContentProps) => {
   return (
     <Dialog.Portal>
@@ -79,14 +70,13 @@ const ModalContent = ({ children, className, ...props }: ModalContentProps) => {
   );
 };
 
-const ModalHeader = ({ title, onClose, className }: ModalHeaderProps) => {
+const ModalHeader = ({ title, className }: ModalHeaderProps) => {
   return (
     <header className={cn('flex items-center justify-between', className)}>
       <Dialog.Title className="text-gray-900">{title}</Dialog.Title>
       <Dialog.Close
         type="button"
         aria-label="모달 닫기"
-        onClick={onClose}
         className="flex size-24 cursor-pointer items-center justify-center"
       >
         <Icon name="ic_delete" size={24} className="text-gray-500" />
@@ -109,7 +99,6 @@ const ModalDescription = ({ children, className }: ModalDescriptionProps) => {
 
 export const Modal = Object.assign(ModalRoot, {
   Trigger: ModalTrigger,
-  Close: ModalClose,
   Content: ModalContent,
   Header: ModalHeader,
   Footer: ModalFooter,
