@@ -81,7 +81,7 @@ const ModalContent = ({ children, className, ...props }: ModalContentProps) => {
 
 const ModalHeader = ({ title, onClose, className }: ModalHeaderProps) => {
   return (
-    <div className={cn('flex items-center justify-between', className)}>
+    <header className={cn('flex items-center justify-between', className)}>
       <Dialog.Title className="text-gray-900">{title}</Dialog.Title>
       <Dialog.Close
         type="button"
@@ -91,12 +91,12 @@ const ModalHeader = ({ title, onClose, className }: ModalHeaderProps) => {
       >
         <Icon name="ic_delete" size={24} className="text-gray-500" />
       </Dialog.Close>
-    </div>
+    </header>
   );
 };
 
 const ModalFooter = ({ children, className }: ModalFooterProps) => {
-  return <div className={cn('flex gap-8', className)}>{children}</div>;
+  return <footer className={cn('flex gap-8', className)}>{children}</footer>;
 };
 
 const ModalTitle = ({ children, className }: ModalTitleProps) => {
