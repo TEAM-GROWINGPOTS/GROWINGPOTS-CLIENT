@@ -5,7 +5,7 @@ import { Button } from '@shared/components/button/button';
 import { cn } from '@shared/utils/cn';
 import { cva } from 'class-variance-authority';
 import Image from 'next/image';
-import { type ChangeEvent, type DragEvent, useRef, useState } from 'react';
+import { type ChangeEvent, type DragEvent, useEffect, useRef, useState } from 'react';
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
@@ -33,6 +33,16 @@ interface PdfUploaderProps {
 export const PdfUploader = ({ onFileSelect }: PdfUploaderProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+
+  useEffect(() => {
+    const preventWindowDrop = (e: Event) => e.preventDefault();
+    window.addEventListener('dragover', preventWindowDrop);
+    window.addEventListener('drop', preventWindowDrop);
+    return () => {
+      window.removeEventListener('dragover', preventWindowDrop);
+      window.removeEventListener('drop', preventWindowDrop);
+    };
+  }, []);
 
   const validateAndSelect = (file: File) => {
     if (!isPdf(file)) {
