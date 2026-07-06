@@ -6,7 +6,7 @@ export type NavItemStatusTypes = 'default' | 'selected';
 
 const navItemBaseClass = 'flex cursor-pointer items-center gap-12 rounded-lg transition-colors p-12';
 
-const navItemStatusClass: Record<NavItemStatus, string> = {
+const navItemStatusClass: Record<NavItemStatusTypes, string> = {
   default: 'text-gray-100 hover:bg-gray-700 hover:text-white',
   selected: 'bg-gray-800 text-lime-400',
 };
@@ -14,7 +14,7 @@ const navItemStatusClass: Record<NavItemStatus, string> = {
 interface NavItemProps extends Omit<ComponentPropsWithoutRef<'button'>, 'children'> {
   label: string;
   icon: string;
-  status?: NavItemStatus;
+  status?: NavItemStatusTypes;
   isCollapsed?: boolean;
 }
 
