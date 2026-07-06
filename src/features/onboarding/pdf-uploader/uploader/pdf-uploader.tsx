@@ -20,9 +20,6 @@ const dropzoneVariants = cva(
         false: 'bg-white',
       },
     },
-    defaultVariants: {
-      isDragOver: false,
-    },
   },
 );
 
