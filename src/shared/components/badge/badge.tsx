@@ -21,6 +21,7 @@ const badgeVariants = cva('inline-flex w-fit items-center justify-center gap-4 r
       purple: '',
       blue: '',
       red: '',
+      darkRed: '',
     },
   },
   compoundVariants: [
@@ -48,6 +49,11 @@ const badgeVariants = cva('inline-flex w-fit items-center justify-center gap-4 r
       variant: 'primary',
       color: 'red',
       className: 'bg-red-10 text-red-20',
+    },
+    {
+      variant: 'primary',
+      color: 'darkRed',
+      className: 'bg-dark-red-20 text-dark-red-10',
     },
   ],
   defaultVariants: {
