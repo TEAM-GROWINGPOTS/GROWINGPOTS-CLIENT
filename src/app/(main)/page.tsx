@@ -14,8 +14,8 @@ export default function Page() {
               <div key={variant} className="flex flex-col items-center gap-4">
                 <p className="text-xs text-gray-400">{variant}</p>
                 <Tooltip
-                  trigger={<button className="rounded bg-gray-200 px-12 py-8 text-sm">hover me</button>}
-                  content="옹심이들아 팟팅 아자아자 행복앱잼"
+                  trigger={<button className="rounded bg-gray-200 px-12 py-8 text-sm" />}
+                  content={`옹심이들아 팟팅 아자아자 행복앱잼 \n 옹심이 착착 맞아`}
                   variant={variant}
                   size={size}
                 />

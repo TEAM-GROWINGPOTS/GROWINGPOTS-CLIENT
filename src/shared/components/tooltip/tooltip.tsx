@@ -2,7 +2,7 @@
 
 import * as RadixTooltip from '@radix-ui/react-tooltip';
 import { cn } from '@shared/utils/cn';
-import type { ReactNode } from 'react';
+import type { ReactElement } from 'react';
 
 export type TooltipVariant = 'top-center' | 'top-start' | 'bottom-center' | 'bottom-start';
 export type TooltipSize = 'sm' | 'md';
@@ -50,7 +50,7 @@ const sideOffsetMap: Record<TooltipSize, number> = {
 };
 
 interface TooltipProps {
-  trigger: ReactNode;
+  trigger: ReactElement;
   content: string;
   variant?: TooltipVariant;
   size?: TooltipSize;
@@ -63,8 +63,16 @@ export const Tooltip = ({ trigger, content, variant = 'bottom-center', size = 's
     <RadixTooltip.Root>
       <RadixTooltip.Trigger asChild>{trigger}</RadixTooltip.Trigger>
       <RadixTooltip.Portal>
-        <RadixTooltip.Content side={side} align={align} sideOffset={sideOffsetMap[size]} className="relative">
-          <div className={cn('rounded-sm bg-gray-700 text-gray-50', sizeClass[size])}>{content}</div>
+        <RadixTooltip.Content
+          side={side}
+          align={align}
+          sideOffset={sideOffsetMap[size]}
+          avoidCollisions={false}
+          className="z-tooltip relative"
+        >
+          <div className={cn('rounded-sm bg-gray-700 whitespace-pre-line text-gray-50', sizeClass[size])}>
+            {content}
+          </div>
           <div
             className={cn(
               'absolute overflow-hidden',
