@@ -28,7 +28,7 @@ export const SelectOptionItem = ({ id, label, isSelected, isFocused, isMulti, on
       className={cn(
         'text-body-m-16 flex h-48 w-full shrink-0 cursor-pointer items-center rounded-lg bg-white px-12 text-gray-700 hover:bg-gray-50',
         isFocused && 'bg-gray-50',
-        isSelected && 'bg-gray-50 text-blue-500',
+        isSelected && 'bg-gray-100',
       )}
     >
       {isMulti && (
