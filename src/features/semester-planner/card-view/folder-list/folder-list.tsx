@@ -63,7 +63,10 @@ const FolderItem = ({ name, onRename, onDelete }: FolderItemProps) => {
         <button
           type="button"
           onClick={() => setIsMenuOpen((prev) => !prev)}
-          className="invisible cursor-pointer group-hover:visible"
+          aria-haspopup="menu"
+          aria-expanded={isMenuOpen}
+          aria-label="폴더 옵션 열기"
+          className="invisible cursor-pointer group-hover:visible focus-visible:visible focus-visible:rounded focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
         >
           <Icon name="ic_dot_horizontal" size={20} className="text-gray-600" />
         </button>
