@@ -2,10 +2,17 @@
 
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-export type ViewMode = 'card' | 'roadmap';
+type ViewMode = 'card' | 'roadmap';
 
-const OPTIONS: { value: ViewMode; label: string; icon: string }[] = [
+interface ViewModeOption {
+  value: ViewMode;
+  label: string;
+  icon: string;
+}
+
+const OPTIONS: ViewModeOption[] = [
   { value: 'card', label: '목록 보기', icon: 'ic_list' },
   { value: 'roadmap', label: '로드맵 보기', icon: 'ic_roadmap' },
 ];
@@ -16,21 +23,58 @@ interface ViewModeToggleProps {
 }
 
 export const ViewModeToggle = ({ value, onChange }: ViewModeToggleProps) => {
+  const buttonRefs = useRef<Record<ViewMode, HTMLButtonElement | null>>({ card: null, roadmap: null });
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [isTransitionEnabled, setIsTransitionEnabled] = useState(false);
+
+  useLayoutEffect(() => {
+    const button = buttonRefs.current[value];
+
+    if (button) {
+      setIndicatorStyle({ left: button.offsetLeft, width: button.offsetWidth });
+    }
+  }, [value]);
+
+  useEffect(() => {
+    const frameIds: number[] = [];
+
+    frameIds.push(
+      requestAnimationFrame(() => {
+        frameIds.push(requestAnimationFrame(() => setIsTransitionEnabled(true)));
+      }),
+    );
+
+    return () => {
+      frameIds.forEach(cancelAnimationFrame);
+    };
+  }, []);
+
   return (
-    <div className={'flex rounded-full bg-white p-4'}>
+    <div className="relative inline-flex rounded-full bg-white p-4">
+      <div
+        className={cn(
+          'absolute top-4 bottom-4 rounded-full bg-gray-700',
+          isTransitionEnabled && 'transition-[left,width] duration-200 ease-out',
+        )}
+        style={{ left: indicatorStyle.left, width: indicatorStyle.width }}
+      />
       {OPTIONS.map(({ value: optionValue, label, icon }) => {
         const isSelected = optionValue === value;
 
         return (
           <button
             key={optionValue}
+            ref={(el) => {
+              buttonRefs.current[optionValue] = el;
+            }}
             type="button"
             aria-pressed={isSelected}
             aria-label={label}
             onClick={() => onChange(optionValue)}
             className={cn(
-              'text-body-m-14 flex gap-8 rounded-full px-12 py-8',
-              isSelected ? 'bg-gray-700 text-gray-100' : 'text-gray-500',
+              'text-body-m-14 relative flex gap-8 rounded-full px-12 py-8',
+              isTransitionEnabled && 'transition-colors duration-200 ease-out',
+              isSelected ? 'text-gray-100' : 'text-gray-500',
             )}
           >
             <Icon name={icon} size={20} />
