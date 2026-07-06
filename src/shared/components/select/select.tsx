@@ -29,8 +29,6 @@ type MultiSelectProps = BaseProps & {
   multiple: true;
   value: string[];
   onChange: (value: string[]) => void;
-  badgeVariant?: 'primary' | 'secondary' | 'outline' | 'disabled' | 'negative';
-  badgeSize?: 'xsmall';
 };
 
 type SelectProps = SingleSelectProps | MultiSelectProps;
@@ -146,8 +144,7 @@ export const Select = (props: SelectProps) => {
           <SelectedBadgeList
             values={props.value}
             options={options}
-            variant={props.badgeVariant}
-            size={props.badgeSize}
+            onRemove={(v) => props.onChange(props.value.filter((val) => val !== v))}
           />
         ) : (
           <span className="truncate">{triggerLabel}</span>

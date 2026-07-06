@@ -1,4 +1,5 @@
 import { Badge } from '@shared/components/badge/badge';
+import type { MouseEvent } from 'react';
 
 interface SelectOption {
   value: string;
@@ -8,22 +9,26 @@ interface SelectOption {
 interface SelectedBadgeListProps {
   values: string[];
   options: SelectOption[];
-  variant?: 'primary' | 'secondary' | 'outline' | 'disabled' | 'negative';
-  size?: 'xsmall';
+  onRemove: (value: string) => void;
 }
 
-export const SelectedBadgeList = ({
-  values,
-  options,
-  variant = 'primary',
-  size = 'xsmall',
-}: SelectedBadgeListProps) => {
+export const SelectedBadgeList = ({ values, options, onRemove }: SelectedBadgeListProps) => {
   return (
     <div className="flex flex-wrap gap-4">
       {values.map((v) => {
         const label = options.find((opt) => opt.value === v)?.label ?? v;
         return (
-          <Badge key={v} variant={variant} size={size}>
+          <Badge
+            key={v}
+            variant="primary"
+            color="lime02"
+            size="xsmall"
+            rightIconName="ic_delete"
+            onRightIconClick={(e: MouseEvent<HTMLSpanElement>) => {
+              e.stopPropagation();
+              onRemove(v);
+            }}
+          >
             {label}
           </Badge>
         );
