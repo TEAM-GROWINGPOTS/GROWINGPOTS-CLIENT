@@ -5,7 +5,7 @@ import type { ComponentPropsWithoutRef } from 'react';
 
 export type ClassCardType = 'default' | 'disabled';
 
-const classCardVariants = cva('flex w-auto flex-col items-start rounded-sm bg-white px-12 py-16', {
+const classCardVariants = cva('flex w-auto flex-col items-start rounded-sm bg-white px-16 py-12', {
   variants: {
     type: {
       default: '',
@@ -27,11 +27,16 @@ interface ClassCardProps extends Omit<ComponentPropsWithoutRef<'article'>, 'chil
 export const ClassCard = ({ department, title, tags, type = 'default', className, ...props }: ClassCardProps) => {
   return (
     <article className={cn(classCardVariants({ type }), className)} {...props}>
-      <span className="text-caption-m-10 text-gray-400">{department}</span>
+      <span className="text-caption-m-10 mb-2 text-gray-400">{department}</span>
       <h3 className="text-body-sb-16 text-gray-900">{title}</h3>
       <div className="mt-12 flex flex-wrap items-center gap-4">
-        {tags.map((tag) => (
-          <Badge key={tag} size="xsmall" variant="primary">
+        {tags.map((tag, index) => (
+          <Badge
+            key={tag}
+            size="xsmall"
+            variant={index == 0 ? 'primary' : 'disabled'}
+            color={index == 0 ? 'lime01' : null}
+          >
             {tag}
           </Badge>
         ))}
