@@ -2,19 +2,19 @@ import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import type { ComponentPropsWithoutRef } from 'react';
 
-export type DropDownStatus = 'default' | 'selected';
+export type DropDownStatusTypes = 'default' | 'selected';
 
 const dropDownBaseClass =
   'text-body-m-14 flex h-32 cursor-pointer items-center rounded-sm transition-colors pl-12 py-6 pr-10 gap-4';
 
-const dropDownStatusClass: Record<DropDownStatus, string> = {
+const dropDownStatusClass: Record<DropDownStatusTypes, string> = {
   default: 'border border-gray-200 bg-white text-gray-800 hover:bg-gray-50',
   selected: ' bg-gray-700 text-white',
 };
 
 interface DropDownProps extends Omit<ComponentPropsWithoutRef<'button'>, 'children'> {
   label: string;
-  status?: DropDownStatus;
+  status?: DropDownStatusTypes;
 }
 
 export const DropDown = ({ label, status = 'default', className, ...props }: DropDownProps) => {
