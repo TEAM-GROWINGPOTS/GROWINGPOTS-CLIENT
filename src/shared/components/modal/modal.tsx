@@ -23,7 +23,6 @@ interface ModalCloseProps {
 
 interface ModalContentProps extends ComponentPropsWithoutRef<typeof Dialog.Content> {
   children: ReactNode;
-  container?: HTMLElement | null;
 }
 
 interface ModalHeaderProps {
@@ -63,17 +62,13 @@ const ModalClose = ({ children }: ModalCloseProps) => {
   return <Dialog.Close asChild>{children}</Dialog.Close>;
 };
 
-const ModalContent = ({ children, className, container, ...props }: ModalContentProps) => {
-  const isContained = Boolean(container);
-  const positionClass = isContained ? 'absolute' : 'fixed';
-
+const ModalContent = ({ children, className, ...props }: ModalContentProps) => {
   return (
-    <Dialog.Portal container={container ?? undefined}>
-      <Dialog.Overlay className={cn(positionClass, 'z-modal bg-black-40 inset-0')} />
+    <Dialog.Portal>
+      <Dialog.Overlay className="z-modal bg-black-40 fixed inset-0" />
       <Dialog.Content
         className={cn(
-          positionClass,
-          'z-modal top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[1.5rem] bg-white px-32 pt-48 pb-32 outline-none',
+          'z-modal fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[1.5rem] bg-white px-32 pt-48 pb-32 outline-none',
           className,
         )}
         {...props}
