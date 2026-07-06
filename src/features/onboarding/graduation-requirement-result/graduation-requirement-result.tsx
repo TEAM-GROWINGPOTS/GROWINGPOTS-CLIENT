@@ -4,9 +4,8 @@ interface GraduationRequirementItem {
   label: string;
   value: string;
   total?: string;
-  checked?: boolean;
   variant?: GraduationRequirementVariant;
-  valueClassName?: string;
+  disabled?: boolean;
 }
 
 interface GraduationRequirementResultProps {

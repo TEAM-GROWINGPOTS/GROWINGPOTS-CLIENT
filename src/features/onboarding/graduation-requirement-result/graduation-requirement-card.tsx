@@ -8,7 +8,7 @@ interface GraduationRequirementVariantStyle {
   label: string;
   value: string;
   total?: string;
-  checkIconName: string;
+  checkIconName?: string;
 }
 
 const variantStyles: Record<GraduationRequirementVariant, GraduationRequirementVariantStyle> = {
@@ -17,7 +17,6 @@ const variantStyles: Record<GraduationRequirementVariant, GraduationRequirementV
     label: 'text-gray-600',
     value: 'text-gray-700',
     total: 'text-gray-500',
-    checkIconName: 'ic_check_circle',
   },
   dark: {
     card: 'bg-gray-700',
@@ -38,18 +37,16 @@ interface GraduationRequirementCardProps {
   label: string;
   value: string;
   total?: string;
-  checked?: boolean;
   variant?: GraduationRequirementVariant;
-  valueClassName?: string;
+  disabled?: boolean;
 }
 
 export const GraduationRequirementCard = ({
   label,
   value,
   total,
-  checked = false,
   variant = 'default',
-  valueClassName,
+  disabled = false,
 }: GraduationRequirementCardProps) => {
   const styles = variantStyles[variant];
 
@@ -57,10 +54,10 @@ export const GraduationRequirementCard = ({
     <div className={cn('flex h-45 items-center justify-between rounded-sm px-12', styles.card)}>
       <div className="flex items-center gap-4">
         <span className={cn('text-body-m-14', styles.label)}>{label}</span>
-        {checked && <Icon name={styles.checkIconName} size={16} />}
+        {styles.checkIconName && <Icon name={styles.checkIconName} size={16} />}
       </div>
       <span>
-        <span className={cn('text-body-sb-14', styles.value, valueClassName)}>{value}</span>
+        <span className={cn('text-body-sb-14', disabled ? 'text-gray-300' : styles.value)}>{value}</span>
         {total && <span className={cn('text-body-r-14', styles.total)}>{total}</span>}
       </span>
     </div>
