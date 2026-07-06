@@ -78,28 +78,30 @@ export const PdfUploader = ({ onFileSelect }: PdfUploaderProps) => {
   };
 
   return (
-    <div className="flex rounded-lg border border-gray-200 bg-gray-100 p-8">
-      <div
-        className={cn(dropzoneVariants({ isDragOver }))}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <Image src="/images/file_upload.png" alt="upload-file" width={80} height={80} />
-        <p className="text-body-r-16 mb-20 text-center text-gray-900">
-          파일을 끌어다 놓거나
-          <br />
-          ‘파일선택’을 눌러 업로드해 주세요.
-        </p>
-        <Button mode="primary_outline" size="sm" label="파일선택" onClick={() => inputRef.current?.click()} />
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".pdf,application/pdf"
-          className="hidden"
-          onChange={handleFileChange}
-        />
-      </div>
-    </div>
+    <>
+      <section className="flex rounded-lg border border-gray-200 bg-gray-100 p-8">
+        <div
+          className={cn(dropzoneVariants({ isDragOver }))}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <Image src="/images/file_upload.png" alt="upload-file" width={80} height={80} />
+          <p className="text-body-r-16 mb-20 text-center text-gray-900">
+            파일을 끌어다 놓거나
+            <br />
+            ‘파일선택’을 눌러 업로드해 주세요.
+          </p>
+          <Button mode="primary_outline" size="sm" label="파일선택" onClick={() => inputRef.current?.click()} />
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".pdf,application/pdf"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </div>
+      </section>
+    </>
   );
 };
