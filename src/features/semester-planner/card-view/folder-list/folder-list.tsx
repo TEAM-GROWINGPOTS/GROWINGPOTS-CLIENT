@@ -71,10 +71,17 @@ const FolderItem = ({ name, onRename, onDelete }: FolderItemProps) => {
           <Icon name="ic_dot_horizontal" size={20} className="text-gray-600" />
         </button>
         {isMenuOpen && (
-          <ul className="absolute top-full left-0 z-50 flex w-100 flex-col items-start rounded-[8px] border border-gray-100 bg-white p-4 shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]">
-            <li className="w-full">
+          <ul
+            role="menu"
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setIsMenuOpen(false);
+            }}
+            className="absolute top-full left-0 z-50 flex w-100 flex-col items-start rounded-[8px] border border-gray-100 bg-white p-4 shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]"
+          >
+            <li role="none" className="w-full">
               <button
                 type="button"
+                role="menuitem"
                 onClick={() => {
                   onRename?.();
                   setIsMenuOpen(false);
@@ -84,9 +91,10 @@ const FolderItem = ({ name, onRename, onDelete }: FolderItemProps) => {
                 <span className="text-body-m-14 line-clamp-1 flex-1 text-gray-700">이름 편집</span>
               </button>
             </li>
-            <li className="w-full">
+            <li role="none" className="w-full">
               <button
                 type="button"
+                role="menuitem"
                 onClick={() => {
                   onDelete?.();
                   setIsMenuOpen(false);
