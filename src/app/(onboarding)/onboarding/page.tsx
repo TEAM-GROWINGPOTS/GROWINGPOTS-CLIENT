@@ -1,9 +1,5 @@
-import { Toaster } from '@features/onboarding';
+import { OnboardingFlow } from '@features/onboarding';
 
 export default function OnboardingPage() {
-  return (
-    <>
-      <Toaster />
-    </>
-  );
+  return <OnboardingFlow />;
 }
