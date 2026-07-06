@@ -2,7 +2,7 @@ import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import type { ComponentPropsWithoutRef } from 'react';
 
-export type NavItemStatus = 'default' | 'selected';
+export type NavItemStatusTypes = 'default' | 'selected';
 
 const navItemBaseClass = 'flex cursor-pointer items-center gap-12 rounded-lg transition-colors p-12';
 
