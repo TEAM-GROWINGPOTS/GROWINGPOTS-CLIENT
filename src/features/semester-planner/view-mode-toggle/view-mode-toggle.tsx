@@ -1,10 +1,8 @@
-'use client';
-
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-type ViewMode = 'card' | 'roadmap';
+export type ViewMode = 'card' | 'roadmap';
 
 interface ViewModeOption {
   value: ViewMode;
