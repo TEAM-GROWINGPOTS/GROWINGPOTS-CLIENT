@@ -1,10 +1,10 @@
-import { GraduationRequirementCard, type GraduationRequirementTypes } from './graduation-requirement-card';
+import { GraduationRequirementCard, type GraduationRequirementVariant } from './graduation-requirement-card';
 
 interface GraduationRequirementItem {
   label: string;
   value: string;
   total?: string;
-  variant?: GraduationRequirementTypes;
+  variant?: GraduationRequirementVariant;
   disabled?: boolean;
 }
 
