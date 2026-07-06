@@ -5,7 +5,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 export type ButtonMode = 'primary_solid' | 'primary_outline' | 'secondary_solid' | 'secondary_outline';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
-const buttonVariants = cva('flex cursor-pointer items-center disabled:cursor-not-allowed', {
+const buttonVariants = cva('flex justify-center cursor-pointer items-center disabled:cursor-not-allowed', {
   variants: {
     size: {
       sm: 'gap-6 rounded-md px-12 py-6 text-body-m-14',
