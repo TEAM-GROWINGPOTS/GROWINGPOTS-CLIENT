@@ -35,7 +35,7 @@ export const ClassCard = ({ department, title, tags, type = 'default', className
       <div className="mt-12 flex flex-wrap items-center gap-4">
         {tags.map((tag, index) => (
           <Badge
-            key={tag}
+            key={`${tag}-${index}`}
             size="xsmall"
             variant={index == 0 ? 'primary' : 'disabled'}
             color={index == 0 ? 'lime01' : null}
