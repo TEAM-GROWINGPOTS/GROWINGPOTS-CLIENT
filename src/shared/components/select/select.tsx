@@ -137,7 +137,7 @@ export const Select = (props: SelectProps) => {
         aria-controls={listboxId}
         aria-activedescendant={isOpen && focusedIndex >= 0 ? optionId(focusedIndex) : undefined}
         className={cn(
-          'text-body-r-16 flex w-full justify-between rounded-[10px] border border-gray-200 bg-white pr-14 pl-16',
+          'text-body-r-16 flex w-full justify-between rounded-[8px] border border-gray-200 bg-white pr-14 pl-16',
           isMulti ? 'min-h-48 items-start py-12' : 'h-48 items-center',
           hasValue ? 'text-gray-700' : 'text-gray-300',
         )}
@@ -161,7 +161,7 @@ export const Select = (props: SelectProps) => {
           role="listbox"
           aria-multiselectable={isMulti || undefined}
           className={cn(
-            'absolute left-0 z-50 flex max-h-[208px] w-full flex-col overflow-y-auto rounded-xl border border-gray-200 bg-white p-8',
+            'absolute left-0 z-50 flex max-h-[208px] w-full flex-col overflow-y-auto rounded-[8px] border border-gray-200 bg-white p-8',
             openUpward ? 'bottom-full mb-4' : 'top-full mt-4',
           )}
         >

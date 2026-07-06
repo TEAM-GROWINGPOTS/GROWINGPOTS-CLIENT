@@ -26,7 +26,7 @@ export const SelectOptionItem = ({ id, label, isSelected, isFocused, isMulti, on
       aria-selected={isSelected}
       onClick={onClick}
       className={cn(
-        'text-body-m-16 flex h-48 w-full shrink-0 cursor-pointer items-center rounded-lg bg-white px-12 text-gray-700 hover:bg-gray-50',
+        'text-body-m-16 flex h-48 w-full shrink-0 cursor-pointer items-center rounded-[6px] bg-white px-12 text-gray-700 hover:bg-gray-50',
         isFocused && 'bg-gray-50',
         isSelected && 'bg-gray-100',
       )}
