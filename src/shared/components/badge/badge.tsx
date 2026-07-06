@@ -1,7 +1,7 @@
 ﻿import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { cva, type VariantProps } from 'class-variance-authority';
-import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, MouseEvent, ReactNode } from 'react';
 
 const badgeVariants = cva('inline-flex w-fit items-center justify-center gap-4 rounded-[0.25rem] whitespace-nowrap', {
   variants: {
@@ -62,6 +62,7 @@ interface BadgeProps
   children: ReactNode;
   rightIconName?: string;
   rightIconClassName?: string;
+  onRightIconClick?: (event: MouseEvent<HTMLSpanElement>) => void;
 }
 
 export const Badge = ({
@@ -72,13 +73,23 @@ export const Badge = ({
   size = 'medium',
   rightIconName,
   rightIconClassName,
+  onRightIconClick,
   ...props
 }: BadgeProps) => {
   return (
     <span className={cn(badgeVariants({ variant, color, size }), className)} {...props}>
       {children}
       {size === 'xsmall' && rightIconName && (
-        <Icon name={rightIconName} size={16} className={cn('shrink-0', rightIconClassName)} />
+        <span
+          onClick={onRightIconClick}
+          className={cn(
+            'inline-flex shrink-0 items-center justify-center',
+            onRightIconClick && 'cursor-pointer',
+            rightIconClassName,
+          )}
+        >
+          <Icon name={rightIconName} size={16} />
+        </span>
       )}
     </span>
   );
