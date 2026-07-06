@@ -1,18 +1,10 @@
-'use client';
-
-import { UploadedFileCard } from '@features/onboarding';
-import { useState } from 'react';
+import { DropDown } from '@features/semester-planner/card-view';
 
 export default function Page() {
-  const [file, setFile] = useState<File | null>(null);
-
   return (
-    <div>
-      <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-      {file &&
-        (({ name, size }) => <UploadedFileCard fileName={name} fileSizeBytes={size} onRemove={() => setFile(null)} />)(
-          file,
-        )}
-    </div>
+    <main className="flex h-dvh items-center justify-center gap-8 bg-gray-50">
+      <DropDown label="text" />
+      <DropDown label="text" status="selected" />
+    </main>
   );
 }
