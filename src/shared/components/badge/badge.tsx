@@ -1,4 +1,4 @@
-import Icon from '@shared/components/icon/icon';
+﻿import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { cva, type VariantProps } from 'class-variance-authority';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
@@ -61,6 +61,7 @@ interface BadgeProps
   extends Omit<ComponentPropsWithoutRef<'span'>, 'children' | 'color'>, VariantProps<typeof badgeVariants> {
   children: ReactNode;
   rightIconName?: string;
+  rightIconClassName?: string;
 }
 
 export const Badge = ({
@@ -70,12 +71,15 @@ export const Badge = ({
   color = 'lime01',
   size = 'medium',
   rightIconName,
+  rightIconClassName,
   ...props
 }: BadgeProps) => {
   return (
     <span className={cn(badgeVariants({ variant, color, size }), className)} {...props}>
       {children}
-      {size === 'xsmall' && rightIconName && <Icon name={rightIconName} size={16} />}
+      {size === 'xsmall' && rightIconName && (
+        <Icon name={rightIconName} size={16} className={cn('shrink-0', rightIconClassName)} />
+      )}
     </span>
   );
 };
