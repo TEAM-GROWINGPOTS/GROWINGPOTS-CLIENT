@@ -1,10 +1,9 @@
 'use client';
 
 import * as Dialog from '@radix-ui/react-dialog';
+import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
-
-import Icon from '../icon/icon';
 
 interface ModalRootProps {
   defaultOpen?: boolean;
@@ -67,8 +66,9 @@ const ModalContent = ({ children, className, ...props }: ModalContentProps) => {
     <Dialog.Portal>
       <Dialog.Overlay className="z-modal bg-black-40 fixed inset-0" />
       <Dialog.Content
+        aria-describedby={undefined}
         className={cn(
-          'z-modal fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[1.5rem] bg-white px-32 pt-48 pb-32 outline-none',
+          'z-modal shadow-small fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[0.75rem] bg-white px-32 pt-40 pb-32 outline-none',
           className,
         )}
         {...props}
@@ -89,7 +89,7 @@ const ModalHeader = ({ title, onClose, className }: ModalHeaderProps) => {
         onClick={onClose}
         className="flex size-24 cursor-pointer items-center justify-center"
       >
-        <Icon name="ic_delete" size={24} />
+        <Icon name="ic_delete" size={24} className="text-gray-500" />
       </Dialog.Close>
     </div>
   );
