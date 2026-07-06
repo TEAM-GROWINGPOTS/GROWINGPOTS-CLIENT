@@ -60,6 +60,8 @@ const badgeVariants = cva('inline-flex w-fit items-center justify-center gap-4 r
 interface BadgeProps
   extends Omit<ComponentPropsWithoutRef<'span'>, 'children' | 'color'>, VariantProps<typeof badgeVariants> {
   children: ReactNode;
+  leftIconName?: string;
+  leftIconClassName?: string;
   rightIconName?: string;
   rightIconClassName?: string;
   onRightIconClick?: (event: MouseEvent<HTMLSpanElement>) => void;
@@ -71,6 +73,8 @@ export const Badge = ({
   variant = 'primary',
   color = 'lime01',
   size = 'medium',
+  leftIconName,
+  leftIconClassName,
   rightIconName,
   rightIconClassName,
   onRightIconClick,
@@ -78,6 +82,9 @@ export const Badge = ({
 }: BadgeProps) => {
   return (
     <span className={cn(badgeVariants({ variant, color, size }), className)} {...props}>
+      {size === 'xsmall' && leftIconName && (
+        <Icon name={leftIconName} size={16} className={cn('shrink-0', leftIconClassName)} />
+      )}
       {children}
       {size === 'xsmall' && rightIconName && (
         <span
