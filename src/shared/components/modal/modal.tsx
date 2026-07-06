@@ -59,7 +59,7 @@ const ModalContent = ({ children, className, ...props }: ModalContentProps) => {
       <Dialog.Content
         aria-describedby={undefined}
         className={cn(
-          'z-modal shadow-small fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[12PX] bg-white px-32 pt-40 pb-32 outline-none',
+          'z-modal shadow-small fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[12px] bg-white px-32 pt-40 pb-32 outline-none',
           className,
         )}
         {...props}
