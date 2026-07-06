@@ -15,6 +15,8 @@ interface TabsProps {
 }
 
 export const Tabs = ({ items, value, onChange, className }: TabsProps) => {
+  const handleTabClick = (nextValue: string) => onChange(nextValue);
+
   return (
     <ul role="tablist" className={cn('flex items-center gap-20', className)}>
       {items.map(({ value: itemValue, label }) => (
@@ -29,7 +31,7 @@ export const Tabs = ({ items, value, onChange, className }: TabsProps) => {
                 ? 'text-body-sb-16 border-gray-600 text-gray-700'
                 : 'text-body-m-16 border-transparent text-gray-300',
             )}
-            onClick={() => onChange(itemValue)}
+            onClick={() => handleTabClick(itemValue)}
           >
             {label}
           </button>
