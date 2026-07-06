@@ -1,15 +1,7 @@
-import { GraduationRequirementCard, type GraduationRequirementVariant } from './graduation-requirement-card';
-
-interface GraduationRequirementItem {
-  label: string;
-  value: string;
-  total?: string;
-  variant?: GraduationRequirementVariant;
-  disabled?: boolean;
-}
+import { GraduationRequirementCard, type GraduationRequirementCardProps } from './graduation-requirement-card';
 
 interface GraduationRequirementResultProps {
-  items: GraduationRequirementItem[];
+  items: GraduationRequirementCardProps[];
 }
 
 export const GraduationRequirementResult = ({ items }: GraduationRequirementResultProps) => (

@@ -33,7 +33,7 @@ const variantStyles: Record<GraduationRequirementVariant, GraduationRequirementV
   },
 };
 
-interface GraduationRequirementCardProps {
+export interface GraduationRequirementCardProps {
   label: string;
   value: string;
   total?: string;
