@@ -16,7 +16,7 @@ const dropzoneVariants = cva(
   {
     variants: {
       isDragOver: {
-        true: 'bg-blue-100',
+        true: 'bg-gray-200',
         false: 'bg-white',
       },
     },
@@ -67,7 +67,7 @@ export const PdfUploader = ({ onFileSelect }: PdfUploaderProps) => {
   };
 
   return (
-    <div className="flex rounded-lg border border-gray-200 bg-blue-50 p-8">
+    <div className="flex rounded-lg border border-gray-200 bg-gray-100 p-8">
       <div
         className={cn(dropzoneVariants({ isDragOver }))}
         onDragOver={handleDragOver}
