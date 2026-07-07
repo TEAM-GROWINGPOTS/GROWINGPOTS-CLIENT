@@ -2,9 +2,9 @@
 
 import Icon from '@shared/components/icon/icon';
 import { NavItem } from '@shared/components/nav-item/nav-item';
+import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
 
 export interface SideNavigationAcademicInfoItem {
   label: string;
@@ -35,7 +35,8 @@ const isNavItemActive = (pathname: string, href: string) => {
 };
 
 export const SideNavigation = ({ academicInfo = FALLBACK_ACADEMIC_INFO }: SideNavigationProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const isCollapsed = useSideNavigationStore((state) => state.isCollapsed);
+  const toggleSidebar = useSideNavigationStore((state) => state.toggleSidebar);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -44,7 +45,7 @@ export const SideNavigation = ({ academicInfo = FALLBACK_ACADEMIC_INFO }: SideNa
   };
 
   const handleToggleClick = () => {
-    setIsCollapsed((prev) => !prev);
+    toggleSidebar();
   };
 
   return (
