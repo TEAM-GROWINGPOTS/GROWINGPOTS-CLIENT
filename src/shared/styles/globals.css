@@ -4,6 +4,8 @@
 @import './tokens/z-index.css';
 @import './tokens/shadows.css';
 
+@import './tokens/animations.css';
+
 @theme {
   --spacing: 0.0625rem;
 }
