@@ -29,14 +29,14 @@ const iconButtonVariants = cva(
 
 interface IconButtonProps
   extends Omit<ComponentPropsWithoutRef<'button'>, 'children'>, VariantProps<typeof iconButtonVariants> {
-  name: string;
+  icon: string;
   'aria-label': string;
 }
 
-export const IconButton = ({ name, size = 'medium', className, ...props }: IconButtonProps) => {
+export const IconButton = ({ icon, size = 'medium', className, ...props }: IconButtonProps) => {
   return (
     <button type="button" className={cn(iconButtonVariants({ size }), className)} {...props}>
-      <Icon name={name} size={ICON_SIZE[size ?? 'medium']} />
+      <Icon name={icon} size={ICON_SIZE[size ?? 'medium']} />
     </button>
   );
 };
