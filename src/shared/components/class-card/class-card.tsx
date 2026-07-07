@@ -34,7 +34,7 @@ export const ClassCard = ({ department, title, tags, type = 'default', className
   return (
     <article className={cn(classCardVariants({ type }), className)} {...props}>
       <span className="text-caption-m-10 mb-2 text-gray-400">{department}</span>
-      <h3 className="text-body-sb-16 text-gray-900">
+      <h3 className="text-body-sb-16 w-full truncate text-gray-900">
         {title}
         {type === 'disabled' && <span className="sr-only">(비활성)</span>}
       </h3>
