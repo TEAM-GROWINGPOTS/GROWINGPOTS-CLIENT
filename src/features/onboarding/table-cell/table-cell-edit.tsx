@@ -3,7 +3,7 @@
 import { cn } from '@shared/utils/cn';
 import { ChangeEvent, useState } from 'react';
 
-interface TableCellProps {
+interface TableCellEditProps {
   mode: 'view' | 'edit';
   value: string;
   onChange?: (value: string) => void;
@@ -12,7 +12,7 @@ interface TableCellProps {
 
 const cellBaseClassName = 'text-body-m-16 text-gray-600 flex h-32 items-center rounded-sm bg-white px-8';
 
-export const TableCellEdit = ({ mode, value, onChange, className }: TableCellProps) => {
+export const TableCellEdit = ({ mode, value, onChange, className }: TableCellEditProps) => {
   const [touched, setTouched] = useState(false);
   const showError = touched && value.trim() === '';
 
