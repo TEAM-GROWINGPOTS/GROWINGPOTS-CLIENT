@@ -12,7 +12,7 @@ interface TableCellProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'on
 
 const cellBaseClassName = 'text-body-m-16 text-gray-600 flex h-32 items-center rounded-sm bg-white px-8';
 
-export const TableCellEDIT = ({ mode, value, onChange, error = false, className, ...props }: TableCellProps) => {
+export const TableCellEdit = ({ mode, value, onChange, error = false, className, ...props }: TableCellProps) => {
   const [dirty, setDirty] = useState(false);
   const [prevError, setPrevError] = useState(error);
 
