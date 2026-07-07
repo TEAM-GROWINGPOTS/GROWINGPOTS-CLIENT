@@ -27,6 +27,7 @@ export const TableCellSelect = ({ options, value, onChange, className }: TableCe
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
+
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
@@ -36,27 +37,27 @@ export const TableCellSelect = ({ options, value, onChange, className }: TableCe
   };
 
   return (
-    <div ref={ref} className={cn('relative w-full', className)}>
+    <div ref={ref} className={cn('relative', className)}>
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        className="text-body-m-16 flex h-32 w-full cursor-pointer items-center justify-between rounded-sm border border-gray-100 bg-white px-8 text-gray-600"
+        className="text-body-m-16 mb-4 flex h-32 w-full cursor-pointer items-center justify-between rounded-sm border border-gray-100 bg-white px-8 text-gray-600"
       >
         <span className="truncate">{options.find((opt) => opt.value === value)?.label}</span>
         <Icon name="ic_chevron_down" size={16} className="text-gray-500" />
       </button>
 
       {isOpen && (
-        <ul className="z-dropdown absolute flex max-h-130 w-full flex-col gap-9 overflow-y-auto rounded-sm bg-white p-8">
+        <ul className="z-dropdown absolute flex w-full flex-col gap-9 overflow-y-auto rounded-sm bg-white p-8">
           {options.map((opt) => (
             <li
               key={opt.value}
               onClick={() => handleSelect(opt.value)}
               className={cn(
-                'text-body-m-16 flex h-32 cursor-pointer items-center rounded-sm px-8 text-gray-600',
-                opt.value === value && 'bg-red-20',
+                'text-body-m-16 flex h-32 cursor-pointer items-center rounded-sm px-8 text-gray-600 hover:bg-gray-50',
+                opt.value === value && 'bg-gray-50',
               )}
             >
               <span className="truncate">{opt.label}</span>
