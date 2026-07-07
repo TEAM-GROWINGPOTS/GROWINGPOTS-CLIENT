@@ -1,41 +1,40 @@
 'use client';
 
 import { cn } from '@shared/utils/cn';
-import { ChangeEvent, InputHTMLAttributes, useState } from 'react';
+import { ChangeEvent, FocusEvent, InputHTMLAttributes, useState } from 'react';
 
 interface TableCellProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
   mode: 'view' | 'edit';
   value: string;
   onChange?: (value: string) => void;
-  error?: boolean;
 }
 
 const cellBaseClassName = 'text-body-m-16 text-gray-600 flex h-32 items-center rounded-sm bg-white px-8';
 
-export const TableCellEdit = ({ mode, value, onChange, error = false, className, ...props }: TableCellProps) => {
-  const [dirty, setDirty] = useState(false);
-  const [prevError, setPrevError] = useState(error);
-
-  if (error !== prevError) {
-    setPrevError(error);
-    if (error) setDirty(false);
-  }
+export const TableCellEdit = ({ mode, value, onChange, className, onBlur, ...props }: TableCellProps) => {
+  const [touched, setTouched] = useState(false);
+  const showError = touched && value.trim() === '';
 
   if (mode === 'view') {
     return <span className={cn(cellBaseClassName, className)}>{value}</span>;
   }
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setDirty(true);
+    setTouched(false);
     onChange?.(e.target.value);
   };
 
-  const showError = error && !dirty;
+  const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
+    setTouched(true);
+    onBlur?.(e);
+  };
 
   return (
     <input
       value={value}
       onChange={handleChange}
+      onBlur={handleBlur}
+      aria-invalid={showError}
       className={cn(
         cellBaseClassName,
         'border outline-none',

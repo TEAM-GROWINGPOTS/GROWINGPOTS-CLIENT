@@ -50,7 +50,7 @@ export const TableCellSelect = ({ options, value, onChange, className }: TableCe
       </button>
 
       {isOpen && (
-        <ul className="z-dropdown absolute flex w-full flex-col gap-9 overflow-y-auto rounded-sm bg-white p-8">
+        <ul className="z-dropdown absolute flex w-full flex-col gap-9 rounded-sm bg-white p-8">
           {options.map(({ value: optValue, label }) => (
             <li
               key={optValue}
