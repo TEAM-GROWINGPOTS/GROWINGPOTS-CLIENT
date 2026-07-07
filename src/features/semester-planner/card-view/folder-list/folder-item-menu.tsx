@@ -11,6 +11,7 @@ interface FolderItemMenuProps {
 export const FolderItemMenu = ({ onRename, onDelete }: FolderItemMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const menuListRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -20,6 +21,37 @@ export const FolderItemMenu = ({ onRename, onDelete }: FolderItemMenuProps) => {
     };
     if (isMenuOpen) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const first = menuListRef.current?.querySelector<HTMLElement>('[role="menuitem"]');
+    first?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMenuOpen(false);
+        return;
+      }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const focusable = Array.from(
+          document.querySelectorAll<HTMLElement>(
+            'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          ),
+        ).filter((el) => window.getComputedStyle(el).visibility !== 'hidden' && el.offsetParent !== null);
+        const currentIndex = focusable.findIndex((el) => el === document.activeElement);
+        if (e.key === 'ArrowDown') {
+          focusable[Math.min(currentIndex + 1, focusable.length - 1)]?.focus();
+        } else {
+          focusable[Math.max(currentIndex - 1, 0)]?.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isMenuOpen]);
 
   return (
@@ -36,10 +68,8 @@ export const FolderItemMenu = ({ onRename, onDelete }: FolderItemMenuProps) => {
       </button>
       {isMenuOpen && (
         <ul
+          ref={menuListRef}
           role="menu"
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setIsMenuOpen(false);
-          }}
           className="absolute top-full left-0 z-50 flex w-100 flex-col items-start rounded-[8px] border border-gray-100 bg-white p-4 shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]"
         >
           <li role="none" className="w-full">
