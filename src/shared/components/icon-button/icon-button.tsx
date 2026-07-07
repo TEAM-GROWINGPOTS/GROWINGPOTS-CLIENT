@@ -12,7 +12,7 @@ const ICON_SIZE: Record<IconButtonSize, number> = {
 };
 
 const iconButtonVariants = cva(
-  'flex cursor-pointer items-center justify-center rounded-full bg-white border border-gray-200 hover:bg-gray-100  transition-colors text-gray-500 ',
+  'flex cursor-pointer items-center justify-center rounded-full bg-white border border-gray-200 hover:bg-gray-100  transition-colors text-gray-500',
   {
     variants: {
       size: {
