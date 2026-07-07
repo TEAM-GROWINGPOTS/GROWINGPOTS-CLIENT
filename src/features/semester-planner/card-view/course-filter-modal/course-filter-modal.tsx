@@ -6,7 +6,7 @@ import { Modal } from '@shared/components/modal/modal';
 import { Select } from '@shared/components/select/select';
 import { useState } from 'react';
 
-type CourseFilterTabKey = 'campus' | 'major' | 'area' | 'grade' | 'semester' | 'credit';
+type CourseFilterTabKeyTypes = 'campus' | 'major' | 'area' | 'grade' | 'semester' | 'credit';
 
 export interface CourseFilterValues {
   campus: string;
@@ -23,7 +23,7 @@ interface FilterOption {
   label: string;
 }
 
-const FILTER_TABS: { value: CourseFilterTabKey; label: string }[] = [
+const FILTER_TABS: { value: CourseFilterTabKeyTypes; label: string }[] = [
   { value: 'campus', label: '캠퍼스' },
   { value: 'major', label: '전공' },
   { value: 'area', label: '이수영역' },
@@ -94,10 +94,10 @@ interface CourseFilterModalProps {
 }
 
 export const CourseFilterModal = ({ open, onOpenChange, onApply }: CourseFilterModalProps) => {
-  const [activeTab, setActiveTab] = useState<CourseFilterTabKey>('campus');
+  const [activeTab, setActiveTab] = useState<CourseFilterTabKeyTypes>('campus');
   const [values, setValues] = useState<CourseFilterValues>(INITIAL_VALUES);
 
-  const handleTabChange = (next: string) => setActiveTab(next as CourseFilterTabKey);
+  const handleTabChange = (next: string) => setActiveTab(next as CourseFilterTabKeyTypes);
 
   const setFieldValue =
     <K extends keyof CourseFilterValues>(key: K) =>
