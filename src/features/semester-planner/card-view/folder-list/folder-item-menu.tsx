@@ -1,6 +1,7 @@
 'use client';
 
 import Icon from '@shared/components/icon/icon';
+import { cn } from '@shared/utils/cn';
 import { useEffect, useRef, useState } from 'react';
 
 interface FolderItemMenuProps {
@@ -65,7 +66,10 @@ export const FolderItemMenu = ({ onRename, onDelete }: FolderItemMenuProps) => {
         aria-haspopup="menu"
         aria-expanded={isMenuOpen}
         aria-label="폴더 옵션 열기"
-        className="invisible cursor-pointer group-hover:visible focus-visible:visible focus-visible:rounded focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
+        className={cn(
+          'invisible cursor-pointer group-hover:visible focus-visible:visible focus-visible:rounded focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none',
+          isMenuOpen && 'visible',
+        )}
       >
         <Icon name="ic_dot_horizontal" size={20} className="text-gray-600" />
       </button>
