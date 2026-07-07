@@ -51,16 +51,16 @@ export const TableCellSelect = ({ options, value, onChange, className }: TableCe
 
       {isOpen && (
         <ul className="z-dropdown absolute flex w-full flex-col gap-9 overflow-y-auto rounded-sm bg-white p-8">
-          {options.map((opt) => (
+          {options.map(({ value: optValue, label }) => (
             <li
-              key={opt.value}
-              onClick={() => handleSelect(opt.value)}
+              key={optValue}
+              onClick={() => handleSelect(optValue)}
               className={cn(
                 'text-body-m-16 flex h-32 cursor-pointer items-center rounded-sm px-8 text-gray-600 hover:bg-gray-50',
-                opt.value === value && 'bg-gray-50',
+                optValue === value && 'bg-gray-50',
               )}
             >
-              <span className="truncate">{opt.label}</span>
+              <span className="truncate">{label}</span>
             </li>
           ))}
         </ul>
