@@ -21,7 +21,11 @@ export const DropDown = ({ label, status = 'default', className, ...props }: Dro
   return (
     <button type="button" className={cn(dropDownBaseClass, dropDownStatusClass[status], className)} {...props}>
       <span className="truncate">{label}</span>
-      <Icon name="ic_chevron_down" size={16} className="shrink-0" />
+      <Icon
+        name="ic_chevron_down"
+        size={16}
+        className={cn('shrink-0', status === 'default' ? 'text-gray-500' : 'text-gray-50')}
+      />
     </button>
   );
 };
