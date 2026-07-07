@@ -17,6 +17,12 @@ const classCardVariants = cva('flex w-auto flex-col items-start rounded-sm bg-wh
   },
 });
 
+const getTagColor = (tag: string) => {
+  if (tag.startsWith('전공')) return 'lime01';
+  if (tag.startsWith('교양')) return 'purple';
+  return 'blue';
+};
+
 interface ClassCardProps extends Omit<ComponentPropsWithoutRef<'article'>, 'children'> {
   department: string;
   title: string;
@@ -38,8 +44,8 @@ export const ClassCard = ({ department, title, tags, type = 'default', className
             <Badge
               key={`${tag}-${index}`}
               size="xsmall"
-              variant={index == 0 ? 'primary' : 'disabled'}
-              color={index == 0 ? 'lime01' : null}
+              variant={index === 0 ? 'primary' : 'disabled'}
+              color={index === 0 ? getTagColor(tag) : null}
             >
               {tag}
             </Badge>
