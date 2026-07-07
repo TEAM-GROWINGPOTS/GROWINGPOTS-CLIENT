@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 
 import { Modal } from './modal';
 
-type ConfirmModalTypes = 'delete' | 'saveChanges';
+type ConfirmModalTypes = 'delete' | 'saveChanges' | 'notice';
 
 interface ConfirmModalProps {
   open: boolean;
@@ -27,6 +27,10 @@ const CONFIRM_MODAL_DEFAULTS: Record<ConfirmModalTypes, { iconName: string; conf
     iconName: 'ic_alert_triangle_black',
     confirmLabel: '저장',
   },
+  notice: {
+    iconName: 'ic_alert_triangle_black',
+    confirmLabel: '확인',
+  },
 };
 
 export const ConfirmModal = ({
@@ -39,6 +43,7 @@ export const ConfirmModal = ({
   onConfirm,
 }: ConfirmModalProps) => {
   const { iconName, confirmLabel: defaultConfirmLabel } = CONFIRM_MODAL_DEFAULTS[type];
+  const isNoticeType = type === 'notice';
 
   const handleConfirmClick = () => {
     onConfirm?.();
@@ -52,13 +57,15 @@ export const ConfirmModal = ({
         <Modal.Title className="text-title-sb-18 mb-8 text-center">{title}</Modal.Title>
         {description && <Modal.Description>{description}</Modal.Description>}
         <Modal.Footer className="mt-40 w-full">
-          <Button
-            label="취소"
-            mode="secondary_solid"
-            size="lg"
-            className="flex-1 justify-center"
-            onClick={() => onOpenChange(false)}
-          />
+          {!isNoticeType && (
+            <Button
+              label="취소"
+              mode="secondary_solid"
+              size="lg"
+              className="flex-1 justify-center"
+              onClick={() => onOpenChange(false)}
+            />
+          )}
           <Button
             label={confirmLabel ?? defaultConfirmLabel}
             size="lg"
