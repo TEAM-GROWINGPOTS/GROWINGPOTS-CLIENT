@@ -1,17 +1,18 @@
 'use client';
 
 import { cn } from '@shared/utils/cn';
-import { ChangeEvent, FocusEvent, InputHTMLAttributes, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 
-interface TableCellProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
+interface TableCellProps {
   mode: 'view' | 'edit';
   value: string;
   onChange?: (value: string) => void;
+  className?: string;
 }
 
 const cellBaseClassName = 'text-body-m-16 text-gray-600 flex h-32 items-center rounded-sm bg-white px-8';
 
-export const TableCellEdit = ({ mode, value, onChange, className, onBlur, ...props }: TableCellProps) => {
+export const TableCellEdit = ({ mode, value, onChange, className }: TableCellProps) => {
   const [touched, setTouched] = useState(false);
   const showError = touched && value.trim() === '';
 
@@ -24,9 +25,8 @@ export const TableCellEdit = ({ mode, value, onChange, className, onBlur, ...pro
     onChange?.(e.target.value);
   };
 
-  const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
+  const handleBlur = () => {
     setTouched(true);
-    onBlur?.(e);
   };
 
   return (
@@ -41,7 +41,6 @@ export const TableCellEdit = ({ mode, value, onChange, className, onBlur, ...pro
         showError ? 'border-red-20' : 'border-gray-100',
         className,
       )}
-      {...props}
     />
   );
 };
