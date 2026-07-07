@@ -54,13 +54,7 @@ interface FolderItemProps {
 const FolderItem = ({ name, onRename, onDelete }: FolderItemProps) => {
   return (
     <div className="group relative flex w-full items-center justify-between rounded-[6px] border border-white bg-white px-12 py-8 hover:bg-gray-50">
-      <span
-        onMouseEnter={(e) => {
-          const el = e.currentTarget;
-          el.title = el.scrollHeight > el.clientHeight ? name : '';
-        }}
-        className="text-body-m-14 line-clamp-1 flex-1 cursor-default text-gray-700"
-      >
+      <span title={name} className="text-body-m-14 min-w-0 flex-1 cursor-default truncate text-gray-700">
         {name}
       </span>
       <FolderItemMenu onRename={onRename} onDelete={onDelete} />
