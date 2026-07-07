@@ -18,7 +18,13 @@ export interface GraduationStatusData {
   overallMet: boolean;
 }
 
+export interface DoubleMajorData {
+  conditions: GraduationCondition[];
+}
+
 export interface GraduationStatusState {
-  data: GraduationStatusData | null;
-  setData: (data: GraduationStatusData) => void;
+  mainMajor: GraduationStatusData | null;
+  doubleMajor: DoubleMajorData | null;
+  setMainMajor: (data: GraduationStatusData) => void;
+  setDoubleMajor: (data: DoubleMajorData) => void;
 }
