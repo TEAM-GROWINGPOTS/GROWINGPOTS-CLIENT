@@ -44,8 +44,8 @@ export const ClassCard = ({ department, title, tags, type = 'default', className
             <Badge
               key={`${tag}-${index}`}
               size="xsmall"
-              variant={index === 0 ? 'primary' : 'disabled'}
-              color={index === 0 ? getTagColor(tag) : null}
+              variant="primary"
+              color={index === 0 ? getTagColor(tag) : 'gray'}
             >
               {tag}
             </Badge>
