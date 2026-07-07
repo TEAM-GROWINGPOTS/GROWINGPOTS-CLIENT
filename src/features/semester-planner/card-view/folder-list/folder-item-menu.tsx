@@ -8,6 +8,9 @@ interface FolderItemMenuProps {
   onDelete: () => void;
 }
 
+const MENU_ITEM_CLASS =
+  'flex w-full cursor-pointer items-center rounded-[6px] border border-white bg-white px-8 py-6 text-left hover:bg-gray-50';
+
 export const FolderItemMenu = ({ onRename, onDelete }: FolderItemMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -80,7 +83,7 @@ export const FolderItemMenu = ({ onRename, onDelete }: FolderItemMenuProps) => {
                 onRename();
                 setIsMenuOpen(false);
               }}
-              className="flex w-full cursor-pointer items-center rounded-[6px] border border-white bg-white px-8 py-6 text-left hover:bg-gray-50"
+              className={MENU_ITEM_CLASS}
             >
               <span className="text-body-m-14 line-clamp-1 flex-1 text-gray-700">이름 편집</span>
             </button>
@@ -93,7 +96,7 @@ export const FolderItemMenu = ({ onRename, onDelete }: FolderItemMenuProps) => {
                 onDelete();
                 setIsMenuOpen(false);
               }}
-              className="flex w-full cursor-pointer items-center rounded-[6px] border border-white bg-white px-8 py-6 text-left hover:bg-gray-50"
+              className={MENU_ITEM_CLASS}
             >
               <span className="text-body-m-14 line-clamp-1 flex-1 text-[#FF3451]">삭제</span>
             </button>
