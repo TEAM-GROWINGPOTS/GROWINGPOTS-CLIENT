@@ -42,7 +42,10 @@ export const NavItem = ({
       <Icon
         name={icon}
         size={24}
-        className={cn('shrink-0', status === 'default' && 'text-gray-400 group-hover:text-white')}
+        className={cn(
+          'shrink-0 transition-colors',
+          status === 'selected' ? 'text-lime-400' : 'text-gray-400 group-hover:text-white',
+        )}
       />
       {!isCollapsed && <span className="text-body-m-16 truncate">{label}</span>}
     </button>
