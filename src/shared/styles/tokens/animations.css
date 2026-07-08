@@ -1,0 +1,13 @@
+@theme {
+  --animate-progress-fill: progress-fill 700ms ease-out forwards;
+}
+
+@keyframes progress-fill {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
