@@ -1,3 +1,4 @@
+export { AddCourseSidebar } from './add-course-sidebar/add-course-sidebar';
 export { DropDown } from './drop-down/drop-down';
 export { FolderItemMenu } from './folder-item-menu/folder-item-menu';
 export { FolderList } from './folder-list/folder-list';
