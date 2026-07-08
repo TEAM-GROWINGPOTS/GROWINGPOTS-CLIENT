@@ -33,15 +33,19 @@ export const AddSemesterModal = ({ open, onOpenChange, onSubmit }: AddSemesterMo
   const [year, setYear] = useState('');
   const [semester, setSemester] = useState('');
 
-  const handleSubmit = () => {
-    onSubmit(year, semester);
+  const handleClose = () => {
     onOpenChange(false);
     setYear('');
     setSemester('');
   };
 
+  const handleSubmit = () => {
+    onSubmit(year, semester);
+    handleClose();
+  };
+
   return (
-    <Modal open={open} onOpenChange={onOpenChange}>
+    <Modal open={open} onOpenChange={handleClose}>
       <Modal.Content className="flex w-480 flex-col gap-60">
         <div className="flex flex-col gap-32">
           <Modal.Header title="학기 추가" className="text-title-sb-24 flex-1" />
