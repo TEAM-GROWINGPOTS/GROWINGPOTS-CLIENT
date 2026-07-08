@@ -121,7 +121,7 @@ export const CourseFilterModal = ({ open, onOpenChange, onApply }: CourseFilterM
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <Modal.Content className="w-480">
+      <Modal.Content className="flex h-420 w-480 flex-col">
         <Modal.Header title="과목 필터" className="text-title-sb-24 text-gray-900" />
         <div className="mt-32 border-b border-gray-200">
           <Tabs items={FILTER_TABS} value={activeTab} onChange={handleTabChange} className="-mb-px" />
@@ -189,7 +189,7 @@ export const CourseFilterModal = ({ open, onOpenChange, onApply }: CourseFilterM
             />
           )}
         </section>
-        <Modal.Footer className="mt-60">
+        <Modal.Footer className="mt-auto">
           <Button
             label="적용하기"
             mode="primary_solid"
