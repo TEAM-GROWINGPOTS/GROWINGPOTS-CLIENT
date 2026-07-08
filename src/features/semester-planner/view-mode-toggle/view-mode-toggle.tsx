@@ -1,6 +1,10 @@
+'use client';
+
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+
+import { useViewMode } from '../hooks/use-view-mode';
 
 export type ViewMode = 'card' | 'roadmap';
 
@@ -15,12 +19,8 @@ const OPTIONS: ViewModeOption[] = [
   { value: 'roadmap', label: '로드맵 보기', icon: 'ic_roadmap' },
 ];
 
-interface ViewModeToggleProps {
-  value: ViewMode;
-  onChange: (value: ViewMode) => void;
-}
-
-export const ViewModeToggle = ({ value, onChange }: ViewModeToggleProps) => {
+export const ViewModeToggle = () => {
+  const { viewMode: value, setViewMode: onChange } = useViewMode();
   const buttonRefs = useRef<Record<ViewMode, HTMLButtonElement | null>>({ card: null, roadmap: null });
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(false);
