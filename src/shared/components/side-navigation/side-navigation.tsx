@@ -146,7 +146,7 @@ export const SideNavigation = ({
           {!isSidebarCollapsed && (
             <>
               <p className="text-body-m-16 min-w-0 flex-1 truncate text-white">사용자</p>
-              <button type="button" aria-label="로그아웃" className="flex shrink-0 cursor-pointer">
+              <button onClick={() => {}} type="button" aria-label="로그아웃" className="flex shrink-0 cursor-pointer">
                 <Icon name="ic_logout" size={24} className="text-gray-500" />
               </button>
             </>
