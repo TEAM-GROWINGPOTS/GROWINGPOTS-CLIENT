@@ -42,9 +42,9 @@ export const AddSemesterModal = ({ open, onOpenChange, onSubmit }: AddSemesterMo
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <Modal.Content className="flex w-[480px] flex-col gap-60 shadow-[0_15px_60px_0_rgba(15,34,48,0.08)]">
+      <Modal.Content className="flex w-480 flex-col gap-60">
         <div className="flex flex-col gap-32">
-          <Modal.Header title="학기 추가" className="[&_h2]:text-title-sb-24 [&_h2]:flex-1" />
+          <Modal.Header title="학기 추가" className="text-title-sb-24 flex-1" />
           <div className="flex h-240 w-416 items-start gap-10">
             <Select options={YEAR_OPTIONS} value={year} onChange={setYear} placeholder="학년" className="flex-1" />
             <Select
