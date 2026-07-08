@@ -48,7 +48,7 @@ export const ViewModeToggle = () => {
   }, []);
 
   return (
-    <div className="relative inline-flex rounded-full bg-white p-4">
+    <div className="relative inline-flex shrink-0 rounded-full bg-white p-4">
       <div
         className={cn(
           'absolute top-4 bottom-4 rounded-full bg-gray-700',
@@ -70,7 +70,7 @@ export const ViewModeToggle = () => {
             aria-label={label}
             onClick={() => onChange(optionValue)}
             className={cn(
-              'text-body-m-14 relative flex gap-8 rounded-full px-12 py-8',
+              'text-body-m-14 relative flex shrink-0 items-center gap-8 rounded-full px-12 py-8 whitespace-nowrap',
               isTransitionEnabled && 'transition-colors duration-200 ease-out',
               isSelected ? 'text-gray-100' : 'text-gray-500',
             )}
