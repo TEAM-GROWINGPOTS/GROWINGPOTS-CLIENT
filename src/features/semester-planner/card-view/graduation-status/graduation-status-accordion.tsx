@@ -12,8 +12,6 @@ import { AccordionProgressBar } from './accordion-progress-bar';
 
 type GraduationTab = '본전공' | '다전공' | '교양';
 
-const TABS: GraduationTab[] = ['본전공', '다전공', '교양'];
-
 interface GraduationStatusAccordionProps {
   className?: string;
 }
@@ -33,6 +31,8 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
   );
   const doubleMajorConditions =
     doubleMajor?.conditions.filter((c) => c.code.startsWith('MAJOR') && c.code !== 'MAJOR') ?? [];
+
+  const tabs: GraduationTab[] = doubleMajor ? ['본전공', '다전공', '교양'] : ['본전공', '교양'];
 
   const tabConditions: Record<GraduationTab, GraduationCondition[]> = {
     본전공: majorConditions,
@@ -122,7 +122,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
             {/* 탭별 요건 현황 */}
             <div className="flex min-h-158 flex-col justify-between rounded bg-gray-50 p-16">
               <div className="flex gap-8">
-                {TABS.map((tab) => (
+                {tabs.map((tab) => (
                   <Chip
                     key={tab}
                     label={tab}
