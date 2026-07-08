@@ -5,6 +5,7 @@ import { NavItem } from '@shared/components/nav-item/nav-item';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export interface SideNavigationAcademicInfoItem {
   label: string;
@@ -13,6 +14,7 @@ export interface SideNavigationAcademicInfoItem {
 
 interface SideNavigationProps {
   academicInfo?: SideNavigationAcademicInfoItem[];
+  initialIsCollapsed?: boolean;
 }
 
 // TODO: api 연동 후 교체
@@ -34,11 +36,21 @@ const isNavItemActive = (pathname: string, href: string) => {
   return pathname === href || pathname.startsWith(`${href}/`);
 };
 
-export const SideNavigation = ({ academicInfo = FALLBACK_ACADEMIC_INFO }: SideNavigationProps) => {
+export const SideNavigation = ({
+  academicInfo = FALLBACK_ACADEMIC_INFO,
+  initialIsCollapsed = false,
+}: SideNavigationProps) => {
   const isCollapsed = useSideNavigationStore((state) => state.isCollapsed);
+  const isInitialized = useSideNavigationStore((state) => state.isInitialized);
+  const initializeCollapsed = useSideNavigationStore((state) => state.initializeCollapsed);
   const toggleSidebar = useSideNavigationStore((state) => state.toggleSidebar);
   const pathname = usePathname();
   const router = useRouter();
+  const isSidebarCollapsed = isInitialized ? isCollapsed : initialIsCollapsed;
+
+  useEffect(() => {
+    initializeCollapsed(initialIsCollapsed);
+  }, [initialIsCollapsed, initializeCollapsed]);
 
   const handleNavItemClick = (href: string) => {
     router.push(href);
@@ -53,7 +65,7 @@ export const SideNavigation = ({ academicInfo = FALLBACK_ACADEMIC_INFO }: SideNa
       aria-label="사이드 내비게이션"
       className={cn(
         'flex h-full shrink-0 flex-col justify-between overflow-hidden border-r border-gray-100 bg-gray-900 pt-40 pb-24 transition-[width] duration-300 ease-in-out',
-        isCollapsed ? 'w-72' : 'w-240',
+        isSidebarCollapsed ? 'w-72' : 'w-240',
       )}
     >
       <div className="flex flex-col gap-40">
@@ -61,7 +73,7 @@ export const SideNavigation = ({ academicInfo = FALLBACK_ACADEMIC_INFO }: SideNa
           <div
             className={cn(
               'flex items-center gap-12 transition-opacity duration-300',
-              isCollapsed ? 'pointer-events-none opacity-0' : 'opacity-100',
+              isSidebarCollapsed ? 'pointer-events-none opacity-0' : 'opacity-100',
             )}
           >
             <img src="/images/logo.svg" alt="Growing Pots" width={119} height={20} />
@@ -69,8 +81,8 @@ export const SideNavigation = ({ academicInfo = FALLBACK_ACADEMIC_INFO }: SideNa
 
           <button
             type="button"
-            aria-expanded={!isCollapsed}
-            aria-label={isCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
+            aria-expanded={!isSidebarCollapsed}
+            aria-label={isSidebarCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
             className="absolute right-24 flex h-24 w-24 cursor-pointer items-center justify-center rounded-lg transition-all duration-300 ease-in-out"
             onClick={handleToggleClick}
           >
@@ -85,7 +97,7 @@ export const SideNavigation = ({ academicInfo = FALLBACK_ACADEMIC_INFO }: SideNa
                 <NavItem
                   icon={iconName}
                   label={label}
-                  isCollapsed={isCollapsed}
+                  isCollapsed={isSidebarCollapsed}
                   status={isNavItemActive(pathname, href) ? 'selected' : 'default'}
                   onClick={() => handleNavItemClick(href)}
                 />
@@ -99,7 +111,7 @@ export const SideNavigation = ({ academicInfo = FALLBACK_ACADEMIC_INFO }: SideNa
         <div
           className={cn(
             'grid transition-[grid-template-rows,opacity] duration-300 ease-in-out',
-            isCollapsed ? 'pointer-events-none grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100',
+            isSidebarCollapsed ? 'pointer-events-none grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100',
           )}
         >
           <div className="flex flex-col gap-8 overflow-hidden">
@@ -127,11 +139,11 @@ export const SideNavigation = ({ academicInfo = FALLBACK_ACADEMIC_INFO }: SideNa
           aria-label="프로필"
           className={cn(
             'flex items-center p-12 transition-[gap] duration-300 ease-in-out',
-            isCollapsed ? 'justify-center' : 'gap-12',
+            isSidebarCollapsed ? 'justify-center' : 'gap-12',
           )}
         >
           <Icon name="ic_home" />
-          {!isCollapsed && (
+          {!isSidebarCollapsed && (
             <>
               <p className="text-body-m-16 min-w-0 flex-1 truncate text-white">사용자</p>
               <button type="button" aria-label="로그아웃" className="flex shrink-0 cursor-pointer">
