@@ -19,7 +19,7 @@ interface SideNavigationProps {
 const FALLBACK_ACADEMIC_INFO: SideNavigationAcademicInfoItem[] = [
   { label: '학교', value: '경희대학교 국제 캠퍼스' },
   { label: '소속학부', value: '소프트웨어 융합학과' },
-  { label: '학번', value: '20203103101' },
+  { label: '학번', value: '00000000000' },
   { label: '학년', value: '4학년 1학기' },
 ];
 
@@ -31,7 +31,7 @@ const NAV_ITEMS = [
 
 const isNavItemActive = (pathname: string, href: string) => {
   if (href === '/') return pathname === '/';
-  return pathname.startsWith(href);
+  return pathname === href || pathname.startsWith(`${href}/`);
 };
 
 export const SideNavigation = ({ academicInfo = FALLBACK_ACADEMIC_INFO }: SideNavigationProps) => {
@@ -133,7 +133,7 @@ export const SideNavigation = ({ academicInfo = FALLBACK_ACADEMIC_INFO }: SideNa
           <Icon name="ic_home" />
           {!isCollapsed && (
             <>
-              <p className="text-body-m-16 min-w-0 flex-1 truncate text-white">김경민</p>
+              <p className="text-body-m-16 min-w-0 flex-1 truncate text-white">사용자</p>
               <button type="button" aria-label="로그아웃" className="flex shrink-0 cursor-pointer">
                 <Icon name="ic_logout" size={24} className="text-gray-500" />
               </button>
