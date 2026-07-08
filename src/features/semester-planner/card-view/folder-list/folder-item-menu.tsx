@@ -7,12 +7,13 @@ import { useEffect, useRef, useState } from 'react';
 interface FolderItemMenuProps {
   onRename: () => void;
   onDelete: () => void;
+  iconSize?: number;
 }
 
 const MENU_ITEM_CLASS =
   'flex w-full cursor-pointer items-center rounded-[6px] border border-white bg-white px-8 py-6 text-left hover:bg-gray-50';
 
-export const FolderItemMenu = ({ onRename, onDelete }: FolderItemMenuProps) => {
+export const FolderItemMenu = ({ onRename, onDelete, iconSize = 20 }: FolderItemMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -36,7 +37,7 @@ export const FolderItemMenu = ({ onRename, onDelete }: FolderItemMenuProps) => {
         aria-label="폴더 옵션 열기"
         className={cn('invisible cursor-pointer group-hover:visible', isMenuOpen && 'visible')}
       >
-        <Icon name="ic_dot_horizontal" size={20} className="text-gray-600" />
+        <Icon name="ic_dot_horizontal" size={iconSize} className="text-gray-600" />
       </button>
       {isMenuOpen && (
         <ul
