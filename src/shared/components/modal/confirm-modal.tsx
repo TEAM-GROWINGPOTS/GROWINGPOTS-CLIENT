@@ -43,7 +43,6 @@ export const ConfirmModal = ({
   onConfirm,
 }: ConfirmModalProps) => {
   const { iconName, confirmLabel: defaultConfirmLabel } = CONFIRM_MODAL_DEFAULTS[type];
-  const isNoticeType = type === 'notice';
 
   const handleConfirmClick = () => {
     onConfirm?.();
@@ -57,7 +56,7 @@ export const ConfirmModal = ({
         <Modal.Title className="text-title-sb-18 mb-8 text-center">{title}</Modal.Title>
         {description && <Modal.Description>{description}</Modal.Description>}
         <Modal.Footer className="mt-40 w-full">
-          {!isNoticeType && (
+          {type !== 'notice' && (
             <Button
               label="취소"
               mode="secondary_solid"
