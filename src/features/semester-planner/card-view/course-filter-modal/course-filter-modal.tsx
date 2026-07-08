@@ -1,6 +1,6 @@
 'use client';
 
-import { Tabs } from '@features/semester-planner/card-view/tabs/tabs';
+import { Tabs } from '`@features/semester-planner/card-view`';
 import { Button } from '@shared/components/button/button';
 import { Modal } from '@shared/components/modal/modal';
 import { Select } from '@shared/components/select/select';
