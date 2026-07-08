@@ -37,7 +37,7 @@ export const FolderItemMenu = ({ onRename, onDelete, iconSize = 20 }: FolderItem
         aria-label="폴더 옵션 열기"
         className={cn('invisible cursor-pointer group-hover:visible', isMenuOpen && 'visible')}
       >
-        <Icon name="ic_dot_vertical" size={iconSize} className="text-gray-600" />{' '}
+        <Icon name="ic_dot_vertical" size={iconSize} className="mb-0.5 text-gray-600" />
       </button>
       {isMenuOpen && (
         <ul
