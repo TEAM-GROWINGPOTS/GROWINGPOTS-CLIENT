@@ -6,18 +6,22 @@ import * as Accordion from '@radix-ui/react-accordion';
 import { Badge, Chip, Tooltip } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
-import { Fragment, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 
 import { AccordionProgressBar } from './accordion-progress-bar';
 
-type GraduationTab = '본전공' | '다전공' | '교양';
+// TODO: API 연동 시 스토어 데이터로 교체
+const MOCK_MAJOR_NAMES = ['컴퓨터공학부', '경영학과', '심리학과', '사회학과', '미디어커뮤니케이션학부'];
 
 interface GraduationStatusAccordionProps {
   className?: string;
 }
 
 export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordionProps) => {
-  const [activeTab, setActiveTab] = useState<GraduationTab>('본전공');
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [isArrowNav, setIsArrowNav] = useState(false);
+  const chipContainerRef = useRef<HTMLDivElement>(null);
+
   const { mainMajor, doubleMajor } = useGraduationStatusStore();
 
   if (!mainMajor) return null;
@@ -32,12 +36,13 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
   const doubleMajorConditions =
     doubleMajor?.conditions.filter((c) => c.code.startsWith('MAJOR') && c.code !== 'MAJOR') ?? [];
 
-  const tabs: GraduationTab[] = doubleMajor ? ['본전공', '다전공', '교양'] : ['본전공', '교양'];
+  const majorNames = MOCK_MAJOR_NAMES;
+  const tabs = [...majorNames, '교양'];
 
-  const tabConditions: Record<GraduationTab, GraduationCondition[]> = {
-    본전공: majorConditions,
-    다전공: doubleMajorConditions,
-    교양: nonMajorConditions,
+  const getTabConditions = (index: number): GraduationCondition[] => {
+    if (index === tabs.length - 1) return nonMajorConditions;
+    if (index === 0) return majorConditions;
+    return doubleMajorConditions;
   };
 
   const majorCredit = conditions.find((c) => c.code === 'MAJOR')?.current ?? 0;
@@ -48,6 +53,22 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
     totalCredits.required > 0 ? Math.min((current / totalCredits.required) * 100, 100) : 0;
 
   const shortfallCredit = Math.max(totalCredits.required - totalCredits.current, 0);
+
+  const handleChipKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setIsArrowNav(true);
+      const next =
+        e.key === 'ArrowRight' ? (activeTabIndex + 1) % tabs.length : (activeTabIndex - 1 + tabs.length) % tabs.length;
+      setActiveTabIndex(next);
+      const chips = chipContainerRef.current?.querySelectorAll<HTMLButtonElement>('button');
+      const target = chips?.[next];
+      target?.focus();
+      target?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    } else if (e.key === 'Tab') {
+      setIsArrowNav(false);
+    }
+  };
 
   return (
     <Accordion.Root type="single" collapsible className={cn('w-full rounded-[8px] bg-white p-20', className)}>
@@ -121,19 +142,30 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
 
             {/* 탭별 요건 현황 */}
             <div className="flex min-h-158 flex-col justify-between rounded bg-gray-50 p-16">
-              <div className="flex gap-8">
-                {tabs.map((tab) => (
+              <div
+                ref={chipContainerRef}
+                role="tablist"
+                className="flex [scrollbar-width:none] gap-8 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+                onKeyDown={handleChipKeyDown}
+              >
+                {tabs.map((tab, index) => (
                   <Chip
                     key={tab}
+                    role="tab"
                     label={tab}
                     size="small"
-                    isSelected={activeTab === tab}
-                    onClick={() => setActiveTab(tab)}
+                    isSelected={activeTabIndex === index}
+                    tabIndex={activeTabIndex === index ? 0 : -1}
+                    className={cn('shrink-0', isArrowNav && 'focus:outline-none')}
+                    onClick={() => {
+                      setIsArrowNav(false);
+                      setActiveTabIndex(index);
+                    }}
                   />
                 ))}
               </div>
               <div className="grid grid-cols-[max-content_1fr_max-content] items-center gap-x-12 gap-y-8 px-4">
-                {tabConditions[activeTab].map(({ code, name, current, required }) => (
+                {getTabConditions(activeTabIndex).map(({ code, name, current, required }) => (
                   <Fragment key={code}>
                     <span className="text-body-sb-14 text-gray-800">{name}</span>
                     <AccordionProgressBar current={current} required={required ?? 0} />
