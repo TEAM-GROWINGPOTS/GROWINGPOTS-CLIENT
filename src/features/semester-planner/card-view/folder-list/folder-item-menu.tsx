@@ -41,7 +41,7 @@ export const FolderItemMenu = ({ onRename, onDelete }: FolderItemMenuProps) => {
       {isMenuOpen && (
         <ul
           role="menu"
-          className="absolute top-full left-0 z-50 flex w-100 flex-col items-start rounded-[8px] border border-gray-100 bg-white p-4 shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]"
+          className="z-dropdown absolute top-full left-0 flex w-100 flex-col items-start rounded-[8px] border border-gray-100 bg-white p-4 shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]"
         >
           <li role="none" className="w-full">
             <button
