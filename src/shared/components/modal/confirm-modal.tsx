@@ -44,11 +44,6 @@ export const ConfirmModal = ({
 }: ConfirmModalProps) => {
   const { iconName, confirmLabel: defaultConfirmLabel } = CONFIRM_MODAL_DEFAULTS[type];
 
-  const handleConfirmClick = () => {
-    onConfirm?.();
-    onOpenChange(false);
-  };
-
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <Modal.Content className="flex w-440 flex-col items-center">
@@ -69,7 +64,7 @@ export const ConfirmModal = ({
             label={confirmLabel ?? defaultConfirmLabel}
             size="lg"
             className="flex-1 justify-center"
-            onClick={handleConfirmClick}
+            onClick={onConfirm}
           />
         </Modal.Footer>
       </Modal.Content>
