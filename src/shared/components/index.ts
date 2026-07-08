@@ -3,5 +3,8 @@ export type { ChipMode } from './chip/chip';
 export { Chip } from './chip/chip';
 export { ClassCard } from './class-card/class-card';
 export { Modal } from './modal/modal';
+export { NavItem } from './nav-item/nav-item';
 export { Select } from './select/select';
 export { TextField } from './text-field/text-field';
+export type { TooltipSize, TooltipVariant } from './tooltip/tooltip';
+export { Tooltip } from './tooltip/tooltip';
