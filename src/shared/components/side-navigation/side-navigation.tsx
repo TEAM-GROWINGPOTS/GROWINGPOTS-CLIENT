@@ -111,7 +111,7 @@ export const SideNavigation = ({ academicInfo = FALLBACK_ACADEMIC_INFO }: SideNa
               <span className="text-body-m-14 text-gray-300">졸업사정관리표</span>
             </button>
             <section aria-label="학력 정보">
-              <dl className="flex min-w-[216px] flex-col gap-12 rounded-lg bg-gray-800 p-16">
+              <dl className="flex min-w-[216px] cursor-default flex-col gap-12 rounded-lg bg-gray-800 p-16">
                 {academicInfo.map(({ label, value }) => (
                   <div key={label} className="flex items-start justify-between whitespace-nowrap">
                     <dt className="text-body-r-14 text-gray-300">{label}</dt>
