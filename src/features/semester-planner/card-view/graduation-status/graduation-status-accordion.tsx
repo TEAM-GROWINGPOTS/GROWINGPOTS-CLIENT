@@ -137,7 +137,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
                   <Fragment key={code}>
                     <span className="text-body-sb-14 text-gray-800">{name}</span>
                     <AccordionProgressBar current={current} required={required ?? 0} />
-                    <div className="flex w-70 items-center justify-end">
+                    <div className="flex items-center justify-end">
                       <span className="text-body-sb-14 text-gray-700">{current}</span>
                       <span className="text-body-r-14 text-gray-400">/{required ?? '-'}학점</span>
                     </div>
