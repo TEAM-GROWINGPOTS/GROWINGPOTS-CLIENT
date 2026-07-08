@@ -46,8 +46,9 @@ export const ClassCard = ({ department, title, tags, type = 'default', className
               size="xsmall"
               variant="primary"
               color={index === 0 ? getTagColor(tag) : 'gray'}
+              className={index === 0 ? 'max-w-70' : undefined}
             >
-              {tag}
+              {index === 0 ? <span className="truncate">{tag}</span> : tag}
             </Badge>
           ))}
         </div>
