@@ -120,7 +120,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
             </div>
 
             {/* 탭별 요건 현황 */}
-            <div className="flex h-158 flex-col justify-between rounded bg-gray-50 p-16">
+            <div className="flex min-h-158 flex-col justify-between rounded bg-gray-50 p-16">
               <div className="flex gap-8">
                 {TABS.map((tab) => (
                   <Chip
