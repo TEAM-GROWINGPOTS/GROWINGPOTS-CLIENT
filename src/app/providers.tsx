@@ -1,5 +1,6 @@
 'use client';
 
+import * as Tooltip from '@radix-ui/react-tooltip';
 import { createQueryClient } from '@shared/libs/query-client';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -10,8 +11,10 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
-      {process.env.NODE_ENV !== 'production' && <ReactQueryDevtools />}
+      <Tooltip.Provider delayDuration={300}>
+        {children}
+        {process.env.NODE_ENV !== 'production' && <ReactQueryDevtools />}
+      </Tooltip.Provider>
     </QueryClientProvider>
   );
 };
