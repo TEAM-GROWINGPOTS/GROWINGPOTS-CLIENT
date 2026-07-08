@@ -3,7 +3,7 @@
 import { Button } from '@shared/components/button/button';
 import { cn } from '@shared/utils/cn';
 
-import { FolderItemMenu } from './folder-item-menu';
+import { FolderItemMenu } from '../folder-item-menu/folder-item-menu';
 
 const MAX_FOLDERS = 5;
 

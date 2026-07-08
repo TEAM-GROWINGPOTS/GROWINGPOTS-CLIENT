@@ -11,7 +11,7 @@ interface FolderItemMenuProps {
 }
 
 const MENU_ITEM_CLASS =
-  'flex w-full cursor-pointer items-center rounded-[6px] border border-white bg-white px-8 py-6 text-left hover:bg-gray-50';
+  'flex w-full cursor-pointer items-center rounded-md border border-white bg-white px-8 py-6 text-left hover:bg-gray-50';
 
 export const FolderItemMenu = ({ onRename, onDelete, iconSize = 20 }: FolderItemMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,7 +42,7 @@ export const FolderItemMenu = ({ onRename, onDelete, iconSize = 20 }: FolderItem
       {isMenuOpen && (
         <ul
           role="menu"
-          className="z-dropdown absolute top-full left-0 flex w-100 flex-col items-start rounded-[8px] border border-gray-100 bg-white p-4 shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]"
+          className="z-dropdown absolute top-full left-0 flex w-100 flex-col items-start rounded-lg border border-gray-100 bg-white p-4 shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]"
         >
           <li role="none" className="w-full">
             <button
