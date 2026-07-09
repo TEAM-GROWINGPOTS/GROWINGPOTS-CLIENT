@@ -154,6 +154,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
                   <Chip
                     key={tab}
                     role="tab"
+                    aria-selected={activeTabIndex === index}
                     label={tab}
                     size="small"
                     isSelected={activeTabIndex === index}
