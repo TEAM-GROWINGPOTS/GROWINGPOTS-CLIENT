@@ -32,11 +32,11 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
       <div className="flex items-center gap-8">
         <h3 className="text-title-sb-18 min-w-0 truncate text-gray-800">{item.name}</h3>
 
-        {hasInfo && (
+        {hasInfo && infoContent && (
           <Tooltip
             variant="top-start"
             size="sm"
-            content={infoContent ?? 'tooltip text'}
+            content={infoContent}
             trigger={
               <button
                 type="button"
