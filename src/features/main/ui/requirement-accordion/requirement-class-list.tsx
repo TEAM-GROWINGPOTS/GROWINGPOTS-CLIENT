@@ -1,3 +1,4 @@
+import { SEMESTER_LABELS } from '@features/main/constants/requirement';
 import type { RequirementCourse } from '@features/main/types/requirement';
 import { ClassCard } from '@shared/components';
 import { cn } from '@shared/utils/cn';
@@ -14,13 +15,8 @@ const getRequirementCourseKey = ({ studentCourseId, departmentName, name }: Requ
   return studentCourseId ?? `${departmentName}-${name}`;
 };
 
-const getRequirementCourseTags = (
-  { credit, taken, takenSemester, openedSemester }: RequirementCourse,
-  requirementName: string,
-) => {
-  const semester = taken ? (takenSemester ?? '수강학기') : (openedSemester ?? '개설학기');
-
-  return [requirementName, `${credit}학점`, semester];
+const getRequirementCourseTags = ({ credit, openedSemester }: RequirementCourse, requirementName: string) => {
+  return [requirementName, `${credit}학점`, SEMESTER_LABELS[openedSemester]];
 };
 
 export const RequirementClassList = ({ requirementName, courses, className }: RequirementClassListProps) => {

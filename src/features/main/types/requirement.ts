@@ -12,6 +12,8 @@ export type RequirementCode =
   | 'ENGLISH_COURSE'
   | 'SW_CERT_COURSE';
 
+export type RequirementSemester = 'FIRST' | 'SECOND' | 'SUMMER' | 'WINTER';
+
 export interface RequirementCondition {
   code: RequirementCode;
   majorType?: MajorTypes;
@@ -27,8 +29,7 @@ export interface RequirementCourse {
   departmentName: string;
   credit: number;
   taken: boolean;
-  takenSemester?: string;
-  openedSemester?: string;
+  openedSemester: RequirementSemester;
 }
 
 export interface RequirementDetail {
