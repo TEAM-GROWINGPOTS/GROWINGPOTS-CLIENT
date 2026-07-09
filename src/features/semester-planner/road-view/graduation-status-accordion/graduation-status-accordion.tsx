@@ -55,19 +55,23 @@ export const GraduationStatusAccordion = () => {
   return (
     <Accordion.Root type="single" collapsible className="w-306 rounded-xl bg-gray-800">
       <Accordion.Item value="graduation-status">
-        <Accordion.Trigger className="group flex w-full items-center justify-between px-24 py-24 data-[state=open]:pb-8">
-          <div className="flex items-center gap-8">
-            <span className="text-title-sb-18 text-gray-100">졸업 요건 충족 현황</span>
-            <Badge size="xsmall" variant="primary" color={graduatable ? 'lime01' : 'darkRed'}>
-              {badgeLabel}
-            </Badge>
-          </div>
-          <Icon
-            name="ic_chevron_down"
-            size={24}
-            className="shrink-0 text-gray-100 transition-transform duration-200 group-data-[state=open]:rotate-180"
-          />
-        </Accordion.Trigger>
+        <Accordion.Header asChild>
+          <h3>
+            <Accordion.Trigger className="group flex w-full items-center justify-between px-24 py-24 data-[state=open]:pb-8">
+              <div className="flex items-center gap-8">
+                <span className="text-title-sb-18 text-gray-100">졸업 요건 충족 현황</span>
+                <Badge size="xsmall" variant="primary" color={graduatable ? 'lime01' : 'darkRed'}>
+                  {badgeLabel}
+                </Badge>
+              </div>
+              <Icon
+                name="ic_chevron_down"
+                size={24}
+                className="shrink-0 text-gray-100 transition-transform duration-200 group-data-[state=open]:rotate-180"
+              />
+            </Accordion.Trigger>
+          </h3>
+        </Accordion.Header>
 
         <Accordion.Content className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden">
           {hasMultipleMajors && (
