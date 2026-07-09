@@ -1,4 +1,9 @@
-import type { MajorTypes, RequirementCode, RequirementSemester } from '@features/main/types/requirement';
+import type {
+  MajorTypes,
+  RequirementCode,
+  RequirementSemester,
+  RequirementUnit,
+} from '@features/main/types/requirement';
 
 export const CURRENT_ONLY_CODES = new Set<RequirementCode>(['GRADUATION_REQUIRED', 'GENERAL_ELECTIVE']);
 export const HIDDEN_BADGE_CODES = new Set<RequirementCode>(['GENERAL_ELECTIVE']);
@@ -22,6 +27,11 @@ export const SEMESTER_LABELS: Record<RequirementSemester, string> = {
   SECOND: '2학기',
   SUMMER: '여름계절학기',
   WINTER: '겨울계절학기',
+};
+
+export const REQUIREMENT_UNIT_LABELS: Record<RequirementUnit, string> = {
+  CREDITS: '학점',
+  COURSES: '과목',
 };
 
 export const INFORMATION_CONTENTS: Partial<Record<RequirementCode, string>> = {

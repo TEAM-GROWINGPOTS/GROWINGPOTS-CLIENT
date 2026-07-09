@@ -14,12 +14,15 @@ export type RequirementCode =
 
 export type RequirementSemester = 'FIRST' | 'SECOND' | 'SUMMER' | 'WINTER';
 
+export type RequirementUnit = 'CREDITS' | 'COURSES';
+
 export interface RequirementCondition {
   code: RequirementCode;
   majorType?: MajorTypes;
   name: string;
   current: number;
   required: number | null;
+  unit: RequirementUnit;
   satisfied: boolean;
 }
 

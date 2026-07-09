@@ -1,4 +1,9 @@
-import { CURRENT_ONLY_CODES, HIDDEN_BADGE_CODES, MAJOR_TYPE_LABELS } from '@features/main/constants/requirement';
+import {
+  CURRENT_ONLY_CODES,
+  HIDDEN_BADGE_CODES,
+  MAJOR_TYPE_LABELS,
+  REQUIREMENT_UNIT_LABELS,
+} from '@features/main/constants/requirement';
 import type { RequirementAccordionItem } from '@features/main/types/requirement';
 import { ProgressBar } from '@features/main/ui';
 import * as Accordion from '@radix-ui/react-accordion';
@@ -18,7 +23,7 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
   const required = item.required ?? 0;
   const hasProgress = !isCurrentOnly && required > 0;
   const majorTypeLabel = item.majorType === 'ALL' || !item.majorType ? undefined : MAJOR_TYPE_LABELS[item.majorType];
-  const unit = item.name === '영어 강의' ? '과목' : '학점';
+  const unit = REQUIREMENT_UNIT_LABELS[item.unit];
 
   return (
     <Accordion.Header>
