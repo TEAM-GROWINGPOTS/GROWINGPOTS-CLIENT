@@ -3,8 +3,17 @@ import { useState } from 'react';
 
 import { UploadedCard, Uploader } from '../pdf-uploader';
 
-export const PdfUploadStep = () => {
+interface PdfUploadStepProps {
+  onSubmit?: (file: File) => void;
+}
+
+export const PdfUploadStep = ({ onSubmit }: PdfUploadStepProps) => {
   const [file, setFile] = useState<File | null>(null);
+
+  const handleAnalyze = () => {
+    if (!file) return;
+    onSubmit?.(file);
+  };
 
   return (
     <>
@@ -15,7 +24,7 @@ export const PdfUploadStep = () => {
         {file && <UploadedCard fileName={file.name} fileSizeBytes={file.size} onRemove={() => setFile(null)} />}
       </div>
 
-      <Button label="분석하기" size="lg" disabled={!file} className="mt-60 w-full" />
+      <Button label="분석하기" size="lg" disabled={!file} className="mt-60 w-full" onClick={handleAnalyze} />
     </>
   );
 };

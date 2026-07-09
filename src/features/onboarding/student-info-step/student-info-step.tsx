@@ -30,10 +30,10 @@ const ADMISSION_YEAR_OPTIONS = ADMISSION_YEARS.map((year) => ({
   label: `${year}년(${String(year).slice(-2)}학번)`,
 }));
 
-interface StudentInfoValues {
-  college: string;
-  department: string;
-  admissionYear: string;
+export interface StudentInfoValues {
+  schoolId: number;
+  departmentId: number;
+  admissionYear: number;
 }
 
 interface StudentInfoStepProps {
@@ -66,12 +66,11 @@ export const StudentInfoStep = ({ onSubmit }: StudentInfoStepProps) => {
 
   const handleSubmit = () => {
     if (!isComplete) return;
-    onSubmit({ college, department, admissionYear });
+    onSubmit({ schoolId: Number(school), departmentId: Number(department), admissionYear: Number(admissionYear) });
   };
 
   return (
     <>
-      {/* TODO 일러스트 추가하기 */}
       <p className="text-title-sb-24 mb-32 text-gray-900">
         정확한 졸업 현황 분석을 위해
         <br />
