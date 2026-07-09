@@ -23,11 +23,11 @@ const dropzoneVariants = cva(
   },
 );
 
-interface PdfUploaderProps {
+interface UploaderProps {
   onFileSelect: (file: File) => void;
 }
 
-export const PdfUploader = ({ onFileSelect }: PdfUploaderProps) => {
+export const Uploader = ({ onFileSelect }: UploaderProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
