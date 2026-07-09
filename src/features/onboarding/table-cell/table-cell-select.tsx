@@ -50,13 +50,13 @@ export const TableCellSelect = ({ options, value, onChange, className }: TableCe
       </button>
 
       {isOpen && (
-        <ul className="z-dropdown absolute mt-4 flex w-full flex-col gap-9 rounded-sm bg-white p-8">
+        <ul className="z-dropdown absolute mt-4 flex max-h-171 w-full flex-col gap-9 overflow-y-auto rounded-sm bg-white p-8">
           {options.map(({ value: optValue, label }) => (
             <li
               key={optValue}
               onClick={() => handleSelect(optValue)}
               className={cn(
-                'text-body-m-16 flex h-32 cursor-pointer items-center rounded-sm px-8 text-gray-600 hover:bg-gray-50',
+                'text-body-m-16 flex min-h-32 cursor-pointer items-center rounded-sm px-8 text-gray-600 hover:bg-gray-50',
                 optValue === value && 'bg-gray-50',
               )}
             >
