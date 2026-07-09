@@ -46,9 +46,10 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
     return doubleMajorConditions;
   };
 
-  const majorCredit = conditions.find((c) => c.code === 'MAJOR')?.current ?? 0;
-  const generalCredit = conditions.find((c) => c.code === 'GENERAL')?.current ?? 0;
-  const otherCredit = conditions.find((c) => c.code === 'OTHER')?.current ?? 0;
+  const conditionByCode = Object.fromEntries(conditions.map((c) => [c.code, c]));
+  const majorCredit = conditionByCode['MAJOR']?.current ?? 0;
+  const generalCredit = conditionByCode['GENERAL']?.current ?? 0;
+  const otherCredit = conditionByCode['OTHER']?.current ?? 0;
 
   const toPercent = (current: number) => calculatePercentage(current, totalCredits.required);
 
