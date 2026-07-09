@@ -13,13 +13,13 @@ interface FolderRenameFormProps {
 }
 
 const FolderRenameForm = ({ initialName, onSave }: FolderRenameFormProps) => {
-  const [name, setName] = useState(initialName);
+  const [folderName, setFolderName] = useState(initialName);
 
   return (
     <>
       <TextField
-        value={name}
-        onChange={setName}
+        value={folderName}
+        onChange={setFolderName}
         maxLength={NAME_MAX_LENGTH}
         placeholder="폴더 이름을 입력해 주세요"
         className="mt-32"
@@ -29,8 +29,8 @@ const FolderRenameForm = ({ initialName, onSave }: FolderRenameFormProps) => {
           label="저장하기"
           mode="primary_solid"
           size="lg"
-          disabled={name.trim() === ''}
-          onClick={() => onSave(name.trim())}
+          disabled={folderName.trim() === ''}
+          onClick={() => onSave(folderName.trim())}
           className="w-full justify-center"
         />
       </Modal.Footer>
