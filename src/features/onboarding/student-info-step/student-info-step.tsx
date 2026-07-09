@@ -7,9 +7,9 @@ import { useState } from 'react';
 
 const SCHOOLS = [{ schoolId: 1, name: '경희대학교 국제캠퍼스' }];
 
-const SCHOOL_OPTIONS = SCHOOLS.map((school) => ({
-  value: `${school.schoolId}`,
-  label: school.name,
+const SCHOOL_OPTIONS = SCHOOLS.map(({ schoolId, name }) => ({
+  value: `${schoolId}`,
+  label: name,
 }));
 
 const DEPARTMENTS = [
@@ -19,7 +19,7 @@ const DEPARTMENTS = [
   { departmentId: 104, schoolId: 1, college: '공과대학', name: '산업공학과' },
 ];
 
-const COLLEGE_OPTIONS = [...new Set(DEPARTMENTS.map((department) => department.college))].map((college) => ({
+const COLLEGE_OPTIONS = [...new Set(DEPARTMENTS.map(({ college }) => college))].map((college) => ({
   value: college,
   label: college,
 }));
@@ -44,10 +44,12 @@ export const StudentInfoStep = () => {
   const [department, setDepartment] = useState('');
   const [admissionYear, setAdmissionYear] = useState('');
 
-  const departmentOptions = DEPARTMENTS.filter((item) => item.college === college).map((item) => ({
-    value: `${item.departmentId}`,
-    label: item.name,
-  }));
+  const departmentOptions = DEPARTMENTS.filter(({ college: departmentCollege }) => departmentCollege === college).map(
+    ({ departmentId, name }) => ({
+      value: `${departmentId}`,
+      label: name,
+    }),
+  );
 
   const isComplete = school !== '' && college !== '' && department !== '' && admissionYear !== '';
 
