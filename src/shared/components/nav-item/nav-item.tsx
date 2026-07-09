@@ -4,7 +4,7 @@ import type { ComponentPropsWithoutRef } from 'react';
 
 export type NavItemStatusTypes = 'default' | 'selected';
 
-const navItemBaseClass = 'flex cursor-pointer items-center gap-12 rounded-lg transition-colors p-12';
+const navItemBaseClass = 'group flex cursor-pointer items-center gap-12 rounded-lg transition-colors p-12';
 
 const navItemStatusClass: Record<NavItemStatusTypes, string> = {
   default: 'text-gray-100 hover:bg-gray-700 hover:text-white',
@@ -39,7 +39,14 @@ export const NavItem = ({
       )}
       {...props}
     >
-      <Icon name={icon} size={24} className="shrink-0" />
+      <Icon
+        name={icon}
+        size={24}
+        className={cn(
+          'shrink-0 transition-colors',
+          status === 'selected' ? 'text-lime-400' : 'text-gray-400 group-hover:text-white',
+        )}
+      />
       {!isCollapsed && <span className="text-body-m-16 truncate">{label}</span>}
     </button>
   );
