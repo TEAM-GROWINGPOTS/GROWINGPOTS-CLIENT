@@ -8,14 +8,6 @@ import { cn } from '@shared/utils/cn';
 import { RequirementDetail } from './requirement-detail';
 import { RequirementHeader } from './requirement-header';
 
-export type {
-  MajorTypes,
-  RequirementAccordionItem,
-  RequirementCondition,
-  RequirementCourse,
-  RequirementDetail,
-} from '@features/main/types/requirement';
-
 interface RequirementAccordionProps {
   items: RequirementAccordionItem[];
   defaultValue?: string[];
