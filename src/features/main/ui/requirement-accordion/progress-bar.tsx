@@ -13,7 +13,7 @@ export const ProgressBar = ({ current, required, satisfied, className }: Progres
   return (
     <div className={cn('h-6 overflow-hidden rounded-lg bg-white', className)}>
       <div
-        className={cn('animate-progress-fill h-full origin-left rounded-lg', satisfied ? 'bg-gray-800' : 'bg-gray-300')}
+        className={cn('animate-progress-fill h-full origin-left rounded-lg', satisfied ? 'bg-gray-700' : 'bg-gray-300')}
         style={{ width: `${percent}%` }}
       />
     </div>
