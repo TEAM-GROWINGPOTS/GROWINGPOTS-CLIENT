@@ -1,11 +1,23 @@
 export type MajorTypes = 'ALL' | 'PRIMARY' | 'MULTI';
 
+export type RequirementCode =
+  | 'GRADUATION_REQUIRED'
+  | 'MAJOR_BASIC'
+  | 'MAJOR_REQUIRED'
+  | 'MAJOR_ELECTIVE'
+  | 'REQUIRED_GE'
+  | 'DISTRIBUTED_GE'
+  | 'FREE_GE'
+  | 'GENERAL_ELECTIVE'
+  | 'ENGLISH_COURSE'
+  | 'SW_CERT_COURSE';
+
 export interface RequirementCondition {
-  code: string;
+  code: RequirementCode;
   majorType?: MajorTypes;
   name: string;
   current: number;
-  required: number;
+  required: number | null;
   satisfied: boolean;
 }
 
@@ -20,10 +32,10 @@ export interface RequirementCourse {
 }
 
 export interface RequirementDetail {
-  divisionCode: string;
+  divisionCode: RequirementCode;
   divisionName: string;
   current: number;
-  required: number;
+  required: number | null;
   satisfied: boolean;
   hasRequiredList: boolean;
   courses: RequirementCourse[];

@@ -34,7 +34,7 @@ const getRequirementAccordionValue = ({ code, majorType }: RequirementCondition)
   return `${majorType ?? 'ALL'}-${code}`;
 };
 
-export const RequirementAccordion = ({ items, defaultValue, className }: RequirementAccordionProps) => {
+export const RequirementAccordion = ({ items, defaultValue = [], className }: RequirementAccordionProps) => {
   return (
     <Accordion.Root type="multiple" defaultValue={defaultValue} className={cn('flex w-509 flex-col gap-12', className)}>
       {items.map((item) => (

@@ -15,7 +15,8 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
   const isSatisfied = item.satisfied;
   const isCurrentOnly = CURRENT_ONLY_CODES.has(item.code);
   const hasBadge = !HIDDEN_BADGE_CODES.has(item.code);
-  const hasProgress = !isCurrentOnly && item.required > 0;
+  const required = item.required ?? 0;
+  const hasProgress = !isCurrentOnly && required > 0;
   const majorTypeLabel = item.majorType === 'ALL' || !item.majorType ? undefined : MAJOR_TYPE_LABELS[item.majorType];
   const unit = item.name === '영어 강의' ? '과목' : '학점';
 
@@ -55,7 +56,7 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
             unit
           ) : (
             <span className="text-body-m-16 text-gray-400">
-              /{item.required}
+              /{required}
               {unit}
             </span>
           )}
@@ -71,7 +72,7 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
       </div>
 
       {hasProgress && (
-        <ProgressBar current={item.current} required={item.required} satisfied={isSatisfied} className="mt-12" />
+        <ProgressBar current={item.current} required={required} satisfied={isSatisfied} className="mt-12" />
       )}
     </Accordion.Header>
   );
