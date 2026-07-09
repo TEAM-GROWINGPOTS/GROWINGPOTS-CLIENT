@@ -2,6 +2,7 @@
 
 import { Button } from '@shared/components/button/button';
 import { Select } from '@shared/components/select/select';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 const SCHOOLS = [{ schoolId: 1, name: '경희대학교 국제캠퍼스' }];
@@ -36,11 +37,8 @@ export interface StudentInfoValues {
   admissionYear: number;
 }
 
-interface StudentInfoStepProps {
-  onSubmit: (values: StudentInfoValues) => void;
-}
-
-export const StudentInfoStep = ({ onSubmit }: StudentInfoStepProps) => {
+export const StudentInfoStep = () => {
+  const router = useRouter();
   const [school, setSchool] = useState('');
   const [college, setCollege] = useState('');
   const [department, setDepartment] = useState('');
@@ -66,7 +64,7 @@ export const StudentInfoStep = ({ onSubmit }: StudentInfoStepProps) => {
 
   const handleSubmit = () => {
     if (!isComplete) return;
-    onSubmit({ schoolId: Number(school), departmentId: Number(department), admissionYear: Number(admissionYear) });
+    router.push('/onboarding?step=pdf');
   };
 
   return (

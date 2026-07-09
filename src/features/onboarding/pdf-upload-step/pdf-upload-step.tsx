@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@shared/components/button/button';
 import { useState } from 'react';
 
