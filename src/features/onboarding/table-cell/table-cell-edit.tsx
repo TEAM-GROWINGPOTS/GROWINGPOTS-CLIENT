@@ -6,7 +6,7 @@ import { ChangeEvent, useState } from 'react';
 interface TableCellEditProps {
   mode: 'view' | 'edit';
   value: string;
-  onChange?: (value: string) => void;
+  onChange: (value: string) => void;
   className?: string;
 }
 
@@ -22,7 +22,7 @@ export const TableCellEdit = ({ mode, value, onChange, className }: TableCellEdi
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setTouched(false);
-    onChange?.(e.target.value);
+    onChange(e.target.value);
   };
 
   const handleBlur = () => {
