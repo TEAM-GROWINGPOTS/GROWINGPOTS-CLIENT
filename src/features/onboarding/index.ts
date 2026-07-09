@@ -1,4 +1,4 @@
-export { GraduationRequirementResult } from './graduation-requirement-result/graduation-requirement-result';
+export { GraduationResult } from './graduation-result/graduation-result';
 export { PdfUploader } from './pdf-uploader';
 export { toast, Toaster } from './toast';
 export { UploadedFileCard } from './uploaded-file-card/uploaded-file-card';

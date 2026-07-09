@@ -1,9 +1,9 @@
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 
-export type GraduationRequirementVariant = 'default' | 'dark' | 'highlight';
+export type RequirementVariant = 'default' | 'dark' | 'highlight';
 
-interface GraduationRequirementVariantStyle {
+interface RequirementVariantStyle {
   card: string;
   label: string;
   value: string;
@@ -11,7 +11,7 @@ interface GraduationRequirementVariantStyle {
   checkIconName?: string;
 }
 
-const variantStyles: Record<GraduationRequirementVariant, GraduationRequirementVariantStyle> = {
+const variantStyles: Record<RequirementVariant, RequirementVariantStyle> = {
   default: {
     card: 'bg-gray-100',
     label: 'text-gray-600',
@@ -33,21 +33,21 @@ const variantStyles: Record<GraduationRequirementVariant, GraduationRequirementV
   },
 };
 
-export interface GraduationRequirementCardProps {
+export interface RequirementCardProps {
   label: string;
   value: string;
   total?: string;
-  variant?: GraduationRequirementVariant;
+  variant?: RequirementVariant;
   disabled?: boolean;
 }
 
-export const GraduationRequirementCard = ({
+export const RequirementCard = ({
   label,
   value,
   total,
   variant = 'default',
   disabled = false,
-}: GraduationRequirementCardProps) => {
+}: RequirementCardProps) => {
   const styles = variantStyles[variant];
 
   return (
