@@ -6,7 +6,7 @@ import { Modal } from '@shared/components/modal/modal';
 import { Select } from '@shared/components/select/select';
 import { useState } from 'react';
 
-type CourseFilterTabKeyTypes = 'campus' | 'major' | 'area' | 'grade' | 'semester' | 'credit' | 'extra';
+export type CourseFilterTabKeyTypes = 'campus' | 'major' | 'area' | 'grade' | 'semester' | 'credit' | 'extra';
 
 export interface CourseFilterValues {
   campus: string;
@@ -95,15 +95,15 @@ const INITIAL_VALUES: CourseFilterValues = {
   extras: [],
 };
 
-interface CourseFilterModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+interface CourseFilterFormProps {
+  initialValues: CourseFilterValues;
+  initialTab: CourseFilterTabKeyTypes;
   onApply: (values: CourseFilterValues) => void;
 }
 
-export const CourseFilterModal = ({ open, onOpenChange, onApply }: CourseFilterModalProps) => {
-  const [activeTab, setActiveTab] = useState<CourseFilterTabKeyTypes>('campus');
-  const [values, setValues] = useState<CourseFilterValues>(INITIAL_VALUES);
+const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFormProps) => {
+  const [activeTab, setActiveTab] = useState<CourseFilterTabKeyTypes>(initialTab);
+  const [values, setValues] = useState<CourseFilterValues>(initialValues);
 
   const handleTabChange = (next: string) => setActiveTab(next as CourseFilterTabKeyTypes);
 
@@ -122,107 +122,125 @@ export const CourseFilterModal = ({ open, onOpenChange, onApply }: CourseFilterM
     setValues((prev) => ({ ...prev, college: next, department: '' }));
   };
 
-  const handleApplyClick = () => {
+  return (
+    <>
+      <div className="mt-32 border-b border-gray-200">
+        <Tabs items={FILTER_TABS} value={activeTab} onChange={handleTabChange} className="-mb-px" />
+      </div>
+      <section className="mt-20 flex flex-col gap-10">
+        {activeTab === 'campus' && (
+          <Select
+            options={CAMPUS_OPTIONS}
+            value={values.campus}
+            onChange={setFieldValue('campus')}
+            placeholder="캠퍼스"
+          />
+        )}
+        {activeTab === 'major' && (
+          <>
+            <Select
+              options={COLLEGE_OPTIONS}
+              value={values.college}
+              onChange={handleCollegeChange}
+              placeholder="단과대학"
+            />
+            <Select
+              options={departmentOptions}
+              value={values.department}
+              onChange={setFieldValue('department')}
+              placeholder="소속학과부"
+              disabled={values.college === ''}
+            />
+          </>
+        )}
+        {activeTab === 'area' && (
+          <Select
+            multiple
+            options={AREA_OPTIONS}
+            value={values.areas}
+            onChange={setFieldValue('areas')}
+            placeholder="이수영역"
+          />
+        )}
+        {activeTab === 'grade' && (
+          <Select
+            multiple
+            options={GRADE_OPTIONS}
+            value={values.grades}
+            onChange={setFieldValue('grades')}
+            placeholder="학년"
+          />
+        )}
+        {activeTab === 'semester' && (
+          <Select
+            multiple
+            options={SEMESTER_OPTIONS}
+            value={values.semesters}
+            onChange={setFieldValue('semesters')}
+            placeholder="학기"
+          />
+        )}
+        {activeTab === 'credit' && (
+          <Select
+            multiple
+            options={CREDIT_OPTIONS}
+            value={values.credits}
+            onChange={setFieldValue('credits')}
+            placeholder="학점"
+          />
+        )}
+        {activeTab === 'extra' && (
+          <Select
+            multiple
+            options={EXTRA_OPTIONS}
+            value={values.extras}
+            onChange={setFieldValue('extras')}
+            placeholder="기타 필수"
+          />
+        )}
+      </section>
+      <Modal.Footer className="mt-auto">
+        <Button
+          label="적용하기"
+          mode="primary_solid"
+          size="lg"
+          onClick={() => onApply(values)}
+          className="w-full justify-center"
+        />
+      </Modal.Footer>
+    </>
+  );
+};
+
+interface CourseFilterModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  initialValues?: CourseFilterValues;
+  initialTab?: CourseFilterTabKeyTypes;
+  onApply: (values: CourseFilterValues) => void;
+}
+
+export const CourseFilterModal = ({
+  open,
+  onOpenChange,
+  initialValues,
+  initialTab,
+  onApply,
+}: CourseFilterModalProps) => {
+  const handleApply = (values: CourseFilterValues) => {
     onApply(values);
     onOpenChange(false);
   };
 
-  const handleOpenChange = (next: boolean) => {
-    if (!next) {
-      setValues(INITIAL_VALUES);
-      setActiveTab('campus');
-    }
-    onOpenChange(next);
-  };
-
   return (
-    <Modal open={open} onOpenChange={handleOpenChange}>
+    <Modal open={open} onOpenChange={onOpenChange}>
       <Modal.Content className="flex h-420 w-480 flex-col">
         <Modal.Header title="과목 필터" className="text-title-sb-24 text-gray-900" />
-        <div className="mt-32 border-b border-gray-200">
-          <Tabs items={FILTER_TABS} value={activeTab} onChange={handleTabChange} className="-mb-px" />
-        </div>
-        <section className="mt-20 flex flex-col gap-10">
-          {activeTab === 'campus' && (
-            <Select
-              options={CAMPUS_OPTIONS}
-              value={values.campus}
-              onChange={setFieldValue('campus')}
-              placeholder="캠퍼스"
-            />
-          )}
-          {activeTab === 'major' && (
-            <>
-              <Select
-                options={COLLEGE_OPTIONS}
-                value={values.college}
-                onChange={handleCollegeChange}
-                placeholder="단과대학"
-              />
-              <Select
-                options={departmentOptions}
-                value={values.department}
-                onChange={setFieldValue('department')}
-                placeholder="소속학과부"
-                disabled={values.college === ''}
-              />
-            </>
-          )}
-          {activeTab === 'area' && (
-            <Select
-              multiple
-              options={AREA_OPTIONS}
-              value={values.areas}
-              onChange={setFieldValue('areas')}
-              placeholder="이수영역"
-            />
-          )}
-          {activeTab === 'grade' && (
-            <Select
-              multiple
-              options={GRADE_OPTIONS}
-              value={values.grades}
-              onChange={setFieldValue('grades')}
-              placeholder="학년"
-            />
-          )}
-          {activeTab === 'semester' && (
-            <Select
-              multiple
-              options={SEMESTER_OPTIONS}
-              value={values.semesters}
-              onChange={setFieldValue('semesters')}
-              placeholder="학기"
-            />
-          )}
-          {activeTab === 'credit' && (
-            <Select
-              multiple
-              options={CREDIT_OPTIONS}
-              value={values.credits}
-              onChange={setFieldValue('credits')}
-              placeholder="학점"
-            />
-          )}
-          {activeTab === 'extra' && (
-            <Select
-              multiple
-              options={EXTRA_OPTIONS}
-              value={values.extras}
-              onChange={setFieldValue('extras')}
-              placeholder="기타 필수"
-            />
-          )}
-        </section>
-        <Modal.Footer className="mt-auto">
-          <Button
-            label="적용하기"
-            mode="primary_solid"
-            size="lg"
-            onClick={handleApplyClick}
-            className="w-full justify-center"
-          />
-        </Modal.Footer>
+        <CourseFilterForm
+          initialValues={initialValues ?? INITIAL_VALUES}
+          initialTab={initialTab ?? 'campus'}
+          onApply={handleApply}
+        />
       </Modal.Content>
     </Modal>
   );
