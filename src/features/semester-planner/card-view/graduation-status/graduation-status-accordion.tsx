@@ -23,7 +23,8 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
   const [isArrowNav, setIsArrowNav] = useState(false);
   const chipContainerRef = useRef<HTMLDivElement>(null);
 
-  const { mainMajor, doubleMajor } = useGraduationStatusStore();
+  const mainMajor = useGraduationStatusStore((s) => s.mainMajor);
+  const doubleMajor = useGraduationStatusStore((s) => s.doubleMajor);
 
   if (!mainMajor) return null;
 
