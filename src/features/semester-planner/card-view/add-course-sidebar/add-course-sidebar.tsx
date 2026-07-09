@@ -3,6 +3,7 @@
 import { DropDown } from '@features/semester-planner/card-view/drop-down/drop-down';
 import { SearchField } from '@features/semester-planner/card-view/search-field/search-field';
 import { IconButton } from '@shared/components';
+import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
 import Icon from '@shared/components/icon/icon';
 import Image from 'next/image';
@@ -17,6 +18,7 @@ export interface Course {
 
 interface AddCourseSidebarProps {
   onClose: () => void;
+  onDirectAdd?: () => void;
   renderCourse?: (course: Course) => ReactNode;
 }
 
@@ -24,7 +26,7 @@ const FILTER_LABELS = ['캠퍼스', '전공', '이수영역', '학년', '개설�
 
 const COURSES: Course[] = [];
 
-export const AddCourseSidebar = ({ onClose, renderCourse }: AddCourseSidebarProps) => {
+export const AddCourseSidebar = ({ onClose, onDirectAdd, renderCourse }: AddCourseSidebarProps) => {
   const [keyword, setKeyword] = useState('');
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const filterRowRef = useRef<HTMLDivElement>(null);
@@ -76,7 +78,17 @@ export const AddCourseSidebar = ({ onClose, renderCourse }: AddCourseSidebarProp
       </div>
 
       <section className="mt-24 flex min-h-0 flex-1 flex-col">
-        <h3 className="text-body-m-14 text-gray-700">개설 과목</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-body-m-14 text-gray-700">개설 과목</h3>
+          <button
+            type="button"
+            onClick={() => onDirectAdd?.()}
+            className="text-body-m-14 flex cursor-pointer items-center gap-4 text-gray-700"
+          >
+            <Icon name="ic_plus" size={16} className="text-gray-600" />
+            직접추가
+          </button>
+        </div>
         {filteredCourses.length > 0 ? (
           <ul className="mt-8 flex flex-col gap-12 overflow-y-auto">
             {filteredCourses.map((course) => (
@@ -93,6 +105,13 @@ export const AddCourseSidebar = ({ onClose, renderCourse }: AddCourseSidebarProp
           <div className="flex flex-1 flex-col items-center justify-center gap-12">
             <Image src="/images/img_noresult.png" alt="" width={80} height={80} />
             <p className="text-body-r-16 text-gray-700">검색결과가 없습니다</p>
+            <Button
+              size="sm"
+              mode="primary_outline"
+              label="직접추가"
+              icon={<Icon name="ic_plus" size={16} />}
+              onClick={() => onDirectAdd?.()}
+            />
           </div>
         )}
       </section>
