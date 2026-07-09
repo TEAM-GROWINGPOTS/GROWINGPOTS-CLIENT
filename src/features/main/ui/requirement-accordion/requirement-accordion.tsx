@@ -2,9 +2,11 @@
 
 import { INFORMATION_CODES, INFORMATION_CONTENTS, NOTICE_CODES } from '@features/main/constants/requirement';
 import type { RequirementAccordionItem, RequirementCondition } from '@features/main/types/requirement';
-import { RequirementDetail, RequirementHeader } from '@features/main/ui';
 import * as Accordion from '@radix-ui/react-accordion';
 import { cn } from '@shared/utils/cn';
+
+import { RequirementDetail } from './requirement-detail';
+import { RequirementHeader } from './requirement-header';
 
 export type {
   MajorTypes,
