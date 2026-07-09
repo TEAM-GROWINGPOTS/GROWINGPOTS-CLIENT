@@ -127,8 +127,16 @@ export const CourseFilterModal = ({ open, onOpenChange, onApply }: CourseFilterM
     onOpenChange(false);
   };
 
+  const handleOpenChange = (next: boolean) => {
+    if (!next) {
+      setValues(INITIAL_VALUES);
+      setActiveTab('campus');
+    }
+    onOpenChange(next);
+  };
+
   return (
-    <Modal open={open} onOpenChange={onOpenChange}>
+    <Modal open={open} onOpenChange={handleOpenChange}>
       <Modal.Content className="flex h-420 w-480 flex-col">
         <Modal.Header title="과목 필터" className="text-title-sb-24 text-gray-900" />
         <div className="mt-32 border-b border-gray-200">
