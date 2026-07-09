@@ -101,7 +101,7 @@ export const SemesterCard = ({
         </div>
         {isPlanned && (
           <div className="[&_button]:visible [&>div>button>svg]:text-gray-300">
-            <FolderItemMenu iconSize={20} onRename={() => {}} onDelete={() => onDeleteTerm?.()} />
+            <FolderItemMenu iconSize={20} onDelete={() => onDeleteTerm?.()} />
           </div>
         )}
       </header>
