@@ -100,7 +100,6 @@ export const AddCourseSidebar = ({ onClose, onDirectAdd, renderCourse }: AddCour
                 )}
               </li>
             ))}
-            ))}
           </ul>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-12">
