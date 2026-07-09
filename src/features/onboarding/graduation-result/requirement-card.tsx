@@ -51,12 +51,12 @@ export const RequirementCard = ({
   const styles = variantStyles[variant];
 
   return (
-    <div className={cn('flex h-45 items-center justify-between rounded-sm px-12', styles.card)}>
-      <div className="flex items-center gap-4">
-        <span className={cn('text-body-m-14', styles.label)}>{label}</span>
+    <div className={cn('flex h-45 items-center justify-between overflow-hidden rounded-sm px-12', styles.card)}>
+      <div className="flex shrink-0 items-center gap-4">
+        <span className={cn('text-body-m-14 whitespace-nowrap', styles.label)}>{label}</span>
         {styles.checkIconName && <Icon name={styles.checkIconName} size={16} />}
       </div>
-      <span>
+      <span className="whitespace-nowrap">
         <span className={cn('text-body-sb-14', disabled ? 'text-gray-300' : styles.value)}>{value}</span>
         {total && <span className={cn('text-body-r-14', styles.total)}>{total}</span>}
       </span>
