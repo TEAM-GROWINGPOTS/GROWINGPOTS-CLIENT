@@ -82,7 +82,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
                 <p className="text-title-sb-18 text-gray-800">졸업 요건 충족 현황</p>
                 <Tooltip
                   trigger={
-                    <span className="-ml-6 pl-6">
+                    <span className="-ml-6 pl-6" onClick={(e) => e.stopPropagation()}>
                       <Icon name="ic_information_outline" size={20} className="text-gray-300" />
                     </span>
                   }
