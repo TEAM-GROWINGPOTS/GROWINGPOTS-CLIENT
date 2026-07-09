@@ -1,1 +1,1 @@
-﻿export * from './requirement-accordion';
+export * from './requirement-accordion';
