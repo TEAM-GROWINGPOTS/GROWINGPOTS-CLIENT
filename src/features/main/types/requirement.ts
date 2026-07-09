@@ -1,4 +1,4 @@
-export type MajorTypes = 'ALL' | 'PRIMARY' | 'MULTI';
+export type MajorTypes = 'ALL' | 'PRIMARY' | 'MULTI' | 'GE' | 'OTHERS';
 
 export type RequirementCode =
   | 'GRADUATION_REQUIRED'
