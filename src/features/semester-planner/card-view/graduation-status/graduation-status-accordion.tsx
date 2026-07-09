@@ -9,6 +9,7 @@ import { cn } from '@shared/utils/cn';
 import { Fragment, useRef, useState } from 'react';
 
 import { AccordionProgressBar } from './accordion-progress-bar';
+import { calculatePercentage } from './calculate-percentage';
 
 // TODO: API 연동 시 스토어 데이터로 교체
 const MOCK_MAJOR_NAMES = ['컴퓨터공학부', '경영학과', '심리학과', '사회학과', '미디어커뮤니케이션학부'];
@@ -49,8 +50,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
   const generalCredit = conditions.find((c) => c.code === 'GENERAL')?.current ?? 0;
   const otherCredit = conditions.find((c) => c.code === 'OTHER')?.current ?? 0;
 
-  const toPercent = (current: number) =>
-    totalCredits.required > 0 ? Math.min((current / totalCredits.required) * 100, 100) : 0;
+  const toPercent = (current: number) => calculatePercentage(current, totalCredits.required);
 
   const shortfallCredit = Math.max(totalCredits.required - totalCredits.current, 0);
 
