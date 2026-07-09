@@ -1,9 +1,50 @@
+export type GraduationUnit = 'CREDITS' | 'COURSES';
+export type MajorType = 'MAIN' | 'DOUBLE';
+
 export interface GraduationCondition {
   code: string;
   name: string;
   current: number;
   required: number | null;
+  unit: GraduationUnit;
   satisfied: boolean;
+  chartTarget: boolean;
+}
+
+export interface RequirementProgress {
+  name: string;
+  current: number;
+  required: number | null;
+  unit: GraduationUnit;
+  satisfied: boolean;
+}
+
+export interface GraduationRequired {
+  hasGraduationRequired: boolean;
+  satisfied: boolean;
+  totalCredit: number;
+  unmetDescriptions: string[];
+  items: RequirementProgress[] | null;
+}
+
+export interface MajorSection {
+  majorName: string;
+  majorType: MajorType;
+  conditions: GraduationCondition[];
+  graduationRequired: GraduationRequired | null;
+}
+
+export interface GeSection {
+  majorName: null;
+  majorType: null;
+  conditions: GraduationCondition[];
+  graduationRequired: null;
+}
+
+export interface AllSections {
+  majors: MajorSection[];
+  ge: GeSection;
+  others: GeSection;
 }
 
 export interface GraduationSummary {
@@ -12,19 +53,19 @@ export interface GraduationSummary {
   enrollmentStatus: string;
 }
 
-export interface GraduationStatusData {
-  summary: GraduationSummary;
-  conditions: GraduationCondition[];
-  overallMet: boolean;
+export interface GraduationCert {
+  certType: 'THESIS' | 'ENGLISH' | 'SW' | 'TOPIK' | 'GRADUATION_CERT';
+  result: 'PASS' | 'FAIL' | 'EXEMPT' | 'NONE';
 }
 
-export interface DoubleMajorData {
-  conditions: GraduationCondition[];
+export interface GraduationData {
+  summary: GraduationSummary;
+  graduatable: boolean;
+  sections: AllSections;
+  certs: GraduationCert[];
 }
 
 export interface GraduationStatusState {
-  mainMajor: GraduationStatusData | null;
-  doubleMajor: DoubleMajorData | null;
-  setMainMajor: (data: GraduationStatusData) => void;
-  setDoubleMajor: (data: DoubleMajorData) => void;
+  data: GraduationData | null;
+  setData: (data: GraduationData) => void;
 }
