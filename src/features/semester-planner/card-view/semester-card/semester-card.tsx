@@ -143,20 +143,23 @@ export const SemesterCard = ({
         <div className="relative flex min-h-0 flex-col">
           {courses.length > 0 ? (
             <ul className="flex min-h-0 flex-col gap-8 overflow-y-auto">
-              {courses.map((course, index) => (
-                <li key={`${course.id}-${index}`}>
-                  {renderCourse ? (
-                    renderCourse(course)
-                  ) : (
-                    <ClassCard
-                      department={course.department}
-                      title={course.name}
-                      tags={course.tags}
-                      className="w-full border border-gray-100"
-                    />
-                  )}
-                </li>
-              ))}
+              {courses.map((course) => {
+                const { id, department, name, tags } = course;
+                return (
+                  <li key={id}>
+                    {renderCourse ? (
+                      renderCourse(course)
+                    ) : (
+                      <ClassCard
+                        department={department}
+                        title={name}
+                        tags={tags}
+                        className="w-full border border-gray-100"
+                      />
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <div className="flex h-100 items-center justify-center rounded-md border border-dashed border-gray-300">
