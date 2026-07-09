@@ -1,0 +1,79 @@
+'use client';
+
+import Icon from '@shared/components/icon/icon';
+import { cn } from '@shared/utils/cn';
+import { useEffect, useRef, useState } from 'react';
+
+interface FolderItemMenuProps {
+  onRename?: () => void;
+  onDelete: () => void;
+  iconSize?: number;
+}
+
+const MENU_ITEM_CLASS =
+  'flex w-full cursor-pointer items-center rounded-md border border-white bg-white px-8 py-6 text-left hover:bg-gray-50';
+
+export const FolderItemMenu = ({ onRename, onDelete, iconSize = 20 }: FolderItemMenuProps) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen]);
+
+  return (
+    <div ref={menuRef} className="relative flex shrink-0 items-center">
+      <button
+        type="button"
+        onClick={() => setIsMenuOpen((prev) => !prev)}
+        aria-haspopup="menu"
+        aria-expanded={isMenuOpen}
+        aria-label="폴더 옵션 열기"
+        className={cn('invisible cursor-pointer group-hover:visible', isMenuOpen && 'visible')}
+      >
+        <Icon name="ic_dot_vertical" size={iconSize} className="mb-0.5 text-gray-600" />
+      </button>
+      {isMenuOpen && (
+        <ul
+          role="menu"
+          className="z-dropdown absolute top-full left-0 flex w-100 flex-col items-start rounded-lg border border-gray-100 bg-white p-4 shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]"
+        >
+          {onRename && (
+            <li role="none" className="w-full">
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onRename();
+                  setIsMenuOpen(false);
+                }}
+                className={MENU_ITEM_CLASS}
+              >
+                <span className="text-body-m-14 line-clamp-1 flex-1 text-gray-700">이름 편집</span>
+              </button>
+            </li>
+          )}
+          <li role="none" className="w-full">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                onDelete();
+                setIsMenuOpen(false);
+              }}
+              className={MENU_ITEM_CLASS}
+            >
+              <span className="text-body-m-14 line-clamp-1 flex-1 text-[#FF3451]">삭제</span>
+            </button>
+          </li>
+        </ul>
+      )}
+    </div>
+  );
+};
