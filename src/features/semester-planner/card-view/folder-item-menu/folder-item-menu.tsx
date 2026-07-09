@@ -5,7 +5,7 @@ import { cn } from '@shared/utils/cn';
 import { useEffect, useRef, useState } from 'react';
 
 interface FolderItemMenuProps {
-  onRename: () => void;
+  onRename?: () => void;
   onDelete: () => void;
   iconSize?: number;
 }
@@ -37,26 +37,28 @@ export const FolderItemMenu = ({ onRename, onDelete, iconSize = 20 }: FolderItem
         aria-label="폴더 옵션 열기"
         className={cn('invisible cursor-pointer group-hover:visible', isMenuOpen && 'visible')}
       >
-        <Icon name="ic_dot_vertical" size={iconSize} className="text-gray-600" />
+        <Icon name="ic_dot_vertical" size={iconSize} className="mb-0.5 text-gray-600" />
       </button>
       {isMenuOpen && (
         <ul
           role="menu"
           className="z-dropdown absolute top-full left-0 flex w-100 flex-col items-start rounded-lg border border-gray-100 bg-white p-4 shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]"
         >
-          <li role="none" className="w-full">
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                onRename();
-                setIsMenuOpen(false);
-              }}
-              className={MENU_ITEM_CLASS}
-            >
-              <span className="text-body-m-14 line-clamp-1 flex-1 text-gray-700">이름 편집</span>
-            </button>
-          </li>
+          {onRename && (
+            <li role="none" className="w-full">
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onRename();
+                  setIsMenuOpen(false);
+                }}
+                className={MENU_ITEM_CLASS}
+              >
+                <span className="text-body-m-14 line-clamp-1 flex-1 text-gray-700">이름 편집</span>
+              </button>
+            </li>
+          )}
           <li role="none" className="w-full">
             <button
               type="button"
