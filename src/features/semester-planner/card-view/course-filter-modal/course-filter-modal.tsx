@@ -6,7 +6,7 @@ import { Modal } from '@shared/components/modal/modal';
 import { Select } from '@shared/components/select/select';
 import { useState } from 'react';
 
-type CourseFilterTabKeyTypes = 'campus' | 'major' | 'area' | 'grade' | 'semester' | 'credit';
+type CourseFilterTabKeyTypes = 'campus' | 'major' | 'area' | 'grade' | 'semester' | 'credit' | 'extra';
 
 export interface CourseFilterValues {
   campus: string;
@@ -16,6 +16,7 @@ export interface CourseFilterValues {
   grades: string[];
   semesters: string[];
   credits: string[];
+  extras: string[];
 }
 
 interface FilterOption {
@@ -30,6 +31,7 @@ const FILTER_TABS: { value: CourseFilterTabKeyTypes; label: string }[] = [
   { value: 'grade', label: '학년' },
   { value: 'semester', label: '개설학기' },
   { value: 'credit', label: '학점' },
+  { value: 'extra', label: '기타 필수' },
 ];
 
 const CAMPUS_OPTIONS: FilterOption[] = [{ value: '국제캠퍼스', label: '국제캠퍼스' }];
@@ -77,6 +79,11 @@ const CREDIT_OPTIONS: FilterOption[] = [
   { value: '4학점 이상', label: '4학점 이상' },
 ];
 
+const EXTRA_OPTIONS: FilterOption[] = [
+  { value: 'SW인증', label: 'SW인증' },
+  { value: '영어강의', label: '영어강의' },
+];
+
 const INITIAL_VALUES: CourseFilterValues = {
   campus: '',
   college: '',
@@ -85,6 +92,7 @@ const INITIAL_VALUES: CourseFilterValues = {
   grades: [],
   semesters: [],
   credits: [],
+  extras: [],
 };
 
 interface CourseFilterModalProps {
@@ -186,6 +194,15 @@ export const CourseFilterModal = ({ open, onOpenChange, onApply }: CourseFilterM
               value={values.credits}
               onChange={setFieldValue('credits')}
               placeholder="학점"
+            />
+          )}
+          {activeTab === 'extra' && (
+            <Select
+              multiple
+              options={EXTRA_OPTIONS}
+              value={values.extras}
+              onChange={setFieldValue('extras')}
+              placeholder="기타 필수"
             />
           )}
         </section>
