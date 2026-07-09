@@ -1,9 +1,4 @@
-import type {
-  MajorTypes,
-  RequirementCode,
-  RequirementSemester,
-  RequirementUnit,
-} from '@features/main/types/requirement';
+import type { RequirementCode, RequirementSemester, RequirementUnit } from '@features/main/types/requirement';
 
 export const CURRENT_ONLY_CODES = new Set<RequirementCode>(['GRADUATION_REQUIRED', 'GENERAL_ELECTIVE']);
 export const HIDDEN_BADGE_CODES = new Set<RequirementCode>(['GENERAL_ELECTIVE']);
@@ -14,13 +9,6 @@ export const INFORMATION_CODES = new Set<RequirementCode>([
   'FREE_GE',
 ]);
 export const NOTICE_CODES = new Set<RequirementCode>(['GRADUATION_REQUIRED', 'REQUIRED_GE', 'DISTRIBUTED_GE']);
-
-export const MAJOR_TYPE_LABELS: Record<Exclude<MajorTypes, 'ALL'>, string> = {
-  PRIMARY: '본전공',
-  MULTI: '다전공',
-  GE: '교양',
-  OTHERS: '기타',
-};
 
 export const SEMESTER_LABELS: Record<RequirementSemester, string> = {
   FIRST: '1학기',

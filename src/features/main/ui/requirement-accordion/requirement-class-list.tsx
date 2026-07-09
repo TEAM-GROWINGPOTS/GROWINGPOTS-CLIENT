@@ -1,4 +1,3 @@
-import { SEMESTER_LABELS } from '@features/main/constants/requirement';
 import type { RequirementCourse } from '@features/main/types/requirement';
 import { ClassCard } from '@shared/components';
 import { cn } from '@shared/utils/cn';
@@ -7,6 +6,7 @@ interface RequirementClassListProps {
   requirementName: string;
   courses: RequirementCourse[];
   className?: string;
+  showTakenState?: boolean;
 }
 
 export const isTakenCourse = ({ taken }: RequirementCourse) => taken;
@@ -15,11 +15,16 @@ const getRequirementCourseKey = ({ studentCourseId, departmentName, name }: Requ
   return studentCourseId ?? `${departmentName}-${name}`;
 };
 
-const getRequirementCourseTags = ({ credit, openedSemester }: RequirementCourse, requirementName: string) => {
-  return [requirementName, `${credit}학점`, SEMESTER_LABELS[openedSemester]];
+const getRequirementCourseTags = ({ credit, semester }: RequirementCourse, requirementName: string) => {
+  return [requirementName, `${credit}학점`, semester];
 };
 
-export const RequirementClassList = ({ requirementName, courses, className }: RequirementClassListProps) => {
+export const RequirementClassList = ({
+  requirementName,
+  courses,
+  className,
+  showTakenState = false,
+}: RequirementClassListProps) => {
   if (courses.length === 0) return null;
 
   return (
@@ -30,7 +35,7 @@ export const RequirementClassList = ({ requirementName, courses, className }: Re
             department={course.departmentName}
             title={course.name}
             tags={getRequirementCourseTags(course, requirementName)}
-            type={isTakenCourse(course) ? 'default' : 'disabled'}
+            type={showTakenState && !isTakenCourse(course) ? 'disabled' : 'default'}
           />
         </li>
       ))}

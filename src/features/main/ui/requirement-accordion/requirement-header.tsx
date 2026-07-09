@@ -1,17 +1,14 @@
-import {
-  CURRENT_ONLY_CODES,
-  HIDDEN_BADGE_CODES,
-  MAJOR_TYPE_LABELS,
-  REQUIREMENT_UNIT_LABELS,
-} from '@features/main/constants/requirement';
-import type { RequirementAccordionItem } from '@features/main/types/requirement';
+import { CURRENT_ONLY_CODES, HIDDEN_BADGE_CODES, REQUIREMENT_UNIT_LABELS } from '@features/main/constants/requirement';
+import type { RequirementCondition } from '@features/main/types/requirement';
 import { ProgressBar } from '@features/main/ui';
 import * as Accordion from '@radix-ui/react-accordion';
 import { Badge, Tooltip } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 
 interface RequirementHeaderProps {
-  item: RequirementAccordionItem;
+  item: RequirementCondition & {
+    majorName?: string | null;
+  };
   hasInfo?: boolean;
   infoContent?: string;
 }
@@ -22,12 +19,11 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
   const hasBadge = !HIDDEN_BADGE_CODES.has(item.code);
   const required = item.required ?? 0;
   const hasProgress = !isCurrentOnly && required > 0;
-  const majorTypeLabel = item.majorType === 'ALL' || !item.majorType ? undefined : MAJOR_TYPE_LABELS[item.majorType];
   const unit = REQUIREMENT_UNIT_LABELS[item.unit];
 
   return (
     <Accordion.Header>
-      {majorTypeLabel && <p className="text-body-m-14 mb-3 text-gray-500">{majorTypeLabel}</p>}
+      {item.majorName && <p className="text-body-m-14 mb-8 text-gray-500">{item.majorName}</p>}
 
       <div className="flex items-center gap-8">
         <h3 className="text-title-sb-18 min-w-0 truncate text-gray-800">{item.name}</h3>
