@@ -30,25 +30,25 @@ export const LoginCarousel = () => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, plugins);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const onSelect = useCallback(() => {
+  const handleSelect = useCallback(() => {
     if (!emblaApi) return;
     setSelectedIndex(emblaApi.selectedScrollSnap());
   }, [emblaApi]);
 
   useEffect(() => {
     if (!emblaApi) return;
-    emblaApi.on('select', onSelect);
+    emblaApi.on('select', handleSelect);
     return () => {
-      emblaApi.off('select', onSelect);
+      emblaApi.off('select', handleSelect);
     };
-  }, [emblaApi, onSelect]);
+  }, [emblaApi, handleSelect]);
 
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+  const handlePrevClick = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const handleNextClick = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
   return (
     <div className="flex size-full items-center justify-between overflow-hidden rounded-3xl border border-gray-100 bg-gray-50 px-40 py-120">
-      <IconButton icon="ic_chevron_left" aria-label="이전 슬라이드" onClick={scrollPrev} />
+      <IconButton icon="ic_chevron_left" aria-label="이전 슬라이드" onClick={handlePrevClick} />
 
       <div className="flex w-545 shrink-0 flex-col items-center gap-80">
         <div ref={emblaRef} className="w-full overflow-hidden">
@@ -79,7 +79,7 @@ export const LoginCarousel = () => {
         </div>
       </div>
 
-      <IconButton icon="ic_chevron_right" aria-label="다음 슬라이드" onClick={scrollNext} />
+      <IconButton icon="ic_chevron_right" aria-label="다음 슬라이드" onClick={handleNextClick} />
     </div>
   );
 };
