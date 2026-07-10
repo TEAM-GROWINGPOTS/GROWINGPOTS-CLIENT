@@ -46,10 +46,10 @@ export const RequirementDetail = ({
 
   return (
     <>
-      {notice && <p className="text-caption-r-12 text-darkred-10 mt-4">*{notice}</p>}
-      {unmetDescription && <p className="text-caption-r-12 text-darkred-10 mt-4">*{unmetDescription}</p>}
+      {notice && <p className="text-caption-r-12 text-dark-red-10 mt-4">*{notice}</p>}
+      {unmetDescription && <p className="text-caption-r-12 text-dark-red-10 mt-4">*{unmetDescription}</p>}
       {areaRequirementDescription && (
-        <p className="text-caption-r-12 text-darkred-10 mt-4">*{areaRequirementDescription}</p>
+        <p className="text-caption-r-12 text-dark-red-10 mt-4">*{areaRequirementDescription}</p>
       )}
       {courses && courses.length > 0 && !hasRequiredList && (
         <RequirementClassList requirementName={requirementName} courses={courses} className="mt-12" />
