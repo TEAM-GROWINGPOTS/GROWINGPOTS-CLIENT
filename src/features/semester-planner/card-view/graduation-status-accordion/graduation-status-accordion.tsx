@@ -2,7 +2,7 @@
 
 import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
 import * as Accordion from '@radix-ui/react-accordion';
-import type { GraduationCondition, GraduationUnit } from '@shared/apis/types/graduation';
+import type { GraduationCondition, GraduationResponse, GraduationUnit } from '@shared/apis/types/graduation';
 import { Badge, Chip, Tooltip } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
@@ -32,14 +32,16 @@ const orderConditions = (conditions: GraduationCondition[], order: string[]): Gr
 
 interface GraduationStatusAccordionProps {
   className?: string;
+  data?: GraduationResponse;
 }
 
-export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordionProps) => {
+export const GraduationStatusAccordion = ({ className, data: dataProp }: GraduationStatusAccordionProps) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [isArrowNav, setIsArrowNav] = useState(false);
   const chipContainerRef = useRef<HTMLDivElement>(null);
 
-  const data = useGraduationStatusStore((s) => s.data);
+  const storeData = useGraduationStatusStore((s) => s.data);
+  const data = dataProp ?? storeData;
 
   if (!data || !data.sections) return null;
 
@@ -48,6 +50,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
   const { totalCredits } = summary;
 
   const mainMajor = majors.find(({ majorType }) => majorType === 'MAIN') ?? majors[0];
+  const hasGraduationRequired = mainMajor?.graduationRequired?.hasGraduationRequired ?? false;
 
   const graduationRequiredRows: TabRow[] = (mainMajor?.graduationRequired?.items ?? []).map(
     ({ name, current, required, unit }) => ({ key: name, name, current, required, unit }),
@@ -57,13 +60,19 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
     orderConditions(mainMajor?.conditions ?? [], OTHER_REQUIRED_CODE_ORDER),
   );
 
-  const tabs = ['졸업 필수', ...majors.map(({ majorName }) => majorName), '교양', 'SW/영어'];
+  const tabs = [
+    ...(hasGraduationRequired ? ['졸업 필수'] : []),
+    ...majors.map(({ majorName }) => majorName),
+    '교양',
+    'SW/영어',
+  ];
 
   const getTabConditions = (index: number): TabRow[] => {
-    if (index === 0) return graduationRequiredRows;
+    if (hasGraduationRequired && index === 0) return graduationRequiredRows;
     if (index === tabs.length - 1) return otherRequiredRows;
     if (index === tabs.length - 2) return toTabRows(orderConditions(ge.conditions, GE_CODE_ORDER));
-    return toTabRows(majors[index - 1]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)) ?? []);
+    const majorIndex = hasGraduationRequired ? index - 1 : index;
+    return toTabRows(majors[majorIndex]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)) ?? []);
   };
 
   // 전공/교양/기타 학점을 각 섹션에서 합산하여 스택 바에 사용
