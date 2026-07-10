@@ -1,10 +1,9 @@
 'use client';
 
+import type { MajorDivisionCategoryTypes, NodeCardCourse } from '@features/semester-planner/types/planner-node';
 import { Badge, Tooltip } from '@shared/components';
 import { cn } from '@shared/utils/cn';
 import { useLayoutEffect, useRef, useState } from 'react';
-
-import type { MajorDivisionCategoryTypes, NodeCardCourse } from '../../types/planner-node';
 
 const MAJOR_DIVISION_CATEGORY_SET: Set<string> = new Set<MajorDivisionCategoryTypes>([
   'MAJOR_REQUIRED',

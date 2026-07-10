@@ -1,4 +1,4 @@
-import type { PlannerApiData } from '../types/planner-node';
+import type { PlannerApiData } from '@features/semester-planner/types/planner-node';
 
 export const PLANNER_NODE_MOCK: PlannerApiData = {
   completedTerms: [

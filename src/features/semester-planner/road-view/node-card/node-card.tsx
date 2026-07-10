@@ -1,29 +1,31 @@
 'use client';
 
 import { FolderItemMenu } from '@features/semester-planner/card-view';
+import type { NodeCardCourse } from '@features/semester-planner/types/planner-node';
 import * as Accordion from '@radix-ui/react-accordion';
 import { Badge } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { useState } from 'react';
 
-import type { NodeCardCourse } from '../../types/planner-node';
 import { CourseItem } from './course-item';
 
 export type { NodeCardCourse };
 
 export type NodeCardStatusTypes = 'COMPLETED' | 'IN_PROGRESS' | 'PLANNED';
 
-export interface NodeCardProps {
-  status: NodeCardStatusTypes;
+type BaseNodeCardProps = {
   isSelected: boolean;
   termName: string;
   folderName: string;
   totalCredit: number;
   courses: NodeCardCourse[];
-  onDelete?: () => void;
   className?: string;
-}
+};
+
+export type NodeCardProps =
+  | (BaseNodeCardProps & { status: 'PLANNED'; onDelete: () => void })
+  | (BaseNodeCardProps & { status: 'COMPLETED' | 'IN_PROGRESS' });
 
 const STATUS_ICON: Record<'COMPLETED' | 'IN_PROGRESS', string> = {
   COMPLETED: 'ic_check_circle_black',
@@ -36,16 +38,8 @@ function getCreditBadgeText(status: NodeCardStatusTypes, totalCredit: number): s
   return `${totalCredit}학점 이수예정`;
 }
 
-export const NodeCard = ({
-  status,
-  isSelected,
-  termName,
-  folderName,
-  totalCredit,
-  courses,
-  onDelete,
-  className,
-}: NodeCardProps) => {
+export const NodeCard = (props: NodeCardProps) => {
+  const { status, isSelected, termName, folderName, totalCredit, courses, className } = props;
   const isLime = status !== 'PLANNED' || isSelected;
   const [defaultOpen] = useState(isLime);
 
@@ -78,7 +72,7 @@ export const NodeCard = ({
 
         {status === 'PLANNED' && (
           <div className="[&_button]:visible">
-            <FolderItemMenu onDelete={onDelete ?? (() => {})} />
+            <FolderItemMenu onDelete={props.onDelete} />
           </div>
         )}
       </div>
