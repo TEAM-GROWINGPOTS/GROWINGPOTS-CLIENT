@@ -1,5 +1,74 @@
-import { GraduationResult, RequirementCardProps, StudentInfo } from '@features/onboarding';
+import { CourseInfo, CourseInfoTable, GraduationResult, RequirementCardProps, StudentInfo } from '@features/onboarding';
 import { Button } from '@shared/components/button/button';
+
+const courses: CourseInfo[] = [
+  { id: '1', courseName: '세계와시민', department: '해당없음', credit: '3학점', semester: '1학기', area: '필수교과' },
+  {
+    id: '2',
+    courseName: '인간의가치탐색',
+    department: '해당없음',
+    credit: '3학점',
+    semester: '2학기',
+    area: '필수교과',
+  },
+  {
+    id: '3',
+    courseName: '빅뱅에서문명까지',
+    department: '해당없음',
+    credit: '3학점',
+    semester: '2학기',
+    area: '필수교과',
+  },
+  {
+    id: '4',
+    courseName: '고전으로읽는리더십',
+    department: '해당없음',
+    credit: '3학점',
+    semester: '1학기',
+    area: '필수교과',
+  },
+  { id: '5', courseName: '한국사의이해', department: '해당없음', credit: '3학점', semester: '2학기', area: '필수교과' },
+  {
+    id: '6',
+    courseName: '영화의이해',
+    department: '연극영화학과',
+    credit: '3학점',
+    semester: '3학기',
+    area: '전공 기초',
+  },
+  {
+    id: '7',
+    courseName: '연기실습기초',
+    department: '연극영화학과',
+    credit: '3학점',
+    semester: '3학기',
+    area: '전공 필수',
+  },
+  {
+    id: '8',
+    courseName: '시나리오작법',
+    department: '연극영화학과',
+    credit: '3학점',
+    semester: '4학기',
+    area: '전공 필수',
+  },
+  {
+    id: '9',
+    courseName: '영화편집실습',
+    department: '연극영화학과',
+    credit: '3학점',
+    semester: '4학기',
+    area: '전공 선택',
+  },
+  {
+    id: '10',
+    courseName: '다큐멘터리제작',
+    department: '연극영화학과',
+    credit: '3학점',
+    semester: '5학기',
+    area: '전공 선택',
+  },
+];
 
 const requirementItems: RequirementCardProps[] = [
   { label: '총 학점', value: '88', total: '/120학점' },
@@ -45,6 +114,10 @@ export default function AnalysisResultPage() {
         <div className="flex-4">
           <GraduationResult items={requirementItems} />
         </div>
+      </div>
+
+      <div className="mt-20 w-full">
+        <CourseInfoTable courses={courses} />
       </div>
     </div>
   );

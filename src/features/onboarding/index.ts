@@ -1,5 +1,7 @@
 export { AnalysisLoading } from './analysis-loading/analysis-loading';
 export { StudentInfo } from './analysis-result/student-info';
+export type { CourseInfo } from './course-info-table';
+export { CourseInfoTable } from './course-info-table';
 export { GraduationResult } from './graduation-result/graduation-result';
 export type { RequirementCardProps } from './graduation-result/requirement-card';
 export { PdfUploader } from './pdf-uploader';
