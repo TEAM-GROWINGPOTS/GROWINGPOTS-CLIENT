@@ -24,15 +24,30 @@ interface FilterOption {
   label: string;
 }
 
-const FILTER_TABS: { value: CourseFilterTabKeyTypes; label: string }[] = [
-  { value: 'campus', label: '캠퍼스' },
-  { value: 'major', label: '전공' },
-  { value: 'area', label: '이수영역' },
-  { value: 'grade', label: '학년' },
-  { value: 'semester', label: '개설학기' },
-  { value: 'credit', label: '학점' },
-  { value: 'extra', label: '기타 필수' },
+const FILTER_TABS: { value: CourseFilterTabKeyTypes; label: string; fields: (keyof CourseFilterValues)[] }[] = [
+  { value: 'campus', label: '캠퍼스', fields: ['campus'] },
+  { value: 'major', label: '전공', fields: ['college', 'department'] },
+  { value: 'area', label: '이수영역', fields: ['areas'] },
+  { value: 'grade', label: '학년', fields: ['grades'] },
+  { value: 'semester', label: '개설학기', fields: ['semesters'] },
+  { value: 'credit', label: '학점', fields: ['credits'] },
+  { value: 'extra', label: '기타 필수', fields: ['extras'] },
 ];
+
+const isTabSelected = (fields: (keyof CourseFilterValues)[], filters: CourseFilterValues): boolean =>
+  fields.some((field) => {
+    const value = filters[field];
+    return Array.isArray(value) ? value.length > 0 : value !== '';
+  });
+
+export const getSelectedFilterLabels = (filters: CourseFilterValues | undefined): string[] => {
+  if (!filters) return [];
+
+  return FILTER_TABS.filter(({ fields }) => isTabSelected(fields, filters)).map(({ label }) => label);
+};
+
+export const getFilterTabByLabel = (label: string): CourseFilterTabKeyTypes | undefined =>
+  FILTER_TABS.find((tab) => tab.label === label)?.value;
 
 const CAMPUS_OPTIONS: FilterOption[] = [{ value: '국제캠퍼스', label: '국제캠퍼스' }];
 
