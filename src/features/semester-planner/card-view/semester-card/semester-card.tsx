@@ -34,8 +34,8 @@ interface SemesterCardProps {
   className?: string;
   onDeleteTerm?: () => void;
   onAddFolder?: () => void;
-  onRenameFolder?: (folderId?: string) => void;
-  onDeleteFolder?: (folderId?: string) => void;
+  onRenameFolder?: (folderId: string) => void;
+  onDeleteFolder?: (folderId: string) => void;
   onSwapFolder?: () => void;
 }
 
@@ -109,10 +109,7 @@ export const SemesterCard = ({
         <div className="flex items-center px-4 pt-12 pb-2">
           <span className="text-body-sb-14 shrink-0 text-gray-600">{folderName}</span>
           {isPlanned && (
-            <div className="my-4 flex flex-1 items-center justify-between text-gray-600">
-              <div className="[&_button]:visible">
-                <FolderItemMenu iconSize={16} onRename={() => onRenameFolder?.()} onDelete={() => onDeleteFolder?.()} />
-              </div>
+            <div className="my-4 flex flex-1 items-center justify-end text-gray-600">
               <div ref={folderListRef} className="relative flex shrink-0 items-center">
                 <button
                   type="button"
