@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@shared/components/button/button';
+import { Tooltip } from '@shared/components/tooltip/tooltip';
 import { cn } from '@shared/utils/cn';
 
 import { FolderItemMenu } from '../folder-item-menu/folder-item-menu';
@@ -31,6 +32,19 @@ export const FolderList = ({
   onDeleteFolder,
   className,
 }: FolderListProps) => {
+  const isMaxFolders = folders.length >= MAX_FOLDERS;
+
+  const addFolderButton = (
+    <Button
+      label="추가"
+      size="sm"
+      mode="primary_solid"
+      disabled={isMaxFolders}
+      onClick={onAddFolder}
+      className={cn('w-full justify-center', isMaxFolders && 'pointer-events-none')}
+    />
+  );
+
   return (
     <div className={cn('flex w-160 flex-col rounded-[6px] border border-gray-200 bg-white p-8', className)}>
       {folders.map(({ id, name }) => (
@@ -44,14 +58,16 @@ export const FolderList = ({
           onDelete={() => onDeleteFolder(id)}
         />
       ))}
-      <Button
-        label="추가"
-        size="sm"
-        mode="primary_solid"
-        disabled={folders.length >= MAX_FOLDERS}
-        onClick={onAddFolder}
-        className="mt-4 w-full justify-center"
-      />
+      {isMaxFolders ? (
+        <Tooltip
+          content="폴더는 최대 5개까지 생성돼요"
+          variant="top-start"
+          size="md"
+          trigger={<span className="mt-4 w-full cursor-not-allowed">{addFolderButton}</span>}
+        />
+      ) : (
+        <span className="mt-4 w-full">{addFolderButton}</span>
+      )}
     </div>
   );
 };
