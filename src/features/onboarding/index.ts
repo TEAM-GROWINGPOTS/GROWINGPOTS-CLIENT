@@ -1,3 +1,4 @@
+export { GraduationResult } from './graduation-result/graduation-result';
 export { PdfUploader } from './pdf-uploader';
 export { StepView } from './step-view';
 export type { TableCellSelectOption } from './table-cell';
