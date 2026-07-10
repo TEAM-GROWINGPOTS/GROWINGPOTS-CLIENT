@@ -48,7 +48,7 @@ export const ViewModeToggle = () => {
   }, []);
 
   return (
-    <div className="relative inline-flex shrink-0 rounded-full bg-white p-4">
+    <div role="tablist" aria-label="화면 보기 방식" className="relative inline-flex shrink-0 rounded-full bg-white p-4">
       <div
         className={cn(
           'absolute top-4 bottom-4 rounded-full bg-gray-800',
@@ -66,7 +66,8 @@ export const ViewModeToggle = () => {
               buttonRefs.current[optionValue] = el;
             }}
             type="button"
-            aria-pressed={isSelected}
+            role="tab"
+            aria-selected={isSelected}
             aria-label={label}
             onClick={() => onChange(optionValue)}
             className={cn(
