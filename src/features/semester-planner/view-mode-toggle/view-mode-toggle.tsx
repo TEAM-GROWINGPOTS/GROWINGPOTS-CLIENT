@@ -24,8 +24,17 @@ const OPTIONS: ViewModeOption[] = [
   { value: 'roadmap', label: '로드맵 보기', icon: 'ic_roadmap' },
 ];
 
-export const ViewModeToggle = () => {
-  const { viewMode: value, setViewMode: onChange } = useViewMode();
+interface ViewModeToggleProps {
+  onBeforeChange?: (next: ViewMode) => boolean;
+}
+
+export const ViewModeToggle = ({ onBeforeChange }: ViewModeToggleProps) => {
+  const { viewMode: value, setViewMode } = useViewMode();
+
+  const onChange = (next: ViewMode) => {
+    if (onBeforeChange && !onBeforeChange(next)) return;
+    setViewMode(next);
+  };
   const buttonRefs = useRef<Record<ViewMode, HTMLButtonElement | null>>({ card: null, roadmap: null });
   const [indicatorStyle, setIndicatorStyle] = useState<IndicatorStyle | null>(null);
 
