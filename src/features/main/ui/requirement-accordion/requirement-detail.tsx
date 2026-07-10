@@ -1,5 +1,6 @@
 import type { RequirementCourse } from '@features/main/types/requirement';
-import { isTakenCourse, RequirementClassList } from '@features/main/ui/requirement-accordion/requirement-class-list';
+
+import { isTakenCourse, RequirementClassList } from './requirement-class-list';
 
 interface RequirementDetailProps {
   requirementName: string;

@@ -1,9 +1,10 @@
 import { CURRENT_ONLY_CODES, HIDDEN_BADGE_CODES, REQUIREMENT_UNIT_LABELS } from '@features/main/constants/requirement';
 import type { RequirementCondition } from '@features/main/types/requirement';
-import { ProgressBar } from '@features/main/ui';
 import * as Accordion from '@radix-ui/react-accordion';
 import { Badge, Tooltip } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
+
+import { ProgressBar } from './progress-bar';
 
 interface RequirementHeaderProps {
   item: RequirementCondition & {
