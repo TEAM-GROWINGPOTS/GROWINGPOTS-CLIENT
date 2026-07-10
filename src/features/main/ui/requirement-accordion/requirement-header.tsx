@@ -3,6 +3,7 @@ import type { RequirementCondition } from '@features/main/types/requirement';
 import * as Accordion from '@radix-ui/react-accordion';
 import { Badge, Tooltip } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
+import { cn } from '@shared/utils/cn';
 
 import { ProgressBar } from './progress-bar';
 
@@ -21,15 +22,18 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
   const required = item.required ?? 0;
   const hasProgress = !isCurrentOnly && required > 0;
   const unit = REQUIREMENT_UNIT_LABELS[item.unit];
+  const hasInfoIcon = hasInfo && infoContent;
 
   return (
     <Accordion.Header>
-      {item.majorName && <p className="text-body-m-14 mb-8 text-gray-500">{item.majorName}</p>}
+      {item.majorName && <p className="text-body-m-14 mb-3 text-gray-500">{item.majorName}</p>}
 
-      <div className="flex items-center gap-8">
-        <h3 className="text-title-sb-18 min-w-0 truncate text-gray-800">{item.name}</h3>
+      <div className="flex items-center">
+        <h3 className={cn('text-title-sb-18 min-w-0 truncate text-gray-800', hasInfoIcon ? 'mr-4' : 'mr-8')}>
+          {item.name}
+        </h3>
 
-        {hasInfo && infoContent && (
+        {hasInfoIcon && (
           <Tooltip
             variant="top-start"
             size="sm"
@@ -38,7 +42,7 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
               <button
                 type="button"
                 aria-label={`${item.name} 안내 보기`}
-                className="flex size-20 shrink-0 items-center justify-center"
+                className="mr-8 flex size-20 shrink-0 items-center justify-center"
               >
                 <Icon name="ic_information_outline" size={20} className="text-gray-300" />
               </button>
@@ -52,7 +56,7 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
           </Badge>
         )}
 
-        <p className="text-title-sb-18 ml-auto shrink-0 text-gray-700">
+        <p className="text-title-sb-18 mr-4 ml-auto shrink-0 text-gray-700">
           {item.current}
           {isCurrentOnly ? (
             unit
