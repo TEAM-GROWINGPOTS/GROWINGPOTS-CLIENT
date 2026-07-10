@@ -8,16 +8,22 @@ interface TableCellEditProps {
   value: string;
   onChange: (value: string) => void;
   className?: string;
+  suffix?: string;
 }
 
 const cellBaseClassName = 'text-body-m-16 text-gray-600 flex h-32 items-center rounded-sm bg-white px-8';
 
-export const TableCellEdit = ({ mode, value, onChange, className }: TableCellEditProps) => {
+export const TableCellEdit = ({ mode, value, onChange, className, suffix }: TableCellEditProps) => {
   const [touched, setTouched] = useState(false);
   const showError = touched && value.trim() === '';
 
   if (mode === 'view') {
-    return <span className={cn(cellBaseClassName, className)}>{value}</span>;
+    return (
+      <span className={cn(cellBaseClassName, className)}>
+        {value}
+        {suffix && <span className="text-gray-400">{suffix}</span>}
+      </span>
+    );
   }
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -28,6 +34,28 @@ export const TableCellEdit = ({ mode, value, onChange, className }: TableCellEdi
   const handleBlur = () => {
     setTouched(true);
   };
+
+  if (suffix) {
+    return (
+      <span
+        className={cn(
+          cellBaseClassName,
+          'border outline-none',
+          showError ? 'border-red-20' : 'border-gray-100',
+          className,
+        )}
+      >
+        <input
+          value={value}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          aria-invalid={showError}
+          className="w-full min-w-0 bg-transparent outline-none"
+        />
+        <span className="shrink-0 text-gray-400">{suffix}</span>
+      </span>
+    );
+  }
 
   return (
     <input

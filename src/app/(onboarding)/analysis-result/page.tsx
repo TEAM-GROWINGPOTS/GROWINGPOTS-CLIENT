@@ -1,13 +1,16 @@
+'use client';
+
 import { CourseInfo, CourseInfoTable, GraduationResult, RequirementCardProps, StudentInfo } from '@features/onboarding';
 import { Button } from '@shared/components/button/button';
+import { useState } from 'react';
 
 const courses: CourseInfo[] = [
-  { id: '1', courseName: '세계와시민', department: '해당없음', credit: '3학점', semester: '1학기', area: '필수교과' },
+  { id: '1', courseName: '세계와시민', department: '해당없음', credit: '3', semester: '1학기', area: '필수교과' },
   {
     id: '2',
     courseName: '인간의가치탐색',
     department: '해당없음',
-    credit: '3학점',
+    credit: '3',
     semester: '2학기',
     area: '필수교과',
   },
@@ -15,7 +18,7 @@ const courses: CourseInfo[] = [
     id: '3',
     courseName: '빅뱅에서문명까지',
     department: '해당없음',
-    credit: '3학점',
+    credit: '3',
     semester: '2학기',
     area: '필수교과',
   },
@@ -23,16 +26,16 @@ const courses: CourseInfo[] = [
     id: '4',
     courseName: '고전으로읽는리더십',
     department: '해당없음',
-    credit: '3학점',
+    credit: '3',
     semester: '1학기',
     area: '필수교과',
   },
-  { id: '5', courseName: '한국사의이해', department: '해당없음', credit: '3학점', semester: '2학기', area: '필수교과' },
+  { id: '5', courseName: '한국사의이해', department: '해당없음', credit: '3', semester: '2학기', area: '필수교과' },
   {
     id: '6',
     courseName: '영화의이해',
     department: '연극영화학과',
-    credit: '3학점',
+    credit: '3',
     semester: '3학기',
     area: '전공 기초',
   },
@@ -40,7 +43,7 @@ const courses: CourseInfo[] = [
     id: '7',
     courseName: '연기실습기초',
     department: '연극영화학과',
-    credit: '3학점',
+    credit: '3',
     semester: '3학기',
     area: '전공 필수',
   },
@@ -48,7 +51,7 @@ const courses: CourseInfo[] = [
     id: '8',
     courseName: '시나리오작법',
     department: '연극영화학과',
-    credit: '3학점',
+    credit: '3',
     semester: '4학기',
     area: '전공 필수',
   },
@@ -56,7 +59,7 @@ const courses: CourseInfo[] = [
     id: '9',
     courseName: '영화편집실습',
     department: '연극영화학과',
-    credit: '3학점',
+    credit: '3',
     semester: '4학기',
     area: '전공 선택',
   },
@@ -64,7 +67,7 @@ const courses: CourseInfo[] = [
     id: '10',
     courseName: '다큐멘터리제작',
     department: '연극영화학과',
-    credit: '3학점',
+    credit: '3',
     semester: '5학기',
     area: '전공 선택',
   },
@@ -87,6 +90,12 @@ const requirementItems: RequirementCardProps[] = [
 ];
 
 export default function AnalysisResultPage() {
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleEditToggleClick = () => {
+    setIsEditing((prev) => !prev);
+  };
+
   return (
     <div className="w-full px-120 pt-80 pb-40">
       <div className="mb-28 flex items-end justify-between">
@@ -96,7 +105,12 @@ export default function AnalysisResultPage() {
             PDF에서 추출한 정보를 바탕으로 졸업 현황을 분석했습니다. 잘못된 정보가 있다면 수정해주세요!
           </p>
         </div>
-        <Button label="편집하기" mode="secondary_outline" size="sm" />
+        <Button
+          label={isEditing ? '저장하기' : '편집하기'}
+          mode={isEditing ? 'primary_solid' : 'secondary_outline'}
+          size="sm"
+          onClick={handleEditToggleClick}
+        />
       </div>
 
       <div className="flex h-231 w-full gap-20">
@@ -117,7 +131,7 @@ export default function AnalysisResultPage() {
       </div>
 
       <div className="mt-20 w-full">
-        <CourseInfoTable courses={courses} />
+        <CourseInfoTable courses={courses} isEditing={isEditing} />
       </div>
 
       <div className="mt-20 flex justify-center">
