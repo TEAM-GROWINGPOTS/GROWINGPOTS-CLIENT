@@ -23,7 +23,7 @@ export const PlannerView = () => {
   }, []);
 
   const handleBeforeViewModeChange = (next: ViewMode): boolean => {
-    if (!isDirty) return true;
+    if (next === viewMode || !isDirty) return true;
     setPendingViewMode(next);
     return false;
   };
