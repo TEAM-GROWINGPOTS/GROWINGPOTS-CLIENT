@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 
 import type { ViewMode } from '../view-mode-toggle/view-mode-toggle';
 
@@ -16,6 +17,15 @@ export const useViewMode = () => {
 
   const paramValue = searchParams.get(VIEW_MODE_QUERY_KEY);
   const viewMode = isViewMode(paramValue) ? paramValue : DEFAULT_VIEW_MODE;
+
+  useEffect(() => {
+    if (paramValue === null || isViewMode(paramValue)) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.set(VIEW_MODE_QUERY_KEY, DEFAULT_VIEW_MODE);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [paramValue, pathname, router, searchParams]);
 
   const setViewMode = (nextViewMode: ViewMode) => {
     if (nextViewMode === viewMode) return;
