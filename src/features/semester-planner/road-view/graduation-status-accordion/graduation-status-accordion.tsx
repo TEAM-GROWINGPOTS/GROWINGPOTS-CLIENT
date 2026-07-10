@@ -9,10 +9,8 @@ import type { TabItem } from '@shared/components/tabs/tabs';
 import { cn } from '@shared/utils/cn';
 import { useState } from 'react';
 
-// SW/영어 강의가 교양과 전공에 중복으로 들어가 있음 -> 전공 요건에서는 제외하고 교양 요건에서만 보여주기 위해 전공 요건 코드 정의
 const MAJOR_CODES = new Set(['MAJOR_BASIC', 'MAJOR_REQUIRED', 'MAJOR_ELECTIVE']);
 
-// 학점 단위와 과목 단위를 한글로 변환
 const toUnitLabel = (unit: GraduationUnit) => (unit === 'COURSES' ? '과목' : '학점');
 
 export const GraduationStatusAccordion = () => {
@@ -22,31 +20,22 @@ export const GraduationStatusAccordion = () => {
 
   if (!data || !data.sections) return null;
 
-  // 졸업 요건 데이터 구조 분해 할당
-  const { summary, graduatable, sections } = data; // 졸업 요건 요약, 졸업 가능 여부, 졸업 요건 섹션(전공 목록, 교양, 기타)
-  const { majors, ge, others } = sections; // 전공 목록(MAIN + DOUBLE), 교양, 기타 섹션
+  const { summary, graduatable, sections } = data;
+  const { majors, ge, others } = sections;
 
-  // 다전공 여부 확인 (본전공 외 다전공이 하나 이상인 경우)
   const hasMultipleMajors = majors.length > 1;
-  // 선택된 전공 섹션 결정
   const selectedMajor = majors[selectedMajorIndex];
 
-  // 몇 학점 부족한지 계산
   const shortfall = summary.totalCredits.required - summary.totalCredits.current;
-  // 졸업 요건 충족 여부에 따라 배지 라벨 결정
-  // 학점 부족인 경우 `${shortfall}학점 부족`, 졸업 요건 충족인 경우 '요건 충족', 그 외에는 '요건 미충족'으로 표시
   const badgeLabel = graduatable ? '요건 충족' : shortfall > 0 ? `${shortfall}학점 부족` : '요건 미충족';
 
-  // 졸업 필수 요건이 있는 경우 해당 항목들을 배열로 추출, 없으면 빈 배열 반환
   const graduationRequiredItems =
     selectedMajor.graduationRequired?.hasGraduationRequired && selectedMajor.graduationRequired.items?.length
       ? selectedMajor.graduationRequired.items
       : [];
 
-  // 전공 섹션의 조건 중 전공 요건 코드에 해당하는 항목만 필터링
   const majorConditions = selectedMajor.conditions.filter(({ code }) => MAJOR_CODES.has(code));
 
-  // 탭 항목 구성: 모든 전공(MAIN + DOUBLE)을 순서대로 표시
   const tabs: TabItem[] = majors.map(({ majorName }, i) => ({
     value: String(i),
     label: majorName,
