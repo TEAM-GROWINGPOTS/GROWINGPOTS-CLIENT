@@ -53,11 +53,11 @@ export const LoginCarousel = () => {
       <div className="flex w-545 shrink-0 flex-col items-center gap-80">
         <div ref={emblaRef} className="w-full overflow-hidden">
           <div className="flex">
-            {SLIDES.map((slide, index) => (
+            {SLIDES.map(({ lines }, index) => (
               <div key={index} className="min-w-0 flex-[0_0_100%]">
                 <div className="flex flex-col items-center gap-32">
                   <div className="text-title-sb-24 min-h-63 w-full text-center text-gray-900">
-                    {slide.lines.map((line, i) => (
+                    {lines.map((line, i) => (
                       <p key={i}>{line}</p>
                     ))}
                   </div>
