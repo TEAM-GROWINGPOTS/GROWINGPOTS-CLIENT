@@ -1,13 +1,20 @@
-import type { GraduationData, GraduationStatusState } from '@features/semester-planner/types/graduation-status';
+import type { GraduationResponse } from '@shared/apis/types/graduation';
 import { create } from 'zustand';
 
-const MOCK_DATA: GraduationData = {
+interface GraduationStatusState {
+  data: GraduationResponse | null;
+  setData: (data: GraduationResponse) => void;
+}
+
+const MOCK_DATA: GraduationResponse = {
   summary: {
     totalCredits: { current: 44, required: 120 },
     gpa: { current: 2.788, min: 1.7 },
     enrollmentStatus: '재학',
   },
   graduatable: false,
+  conditions: null,
+  graduationRequired: null,
   sections: {
     majors: [
       {
