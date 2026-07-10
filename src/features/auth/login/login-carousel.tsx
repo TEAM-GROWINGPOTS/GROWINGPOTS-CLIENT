@@ -46,7 +46,7 @@ export const LoginCarousel = () => {
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
   return (
-    <div className="flex size-full items-center justify-between overflow-hidden rounded-[24px] border border-gray-100 bg-gray-50 px-40 py-120">
+    <div className="flex size-full items-center justify-between overflow-hidden rounded-3xl border border-gray-100 bg-gray-50 px-40 py-120">
       <IconButton icon="ic_chevron_left" aria-label="이전 슬라이드" onClick={scrollPrev} />
 
       <div className="flex w-545 shrink-0 flex-col items-center gap-80">
@@ -60,7 +60,7 @@ export const LoginCarousel = () => {
                       <p key={i}>{line}</p>
                     ))}
                   </div>
-                  <div className="h-[340.625px] w-full overflow-hidden rounded-[16px] border-[6px] border-gray-700 bg-gray-100" />
+                  <div className="h-340 w-full overflow-hidden rounded-2xl border-[6px] border-gray-700 bg-gray-100" />
                 </div>
               </div>
             ))}
