@@ -90,13 +90,13 @@ export const AddCourseSidebar = ({ onClose, onDirectAdd, renderCourse }: AddCour
           </button>
         </div>
         {filteredCourses.length > 0 ? (
-          <ul className="mt-8 flex flex-col gap-12 overflow-y-auto">
+          <ul className="mt-8 flex [scrollbar-width:none] flex-col gap-12 overflow-y-auto [&::-webkit-scrollbar]:hidden">
             {filteredCourses.map(({ id, department, title, tags }) => (
               <li key={id}>
                 {renderCourse ? (
                   renderCourse({ id, department, title, tags })
                 ) : (
-                  <ClassCard department={department} title={title} tags={tags} />
+                  <ClassCard department={department} title={title} tags={tags} className="border border-gray-100" />
                 )}
               </li>
             ))}
