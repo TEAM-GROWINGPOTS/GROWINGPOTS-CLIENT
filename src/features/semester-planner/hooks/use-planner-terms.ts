@@ -169,10 +169,11 @@ export const usePlannerTerms = () => {
 
   const deleteFolder = (termId: string, folderId: string) => {
     setPlannedTerms((prev) =>
-      prev.map((term) => {
+      prev.flatMap((term) => {
         if (term.id !== termId) return term;
         const remainingFolders = term.folders.filter(({ id }) => id !== folderId);
-        const selectedFolderId = term.selectedFolderId === folderId ? remainingFolders[0]?.id : term.selectedFolderId;
+        if (remainingFolders.length === 0) return [];
+        const selectedFolderId = term.selectedFolderId === folderId ? remainingFolders[0].id : term.selectedFolderId;
         return { ...term, folders: remainingFolders, selectedFolderId };
       }),
     );

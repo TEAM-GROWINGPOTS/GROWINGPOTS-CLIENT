@@ -1,6 +1,5 @@
 'use client';
 
-import { toast } from '@features/onboarding';
 import { FolderItemMenu } from '@features/semester-planner/card-view/folder-item-menu/folder-item-menu';
 import { FolderList } from '@features/semester-planner/card-view/folder-list/folder-list';
 import { FolderRenameModal } from '@features/semester-planner/card-view/folder-rename-modal/folder-rename-modal';
@@ -120,10 +119,6 @@ export const SemesterCard = ({
   const handleDeleteFolderClick = (folderId: string) => {
     const folder = folders?.find(({ id }) => id === folderId);
     if (!folder) return;
-    if ((folders?.length ?? 0) <= 1) {
-      toast.negative('마지막 폴더는 삭제할 수 없어요.');
-      return;
-    }
     setDeleteTarget({ folderId, folderName: folder.name });
   };
 
@@ -137,6 +132,7 @@ export const SemesterCard = ({
   const isPlanned = status === 'planned';
   const statusIcon = STATUS_ICON[status];
   const termLabel = `${yearLevel}학년 ${semesterLabel ?? `${semester}학기`}`;
+  const isLastFolder = (folders?.length ?? 0) <= 1;
 
   return (
     <section className={cn('flex max-h-screen w-258 shrink-0 flex-col self-start rounded-xl bg-gray-800', className)}>
@@ -235,8 +231,16 @@ export const SemesterCard = ({
           if (!open) setDeleteTarget(null);
         }}
         type="delete"
-        title={`${termLabel}의 '${deleteTarget?.folderName ?? ''}'을 삭제할까요?`}
-        description="삭제한 폴더는 복구할 수 없어요."
+        title={
+          isLastFolder
+            ? `정말 '${deleteTarget?.folderName ?? ''}'을 삭제하시겠습니까?`
+            : `${termLabel}의 '${deleteTarget?.folderName ?? ''}'을 삭제할까요?`
+        }
+        description={
+          isLastFolder
+            ? `'${deleteTarget?.folderName ?? ''}'을 삭제하면 ${termLabel} 내 저장된 과목 정보가 모두 삭제되며 복구할 수 없습니다.`
+            : '삭제한 폴더는 복구할 수 없어요.'
+        }
         onConfirm={handleConfirmDeleteFolder}
       />
     </section>
