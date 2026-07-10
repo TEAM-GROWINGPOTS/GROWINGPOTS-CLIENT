@@ -119,6 +119,13 @@ export default function AnalysisResultPage() {
       <div className="mt-20 w-full">
         <CourseInfoTable courses={courses} />
       </div>
+
+      <div className="mt-20 flex justify-center">
+        <div className="flex w-416 flex-col gap-8">
+          <Button label="PDF 재업로드" mode="primary_outline" size="lg" className="w-full justify-center" />
+          <Button label="확인" mode="primary_solid" size="lg" className="w-full justify-center" />
+        </div>
+      </div>
     </div>
   );
 }
