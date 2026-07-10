@@ -13,11 +13,13 @@ interface CourseItemProps {
 }
 
 export const CourseItem = ({ course }: CourseItemProps) => {
+  // 전공 관련 divisionCategory → 배지 표기, 그 외 → 배지 미표기
   const isMajor = course.divisionCategory !== null && MAJOR_DIVISION_CATEGORIES.includes(course.divisionCategory);
 
   const textRef = useRef<HTMLParagraphElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
 
+  // 과목명이 길어져서 줄임표시가 되는 경우 → 툴팁 표시
   useLayoutEffect(() => {
     const el = textRef.current;
     if (el) setIsTruncated(el.scrollWidth > el.clientWidth);
@@ -32,9 +34,10 @@ export const CourseItem = ({ course }: CourseItemProps) => {
           </p>
         }
         content={course.courseName}
-        variant="top-start"
+        variant="bottom-start"
         disabled={!isTruncated}
       />
+      {/* 전공일 경우 배지 표기, 그 외에는 배지 미표기 */}
       {isMajor && course.divisionName && (
         <Badge size="xsmall" color="lime02" className="ml-8 shrink-0">
           {course.divisionName}

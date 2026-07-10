@@ -91,8 +91,8 @@ export const NodeCard = ({
           <button
             type="button"
             onClick={onMenuClick}
-            aria-label="학기 옵션"
-            className="flex shrink-0 cursor-pointer items-center justify-center rounded-sm p-2"
+            aria-label="학기 삭제 메뉴"
+            className="flex shrink-0 cursor-pointer items-center justify-center rounded p-2"
           >
             <Icon name="ic_dot_vertical" size={20} className="text-gray-600" />
           </button>
