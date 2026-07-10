@@ -44,7 +44,7 @@ const getCardClassName = (item: StepViewItem, isSelected: boolean) =>
     cardBaseClassName,
     shortCardIds.has(item.id) && 'h-140',
     item.satisfied ? 'bg-gray-700' : 'bg-lime-300',
-    item.isTotal && 'bg-lime-300',
+    item.isTotal && 'bg-transparent',
     isSelected && 'ring-2 ring-lime-500 ring-offset-2 ring-offset-gray-100',
   );
 
@@ -55,7 +55,7 @@ const getValueClassName = (item: StepViewItem) =>
   item.satisfied ? 'text-title-sb-24 text-gray-50' : 'text-title-sb-24 text-gray-800';
 
 const getRequiredClassName = (item: StepViewItem) =>
-  item.satisfied ? 'text-body-m-14 text-gray-400' : 'text-body-m-14 text-lime-700';
+  item.satisfied ? 'px-2 text-body-m-14 text-gray-400' : 'text-body-m-14 text-lime-700';
 
 const getUnit = (unit?: StepViewUnit) => unit ?? '학점';
 
@@ -75,11 +75,14 @@ export const StepView = ({ items = DEFAULT_ITEMS, selectedItemId, onSelectItem, 
               aria-pressed={isSelected}
             >
               {item.isTotal && (
-                <span
-                  className="pointer-events-none absolute inset-y-0 right-0 w-68 bg-lime-400"
-                  style={{ clipPath: 'polygon(0 0, 100% 50%, 0 100%)' }}
-                  aria-hidden
-                />
+                <span className="pointer-events-none absolute inset-0 z-0" aria-hidden>
+                  <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 225 162">
+                    <path
+                      d="M0 20C0 8.95431 8.9543 0 20 0H159.78C166.306 0 172.422 3.18387 176.164 8.52992L223.172 75.6769C228.376 83.1101 227.924 93.1151 222.071 100.049L176.185 154.402C172.385 158.903 166.794 161.5 160.903 161.5H20C8.95433 161.5 0 152.546 0 141.5V20Z"
+                      fill="#EDFF98"
+                    />
+                  </svg>
+                </span>
               )}
 
               <div className="relative z-10 flex items-center gap-4">
@@ -90,7 +93,7 @@ export const StepView = ({ items = DEFAULT_ITEMS, selectedItemId, onSelectItem, 
               </div>
 
               <div className="relative z-10 flex items-end">
-                <span className={cn(getValueClassName(item))}>{item.current}</span>
+                <span className={cn(getValueClassName(item), 'relative top-2')}>{item.current}</span>
                 <span className={getRequiredClassName(item)}>
                   /{item.required}
                   {getUnit(item.unit)}
