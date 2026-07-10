@@ -38,7 +38,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
   const doubleMajorConditions = doubleMajor?.conditions.filter((c) => c.code.startsWith('MAJOR_')) ?? [];
 
   const majorNames = MOCK_MAJOR_NAMES;
-  const tabs = ['졸업 필수', ...majorNames, '교양', '기타 필수'];
+  const tabs = ['졸업 필수', ...majorNames, '교양', 'SW/영어'];
 
   const getTabConditions = (index: number): GraduationCondition[] => {
     if (index === 0) return gradRequiredConditions;
