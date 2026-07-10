@@ -1,9 +1,9 @@
 'use client';
 
-import { Tabs } from '@features/semester-planner/card-view/tabs/tabs';
 import { Button } from '@shared/components/button/button';
 import { Modal } from '@shared/components/modal/modal';
 import { Select } from '@shared/components/select/select';
+import { Tabs } from '@shared/components/tabs/tabs';
 import { useState } from 'react';
 
 export type CourseFilterTabKeyTypes = 'campus' | 'major' | 'area' | 'grade' | 'semester' | 'credit' | 'extra';
