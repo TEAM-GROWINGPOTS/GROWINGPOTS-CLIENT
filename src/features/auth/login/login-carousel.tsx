@@ -73,7 +73,10 @@ export const LoginCarousel = () => {
             <div
               key={index}
               aria-label={`${index + 1}번 슬라이드`}
-              className={cn('rounded-full', index === selectedIndex ? 'h-7 w-95 bg-gray-800' : 'size-7 bg-gray-200')}
+              className={cn(
+                'h-7 rounded-full transition-[width,background-color] duration-300',
+                index === selectedIndex ? 'w-95 bg-gray-800' : 'w-7 bg-gray-200',
+              )}
             />
           ))}
         </div>
