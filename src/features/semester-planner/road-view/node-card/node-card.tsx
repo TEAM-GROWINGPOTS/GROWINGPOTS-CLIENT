@@ -1,36 +1,27 @@
 'use client';
 
+import { FolderItemMenu } from '@features/semester-planner/card-view';
 import * as Accordion from '@radix-ui/react-accordion';
 import { Badge } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { useState } from 'react';
 
+import type { NodeCardCourse } from '../../types/planner-node';
 import { CourseItem } from './course-item';
 
-export interface NodeCardCourse {
-  id: number;
-  courseName: string;
-  divisionCategory: string | null;
-  divisionName: string | null;
-}
+export type { NodeCardCourse };
 
-export type NodeCardStatus = 'COMPLETED' | 'IN_PROGRESS' | 'PLANNED';
+export type NodeCardStatusTypes = 'COMPLETED' | 'IN_PROGRESS' | 'PLANNED';
 
 export interface NodeCardProps {
-  status: NodeCardStatus;
-  /* true → 라임 카드 & 아코디언 초기 오픈. completedTerms는 항상 true. */
+  status: NodeCardStatusTypes;
   isSelected: boolean;
-  /* 헤더에 표시되는 학기명 (예: "1학년 1학기") */
   termName: string;
-  /* 아코디언 헤더에 표시되는 폴더/버전명 */
   folderName: string;
-  /* 학기 총 이수학점 → 배지 표기 */
   totalCredit: number;
-  /* 학기 내 수강 과목 리스트 */
   courses: NodeCardCourse[];
-  /* PLANNED 카드의 점세개 버튼 클릭 핸들러 */
-  onMenuClick?: () => void;
+  onDelete?: () => void;
   className?: string;
 }
 
@@ -39,7 +30,7 @@ const STATUS_ICON: Record<'COMPLETED' | 'IN_PROGRESS', string> = {
   IN_PROGRESS: 'ic_check_circle_lime',
 };
 
-function getCreditBadgeText(status: NodeCardStatus, totalCredit: number): string {
+function getCreditBadgeText(status: NodeCardStatusTypes, totalCredit: number): string {
   if (status === 'COMPLETED') return `${totalCredit}학점 이수완료`;
   if (status === 'IN_PROGRESS') return `${totalCredit}학점 이수 중`;
   return `${totalCredit}학점 이수예정`;
@@ -52,18 +43,16 @@ export const NodeCard = ({
   folderName,
   totalCredit,
   courses,
-  onMenuClick,
+  onDelete,
   className,
 }: NodeCardProps) => {
-  // status가 PLANNED이거나 isSelected가 false인 경우 → 아코디언 닫힘, 그 외 → 아코디언 열림
   const isLime = status !== 'PLANNED' || isSelected;
-  // 노드뷰 진입 시 초기값만 사용 — isSelected 변경 시 아코디언 상태 자동 조정 안 함
   const [defaultOpen] = useState(isLime);
 
   return (
     <div
       className={cn(
-        'flex w-250 flex-col gap-12 self-start overflow-hidden rounded-xl px-8 pt-16 pb-8',
+        'group flex w-250 flex-col gap-12 self-start rounded-xl px-8 pt-16 pb-8',
         isLime ? 'border border-lime-300 bg-lime-300' : 'bg-gray-50',
         className,
       )}
@@ -88,14 +77,9 @@ export const NodeCard = ({
         </div>
 
         {status === 'PLANNED' && (
-          <button
-            type="button"
-            onClick={onMenuClick}
-            aria-label="학기 삭제 메뉴"
-            className="flex shrink-0 cursor-pointer items-center justify-center rounded p-2"
-          >
-            <Icon name="ic_dot_vertical" size={20} className="text-gray-600" />
-          </button>
+          <div className="[&_button]:visible">
+            <FolderItemMenu onDelete={onDelete ?? (() => {})} />
+          </div>
         )}
       </div>
 

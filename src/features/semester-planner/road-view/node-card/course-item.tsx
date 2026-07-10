@@ -4,9 +4,13 @@ import { Badge, Tooltip } from '@shared/components';
 import { cn } from '@shared/utils/cn';
 import { useLayoutEffect, useRef, useState } from 'react';
 
-import type { NodeCardCourse } from './node-card';
+import type { MajorDivisionCategoryTypes, NodeCardCourse } from '../../types/planner-node';
 
-const MAJOR_DIVISION_CATEGORIES = ['MAJOR_REQUIRED', 'MAJOR_ELECTIVE', 'MAJOR_BASIC'];
+const MAJOR_DIVISION_CATEGORY_SET: Set<string> = new Set<MajorDivisionCategoryTypes>([
+  'MAJOR_REQUIRED',
+  'MAJOR_ELECTIVE',
+  'MAJOR_BASIC',
+]);
 
 interface CourseItemProps {
   course: NodeCardCourse;
@@ -14,7 +18,7 @@ interface CourseItemProps {
 
 export const CourseItem = ({ course }: CourseItemProps) => {
   // 전공 관련 divisionCategory → 배지 표기, 그 외 → 배지 미표기
-  const isMajor = course.divisionCategory !== null && MAJOR_DIVISION_CATEGORIES.includes(course.divisionCategory);
+  const isMajor = course.divisionCategory !== null && MAJOR_DIVISION_CATEGORY_SET.has(course.divisionCategory);
 
   const textRef = useRef<HTMLParagraphElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);

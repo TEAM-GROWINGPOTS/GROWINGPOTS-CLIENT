@@ -1,6 +1,13 @@
-export type CompletedTermStatus = 'COMPLETED' | 'IN_PROGRESS';
+export type CompletedTermStatusTypes = 'COMPLETED' | 'IN_PROGRESS';
 
-export type MajorDivisionCategory = 'MAJOR_REQUIRED' | 'MAJOR_ELECTIVE' | 'MAJOR_BASIC';
+export type MajorDivisionCategoryTypes = 'MAJOR_REQUIRED' | 'MAJOR_ELECTIVE' | 'MAJOR_BASIC';
+
+export interface NodeCardCourse {
+  id: number;
+  courseName: string;
+  divisionCategory: string | null;
+  divisionName: string | null;
+}
 
 export interface CompletedCourse {
   studentCourseId: number;
@@ -21,7 +28,7 @@ export interface CompletedTerm {
   /** 합성값이라 항상 음수 — 다른 API에 넘기지 않는다 */
   plannerTermVersionId: number;
   name: string;
-  status: CompletedTermStatus;
+  status: CompletedTermStatusTypes;
   totalCredit: number;
   locked: true;
   courses: CompletedCourse[];
