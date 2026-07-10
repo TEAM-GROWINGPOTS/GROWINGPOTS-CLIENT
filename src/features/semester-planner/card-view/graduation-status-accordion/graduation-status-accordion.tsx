@@ -2,7 +2,7 @@
 
 import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
 import * as Accordion from '@radix-ui/react-accordion';
-import type { GraduationCondition } from '@shared/apis/types/graduation';
+import type { GraduationCondition, GraduationUnit } from '@shared/apis/types/graduation';
 import { Badge, Chip, Tooltip } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
@@ -12,6 +12,23 @@ import { AccordionProgressBar } from './accordion-progress-bar';
 import { calculatePercentage } from './calculate-percentage';
 
 const MAJOR_CODES = new Set(['MAJOR_BASIC', 'MAJOR_REQUIRED', 'MAJOR_ELECTIVE']);
+const OTHER_REQUIRED_CODE_ORDER = ['SW_CERT_COURSE', 'ENGLISH_COURSE'];
+const GE_CODE_ORDER = ['DISTRIBUTED_GE', 'REQUIRED_GE', 'FREE_GE'];
+const UNIT_LABEL: Record<GraduationUnit, string> = { CREDITS: '학점', COURSES: '과목' };
+
+interface TabRow {
+  key: string;
+  name: string;
+  current: number;
+  required: number | null;
+  unit: GraduationUnit;
+}
+
+const toTabRows = (conditions: GraduationCondition[]): TabRow[] =>
+  conditions.map(({ code, name, current, required, unit }) => ({ key: code, name, current, required, unit }));
+
+const orderConditions = (conditions: GraduationCondition[], order: string[]): GraduationCondition[] =>
+  order.flatMap((code) => conditions.filter((c) => c.code === code));
 
 interface GraduationStatusAccordionProps {
   className?: string;
@@ -30,11 +47,23 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
   const { majors, ge, others } = sections;
   const { totalCredits } = summary;
 
-  const tabs = [...majors.map(({ majorName }) => majorName), '교양'];
+  const mainMajor = majors.find(({ majorType }) => majorType === 'MAIN') ?? majors[0];
 
-  const getTabConditions = (index: number): GraduationCondition[] => {
-    if (index === tabs.length - 1) return ge.conditions;
-    return majors[index]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)) ?? [];
+  const graduationRequiredRows: TabRow[] = (mainMajor?.graduationRequired?.items ?? []).map(
+    ({ name, current, required, unit }) => ({ key: name, name, current, required, unit }),
+  );
+
+  const otherRequiredRows: TabRow[] = toTabRows(
+    orderConditions(mainMajor?.conditions ?? [], OTHER_REQUIRED_CODE_ORDER),
+  );
+
+  const tabs = ['졸업 필수', ...majors.map(({ majorName }) => majorName), '교양', 'SW/영어'];
+
+  const getTabConditions = (index: number): TabRow[] => {
+    if (index === 0) return graduationRequiredRows;
+    if (index === tabs.length - 1) return otherRequiredRows;
+    if (index === tabs.length - 2) return toTabRows(orderConditions(ge.conditions, GE_CODE_ORDER));
+    return toTabRows(majors[index - 1]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)) ?? []);
   };
 
   // 전공/교양/기타 학점을 각 섹션에서 합산하여 스택 바에 사용
@@ -65,7 +94,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
   };
 
   return (
-    <Accordion.Root type="single" collapsible className={cn('w-full rounded-[8px] bg-white p-20', className)}>
+    <Accordion.Root type="single" collapsible className={cn('w-full rounded-lg bg-white p-20', className)}>
       <Accordion.Item value="graduation-status">
         <Accordion.Header>
           <Accordion.Trigger className="group flex w-full cursor-pointer items-center justify-between">
@@ -105,7 +134,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
                   </div>
                 </div>
                 <div
-                  className="relative h-16 w-full overflow-hidden rounded-[2px]"
+                  className="relative h-16 w-full overflow-hidden rounded-xs"
                   style={{
                     backgroundImage:
                       'repeating-linear-gradient(to right, #f4f4f4 0px, #f4f4f4 3px, #fafafa 3px, #fafafa 6px)',
@@ -135,11 +164,11 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
             </div>
 
             {/* 탭별 요건 현황 */}
-            <div className="flex min-h-158 flex-col justify-between rounded bg-gray-50 p-16">
+            <div className="flex min-h-158 flex-col gap-16 rounded bg-gray-50 p-16">
               <div
                 ref={chipContainerRef}
                 role="tablist"
-                className="flex [scrollbar-width:none] gap-8 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+                className="flex h-30 [scrollbar-width:none] gap-8 overflow-x-auto [&::-webkit-scrollbar]:hidden"
                 onKeyDown={handleChipKeyDown}
               >
                 {tabs.map((tab, index) => (
@@ -160,13 +189,16 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
                 ))}
               </div>
               <div className="grid grid-cols-[max-content_1fr_max-content] items-center gap-x-12 gap-y-8 px-4">
-                {getTabConditions(activeTabIndex).map(({ code, name, current, required }) => (
-                  <Fragment key={code}>
+                {getTabConditions(activeTabIndex).map(({ key, name, current, required, unit }) => (
+                  <Fragment key={key}>
                     <span className="text-body-sb-14 text-gray-800">{name}</span>
                     <AccordionProgressBar current={current} required={required ?? 0} />
                     <div className="flex items-center justify-end">
                       <span className="text-body-sb-14 text-gray-700">{current}</span>
-                      <span className="text-body-r-14 text-gray-400">/{required ?? '-'}학점</span>
+                      <span className="text-body-r-14 text-gray-400">
+                        /{required ?? '-'}
+                        {UNIT_LABEL[unit]}
+                      </span>
                     </div>
                   </Fragment>
                 ))}
