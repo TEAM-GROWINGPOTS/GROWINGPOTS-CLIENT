@@ -26,7 +26,8 @@ const SLIDES = [
 ];
 
 export const LoginCarousel = () => {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 3000 })]);
+  const [plugins] = useState(() => [Autoplay({ delay: 3000 })]);
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, plugins);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const onSelect = useCallback(() => {
