@@ -51,7 +51,7 @@ export const ViewModeToggle = () => {
     <div className="relative inline-flex shrink-0 rounded-full bg-white p-4">
       <div
         className={cn(
-          'absolute top-4 bottom-4 rounded-full bg-gray-700',
+          'absolute top-4 bottom-4 rounded-full bg-gray-800',
           isTransitionEnabled && 'transition-[left,width] duration-200 ease-out',
         )}
         style={{ left: indicatorStyle.left, width: indicatorStyle.width }}
@@ -75,7 +75,7 @@ export const ViewModeToggle = () => {
               isSelected ? 'text-gray-100' : 'text-gray-500',
             )}
           >
-            <Icon name={icon} size={20} />
+            <Icon name={icon} size={20} className={isSelected ? 'text-gray-50' : undefined} />
             {isSelected && <span>{label}</span>}
           </button>
         );
