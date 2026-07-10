@@ -73,7 +73,12 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
   };
 
   return (
-    <Accordion.Root type="single" collapsible className={cn('w-full rounded-[8px] bg-white p-20', className)}>
+    <Accordion.Root
+      type="single"
+      collapsible
+      defaultValue="graduation-status"
+      className={cn('w-full rounded-[8px] bg-white p-20', className)}
+    >
       <Accordion.Item value="graduation-status">
         <Accordion.Header>
           <Accordion.Trigger className="group flex w-full cursor-pointer items-center justify-between">
