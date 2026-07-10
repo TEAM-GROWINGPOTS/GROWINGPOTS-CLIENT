@@ -4,6 +4,7 @@ import Icon from '@shared/components/icon/icon';
 import { NavItem } from '@shared/components/nav-item/nav-item';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -25,11 +26,24 @@ const FALLBACK_ACADEMIC_INFO: SideNavigationAcademicInfoItem[] = [
   { label: '학년', value: '4학년 1학기' },
 ];
 
-// TODO: 실제 endpoint로 교체
 const NAV_ITEMS = [
   { label: '나의 현황', iconName: 'ic_home', href: '/' },
   { label: '학기플래너', iconName: 'ic_planner', href: '/semester-planner' },
 ] as const;
+
+// TODO: 전역 사용자 정보 연동 후 교체
+const MOCK_USER_PROFILE = {
+  name: '사용자',
+  grade: 4,
+} as const;
+
+const GRADE_IMAGE_BY_YEAR: Record<number, string> = {
+  1: '/images/grade_1st.png',
+  2: '/images/grade_2nd.png',
+  3: '/images/grade_3rd.png',
+  4: '/images/grade_4th.png',
+  5: '/images/grade_5th.png',
+};
 
 const isNavItemActive = (pathname: string, href: string) => {
   if (href === '/') return pathname === '/';
@@ -40,13 +54,18 @@ export const SideNavigation = ({
   academicInfo = FALLBACK_ACADEMIC_INFO,
   initialIsCollapsed = false,
 }: SideNavigationProps) => {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const isCollapsed = useSideNavigationStore((state) => state.isCollapsed);
   const isInitialized = useSideNavigationStore((state) => state.isInitialized);
+  const isSidebarCollapsed = isInitialized ? isCollapsed : initialIsCollapsed;
+
+  const resolvedUserGrade = Math.min(Math.max(MOCK_USER_PROFILE.grade, 1), 5);
+  const profileImageSrc = GRADE_IMAGE_BY_YEAR[resolvedUserGrade] ?? GRADE_IMAGE_BY_YEAR[1];
+
   const initializeCollapsed = useSideNavigationStore((state) => state.initializeCollapsed);
   const toggleSidebar = useSideNavigationStore((state) => state.toggleSidebar);
-  const pathname = usePathname();
-  const router = useRouter();
-  const isSidebarCollapsed = isInitialized ? isCollapsed : initialIsCollapsed;
 
   useEffect(() => {
     initializeCollapsed(initialIsCollapsed);
@@ -76,7 +95,7 @@ export const SideNavigation = ({
               isSidebarCollapsed ? 'pointer-events-none opacity-0' : 'opacity-100',
             )}
           >
-            <img src="/images/logo.svg" alt="Growing Pots" width={119} height={20} />
+            <Image src="/images/logo.svg" alt="Growing Pots" width={119} height={20} priority />
           </div>
 
           <button
@@ -119,7 +138,6 @@ export const SideNavigation = ({
               type="button"
               className="flex cursor-pointer items-center justify-center gap-4 rounded bg-gray-800 px-12 py-6"
             >
-              <Icon name="ic_home" />
               <span className="text-body-m-14 text-gray-300">졸업사정관리표</span>
             </button>
             <section aria-label="학력 정보">
@@ -139,13 +157,13 @@ export const SideNavigation = ({
           aria-label="프로필"
           className={cn(
             'flex items-center p-12 transition-[gap] duration-300 ease-in-out',
-            isSidebarCollapsed ? 'justify-center' : 'gap-12',
+            isSidebarCollapsed ? 'justify-center' : 'gap-4',
           )}
         >
-          <Icon name="ic_home" />
+          <Image src={profileImageSrc} alt={`${resolvedUserGrade}학년`} width={20} height={20} />
           {!isSidebarCollapsed && (
             <>
-              <p className="text-body-m-16 min-w-0 flex-1 truncate text-white">사용자</p>
+              <p className="text-body-m-16 min-w-0 flex-1 truncate text-white">{MOCK_USER_PROFILE.name}</p>
               <button onClick={() => {}} type="button" aria-label="로그아웃" className="flex shrink-0 cursor-pointer">
                 <Icon name="ic_logout" size={24} className="text-gray-500" />
               </button>
