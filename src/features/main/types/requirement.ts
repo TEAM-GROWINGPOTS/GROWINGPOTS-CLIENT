@@ -1,4 +1,4 @@
-import { MajorType } from '@shared/apis/types/graduation';
+import type { MajorType } from '@shared/apis/types/graduation';
 
 export type RequirementCode =
   | 'GRADUATION_REQUIRED'
