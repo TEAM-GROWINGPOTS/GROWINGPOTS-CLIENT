@@ -18,7 +18,7 @@ export interface Course {
 
 interface AddCourseSidebarProps {
   onClose: () => void;
-  onDirectAdd?: () => void;
+  onDirectAdd: () => void;
   renderCourse?: (course: Course) => ReactNode;
 }
 
@@ -82,7 +82,7 @@ export const AddCourseSidebar = ({ onClose, onDirectAdd, renderCourse }: AddCour
           <h3 className="text-body-m-14 text-gray-700">개설 과목</h3>
           <button
             type="button"
-            onClick={() => onDirectAdd?.()}
+            onClick={onDirectAdd}
             className="text-body-m-14 flex cursor-pointer items-center gap-4 text-gray-700"
           >
             <Icon name="ic_plus" size={16} className="text-gray-600" />
@@ -110,7 +110,7 @@ export const AddCourseSidebar = ({ onClose, onDirectAdd, renderCourse }: AddCour
               mode="primary_outline"
               label="직접추가"
               icon={<Icon name="ic_plus" size={16} />}
-              onClick={() => onDirectAdd?.()}
+              onClick={onDirectAdd}
             />
           </div>
         )}
