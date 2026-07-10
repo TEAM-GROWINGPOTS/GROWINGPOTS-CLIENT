@@ -69,15 +69,10 @@ export const LoginCarousel = () => {
 
         <div className="flex w-322 items-center justify-center gap-6 rounded-full p-8">
           {SLIDES.map((_, index) => (
-            <button
+            <div
               key={index}
-              type="button"
-              aria-label={`${index + 1}번 슬라이드로 이동`}
-              onClick={() => emblaApi?.scrollTo(index)}
-              className={cn(
-                'cursor-pointer rounded-full',
-                index === selectedIndex ? 'h-7 w-95 bg-gray-800' : 'size-7 bg-gray-200',
-              )}
+              aria-label={`${index + 1}번 슬라이드`}
+              className={cn('rounded-full', index === selectedIndex ? 'h-7 w-95 bg-gray-800' : 'size-7 bg-gray-200')}
             />
           ))}
         </div>
