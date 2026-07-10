@@ -1,9 +1,12 @@
 'use client';
 
+import { toast } from '@features/onboarding';
 import { FolderItemMenu } from '@features/semester-planner/card-view/folder-item-menu/folder-item-menu';
 import { FolderList } from '@features/semester-planner/card-view/folder-list/folder-list';
+import { FolderRenameModal } from '@features/semester-planner/card-view/folder-rename-modal/folder-rename-modal';
 import { Badge, ClassCard } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
+import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { cn } from '@shared/utils/cn';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 
@@ -39,8 +42,13 @@ interface SemesterCardProps {
   onDeleteTerm?: () => void;
   onAddFolder?: () => void;
   onSelectFolder?: (folderId: string) => void;
-  onRenameFolder?: (folderId: string) => void;
+  onRenameFolder?: (folderId: string, name: string) => void;
   onDeleteFolder?: (folderId: string) => void;
+}
+
+interface FolderTarget {
+  folderId: string;
+  folderName: string;
 }
 
 const STATUS_LABEL: Record<SemesterCardStatus, string> = {
@@ -74,6 +82,8 @@ export const SemesterCard = ({
   onDeleteFolder,
 }: SemesterCardProps) => {
   const [isFolderListOpen, setIsFolderListOpen] = useState(false);
+  const [renameTarget, setRenameTarget] = useState<FolderTarget | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<FolderTarget | null>(null);
   const folderListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -95,16 +105,45 @@ export const SemesterCard = ({
     setIsFolderListOpen(false);
   };
 
+  const handleRenameFolderClick = (folderId: string) => {
+    const folder = folders?.find(({ id }) => id === folderId);
+    if (!folder) return;
+    setRenameTarget({ folderId, folderName: folder.name });
+  };
+
+  const handleRenameFolderSave = (name: string) => {
+    if (!renameTarget) return;
+    onRenameFolder?.(renameTarget.folderId, name);
+    setRenameTarget(null);
+  };
+
+  const handleDeleteFolderClick = (folderId: string) => {
+    const folder = folders?.find(({ id }) => id === folderId);
+    if (!folder) return;
+    if ((folders?.length ?? 0) <= 1) {
+      toast.negative('마지막 폴더는 삭제할 수 없어요.');
+      return;
+    }
+    setDeleteTarget({ folderId, folderName: folder.name });
+  };
+
+  const handleConfirmDeleteFolder = () => {
+    if (!deleteTarget) return;
+    onDeleteFolder?.(deleteTarget.folderId);
+    setDeleteTarget(null);
+  };
+
   const totalCredit = courses.reduce((sum, { credit }) => sum + credit, 0);
   const isPlanned = status === 'planned';
   const statusIcon = STATUS_ICON[status];
+  const termLabel = `${yearLevel}학년 ${semesterLabel ?? `${semester}학기`}`;
 
   return (
     <section className={cn('flex max-h-screen w-258 shrink-0 flex-col self-start rounded-xl bg-gray-800', className)}>
       <header className="flex items-center justify-between px-12 pt-12">
         <div className="flex flex-row gap-8">
           {statusIcon && <Icon name={statusIcon} size={20} />}
-          <h2 className="text-body-sb-16 text-white">{`${yearLevel}학년 ${semesterLabel ?? `${semester}학기`}`}</h2>
+          <h2 className="text-body-sb-16 text-white">{termLabel}</h2>
           <Badge size="xsmall" variant="secondary">
             {`${totalCredit}학점 ${STATUS_LABEL[status]}`}
           </Badge>
@@ -138,8 +177,8 @@ export const SemesterCard = ({
                       selectedFolderId={selectedFolderId}
                       onSelectFolder={handleSelectFolder}
                       onAddFolder={() => onAddFolder?.()}
-                      onRenameFolder={(id) => onRenameFolder?.(id)}
-                      onDeleteFolder={(id) => onDeleteFolder?.(id)}
+                      onRenameFolder={handleRenameFolderClick}
+                      onDeleteFolder={handleDeleteFolderClick}
                       className="shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]"
                     />
                   </div>
@@ -182,6 +221,24 @@ export const SemesterCard = ({
           )}
         </div>
       </div>
+      <FolderRenameModal
+        open={renameTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setRenameTarget(null);
+        }}
+        initialName={renameTarget?.folderName ?? ''}
+        onSave={handleRenameFolderSave}
+      />
+      <ConfirmModal
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        type="delete"
+        title={`${termLabel}의 '${deleteTarget?.folderName ?? ''}'을 삭제할까요?`}
+        description="삭제한 폴더는 복구할 수 없어요."
+        onConfirm={handleConfirmDeleteFolder}
+      />
     </section>
   );
 };
