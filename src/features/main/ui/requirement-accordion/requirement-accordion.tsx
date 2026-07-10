@@ -1,14 +1,15 @@
 'use client';
 
 import { INFORMATION_CODES, INFORMATION_CONTENTS, NOTICE_CODES } from '@features/main/constants/requirement';
-import type { RequirementCondition, RequirementCourse } from '@features/main/types/requirement';
+import type { RequirementCourse } from '@features/main/types/requirement';
 import * as Accordion from '@radix-ui/react-accordion';
+import type { GraduationCondition } from '@shared/apis/types/graduation';
 import { cn } from '@shared/utils/cn';
 
 import { RequirementDetail } from './requirement-detail';
 import { RequirementHeader } from './requirement-header';
 
-export interface RequirementAccordionItem extends RequirementCondition {
+export interface RequirementAccordionItem extends GraduationCondition {
   majorName?: string | null;
   detail?: {
     hasRequiredList: boolean;
@@ -25,7 +26,7 @@ interface RequirementAccordionProps {
   className?: string;
 }
 
-const hasRequirementInfo = ({ code }: RequirementCondition) => INFORMATION_CODES.has(code);
+const hasRequirementInfo = ({ code }: GraduationCondition) => INFORMATION_CODES.has(code);
 
 const getRequirementNotice = ({ code, notice }: RequirementAccordionItem) => {
   if (!NOTICE_CODES.has(code)) return undefined;
@@ -33,9 +34,9 @@ const getRequirementNotice = ({ code, notice }: RequirementAccordionItem) => {
   return notice;
 };
 
-const getRequirementInfoContent = ({ code }: RequirementCondition) => INFORMATION_CONTENTS[code];
+const getRequirementInfoContent = ({ code }: GraduationCondition) => INFORMATION_CONTENTS[code];
 
-const getRequirementAccordionValue = ({ code }: RequirementCondition, index: number) => {
+const getRequirementAccordionValue = ({ code }: GraduationCondition, index: number) => {
   return `${code}-${index}`;
 };
 
