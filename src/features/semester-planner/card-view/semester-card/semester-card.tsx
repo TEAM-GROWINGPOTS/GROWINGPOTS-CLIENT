@@ -90,7 +90,7 @@ export const SemesterCard = ({
   const statusIcon = STATUS_ICON[status];
 
   return (
-    <section className={cn('flex max-h-screen w-258 flex-col rounded-xl bg-gray-800', className)}>
+    <section className={cn('flex max-h-screen w-258 flex-col self-start rounded-xl bg-gray-800', className)}>
       <header className="flex items-center justify-between px-12 pt-12">
         <div className="flex flex-row gap-8">
           {statusIcon && <Icon name={statusIcon} size={20} />}
