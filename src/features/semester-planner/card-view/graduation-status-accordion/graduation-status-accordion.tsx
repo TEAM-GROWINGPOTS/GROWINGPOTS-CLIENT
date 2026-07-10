@@ -1,8 +1,8 @@
 'use client';
 
 import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
-import type { GraduationCondition } from '@features/semester-planner/types/graduation-status';
 import * as Accordion from '@radix-ui/react-accordion';
+import type { GraduationCondition } from '@shared/apis/types/graduation';
 import { Badge, Chip, Tooltip } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
@@ -11,8 +11,7 @@ import { Fragment, useRef, useState } from 'react';
 import { AccordionProgressBar } from './accordion-progress-bar';
 import { calculatePercentage } from './calculate-percentage';
 
-// TODO: API 연동 시 스토어 데이터로 교체
-const MOCK_MAJOR_NAMES = ['컴퓨터공학부', '경영학과', '심리학과'];
+const MAJOR_CODES = new Set(['MAJOR_BASIC', 'MAJOR_REQUIRED', 'MAJOR_ELECTIVE']);
 
 interface GraduationStatusAccordionProps {
   className?: string;
@@ -23,35 +22,27 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
   const [isArrowNav, setIsArrowNav] = useState(false);
   const chipContainerRef = useRef<HTMLDivElement>(null);
 
-  const mainMajor = useGraduationStatusStore((s) => s.mainMajor);
-  const doubleMajor = useGraduationStatusStore((s) => s.doubleMajor);
+  const data = useGraduationStatusStore((s) => s.data);
 
-  if (!mainMajor) return null;
+  if (!data || !data.sections) return null;
 
-  const { summary, conditions, overallMet } = mainMajor;
+  const { summary, graduatable, sections } = data;
+  const { majors, ge, others } = sections;
   const { totalCredits } = summary;
 
-  const gradRequiredConditions = conditions.filter((c) => c.code.startsWith('GRAD_REQUIRED_'));
-  const majorConditions = conditions.filter((c) => c.code.startsWith('MAJOR_'));
-  const generalConditions = conditions.filter((c) => c.code.endsWith('_GE'));
-  const otherRequiredConditions = conditions.filter((c) => c.code.startsWith('OTHER_REQUIRED_'));
-  const doubleMajorConditions = doubleMajor?.conditions.filter((c) => c.code.startsWith('MAJOR_')) ?? [];
-
-  const majorNames = MOCK_MAJOR_NAMES;
-  const tabs = ['졸업 필수', ...majorNames, '교양', 'SW/영어'];
+  const tabs = [...majors.map(({ majorName }) => majorName), '교양'];
 
   const getTabConditions = (index: number): GraduationCondition[] => {
-    if (index === 0) return gradRequiredConditions;
-    if (index === 1) return majorConditions;
-    if (index === tabs.length - 2) return generalConditions;
-    if (index === tabs.length - 1) return otherRequiredConditions;
-    return doubleMajorConditions;
+    if (index === tabs.length - 1) return ge.conditions;
+    return majors[index]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)) ?? [];
   };
 
-  const conditionByCode = Object.fromEntries(conditions.map((c) => [c.code, c]));
-  const majorCredit = conditionByCode['MAJOR']?.current ?? 0;
-  const generalCredit = conditionByCode['GENERAL']?.current ?? 0;
-  const otherCredit = totalCredits.current - (majorCredit + generalCredit);
+  // 전공/교양/기타 학점을 각 섹션에서 합산하여 스택 바에 사용
+  const majorCredit =
+    majors[0]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)).reduce((sum, { current }) => sum + current, 0) ??
+    0;
+  const generalCredit = ge.conditions.reduce((sum, { current }) => sum + current, 0);
+  const otherCredit = others.conditions.reduce((sum, { current }) => sum + current, 0);
 
   const toPercent = (current: number) => calculatePercentage(current, totalCredits.required);
 
@@ -92,7 +83,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
                   size="md"
                 />
               </div>
-              {!overallMet && <Badge size="xsmall" color="red">{`${shortfallCredit}학점 부족`}</Badge>}
+              {!graduatable && <Badge size="xsmall" color="red">{`${shortfallCredit}학점 부족`}</Badge>}
             </div>
             <Icon
               name="ic_chevron_down"
@@ -144,7 +135,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
             </div>
 
             {/* 탭별 요건 현황 */}
-            <div className="flex min-h-158 flex-col gap-16 rounded bg-gray-50 p-16">
+            <div className="flex min-h-158 flex-col justify-between rounded bg-gray-50 p-16">
               <div
                 ref={chipContainerRef}
                 role="tablist"
@@ -169,16 +160,13 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
                 ))}
               </div>
               <div className="grid grid-cols-[max-content_1fr_max-content] items-center gap-x-12 gap-y-8 px-4">
-                {getTabConditions(activeTabIndex).map(({ code, name, current, required, unit }) => (
+                {getTabConditions(activeTabIndex).map(({ code, name, current, required }) => (
                   <Fragment key={code}>
                     <span className="text-body-sb-14 text-gray-800">{name}</span>
                     <AccordionProgressBar current={current} required={required ?? 0} />
                     <div className="flex items-center justify-end">
                       <span className="text-body-sb-14 text-gray-700">{current}</span>
-                      <span className="text-body-r-14 text-gray-400">
-                        /{required ?? '-'}
-                        {unit}
-                      </span>
+                      <span className="text-body-r-14 text-gray-400">/{required ?? '-'}학점</span>
                     </div>
                   </Fragment>
                 ))}
