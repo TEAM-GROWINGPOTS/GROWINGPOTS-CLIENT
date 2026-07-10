@@ -57,7 +57,7 @@ export const GraduationStatusAccordion = () => {
       <Accordion.Item value="graduation-status">
         <Accordion.Header asChild>
           <h3>
-            <Accordion.Trigger className="group flex w-full items-center justify-between px-24 py-24 data-[state=open]:pb-8">
+            <Accordion.Trigger className="group flex w-full items-center justify-between px-24 py-24 transition-[padding-bottom] duration-200 data-[state=open]:pb-8">
               <div className="flex items-center gap-8">
                 <span className="text-title-sb-18 text-gray-100">졸업 요건 충족 현황</span>
                 <Badge size="xsmall" variant="primary" color={graduatable ? 'lime01' : 'darkRed'}>
