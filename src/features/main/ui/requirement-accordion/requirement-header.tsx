@@ -22,18 +22,18 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
   const required = item.required ?? 0;
   const hasProgress = !isCurrentOnly && required > 0;
   const unit = REQUIREMENT_UNIT_LABELS[item.unit];
-  const hasInfoIcon = hasInfo && infoContent;
+  const isInfoIconVisible = Boolean(hasInfo && infoContent);
 
   return (
     <Accordion.Header>
       {item.majorName && <p className="text-body-m-14 mb-3 text-gray-500">{item.majorName}</p>}
 
       <div className="flex items-center">
-        <h3 className={cn('text-title-sb-18 min-w-0 truncate text-gray-800', hasInfoIcon ? 'mr-4' : 'mr-8')}>
+        <h3 className={cn('text-title-sb-18 min-w-0 truncate text-gray-800', isInfoIconVisible ? 'mr-4' : 'mr-8')}>
           {item.name}
         </h3>
 
-        {hasInfoIcon && (
+        {isInfoIconVisible && infoContent && (
           <Tooltip
             variant="top-start"
             size="sm"
