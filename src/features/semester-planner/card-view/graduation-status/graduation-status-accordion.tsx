@@ -51,7 +51,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
   const conditionByCode = Object.fromEntries(conditions.map((c) => [c.code, c]));
   const majorCredit = conditionByCode['MAJOR']?.current ?? 0;
   const generalCredit = conditionByCode['GENERAL']?.current ?? 0;
-  const otherCredit = conditionByCode['OTHER']?.current ?? 0;
+  const otherCredit = totalCredits.current - (majorCredit + generalCredit);
 
   const toPercent = (current: number) => calculatePercentage(current, totalCredits.required);
 

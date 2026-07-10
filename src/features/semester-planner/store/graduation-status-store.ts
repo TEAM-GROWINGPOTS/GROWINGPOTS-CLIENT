@@ -17,23 +17,15 @@ const MOCK_OTHER_REQUIRED_CONDITIONS: GraduationCondition[] = [
 ];
 
 const MOCK_NON_MAJOR_CONDITIONS: GraduationCondition[] = [
-  { code: 'GENERAL', name: '교양', current: 64, required: 110, satisfied: false, unit: '학점' },
+  { code: 'GENERAL', name: '교양', current: 42, required: 110, satisfied: false, unit: '학점' },
   { code: 'DISTRIBUTED_GE', name: '배분이수교과', current: 5, required: 13, satisfied: false, unit: '학점' },
   { code: 'REQUIRED_GE', name: '필수교과', current: 32, required: 55, satisfied: false, unit: '학점' },
   { code: 'FREE_GE', name: '자유이수교과', current: 27, required: 42, satisfied: false, unit: '학점' },
-  {
-    code: 'OTHER',
-    name: '기타',
-    current: MOCK_OTHER_REQUIRED_CONDITIONS.reduce((sum, c) => sum + c.current, 0),
-    required: null,
-    satisfied: false,
-    unit: '학점',
-  },
 ];
 
 const MOCK_MAIN_MAJOR: GraduationStatusData = {
   summary: {
-    totalCredits: { current: 32, required: 120 },
+    totalCredits: { current: 86, required: 120 },
     gpa: { current: 4.08, min: 1.7 },
     enrollmentStatus: '재학 중',
   },
