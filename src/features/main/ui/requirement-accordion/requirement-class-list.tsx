@@ -16,7 +16,13 @@ const getRequirementCourseKey = ({ studentCourseId, departmentName, name }: Requ
 };
 
 const getRequirementCourseTags = ({ credit, semester }: RequirementCourse, requirementName: string) => {
-  return [requirementName, `${credit}학점`, semester];
+  const tags = {
+    area: requirementName,
+    credit: `${credit}학점`,
+    semester,
+  };
+
+  return [tags.area, tags.credit, tags.semester];
 };
 
 export const RequirementClassList = ({
@@ -35,6 +41,9 @@ export const RequirementClassList = ({
             department={course.departmentName}
             title={course.name}
             tags={getRequirementCourseTags(course, requirementName)}
+            isEnglish={course.isEnglish}
+            isSw={course.isSw}
+            size="max"
             type={showTakenState && !isTakenCourse(course) ? 'disabled' : 'default'}
           />
         </li>
