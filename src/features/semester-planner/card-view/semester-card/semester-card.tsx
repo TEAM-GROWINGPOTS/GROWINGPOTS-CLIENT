@@ -15,6 +15,8 @@ export interface SemesterCourse {
   name: string;
   tags: string[];
   credit: number;
+  isEnglish?: boolean;
+  isSw?: boolean;
 }
 
 export interface SemesterFolder {
@@ -25,18 +27,20 @@ export interface SemesterFolder {
 interface SemesterCardProps {
   yearLevel: number;
   semester: number;
+  semesterLabel?: string;
   status: SemesterCardStatus;
   folderName: string;
   courses: SemesterCourse[];
   folders?: SemesterFolder[];
+  selectedFolderId?: string;
   isDropTarget?: boolean;
   renderCourse?: (course: SemesterCourse) => ReactNode;
   className?: string;
   onDeleteTerm?: () => void;
   onAddFolder?: () => void;
+  onSelectFolder?: (folderId: string) => void;
   onRenameFolder?: (folderId: string) => void;
   onDeleteFolder?: (folderId: string) => void;
-  onSwapFolder?: () => void;
 }
 
 const STATUS_LABEL: Record<SemesterCardStatus, string> = {
@@ -54,18 +58,20 @@ const STATUS_ICON: Record<SemesterCardStatus, string | null> = {
 export const SemesterCard = ({
   yearLevel,
   semester,
+  semesterLabel,
   status,
   folderName,
   courses,
   folders,
+  selectedFolderId,
   isDropTarget = false,
   renderCourse,
   className,
   onDeleteTerm,
   onAddFolder,
+  onSelectFolder,
   onRenameFolder,
   onDeleteFolder,
-  onSwapFolder,
 }: SemesterCardProps) => {
   const [isFolderListOpen, setIsFolderListOpen] = useState(false);
   const folderListRef = useRef<HTMLDivElement>(null);
@@ -82,7 +88,11 @@ export const SemesterCard = ({
 
   const handleSwapClick = () => {
     setIsFolderListOpen((prev) => !prev);
-    onSwapFolder?.();
+  };
+
+  const handleSelectFolder = (folderId: string) => {
+    onSelectFolder?.(folderId);
+    setIsFolderListOpen(false);
   };
 
   const totalCredit = courses.reduce((sum, { credit }) => sum + credit, 0);
@@ -94,7 +104,7 @@ export const SemesterCard = ({
       <header className="flex items-center justify-between px-12 pt-12">
         <div className="flex flex-row gap-8">
           {statusIcon && <Icon name={statusIcon} size={20} />}
-          <h2 className="text-body-sb-16 text-white">{`${yearLevel}학년 ${semester}학기`}</h2>
+          <h2 className="text-body-sb-16 text-white">{`${yearLevel}학년 ${semesterLabel ?? `${semester}학기`}`}</h2>
           <Badge size="xsmall" variant="secondary">
             {`${totalCredit}학점 ${STATUS_LABEL[status]}`}
           </Badge>
@@ -125,6 +135,8 @@ export const SemesterCard = ({
                   <div className="absolute top-full right-0 z-10 mt-8">
                     <FolderList
                       folders={folders ?? []}
+                      selectedFolderId={selectedFolderId}
+                      onSelectFolder={handleSelectFolder}
                       onAddFolder={() => onAddFolder?.()}
                       onRenameFolder={(id) => onRenameFolder?.(id)}
                       onDeleteFolder={(id) => onDeleteFolder?.(id)}
@@ -141,7 +153,7 @@ export const SemesterCard = ({
           {courses.length > 0 ? (
             <ul className="flex min-h-0 flex-col gap-8 overflow-y-auto">
               {courses.map((course) => {
-                const { id, department, name, tags } = course;
+                const { id, department, name, tags, isEnglish, isSw } = course;
                 return (
                   <li key={id}>
                     {renderCourse ? (
@@ -151,6 +163,8 @@ export const SemesterCard = ({
                         department={department}
                         title={name}
                         tags={tags}
+                        isEnglish={isEnglish}
+                        isSw={isSw}
                         className="w-full border border-gray-100"
                       />
                     )}
