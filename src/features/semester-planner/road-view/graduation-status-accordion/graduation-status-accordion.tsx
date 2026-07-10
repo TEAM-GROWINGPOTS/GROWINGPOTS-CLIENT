@@ -1,8 +1,8 @@
 'use client';
 
 import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
-import type { GraduationUnit } from '@features/semester-planner/types/graduation-status';
 import * as Accordion from '@radix-ui/react-accordion';
+import type { GraduationUnit } from '@shared/apis/types/graduation';
 import { Badge, Tabs } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import type { TabItem } from '@shared/components/tabs/tabs';
@@ -20,7 +20,7 @@ export const GraduationStatusAccordion = () => {
 
   const data = useGraduationStatusStore((state) => state.data);
 
-  if (!data) return null;
+  if (!data || !data.sections) return null;
 
   // 졸업 요건 데이터 구조 분해 할당
   const { summary, graduatable, sections } = data; // 졸업 요건 요약, 졸업 가능 여부, 졸업 요건 섹션(전공 목록, 교양, 기타)

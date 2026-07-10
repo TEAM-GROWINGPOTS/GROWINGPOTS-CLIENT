@@ -1,8 +1,8 @@
 'use client';
 
 import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
-import type { GraduationCondition } from '@features/semester-planner/types/graduation-status';
 import * as Accordion from '@radix-ui/react-accordion';
+import type { GraduationCondition } from '@shared/apis/types/graduation';
 import { Badge, Chip, Tooltip } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
@@ -24,7 +24,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
 
   const data = useGraduationStatusStore((s) => s.data);
 
-  if (!data) return null;
+  if (!data || !data.sections) return null;
 
   const { summary, graduatable, sections } = data;
   const { majors, ge, others } = sections;
