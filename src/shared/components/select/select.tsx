@@ -4,27 +4,55 @@ import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { useEffect, useId, useRef, useState } from 'react';
 
+import { SelectedBadgeList } from './select-badge-list';
+import { SelectOptionItem } from './select-option';
+
 interface SelectOption {
   value: string;
   label: string;
 }
 
-interface SelectProps {
+type BaseProps = {
   options: SelectOption[];
-  value: string;
-  onChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
-}
+};
 
-export const Select = ({ options, value, onChange, placeholder, disabled, className }: SelectProps) => {
+type SingleSelectProps = BaseProps & {
+  multiple?: false;
+  value: string;
+  onChange: (value: string) => void;
+};
+
+type MultiSelectProps = BaseProps & {
+  multiple: true;
+  value: string[];
+  onChange: (value: string[]) => void;
+};
+
+type SelectProps = SingleSelectProps | MultiSelectProps;
+
+export const Select = (props: SelectProps) => {
+  const { options, placeholder, disabled, className } = props;
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
-  const hasValue = value !== '';
   const ref = useRef<HTMLDivElement>(null);
   const listboxId = useId();
   const optionId = (index: number) => `${listboxId}-option-${index}`;
+
+  const isMulti = props.multiple === true;
+  const hasValue = props.multiple ? props.value.length > 0 : props.value !== '';
+
+  const isSelected = (optValue: string): boolean => {
+    if (props.multiple) return props.value.includes(optValue);
+    return props.value === optValue;
+  };
+
+  const triggerLabel = props.multiple
+    ? placeholder
+    : (options.find((opt) => opt.value === props.value)?.label ?? placeholder);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -38,16 +66,31 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
   }, []);
 
   const handleSelect = (optValue: string) => {
-    onChange(optValue);
-    setIsOpen(false);
-    setFocusedIndex(-1);
+    if (props.multiple) {
+      const newValue = props.value.includes(optValue)
+        ? props.value.filter((v) => v !== optValue)
+        : [...props.value, optValue];
+      props.onChange(newValue);
+    } else {
+      props.onChange(optValue);
+      setIsOpen(false);
+      setFocusedIndex(-1);
+    }
+  };
+
+  const openDropdown = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setOpenUpward(window.innerHeight - rect.bottom < 220);
+    }
+    setIsOpen(true);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen) {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
         e.preventDefault();
-        setIsOpen(true);
+        openDropdown();
         setFocusedIndex(options.length > 0 ? 0 : -1);
       }
       return;
@@ -63,6 +106,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
         setFocusedIndex((prev) => Math.max(prev - 1, 0));
         break;
       case 'Enter':
+      case ' ':
         e.preventDefault();
         if (focusedIndex >= 0 && options[focusedIndex]) {
           handleSelect(options[focusedIndex].value);
@@ -81,18 +125,30 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
       <button
         type="button"
         disabled={disabled}
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => {
+          if (!isOpen) openDropdown();
+          else setIsOpen(false);
+        }}
         onKeyDown={handleKeyDown}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-controls={listboxId}
         aria-activedescendant={isOpen && focusedIndex >= 0 ? optionId(focusedIndex) : undefined}
         className={cn(
-          'text-body-r-16 flex h-48 w-full items-center justify-between rounded-[10px] border border-gray-200 bg-white px-16',
+          'text-body-r-16 flex w-full justify-between rounded-[8px] border border-gray-200 bg-white pr-14 pl-16',
+          isMulti ? 'min-h-48 items-start py-12' : 'h-48 items-center',
           hasValue ? 'text-gray-700' : 'text-gray-300',
         )}
       >
-        <span className="truncate">{options.find((opt) => opt.value === value)?.label ?? placeholder}</span>
+        {props.multiple && hasValue ? (
+          <SelectedBadgeList
+            values={props.value}
+            options={options}
+            onRemove={(v) => props.onChange(props.value.filter((val) => val !== v))}
+          />
+        ) : (
+          <span className="truncate">{triggerLabel}</span>
+        )}
         <Icon name="ic_chevron_down" size={20} className="pointer-events-none shrink-0 text-gray-600" />
       </button>
 
@@ -100,25 +156,22 @@ export const Select = ({ options, value, onChange, placeholder, disabled, classN
         <ul
           id={listboxId}
           role="listbox"
-          className="z-dropdown absolute top-full left-0 mt-4 flex max-h-[208px] w-full flex-col overflow-y-auto rounded-xl border border-gray-200 bg-white p-8"
+          aria-multiselectable={isMulti || undefined}
+          className={cn(
+            'absolute left-0 z-50 flex max-h-[208px] w-full flex-col overflow-y-auto rounded-[8px] border border-gray-200 bg-white p-8',
+            openUpward ? 'bottom-full mb-10' : 'top-full mt-10',
+          )}
         >
           {options.map((opt, index) => (
-            <li
+            <SelectOptionItem
               key={opt.value}
               id={optionId(index)}
-              role="option"
-              aria-selected={opt.value === value}
+              label={opt.label}
+              isSelected={isSelected(opt.value)}
+              isFocused={focusedIndex === index}
+              isMulti={isMulti}
               onClick={() => handleSelect(opt.value)}
-              className={cn(
-                'text-body-m-16 flex h-48 w-full shrink-0 cursor-pointer items-center rounded-lg bg-white px-16 text-gray-700 hover:bg-gray-50',
-                focusedIndex === index && 'bg-gray-50',
-                opt.value === value && 'bg-gray-50 text-blue-500',
-              )}
-            >
-              <span className="[scrollbar-width:none] overflow-x-auto whitespace-nowrap [&::-webkit-scrollbar]:hidden">
-                {opt.label}
-              </span>
-            </li>
+            />
           ))}
         </ul>
       )}
