@@ -71,7 +71,7 @@ export const ViewModeToggle = () => {
             aria-label={label}
             onClick={() => onChange(optionValue)}
             className={cn(
-              'text-body-m-14 relative flex shrink-0 items-center gap-8 rounded-full px-12 py-8 whitespace-nowrap',
+              'text-body-m-14 relative flex shrink-0 cursor-pointer items-center gap-8 rounded-full px-12 py-8 whitespace-nowrap',
               isTransitionEnabled && 'transition-colors duration-200 ease-out',
               isSelected ? 'text-gray-100' : 'text-gray-500',
             )}
