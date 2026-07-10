@@ -1,7 +1,7 @@
 'use client';
 
 import { DndContext, DragOverlay } from '@dnd-kit/core';
-import { Toaster } from '@features/onboarding';
+import { toast, Toaster } from '@features/onboarding';
 import {
   AddCourseSidebar,
   type Course,
@@ -10,6 +10,7 @@ import {
   CourseFilterModal,
   type CourseFilterTabKeyTypes,
   type CourseFilterValues,
+  getFilterTabByLabel,
   getSelectedFilterLabels,
 } from '@features/semester-planner/card-view/course-filter-modal/course-filter-modal';
 import { DroppableTerm } from '@features/semester-planner/card-view/dnd/droppable-term';
@@ -20,13 +21,23 @@ import { AddSemesterModal } from '@features/semester-planner/card-view/modals/ad
 import { SemesterCard } from '@features/semester-planner/card-view/semester-card/semester-card';
 import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
 import { MOCK_COURSE_SEARCH_ITEMS } from '@features/semester-planner/mocks/planner';
+import { usePlannerStore } from '@features/semester-planner/store/planner-store';
+import type { PlannerTerm } from '@features/semester-planner/types/planner';
 import { toSidebarCourse } from '@features/semester-planner/utils/map-planner';
 import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
 import Icon from '@shared/components/icon/icon';
 import { IconButton } from '@shared/components/icon-button/icon-button';
+import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+const SEMESTER_CODE_MAP: Record<string, { sortValue: number; label: string }> = {
+  '1': { sortValue: 1, label: '1학기' },
+  '2': { sortValue: 1.5, label: '여름학기' },
+  '3': { sortValue: 2, label: '2학기' },
+  '4': { sortValue: 2.5, label: '겨울학기' },
+};
 
 // TODO: API 연동 시 과목검색(GET /courses) 결과로 교체하고 필터 값을 쿼리 파라미터로 전달
 const LIBRARY_COURSES = MOCK_COURSE_SEARCH_ITEMS.map(toSidebarCourse);
@@ -40,6 +51,7 @@ export const CardView = () => {
     moveCourseToTerm,
     insertCourse,
     reorderCourse,
+    addTerm,
     removeTerm,
     addFolder,
     selectFolder,
@@ -58,6 +70,59 @@ export const CardView = () => {
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<CourseFilterValues>();
   const [filterTab, setFilterTab] = useState<CourseFilterTabKeyTypes | null>(null);
+  const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
+  const setIsDirty = usePlannerStore((state) => state.setIsDirty);
+  const setSaveHandler = usePlannerStore((state) => state.setSaveHandler);
+  const savedTermsRef = useRef<PlannerTerm[]>(plannedTerms);
+
+  const handleSaveClick = useCallback(() => {
+    console.log('저장하기:', plannedTerms);
+    savedTermsRef.current = plannedTerms;
+    setIsDirty(false);
+    toast.success('학기 플래너가 저장되었어요.');
+  }, [plannedTerms, setIsDirty]);
+
+  useEffect(() => {
+    setIsDirty(plannedTerms !== savedTermsRef.current);
+  }, [plannedTerms, setIsDirty]);
+
+  useEffect(() => {
+    setSaveHandler(handleSaveClick);
+    return () => setSaveHandler(null);
+  }, [handleSaveClick, setSaveHandler]);
+
+  const handleFilterClick = (label: string) => {
+    const tab = getFilterTabByLabel(label);
+    if (tab) setFilterTab(tab);
+  };
+
+  const handleDirectAdd = () => {
+    console.log('직접추가 클릭 — 과목 직접추가 모달 연결 예정');
+  };
+
+  const handleOpenSidebar = () => {
+    setIsSidebarOpen(true);
+    closeSideNavigation();
+  };
+
+  const handleAddFolder = (termId: string) => {
+    const term = addFolder(termId);
+    if (!term) return;
+    toast.success(`${term.yearLevel}학년 ${term.semesterLabel} 폴더가 생성되었어요.`);
+  };
+
+  const handleAddSemester = (year: string, semester: string) => {
+    const semesterInfo = SEMESTER_CODE_MAP[semester];
+    if (!semesterInfo) return;
+    const yearLevel = Number.parseInt(year, 10);
+
+    const added = addTerm({ yearLevel, semester: semesterInfo.sortValue, semesterLabel: semesterInfo.label });
+    if (!added) {
+      toast.negative('이미 추가된 학기예요.');
+      return;
+    }
+    setIsAddSemesterOpen(false);
+  };
 
   return (
     <DndContext id="card-view-dnd" {...contextProps}>
@@ -66,11 +131,12 @@ export const CardView = () => {
           <header className="flex items-center justify-between">
             <h1 className="text-title-sb-24 text-gray-900">학기 플래너</h1>
             <div className="flex items-center gap-8">
+              <Button label="저장하기" mode="secondary_outline" onClick={handleSaveClick} />
               <Button
                 label="과목추가"
                 mode="primary_solid"
                 icon={<Icon name="ic_plus" size={16} />}
-                onClick={() => setIsSidebarOpen(true)}
+                onClick={handleOpenSidebar}
               />
             </div>
           </header>
@@ -86,7 +152,7 @@ export const CardView = () => {
                     term={term}
                     isDropTarget={overTermId === term.id}
                     onDeleteTerm={() => removeTerm(term.id)}
-                    onAddFolder={() => addFolder(term.id)}
+                    onAddFolder={() => handleAddFolder(term.id)}
                     onSelectFolder={(folderId) => selectFolder(term.id, folderId)}
                     onRenameFolder={(folderId, name) => renameFolder(term.id, folderId, name)}
                     onDeleteFolder={(folderId) => deleteFolder(term.id, folderId)}
@@ -124,8 +190,9 @@ export const CardView = () => {
           <AddCourseSidebar
             courses={LIBRARY_COURSES}
             selectedFilterLabels={getSelectedFilterLabels(appliedFilters)}
+            onFilterClick={handleFilterClick}
             onClose={() => setIsSidebarOpen(false)}
-            onDirectAdd={() => {}}
+            onDirectAdd={handleDirectAdd}
             renderCourse={(course: Course) => <LibraryCourse key={course.id} course={course} />}
           />
         </div>
@@ -142,7 +209,7 @@ export const CardView = () => {
         )}
       </DragOverlay>
 
-      <AddSemesterModal open={isAddSemesterOpen} onOpenChange={setIsAddSemesterOpen} onSubmit={() => {}} />
+      <AddSemesterModal open={isAddSemesterOpen} onOpenChange={setIsAddSemesterOpen} onSubmit={handleAddSemester} />
       <CourseFilterModal
         open={filterTab !== null}
         onOpenChange={(open) => {
