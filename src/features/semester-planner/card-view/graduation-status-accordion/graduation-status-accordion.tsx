@@ -50,7 +50,7 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
   const { totalCredits } = summary;
 
   const mainMajor = majors.find(({ majorType }) => majorType === 'MAIN') ?? majors[0];
-  const hasGraduationRequired = mainMajor?.graduationRequired?.hasGraduationRequired ?? false;
+  const hasGraduationRequired = mainMajor?.graduationRequired != null;
 
   const graduationRequiredRows: TabRow[] = (mainMajor?.graduationRequired?.items ?? []).map(
     ({ name, current, required, unit }) => ({ key: name, name, current, required, unit }),

@@ -68,7 +68,6 @@ const PE_MAIN_MAJOR: MajorSection = {
   },
 };
 
-// 체육대학 외 학과는 별도 졸업 필수 항목이 없어 hasGraduationRequired가 false로 내려옴
 const NON_PE_MAIN_MAJOR: MajorSection = {
   majorName: '컴퓨터공학과',
   majorType: 'MAIN',
@@ -119,13 +118,7 @@ const NON_PE_MAIN_MAJOR: MajorSection = {
       chartTarget: true,
     },
   ],
-  graduationRequired: {
-    hasGraduationRequired: false,
-    satisfied: true,
-    totalCredit: 0,
-    unmetDescriptions: [],
-    items: null,
-  },
+  graduationRequired: null,
 };
 
 const MOCK_DATA: GraduationResponse = {
@@ -321,16 +314,6 @@ const MOCK_DATA: GraduationResponse = {
     { certType: 'TOPIK', result: 'NONE' },
     { certType: 'GRADUATION_CERT', result: 'FAIL' },
   ],
-};
-
-// 체대생이 아닌 경우(졸업 필수 탭 없음) 확인용 mock
-export const NON_PE_MOCK_DATA: GraduationResponse = {
-  ...MOCK_DATA,
-  sections: {
-    majors: [NON_PE_MAIN_MAJOR, ...MOCK_DATA.sections!.majors.slice(1)],
-    ge: MOCK_DATA.sections!.ge,
-    others: MOCK_DATA.sections!.others,
-  },
 };
 
 export const useGraduationStatusStore = create<GraduationStatusState>((set) => ({
