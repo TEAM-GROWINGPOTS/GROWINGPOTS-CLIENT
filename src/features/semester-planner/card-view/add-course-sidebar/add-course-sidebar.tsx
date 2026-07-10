@@ -22,13 +22,17 @@ interface AddCourseSidebarProps {
   renderCourse?: (course: Course) => ReactNode;
 }
 
-const FILTER_LABELS = ['캠퍼스', '전공', '이수영역', '학년', '개설학기', '학점'];
+const FILTER_LABELS = ['캠퍼스', '전공', '이수영역', '학년', '개설학기', '학점', '기타 필수'];
+
+const SCROLL_STEP = 120;
 
 const COURSES: Course[] = [];
 
 export const AddCourseSidebar = ({ onClose, onDirectAdd, renderCourse }: AddCourseSidebarProps) => {
   const [keyword, setKeyword] = useState('');
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
   const filterRowRef = useRef<HTMLDivElement>(null);
 
   const handleFilterClick = (label: string) => {
@@ -37,8 +41,19 @@ export const AddCourseSidebar = ({ onClose, onDirectAdd, renderCourse }: AddCour
 
   const filteredCourses = COURSES.filter(({ title }) => title.includes(keyword.trim()));
 
+  const handleFilterRowScroll = () => {
+    const row = filterRowRef.current;
+    if (!row) return;
+    setCanScrollLeft(row.scrollLeft > 0);
+    setCanScrollRight(row.scrollLeft < row.scrollWidth - row.clientWidth - 1);
+  };
+
+  const handleScrollLeftClick = () => {
+    filterRowRef.current?.scrollBy({ left: -SCROLL_STEP, behavior: 'smooth' });
+  };
+
   const handleScrollRightClick = () => {
-    filterRowRef.current?.scrollBy({ left: 120, behavior: 'smooth' });
+    filterRowRef.current?.scrollBy({ left: SCROLL_STEP, behavior: 'smooth' });
   };
 
   return (
@@ -55,7 +70,8 @@ export const AddCourseSidebar = ({ onClose, onDirectAdd, renderCourse }: AddCour
       <div className="relative mt-8">
         <div
           ref={filterRowRef}
-          className="flex [scrollbar-width:none] gap-6 overflow-x-auto pr-44 [&::-webkit-scrollbar]:hidden"
+          onScroll={handleFilterRowScroll}
+          className="flex [scrollbar-width:none] gap-6 overflow-x-auto [&::-webkit-scrollbar]:hidden"
         >
           {FILTER_LABELS.map((label) => (
             <DropDown
@@ -67,14 +83,30 @@ export const AddCourseSidebar = ({ onClose, onDirectAdd, renderCourse }: AddCour
             />
           ))}
         </div>
-        <div className="pointer-events-none absolute top-0 right-0 h-full w-40 bg-linear-to-l from-[#F9FAFB] from-60% to-[#F9FAFB]/0" />
-        <IconButton
-          icon="ic_chevron_right"
-          aria-label="필터 더 보기"
-          size="small"
-          onClick={handleScrollRightClick}
-          className="absolute top-1/2 right-0 -translate-y-1/2"
-        />
+        {canScrollLeft && (
+          <>
+            <div className="pointer-events-none absolute top-0 left-0 h-full w-40 bg-linear-to-r from-[#F9FAFB] from-60% to-[#F9FAFB]/0" />
+            <IconButton
+              icon="ic_chevron_left"
+              aria-label="필터 왼쪽으로 이동"
+              size="small"
+              onClick={handleScrollLeftClick}
+              className="absolute top-1/2 left-0 -translate-y-1/2"
+            />
+          </>
+        )}
+        {canScrollRight && (
+          <>
+            <div className="pointer-events-none absolute top-0 right-0 h-full w-40 bg-linear-to-l from-[#F9FAFB] from-60% to-[#F9FAFB]/0" />
+            <IconButton
+              icon="ic_chevron_right"
+              aria-label="필터 오른쪽으로 이동"
+              size="small"
+              onClick={handleScrollRightClick}
+              className="absolute top-1/2 right-0 -translate-y-1/2"
+            />
+          </>
+        )}
       </div>
 
       <section className="mt-24 flex min-h-0 flex-1 flex-col">
