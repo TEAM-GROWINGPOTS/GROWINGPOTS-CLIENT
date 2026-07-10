@@ -61,8 +61,7 @@ export const SideNavigation = ({
   const isInitialized = useSideNavigationStore((state) => state.isInitialized);
   const isSidebarCollapsed = isInitialized ? isCollapsed : initialIsCollapsed;
 
-  const resolvedUserGrade = Math.min(Math.max(MOCK_USER_PROFILE.grade, 1), 5);
-  const profileImageSrc = GRADE_IMAGE_BY_YEAR[resolvedUserGrade] ?? GRADE_IMAGE_BY_YEAR[1];
+  const profileImageSrc = GRADE_IMAGE_BY_YEAR[MOCK_USER_PROFILE.grade] ?? GRADE_IMAGE_BY_YEAR[1];
 
   const initializeCollapsed = useSideNavigationStore((state) => state.initializeCollapsed);
   const toggleSidebar = useSideNavigationStore((state) => state.toggleSidebar);
@@ -160,7 +159,7 @@ export const SideNavigation = ({
             isSidebarCollapsed ? 'justify-center' : 'gap-4',
           )}
         >
-          <Image src={profileImageSrc} alt={`${resolvedUserGrade}학년`} width={20} height={20} />
+          <Image src={profileImageSrc} alt={`${MOCK_USER_PROFILE.grade}학년`} width={20} height={20} />
           {!isSidebarCollapsed && (
             <>
               <p className="text-body-m-16 min-w-0 flex-1 truncate text-white">{MOCK_USER_PROFILE.name}</p>
