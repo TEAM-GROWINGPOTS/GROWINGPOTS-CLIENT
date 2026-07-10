@@ -47,7 +47,7 @@ export const LoginCarousel = () => {
 
   return (
     <div className="flex size-full items-center justify-between overflow-hidden rounded-[24px] border border-gray-100 bg-gray-50 px-40 py-120">
-      <IconButton icon="ic_chevron_down" aria-label="이전 슬라이드" className="rotate-90" onClick={scrollPrev} />
+      <IconButton icon="ic_chevron_left" aria-label="이전 슬라이드" onClick={scrollPrev} />
 
       <div className="flex w-545 shrink-0 flex-col items-center gap-80">
         <div ref={emblaRef} className="w-full overflow-hidden">
@@ -83,7 +83,7 @@ export const LoginCarousel = () => {
         </div>
       </div>
 
-      <IconButton icon="ic_chevron_down" aria-label="다음 슬라이드" className="-rotate-90" onClick={scrollNext} />
+      <IconButton icon="ic_chevron_right" aria-label="다음 슬라이드" onClick={scrollNext} />
     </div>
   );
 };
