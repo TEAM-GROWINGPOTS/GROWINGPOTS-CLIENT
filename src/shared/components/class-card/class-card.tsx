@@ -26,8 +26,11 @@ const classCardVariants = cva('flex w-auto flex-col items-start rounded-sm bg-wh
 const GENERAL_EDUCATION_DIVISIONS = ['필수교과', '배분이수교과', '자유이수교과'];
 
 const getTagColor = (tag: string) => {
-  if (tag.startsWith('전공')) return 'lime01';
-  if (GENERAL_EDUCATION_DIVISIONS.includes(tag)) return 'purple';
+  const normalizedTag = tag.replace(/\s/g, '');
+
+  if (normalizedTag === '졸업필수') return 'lime01';
+  if (normalizedTag.startsWith('전공')) return 'lime01';
+  if (GENERAL_EDUCATION_DIVISIONS.includes(normalizedTag)) return 'purple';
   return 'blue';
 };
 
