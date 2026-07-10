@@ -5,6 +5,7 @@ import {
   type DragEndEvent,
   type DragOverEvent,
   type DragStartEvent,
+  pointerWithin,
   type UniqueIdentifier,
 } from '@dnd-kit/core';
 import { detectCoverageCollision, DWELL_MS } from '@features/semester-planner/card-view/dnd/collision';
@@ -15,6 +16,7 @@ import { useRef, useState } from 'react';
 
 export const LIBRARY_ID = 'library';
 export const LIBRARY_PREFIX = 'lib-';
+export const TRASH_ID = 'trash';
 
 interface UseCardViewDndInput {
   plannedTerms: PlannerTerm[];
@@ -22,6 +24,7 @@ interface UseCardViewDndInput {
   restoreSnapshot: () => void;
   moveCourseToTerm: (activeId: string, targetTermId: string, insertBeforeId: string | null) => void;
   insertCourse: (termId: string, course: SemesterCourse, insertBeforeId: string | null) => void;
+  removeCourse: (courseId: string) => void;
   reorderCourse: (termId: string, activeId: string, overId: string) => void;
 }
 
@@ -31,6 +34,7 @@ export const useCardViewDnd = ({
   restoreSnapshot,
   moveCourseToTerm,
   insertCourse,
+  removeCourse,
   reorderCourse,
 }: UseCardViewDndInput) => {
   const [activeCourse, setActiveCourse] = useState<SemesterCourse | null>(null);
@@ -43,10 +47,14 @@ export const useCardViewDnd = ({
 
   const isContainerId = (id: UniqueIdentifier) => plannedTerms.some((term) => term.id === String(id));
 
-  const collisionDetection: CollisionDetection = (args) =>
-    detectCoverageCollision(args, { isContainerId, lastOverIdRef });
+  const collisionDetection: CollisionDetection = (args) => {
+    const trashHit = pointerWithin(args).find(({ id }) => String(id) === TRASH_ID);
+    if (trashHit) return [trashHit];
+    return detectCoverageCollision(args, { isContainerId, lastOverIdRef });
+  };
 
   const findContainer = (id: string): string | undefined => {
+    if (id === TRASH_ID) return TRASH_ID;
     if (id.startsWith(LIBRARY_PREFIX)) return LIBRARY_ID;
     return plannedTerms.find((term) => term.id === id || getSelectedCourses(term).some((course) => course.id === id))
       ?.id;
@@ -88,6 +96,11 @@ export const useCardViewDnd = ({
     const overId = String(over.id);
     const activeContainer = findContainer(activeId);
     const overContainer = findContainer(overId);
+    if (overContainer === TRASH_ID) {
+      setOverTermId(null);
+      clearDwell();
+      return;
+    }
     const isTermTarget = overContainer && overContainer !== LIBRARY_ID;
     setOverTermId(isTermTarget ? overContainer : null);
     if (activeContainer === LIBRARY_ID) {
@@ -123,6 +136,11 @@ export const useCardViewDnd = ({
     const overId = over ? String(over.id) : null;
     const activeContainer = findContainer(activeId);
     const overContainer = overId ? findContainer(overId) : undefined;
+
+    if (overContainer === TRASH_ID) {
+      if (activeContainer !== LIBRARY_ID) removeCourse(activeId);
+      return;
+    }
 
     if (!overContainer || overContainer === LIBRARY_ID) {
       restoreSnapshot();

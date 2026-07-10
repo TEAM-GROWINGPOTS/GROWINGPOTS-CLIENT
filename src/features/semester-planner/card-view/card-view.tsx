@@ -15,6 +15,7 @@ import {
 } from '@features/semester-planner/card-view/course-filter-modal/course-filter-modal';
 import { DroppableTerm } from '@features/semester-planner/card-view/dnd/droppable-term';
 import { LibraryCourse } from '@features/semester-planner/card-view/dnd/library-course';
+import { TrashDropZone } from '@features/semester-planner/card-view/dnd/trash-drop-zone';
 import { useCardViewDnd } from '@features/semester-planner/card-view/dnd/use-card-view-dnd';
 import { GraduationStatusAccordion } from '@features/semester-planner/card-view/graduation-status/graduation-status-accordion';
 import { AddSemesterModal } from '@features/semester-planner/card-view/modals/add-semester-modal';
@@ -50,6 +51,7 @@ export const CardView = () => {
     restoreSnapshot,
     moveCourseToTerm,
     insertCourse,
+    removeCourse,
     reorderCourse,
     addTerm,
     removeTerm,
@@ -64,6 +66,7 @@ export const CardView = () => {
     restoreSnapshot,
     moveCourseToTerm,
     insertCourse,
+    removeCourse,
     reorderCourse,
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -232,6 +235,7 @@ export const CardView = () => {
                 onClick={handleScrollRightClick}
               />
             )}
+            {activeCourse && !isLibraryDrag && <TrashDropZone />}
           </div>
         </div>
 

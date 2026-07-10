@@ -89,6 +89,16 @@ export const usePlannerTerms = () => {
     );
   };
 
+  const removeCourse = (courseId: string) => {
+    setPlannedTerms((prev) =>
+      prev.map((term) =>
+        getSelectedCourses(term).some(({ id }) => id === courseId)
+          ? updateSelectedCourses(term, (courses) => courses.filter(({ id }) => id !== courseId))
+          : term,
+      ),
+    );
+  };
+
   const reorderCourse = (termId: string, activeId: string, overId: string) => {
     setPlannedTerms((prev) =>
       prev.map((term) => {
@@ -187,6 +197,7 @@ export const usePlannerTerms = () => {
     restoreSnapshot,
     moveCourseToTerm,
     insertCourse,
+    removeCourse,
     reorderCourse,
     addTerm,
     removeTerm,
