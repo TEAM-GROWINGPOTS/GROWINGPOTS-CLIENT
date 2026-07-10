@@ -6,12 +6,29 @@ import type {
 } from '@features/semester-planner/types/graduation-status';
 import { create } from 'zustand';
 
+const MOCK_GRADUATION_REQUIRED_CONDITIONS: GraduationCondition[] = [
+  { code: 'GRAD_REQUIRED_PE', name: '전문실기', current: 2, required: 4, satisfied: false, unit: '과목' },
+  { code: 'GRAD_REQUIRED_GYM', name: '맨손체조', current: 0, required: 1, satisfied: false, unit: '과목' },
+];
+
+const MOCK_OTHER_REQUIRED_CONDITIONS: GraduationCondition[] = [
+  { code: 'OTHER_REQUIRED_SW', name: 'SW 인증', current: 6, required: 6, satisfied: true, unit: '학점' },
+  { code: 'OTHER_REQUIRED_ENGLISH', name: '영어강의', current: 7, required: 3, satisfied: true, unit: '과목' },
+];
+
 const MOCK_NON_MAJOR_CONDITIONS: GraduationCondition[] = [
-  { code: 'GENERAL', name: '교양', current: 64, required: 110, satisfied: false },
-  { code: 'DISTRIBUTED_GE', name: '배분이수교과', current: 5, required: 13, satisfied: false },
-  { code: 'REQUIRED_GE', name: '필수교과', current: 32, required: 55, satisfied: false },
-  { code: 'FREE_GE', name: '자유이수교과', current: 27, required: 42, satisfied: false },
-  { code: 'OTHER', name: '기타', current: 27, required: null, satisfied: false },
+  { code: 'GENERAL', name: '교양', current: 64, required: 110, satisfied: false, unit: '학점' },
+  { code: 'DISTRIBUTED_GE', name: '배분이수교과', current: 5, required: 13, satisfied: false, unit: '학점' },
+  { code: 'REQUIRED_GE', name: '필수교과', current: 32, required: 55, satisfied: false, unit: '학점' },
+  { code: 'FREE_GE', name: '자유이수교과', current: 27, required: 42, satisfied: false, unit: '학점' },
+  {
+    code: 'OTHER',
+    name: '기타',
+    current: MOCK_OTHER_REQUIRED_CONDITIONS.reduce((sum, c) => sum + c.current, 0),
+    required: null,
+    satisfied: false,
+    unit: '학점',
+  },
 ];
 
 const MOCK_MAIN_MAJOR: GraduationStatusData = {
@@ -21,21 +38,23 @@ const MOCK_MAIN_MAJOR: GraduationStatusData = {
     enrollmentStatus: '재학 중',
   },
   conditions: [
-    { code: 'MAJOR', name: '전공', current: 32, required: 55, satisfied: false },
-    { code: 'MAJOR_BASIC', name: '전공기초', current: 12, required: 10, satisfied: true },
-    { code: 'MAJOR_REQUIRED', name: '전공필수', current: 5, required: 13, satisfied: false },
-    { code: 'MAJOR_ELECTIVE', name: '전공선택', current: 27, required: 42, satisfied: false },
+    { code: 'MAJOR', name: '전공', current: 32, required: 55, satisfied: false, unit: '학점' },
+    { code: 'MAJOR_BASIC', name: '전공기초', current: 12, required: 10, satisfied: true, unit: '학점' },
+    { code: 'MAJOR_REQUIRED', name: '전공필수', current: 5, required: 13, satisfied: false, unit: '학점' },
+    { code: 'MAJOR_ELECTIVE', name: '전공선택', current: 27, required: 42, satisfied: false, unit: '학점' },
     ...MOCK_NON_MAJOR_CONDITIONS,
+    ...MOCK_GRADUATION_REQUIRED_CONDITIONS,
+    ...MOCK_OTHER_REQUIRED_CONDITIONS,
   ],
   overallMet: false,
 };
 
 const MOCK_DOUBLE_MAJOR: DoubleMajorData = {
   conditions: [
-    { code: 'MAJOR', name: '전공', current: 36, required: 36, satisfied: true },
-    { code: 'MAJOR_BASIC', name: '전공기초', current: 6, required: 6, satisfied: true },
-    { code: 'MAJOR_REQUIRED', name: '전공필수', current: 12, required: 12, satisfied: true },
-    { code: 'MAJOR_ELECTIVE', name: '전공선택', current: 18, required: 18, satisfied: true },
+    { code: 'MAJOR', name: '전공', current: 36, required: 36, satisfied: true, unit: '학점' },
+    { code: 'MAJOR_BASIC', name: '전공기초', current: 6, required: 6, satisfied: true, unit: '학점' },
+    { code: 'MAJOR_REQUIRED', name: '전공필수', current: 12, required: 12, satisfied: true, unit: '학점' },
+    { code: 'MAJOR_ELECTIVE', name: '전공선택', current: 18, required: 18, satisfied: true, unit: '학점' },
   ],
 };
 

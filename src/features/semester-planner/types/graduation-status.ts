@@ -4,6 +4,7 @@ export interface GraduationCondition {
   current: number;
   required: number | null;
   satisfied: boolean;
+  unit: '학점' | '과목';
 }
 
 export interface GraduationSummary {
