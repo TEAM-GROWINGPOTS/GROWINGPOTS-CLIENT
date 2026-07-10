@@ -9,7 +9,7 @@ const dropDownBaseClass =
 
 const dropDownStatusClass: Record<DropDownStatusTypes, string> = {
   default: 'border border-gray-200 bg-white text-gray-800 hover:bg-gray-50',
-  selected: ' bg-gray-700 text-white',
+  selected: 'border border-transparent bg-gray-700 text-white',
 };
 
 interface DropDownProps extends Omit<ComponentPropsWithoutRef<'button'>, 'children'> {
