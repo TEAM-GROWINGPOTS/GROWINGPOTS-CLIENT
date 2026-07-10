@@ -36,8 +36,6 @@ export const CourseInfoTable = ({ courses }: CourseInfoTableProps) => {
   const [visibleCount, setVisibleCount] = useState(() => Math.min(DEFAULT_VISIBLE_ROWS, courses.length));
 
   useEffect(() => {
-    if (expanded) return;
-
     const updateVisibleCount = () => {
       const el = listRef.current;
       if (!el) return;
@@ -52,7 +50,7 @@ export const CourseInfoTable = ({ courses }: CourseInfoTableProps) => {
     window.addEventListener('resize', updateVisibleCount);
 
     return () => window.removeEventListener('resize', updateVisibleCount);
-  }, [expanded, courses.length]);
+  }, [courses.length]);
 
   const visibleCourses = expanded ? courses : courses.slice(0, visibleCount);
   const canToggle = expanded || courses.length > visibleCount;
