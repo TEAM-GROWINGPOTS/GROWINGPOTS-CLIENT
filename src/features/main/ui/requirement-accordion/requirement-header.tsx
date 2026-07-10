@@ -1,6 +1,6 @@
 import { CURRENT_ONLY_CODES, HIDDEN_BADGE_CODES, REQUIREMENT_UNIT_LABELS } from '@features/main/constants/requirement';
-import type { RequirementCondition } from '@features/main/types/requirement';
 import * as Accordion from '@radix-ui/react-accordion';
+import type { GraduationCondition } from '@shared/apis/types/graduation';
 import { Badge, Tooltip } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
@@ -8,7 +8,7 @@ import { cn } from '@shared/utils/cn';
 import { ProgressBar } from './progress-bar';
 
 interface RequirementHeaderProps {
-  item: RequirementCondition & {
+  item: GraduationCondition & {
     majorName?: string | null;
   };
   hasInfo?: boolean;
