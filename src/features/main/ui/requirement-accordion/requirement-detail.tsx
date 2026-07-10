@@ -6,7 +6,7 @@ interface RequirementDetailProps {
   requirementName: string;
   notice?: string;
   unmetDescriptions?: string[];
-  areaRequirement?: string[];
+  distAreaDescriptions?: string[];
   courses?: RequirementCourse[];
   hasRequiredList?: boolean;
 }
@@ -32,14 +32,14 @@ export const RequirementDetail = ({
   requirementName,
   notice,
   unmetDescriptions = [],
-  areaRequirement = [],
+  distAreaDescriptions = [],
   courses,
   hasRequiredList = false,
 }: RequirementDetailProps) => {
   const unmetDescription = unmetDescriptions.join(', ');
-  const areaRequirementDescription = areaRequirement.join(', ');
+  const distAreaDescription = distAreaDescriptions.join(', ');
 
-  if (!notice && !unmetDescription && !areaRequirementDescription && (!courses || courses.length === 0)) return null;
+  if (!notice && !unmetDescription && !distAreaDescription && (!courses || courses.length === 0)) return null;
 
   const takenCourses = courses?.filter(isTakenCourse) ?? [];
   const untakenCourses = courses?.filter((course) => !isTakenCourse(course)) ?? [];
@@ -48,9 +48,7 @@ export const RequirementDetail = ({
     <>
       {notice && <p className="text-caption-r-12 text-dark-red-10 mt-4">*{notice}</p>}
       {unmetDescription && <p className="text-caption-r-12 text-dark-red-10 mt-4">*{unmetDescription}</p>}
-      {areaRequirementDescription && (
-        <p className="text-caption-r-12 text-dark-red-10 mt-4">*{areaRequirementDescription}</p>
-      )}
+      {distAreaDescription && <p className="text-caption-r-12 text-dark-red-10 mt-4">*{distAreaDescription}</p>}
       {courses && courses.length > 0 && !hasRequiredList && (
         <RequirementClassList requirementName={requirementName} courses={courses} className="mt-12" />
       )}

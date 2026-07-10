@@ -93,7 +93,7 @@ export interface RequirementMajor {
   satisfied: boolean;
   hasRequiredList: boolean;
   unmetDescriptions: string[];
-  areaRequirement: string[];
+  distAreaDescriptions: string[];
   courses: RequirementCourse[];
 }
 
