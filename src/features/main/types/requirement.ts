@@ -14,14 +14,18 @@ export type RequirementSemester = 'FIRST' | 'SECOND' | 'SUMMER' | 'WINTER';
 
 export type RequirementUnit = 'CREDITS' | 'COURSES';
 
-export type MajorTypes = 'ALL' | 'MAIN' | 'DOUBLE' | 'GE' | 'OTHERS';
+export type MajorTypes = 'ALL' | 'GE' | 'OTHERS';
+
+export type RequirementDetailMajorType = 'MAIN' | 'DOUBLE';
+
+export type RequirementSource = 'COMPLETED' | 'PLANNED';
 
 export interface RequirementData {
   summary: RequirementSummary;
   graduatable: boolean;
   conditions: RequirementCondition[] | null;
   graduationRequired: RequirementRequired | null;
-  sections: RequirementSections;
+  sections: RequirementSections | null;
   certs: RequirementCert[];
 }
 
@@ -32,14 +36,14 @@ export interface RequirementSummary {
 }
 
 export interface RequirementSections {
-  primary: RequirementSection;
-  multi: RequirementSection | null;
+  majors: RequirementSection[];
   ge: RequirementSection;
   others: RequirementSection;
 }
 
 export interface RequirementSection {
   majorName: string | null;
+  majorType: RequirementDetailMajorType | null;
   conditions: RequirementCondition[];
   graduationRequired: RequirementRequired | null;
 }
@@ -82,13 +86,14 @@ export interface RequirementDetail {
 }
 
 export interface RequirementMajor {
-  majorType: MajorTypes;
+  majorType: RequirementDetailMajorType | null;
   departmentName: string;
   current: number;
   required: number | null;
   satisfied: boolean;
   hasRequiredList: boolean;
   unmetDescriptions: string[];
+  areaRequirement: string[];
   courses: RequirementCourse[];
 }
 

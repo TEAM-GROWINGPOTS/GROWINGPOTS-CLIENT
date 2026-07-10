@@ -13,6 +13,7 @@ export interface RequirementAccordionItem extends RequirementCondition {
   detail?: {
     hasRequiredList: boolean;
     unmetDescriptions: string[];
+    areaRequirement: string[];
     courses: RequirementCourse[];
   };
   notice?: string;
@@ -57,6 +58,7 @@ export const RequirementAccordion = ({ items, defaultValue = [], className }: Re
               requirementName={item.name}
               notice={getRequirementNotice(item)}
               unmetDescriptions={item.detail?.unmetDescriptions}
+              areaRequirement={item.detail?.areaRequirement}
               courses={item.detail?.courses}
               hasRequiredList={item.detail?.hasRequiredList}
             />
