@@ -14,9 +14,15 @@ export interface Course {
   department: string;
   title: string;
   tags: string[];
+  credit: number;
+  isEnglish?: boolean;
+  isSw?: boolean;
 }
 
 interface AddCourseSidebarProps {
+  courses?: Course[];
+  selectedFilterLabels?: string[];
+  onFilterClick?: (label: string) => void;
   onClose: () => void;
   onDirectAdd: () => void;
   renderCourse?: (course: Course) => ReactNode;
@@ -26,20 +32,33 @@ const FILTER_LABELS = ['캠퍼스', '전공', '이수영역', '학년', '개설�
 
 const SCROLL_STEP = 120;
 
-const COURSES: Course[] = [];
-
-export const AddCourseSidebar = ({ onClose, onDirectAdd, renderCourse }: AddCourseSidebarProps) => {
+export const AddCourseSidebar = ({
+  courses = [],
+  selectedFilterLabels,
+  onFilterClick,
+  onClose,
+  onDirectAdd,
+  renderCourse,
+}: AddCourseSidebarProps) => {
   const [keyword, setKeyword] = useState('');
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [internalSelectedFilters, setInternalSelectedFilters] = useState<string[]>([]);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const filterRowRef = useRef<HTMLDivElement>(null);
 
+  const selectedFilters = selectedFilterLabels ?? internalSelectedFilters;
+
   const handleFilterClick = (label: string) => {
-    setSelectedFilters((prev) => (prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label]));
+    if (onFilterClick) {
+      onFilterClick(label);
+      return;
+    }
+    setInternalSelectedFilters((prev) =>
+      prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label],
+    );
   };
 
-  const filteredCourses = COURSES.filter(({ title }) => title.includes(keyword.trim()));
+  const filteredCourses = courses.filter(({ title }) => title.includes(keyword.trim()));
 
   const handleFilterRowScroll = () => {
     const row = filterRowRef.current;
@@ -123,15 +142,25 @@ export const AddCourseSidebar = ({ onClose, onDirectAdd, renderCourse }: AddCour
         </div>
         {filteredCourses.length > 0 ? (
           <ul className="mt-8 flex [scrollbar-width:none] flex-col gap-12 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-            {filteredCourses.map(({ id, department, title, tags }) => (
-              <li key={id}>
-                {renderCourse ? (
-                  renderCourse({ id, department, title, tags })
-                ) : (
-                  <ClassCard department={department} title={title} tags={tags} className="border border-gray-100" />
-                )}
-              </li>
-            ))}
+            {filteredCourses.map((course) => {
+              const { id, department, title, tags, isEnglish, isSw } = course;
+              return (
+                <li key={id}>
+                  {renderCourse ? (
+                    renderCourse(course)
+                  ) : (
+                    <ClassCard
+                      department={department}
+                      title={title}
+                      tags={tags}
+                      isEnglish={isEnglish}
+                      isSw={isSw}
+                      className="border border-gray-100"
+                    />
+                  )}
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-12">
