@@ -30,7 +30,7 @@ import Icon from '@shared/components/icon/icon';
 import { IconButton } from '@shared/components/icon-button/icon-button';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { type TransitionEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 const SEMESTER_CODE_MAP: Record<string, { sortValue: number; label: string }> = {
   '1': { sortValue: 1, label: '1학기' },
@@ -70,10 +70,42 @@ export const CardView = () => {
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<CourseFilterValues>();
   const [filterTab, setFilterTab] = useState<CourseFilterTabKeyTypes | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
   const setIsDirty = usePlannerStore((state) => state.setIsDirty);
   const setSaveHandler = usePlannerStore((state) => state.setSaveHandler);
+  const boardRef = useRef<HTMLElement>(null);
   const savedTermsRef = useRef<PlannerTerm[]>(plannedTerms);
+
+  const updateScrollability = useCallback(() => {
+    const board = boardRef.current;
+    if (!board) return;
+    setCanScrollLeft(board.scrollLeft > 1);
+    setCanScrollRight(board.scrollWidth - board.clientWidth - board.scrollLeft > 1);
+  }, []);
+
+  useEffect(() => {
+    updateScrollability();
+    window.addEventListener('resize', updateScrollability);
+    return () => window.removeEventListener('resize', updateScrollability);
+  }, [gridTerms, updateScrollability]);
+
+  const handleSidebarTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget || event.propertyName !== 'width') return;
+    updateScrollability();
+    if (!isSidebarOpen) return;
+    const board = boardRef.current;
+    board?.scrollTo({ left: board.scrollWidth, behavior: 'smooth' });
+  };
+
+  const handleScrollLeftClick = () => {
+    boardRef.current?.scrollBy({ left: -282, behavior: 'smooth' });
+  };
+
+  const handleScrollRightClick = () => {
+    boardRef.current?.scrollBy({ left: 282, behavior: 'smooth' });
+  };
 
   const handleSaveClick = useCallback(() => {
     console.log('저장하기:', plannedTerms);
@@ -144,7 +176,11 @@ export const CardView = () => {
           <GraduationStatusAccordion className="mt-20" />
 
           <div className="relative mt-24 min-h-0 flex-1">
-            <section className="flex h-full items-start gap-24 overflow-x-auto pb-20">
+            <section
+              ref={boardRef}
+              onScroll={updateScrollability}
+              className="flex h-full items-start gap-24 overflow-x-auto pb-20"
+            >
               {gridTerms.map((term) =>
                 term.status === 'planned' ? (
                   <DroppableTerm
@@ -178,10 +214,29 @@ export const CardView = () => {
                 onClick={() => setIsAddSemesterOpen(true)}
               />
             </section>
+            {canScrollLeft && (
+              <IconButton
+                icon="ic_chevron_left"
+                aria-label="이전 학기 보기"
+                size="medium"
+                className="absolute top-1/2 left-0 -translate-y-1/2"
+                onClick={handleScrollLeftClick}
+              />
+            )}
+            {canScrollRight && (
+              <IconButton
+                icon="ic_chevron_right"
+                aria-label="다음 학기 보기"
+                size="medium"
+                className="absolute top-1/2 right-0 -translate-y-1/2"
+                onClick={handleScrollRightClick}
+              />
+            )}
           </div>
         </div>
 
         <div
+          onTransitionEnd={handleSidebarTransitionEnd}
           className={cn(
             'h-full shrink-0 overflow-hidden transition-[width] duration-300 ease-out',
             isSidebarOpen ? 'w-300' : 'w-0',
