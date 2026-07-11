@@ -1,10 +1,9 @@
 'use client';
 
+import { useViewMode } from '@features/semester-planner/hooks/use-view-mode';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { useLayoutEffect, useRef, useState } from 'react';
-
-import { useViewMode } from '../hooks/use-view-mode';
 
 export type ViewMode = 'card' | 'roadmap';
 

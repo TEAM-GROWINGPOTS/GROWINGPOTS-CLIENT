@@ -1,4 +1,8 @@
-import type { SemesterCardStatus, SemesterCourse, SemesterFolder } from '../card-view/semester-card/semester-card';
+import type {
+  SemesterCardStatus,
+  SemesterCourse,
+  SemesterFolder,
+} from '@features/semester-planner/card-view/semester-card/semester-card';
 
 export type OpenedSemester = 'FIRST' | 'SECOND' | 'BOTH';
 

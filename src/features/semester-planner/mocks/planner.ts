@@ -1,4 +1,4 @@
-import type { CourseSearchItemResponse, PlannerResponse } from '../types/planner';
+import type { CourseSearchItemResponse, PlannerResponse } from '@features/semester-planner/types/planner';
 
 export const MOCK_PLANNER_RESPONSE: PlannerResponse = {
   completedTerms: [

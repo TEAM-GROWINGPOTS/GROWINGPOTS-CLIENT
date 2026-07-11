@@ -1,10 +1,9 @@
 'use client';
 
+import { FolderItemMenu } from '@features/semester-planner/card-view/folder-item-menu/folder-item-menu';
 import { Button } from '@shared/components/button/button';
 import { Tooltip } from '@shared/components/tooltip/tooltip';
 import { cn } from '@shared/utils/cn';
-
-import { FolderItemMenu } from '../folder-item-menu/folder-item-menu';
 
 const MAX_FOLDERS = 5;
 
