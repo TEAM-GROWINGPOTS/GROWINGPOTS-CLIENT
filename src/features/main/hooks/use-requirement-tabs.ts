@@ -1,5 +1,5 @@
 import type { GraduationCondition, GraduationResponse } from '@shared/apis/types/graduation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export const ALL_TAB_VALUE = 'ALL';
 export const GE_TAB_VALUE = 'GE';
@@ -72,11 +72,15 @@ const getRequirementSectionOptions = ({
 
 export const useRequirementTabs = (data: GraduationResponse | null) => {
   const [selectedTab, setSelectedTab] = useState(ALL_TAB_VALUE);
-  const sectionOptions = data ? getRequirementSectionOptions(data) : [];
-  const selectedSectionOption = sectionOptions.find(({ value }) => value === selectedTab) ?? sectionOptions[0];
+  const sectionOptions = useMemo(() => (data ? getRequirementSectionOptions(data) : []), [data]);
+  const selectedSectionOption = useMemo(
+    () => sectionOptions.find(({ value }) => value === selectedTab) ?? sectionOptions[0],
+    [sectionOptions, selectedTab],
+  );
+  const tabs = useMemo(() => sectionOptions.map(({ value, label }) => ({ value, label })), [sectionOptions]);
 
   return {
-    tabs: sectionOptions.map(({ value, label }) => ({ value, label })),
+    tabs,
     selectedTab,
     setSelectedTab,
     selectedSectionOption,
