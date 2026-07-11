@@ -1,4 +1,5 @@
 export { AnalysisLoading } from './analysis-loading/analysis-loading';
+export { AnalysisResultView } from './analysis-result/analysis-result-view';
 export { StudentInfo } from './analysis-result/student-info';
 export type { CourseInfo } from './course-info-table';
 export { CourseInfoTable } from './course-info-table';
