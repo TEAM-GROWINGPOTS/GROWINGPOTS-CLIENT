@@ -4,8 +4,18 @@ import { useState } from 'react';
 
 import { type RequirementSectionOption, useRequirementTabs } from './use-requirement-tabs';
 
-const MAJOR_CONDITION_ORDER = ['MAJOR_BASIC', 'MAJOR_REQUIRED', 'MAJOR_ELECTIVE'];
-const ALL_ITEM_ORDER = ['GRADUATION_REQUIRED', ...MAJOR_CONDITION_ORDER];
+const ALL_ITEM_ORDER = [
+  'GRADUATION_REQUIRED',
+  'MAJOR_BASIC',
+  'MAJOR_REQUIRED',
+  'MAJOR_ELECTIVE',
+  'REQUIRED_GE',
+  'DISTRIBUTED_GE',
+  'FREE_GE',
+  'ENGLISH_COURSE',
+  'SW_CERT_COURSE',
+  'GENERAL_ELECTIVE',
+];
 
 interface UseRequirementSectionParams {
   data: GraduationResponse | null;
@@ -17,7 +27,7 @@ const getRequirementScrollKey = ({ code, majorName }: Pick<RequirementAccordionI
 };
 
 const getRequirementDetail = (item: RequirementAccordionItem, details: RequirementDetail[]) => {
-  const detail = details.find(({ divisionCode }) => divisionCode === item.code);
+  const detail = details.find(({ conditionCode }) => conditionCode === item.code);
   const major = detail?.majors.find(({ departmentName }) => departmentName === item.majorName) ?? detail?.majors[0];
 
   return {

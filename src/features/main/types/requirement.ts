@@ -27,8 +27,8 @@ export interface RequirementAccordionItem extends GraduationCondition {
 }
 
 export interface RequirementDetail {
-  divisionCode: RequirementCode;
-  divisionName: string;
+  conditionCode: RequirementCode;
+  conditionName: string;
   majors: RequirementMajor[];
 }
 
@@ -45,6 +45,8 @@ export interface RequirementMajor {
 }
 
 export interface RequirementCourse {
+  divisionCode: RequirementCode;
+  divisionName: string;
   studentCourseId: number | null;
   name: string;
   departmentName: string;
