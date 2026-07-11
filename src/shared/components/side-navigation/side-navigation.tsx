@@ -94,7 +94,7 @@ export const SideNavigation = ({
               isSidebarCollapsed ? 'pointer-events-none opacity-0' : 'opacity-100',
             )}
           >
-            <Image src="/images/logo.svg" alt="Growing Pots" width={119} height={20} priority />
+            <img src="/images/logo.svg" alt="Growing Pots" width={119} height={20} />
           </div>
 
           <button
