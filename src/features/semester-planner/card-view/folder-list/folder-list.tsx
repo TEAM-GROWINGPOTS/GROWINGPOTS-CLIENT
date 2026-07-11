@@ -33,14 +33,22 @@ export const FolderList = ({
 }: FolderListProps) => {
   const isMaxFolders = folders.length >= MAX_FOLDERS;
 
+  const handleAddFolderClick = () => {
+    if (isMaxFolders) return;
+    onAddFolder();
+  };
+
   const addFolderButton = (
     <Button
       label="추가"
       size="sm"
       mode="primary_solid"
-      disabled={isMaxFolders}
-      onClick={onAddFolder}
-      className={cn('w-full justify-center', isMaxFolders && 'pointer-events-none')}
+      aria-disabled={isMaxFolders}
+      onClick={handleAddFolderClick}
+      className={cn(
+        'mt-4 w-full justify-center',
+        isMaxFolders && 'cursor-not-allowed bg-gray-300 enabled:hover:bg-gray-300',
+      )}
     />
   );
 
@@ -58,14 +66,9 @@ export const FolderList = ({
         />
       ))}
       {isMaxFolders ? (
-        <Tooltip
-          content="폴더는 최대 5개까지 생성돼요"
-          variant="top-start"
-          size="md"
-          trigger={<span className="mt-4 w-full cursor-not-allowed">{addFolderButton}</span>}
-        />
+        <Tooltip content="폴더는 최대 5개까지 생성돼요" variant="top-start" size="md" trigger={addFolderButton} />
       ) : (
-        <span className="mt-4 w-full">{addFolderButton}</span>
+        addFolderButton
       )}
     </div>
   );
