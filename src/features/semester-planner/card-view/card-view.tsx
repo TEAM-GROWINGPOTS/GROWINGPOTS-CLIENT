@@ -16,7 +16,7 @@ import { DroppableTerm } from '@features/semester-planner/card-view/dnd/droppabl
 import { LibraryCourse } from '@features/semester-planner/card-view/dnd/library-course';
 import { TrashDropZone } from '@features/semester-planner/card-view/dnd/trash-drop-zone';
 import { useCardViewDnd } from '@features/semester-planner/card-view/dnd/use-card-view-dnd';
-import { GraduationStatusAccordion } from '@features/semester-planner/card-view/graduation-status/graduation-status-accordion';
+import { GraduationStatusAccordion } from '@features/semester-planner/card-view/graduation-status-accordion/graduation-status-accordion';
 import { AddSemesterModal } from '@features/semester-planner/card-view/modals/add-semester-modal';
 import { SemesterCard } from '@features/semester-planner/card-view/semester-card/semester-card';
 import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
