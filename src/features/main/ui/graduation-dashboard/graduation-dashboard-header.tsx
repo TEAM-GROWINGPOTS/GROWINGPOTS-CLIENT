@@ -1,5 +1,3 @@
-'use client';
-
 import type { CertType, GraduationCert } from '@shared/apis/types/graduation';
 import { Tooltip } from '@shared/components';
 import { cn } from '@shared/utils/cn';
@@ -37,7 +35,7 @@ const badgeResultStyles: Record<GraduationCert['result'], string> = {
   NONE: '',
 };
 
-interface MainHomeHeaderProps {
+interface GraduationDashboardHeaderProps {
   certs: GraduationCert[];
   gpa: number;
 }
@@ -60,7 +58,7 @@ const getBadgeTooltipContent = (certType: CertType, result: GraduationCert['resu
   return `${label} 미통과`;
 };
 
-export const GraduationDashboardHeader = ({ certs, gpa }: MainHomeHeaderProps) => {
+export const GraduationDashboardHeader = ({ certs, gpa }: GraduationDashboardHeaderProps) => {
   return (
     <header className="flex items-center justify-between">
       <div className="flex flex-col gap-8">

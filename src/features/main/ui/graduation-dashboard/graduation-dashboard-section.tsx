@@ -30,7 +30,7 @@ export const GraduationDashboardSection = ({
     <section className="rounded-2xl bg-white p-24">
       <GraduationDashboardTabs tabs={tabs} selectedTab={selectedTab} onTabChange={onTabChange} />
 
-      <div className="mt-29 grid grid-cols-[528px_509px] gap-28">
+      <div className="mt-29 grid grid-cols-2 gap-28">
         <div className="flex flex-col gap-24">
           <div className="grid h-fit grid-cols-3 gap-8">
             {shortcuts.map(({ code, scrollKey, name }) => (

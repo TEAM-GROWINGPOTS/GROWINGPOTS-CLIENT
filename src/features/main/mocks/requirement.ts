@@ -212,10 +212,10 @@ export const requirementData: GraduationResponse = {
         {
           code: 'ENGLISH_COURSE',
           name: '영어 강의',
-          current: 0,
+          current: 5,
           required: 3,
           unit: 'COURSES',
-          satisfied: false,
+          satisfied: true,
           chartTarget: true,
         },
         {

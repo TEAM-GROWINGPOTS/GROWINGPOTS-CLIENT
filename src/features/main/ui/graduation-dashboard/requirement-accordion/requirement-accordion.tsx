@@ -38,7 +38,7 @@ export const RequirementAccordion = ({
   className,
 }: RequirementAccordionProps) => {
   return (
-    <Accordion.Root type="multiple" defaultValue={defaultValue} className={cn('flex w-509 flex-col gap-12', className)}>
+    <Accordion.Root type="multiple" defaultValue={defaultValue} className={cn('flex flex-col gap-12', className)}>
       {items.map((item, index) => {
         const itemValue = getRequirementAccordionValue(item, index);
         const scrollKey = item.scrollKey ?? itemValue;
