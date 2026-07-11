@@ -2,6 +2,7 @@ import type { RequirementAccordionItem, RequirementDetail } from '@features/main
 import type { GraduationCondition, GraduationResponse } from '@shared/apis/types/graduation';
 import { useState } from 'react';
 
+import { useMergedRequirementItems } from './use-merged-requirement-items';
 import { type RequirementSectionOption, useRequirementTabs } from './use-requirement-tabs';
 
 const ALL_ITEM_ORDER = [
@@ -114,12 +115,10 @@ const sortAllItemsByRequirementCode = (items: RequirementAccordionItem[]) => {
 };
 
 const getRequirementItems = (
-  { sections, shouldSort }: RequirementSectionOption,
+  { sections }: RequirementSectionOption,
   details: RequirementDetail[],
 ): RequirementAccordionItem[] => {
-  const items = sections.flatMap((section) => getSectionItems(section, details));
-
-  return shouldSort ? sortAllItemsByRequirementCode(items) : items;
+  return sections.flatMap((section) => getSectionItems(section, details));
 };
 
 const getRequirementShortcuts = (items: RequirementAccordionItem[]) => {
@@ -136,7 +135,9 @@ const getRequirementShortcuts = (items: RequirementAccordionItem[]) => {
 export const useRequirementSection = ({ data, details }: UseRequirementSectionParams) => {
   const { tabs, selectedTab, setSelectedTab, selectedSectionOption } = useRequirementTabs(data);
   const [scrollTargetKey, setScrollTargetKey] = useState<string | null>(null);
-  const items = selectedSectionOption ? getRequirementItems(selectedSectionOption, details) : [];
+  const rawItems = selectedSectionOption ? getRequirementItems(selectedSectionOption, details) : [];
+  const mergedItems = useMergedRequirementItems(rawItems, Boolean(selectedSectionOption?.shouldSort));
+  const items = selectedSectionOption?.shouldSort ? sortAllItemsByRequirementCode(mergedItems) : mergedItems;
   const shortcuts = getRequirementShortcuts(items);
 
   const handleShortcutClick = (scrollKey?: string) => {
