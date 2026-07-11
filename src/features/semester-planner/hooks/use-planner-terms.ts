@@ -21,6 +21,15 @@ export const getFolderName = ({ yearLevel, semesterLabel, selectedFolderId, fold
   return selectedFolder?.name ?? `${yearLevel}학년 ${semesterLabel}`;
 };
 
+const getNextFolderSeq = ({ yearLevel, semesterLabel, folders }: PlannerTerm): number => {
+  const prefix = `${yearLevel}학년 ${semesterLabel}(`;
+  const seqs = folders
+    .filter(({ name }) => name.startsWith(prefix) && name.endsWith(')'))
+    .map(({ name }) => Number(name.slice(prefix.length, -1)))
+    .filter((seq) => Number.isInteger(seq) && seq > 0);
+  return seqs.length > 0 ? Math.max(...seqs) + 1 : 1;
+};
+
 const updateSelectedCourses = (
   term: PlannerTerm,
   update: (courses: SemesterCourse[]) => SemesterCourse[],
@@ -122,7 +131,7 @@ export const usePlannerTerms = () => {
     createdIdSeqRef.current += 1;
     const newFolder: PlannerFolder = {
       id: `folder-new-${createdIdSeqRef.current}`,
-      name: `${term.yearLevel}학년 ${term.semesterLabel}(${term.folders.length + 1})`,
+      name: `${term.yearLevel}학년 ${term.semesterLabel}(${getNextFolderSeq(term)})`,
       courses: [],
     };
     setPlannedTerms((prev) =>
