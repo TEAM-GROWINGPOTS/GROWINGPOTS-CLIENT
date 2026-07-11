@@ -1,6 +1,6 @@
 import { Chip } from '@shared/components';
 
-interface GraduationDashboardTab {
+export interface GraduationDashboardTab {
   value: string;
   label: string;
 }

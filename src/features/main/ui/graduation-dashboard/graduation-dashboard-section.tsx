@@ -1,13 +1,9 @@
 import type { RequirementAccordionItem } from '@features/main/types/requirement';
 
+import type { GraduationDashboardTab } from './graduation-dashboard-tabs';
 import { GraduationDashboardTabs } from './graduation-dashboard-tabs';
 import { GraduationStatusLegend } from './graduation-status-legend';
 import { RequirementAccordionList } from './requirement-accordion/requirement-accordion-list';
-
-interface GraduationDashboardTab {
-  value: string;
-  label: string;
-}
 
 interface GraduationDashboardSectionProps {
   tabs: GraduationDashboardTab[];

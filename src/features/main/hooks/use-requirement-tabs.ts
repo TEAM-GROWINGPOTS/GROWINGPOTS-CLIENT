@@ -73,15 +73,20 @@ const getRequirementSectionOptions = ({
 export const useRequirementTabs = (data: GraduationResponse | null) => {
   const [selectedTab, setSelectedTab] = useState(ALL_TAB_VALUE);
   const sectionOptions = useMemo(() => (data ? getRequirementSectionOptions(data) : []), [data]);
+  const selectedTabValue = useMemo(() => {
+    const isSelectedTabValid = sectionOptions.some(({ value }) => value === selectedTab);
+
+    return isSelectedTabValid ? selectedTab : ALL_TAB_VALUE;
+  }, [sectionOptions, selectedTab]);
   const selectedSectionOption = useMemo(
-    () => sectionOptions.find(({ value }) => value === selectedTab) ?? sectionOptions[0],
-    [sectionOptions, selectedTab],
+    () => sectionOptions.find(({ value }) => value === selectedTabValue) ?? sectionOptions[0],
+    [sectionOptions, selectedTabValue],
   );
   const tabs = useMemo(() => sectionOptions.map(({ value, label }) => ({ value, label })), [sectionOptions]);
 
   return {
     tabs,
-    selectedTab,
+    selectedTab: selectedTabValue,
     setSelectedTab,
     selectedSectionOption,
   };
