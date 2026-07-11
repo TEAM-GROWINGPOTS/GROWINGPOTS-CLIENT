@@ -39,6 +39,12 @@ const columns = [
   { key: 'area', label: '영역', type: 'select', options: areaOptions },
 ] as const;
 
+const toCreditValue = (value: string) =>
+  value
+    .replace(/[^0-9.]/g, '')
+    .replace(/(\..*)\./g, '$1')
+    .replace(/(\.\d).+/, '$1');
+
 const ROW_HEIGHT = 44;
 const FOOTER_RESERVED_HEIGHT = 90;
 const DEFAULT_VISIBLE_ROWS = 3;
@@ -74,7 +80,8 @@ export const CourseInfoTable = ({ courses, isEditing = false }: CourseInfoTableP
   };
 
   const handleCellChange = (id: string, key: (typeof columns)[number]['key']) => (value: string) => {
-    setRows((prev) => prev.map((row) => (row.id === id ? { ...row, [key]: value } : row)));
+    const nextValue = key === 'credit' ? toCreditValue(value) : value;
+    setRows((prev) => prev.map((row) => (row.id === id ? { ...row, [key]: nextValue } : row)));
   };
 
   return (
