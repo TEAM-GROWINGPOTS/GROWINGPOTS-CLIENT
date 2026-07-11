@@ -7,6 +7,7 @@ import { ReachabilityContext } from '@features/roadmap/contexts/reachability-con
 import { usePlannerGraph } from '@features/roadmap/hooks/use-planner-graph';
 import { GRADUATION_REQUIREMENTS, PlannerNodeData, SemesterEdgeData } from '@features/roadmap/types';
 import { AddSemesterModal } from '@features/semester-planner/card-view/modals/add-semester-modal';
+import { cn } from '@shared/utils/cn';
 import {
   Background,
   BackgroundVariant,
@@ -209,6 +210,7 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
   const [dropIndicator, setDropIndicator] = useState<{ colX: number; y: number } | null>(null);
   const [isAddSemesterModalOpen, setIsAddSemesterModalOpen] = useState(false);
   const [isCelebrationDismissed, setIsCelebrationDismissed] = useState(false);
+  const [isCelebrationLeaving, setIsCelebrationLeaving] = useState(false);
 
   const reconnectingEdgeId = useRef<string | null>(null);
   const dragDirectionRef = useRef<{ lastY: number; direction: 'up' | 'down' }>({ lastY: 0, direction: 'down' });
@@ -253,6 +255,12 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
     return sum;
   }, [nodes, reachability.nodeIds]);
   const showCelebration = totalCredits >= GRADUATION_REQUIREMENTS.전체 && !isCelebrationDismissed;
+
+  // 즉시 unmount하지 않고 opacity 전환이 끝난 뒤 dismiss 상태로 확정한다.
+  const dismissCelebration = useCallback(() => {
+    setIsCelebrationLeaving(true);
+    setTimeout(() => setIsCelebrationDismissed(true), 300);
+  }, []);
 
   // 드래그 시작 시점에 이 카드가 형제들 사이에서 원래 있던 인덱스를 기록해둔다.
   // onNodeDrag에서 targetIdx가 이 값과 같으면(=놓아도 제자리) 인디케이터 라인을 띄우지 않는다.
@@ -542,13 +550,22 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
           )}
         </ReactFlow>
 
-        {showCelebration && (
+        {(showCelebration || isCelebrationLeaving) && (
           <div
-            className="z-analysis-loading absolute inset-0 flex cursor-pointer flex-col items-center justify-center bg-white/40"
-            onClick={() => setIsCelebrationDismissed(true)}
+            className={cn(
+              'z-analysis-loading absolute inset-0 flex cursor-pointer flex-col items-center justify-center bg-white/40 transition-opacity duration-300',
+              isCelebrationLeaving && 'pointer-events-none opacity-0',
+            )}
+            onClick={dismissCelebration}
           >
-            <Lottie animationData={graduation} loop autoplay className="h-400 w-400" />
-            <p className="text-title-sb-24 text-gray-700">졸업 요건을 충족했어요!</p>
+            <Lottie
+              animationData={graduation}
+              loop={false}
+              autoplay
+              onComplete={dismissCelebration}
+              className="h-400 w-400"
+            />
+            <p className="text-title-sb-24 animate-text-rise text-gray-700">졸업 요건을 충족했어요!</p>
           </div>
         )}
       </div>
