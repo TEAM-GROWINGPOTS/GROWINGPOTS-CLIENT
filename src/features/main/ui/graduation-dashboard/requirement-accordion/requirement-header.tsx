@@ -1,4 +1,9 @@
-import { CURRENT_ONLY_CODES, HIDDEN_BADGE_CODES, REQUIREMENT_UNIT_LABELS } from '@features/main/constants/requirement';
+import {
+  CURRENT_ONLY_CODES,
+  HIDDEN_BADGE_CODES,
+  HIDDEN_MAJOR_NAME_CODES,
+  REQUIREMENT_UNIT_LABELS,
+} from '@features/main/constants/requirement';
 import * as Accordion from '@radix-ui/react-accordion';
 import type { GraduationCondition } from '@shared/apis/types/graduation';
 import { Badge, Tooltip } from '@shared/components';
@@ -23,11 +28,12 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
   const hasProgress = !isCurrentOnly && required > 0;
   const unit = REQUIREMENT_UNIT_LABELS[item.unit];
   const isInfoIconVisible = Boolean(hasInfo && infoContent);
+  const isMajorNameVisible = Boolean(item.majorName && !HIDDEN_MAJOR_NAME_CODES.has(item.code));
 
   return (
     <Accordion.Header asChild>
       <div>
-        {item.majorName && <p className="text-body-m-14 mb-12 text-gray-500">{item.majorName}</p>}
+        {isMajorNameVisible && <p className="text-body-m-14 mb-12 text-gray-500">{item.majorName}</p>}
 
         <div className="flex items-center">
           <h3 className={cn('text-title-sb-18 min-w-0 truncate text-gray-800', isInfoIconVisible ? 'mr-4' : 'mr-8')}>

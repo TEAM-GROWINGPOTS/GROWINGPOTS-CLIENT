@@ -3,6 +3,7 @@ import type { GraduationUnit } from '@shared/apis/types/graduation';
 
 export const CURRENT_ONLY_CODES = new Set<string>(['GRADUATION_REQUIRED', 'GENERAL_ELECTIVE']);
 export const HIDDEN_BADGE_CODES = new Set<string>(['GENERAL_ELECTIVE']);
+export const HIDDEN_MAJOR_NAME_CODES = new Set<string>(['ENGLISH_COURSE', 'SW_CERT_COURSE']);
 export const INFORMATION_CODES = new Set<string>(['GRADUATION_REQUIRED', 'REQUIRED_GE', 'DISTRIBUTED_GE', 'FREE_GE']);
 export const NOTICE_CODES = new Set<string>(['GRADUATION_REQUIRED', 'REQUIRED_GE', 'DISTRIBUTED_GE']);
 
