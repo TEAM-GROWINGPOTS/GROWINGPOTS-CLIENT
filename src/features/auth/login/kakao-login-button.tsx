@@ -6,7 +6,7 @@ export const KakaoLoginButton = () => {
   return (
     <button
       type="button"
-      className="relative flex min-w-[280px] cursor-pointer items-center justify-center self-stretch rounded-[10px] border border-[#FEE500] bg-[#FEE500] px-16 py-12"
+      className="relative flex min-w-[280px] cursor-pointer items-center justify-center self-stretch rounded-lg border border-[#FEE500] bg-[#FEE500] px-16 py-12"
     >
       <div className="absolute left-16 flex items-center">
         <Icon name="KakaoTalk" size={18} />

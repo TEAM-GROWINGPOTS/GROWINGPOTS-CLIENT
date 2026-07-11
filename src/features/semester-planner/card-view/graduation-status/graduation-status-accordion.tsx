@@ -1,8 +1,8 @@
 'use client';
 
 import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
-import type { GraduationCondition } from '@features/semester-planner/types/graduation-status';
 import * as Accordion from '@radix-ui/react-accordion';
+import type { GraduationCondition } from '@shared/apis/types/graduation';
 import { Badge, Chip, Tooltip } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
@@ -11,8 +11,7 @@ import { Fragment, useRef, useState } from 'react';
 import { AccordionProgressBar } from './accordion-progress-bar';
 import { calculatePercentage } from './calculate-percentage';
 
-// TODO: API 연동 시 스토어 데이터로 교체
-const MOCK_MAJOR_NAMES = ['컴퓨터공학부', '경영학과', '심리학과', '사회학과', '미디어커뮤니케이션학부'];
+const MAJOR_CODES = new Set(['MAJOR_BASIC', 'MAJOR_REQUIRED', 'MAJOR_ELECTIVE']);
 
 interface GraduationStatusAccordionProps {
   className?: string;
@@ -23,34 +22,27 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
   const [isArrowNav, setIsArrowNav] = useState(false);
   const chipContainerRef = useRef<HTMLDivElement>(null);
 
-  const mainMajor = useGraduationStatusStore((s) => s.mainMajor);
-  const doubleMajor = useGraduationStatusStore((s) => s.doubleMajor);
+  const data = useGraduationStatusStore((s) => s.data);
 
-  if (!mainMajor) return null;
+  if (!data || !data.sections) return null;
 
-  const { summary, conditions, overallMet } = mainMajor;
+  const { summary, graduatable, sections } = data;
+  const { majors, ge, others } = sections;
   const { totalCredits } = summary;
 
-  const majorConditions = conditions.filter((c) => c.code.startsWith('MAJOR') && c.code !== 'MAJOR');
-  const nonMajorConditions = conditions.filter(
-    (c) => !c.code.startsWith('MAJOR') && c.code !== 'GENERAL' && c.code !== 'OTHER',
-  );
-  const doubleMajorConditions =
-    doubleMajor?.conditions.filter((c) => c.code.startsWith('MAJOR') && c.code !== 'MAJOR') ?? [];
-
-  const majorNames = MOCK_MAJOR_NAMES;
-  const tabs = [...majorNames, '교양'];
+  const tabs = [...majors.map(({ majorName }) => majorName), '교양'];
 
   const getTabConditions = (index: number): GraduationCondition[] => {
-    if (index === tabs.length - 1) return nonMajorConditions;
-    if (index === 0) return majorConditions;
-    return doubleMajorConditions;
+    if (index === tabs.length - 1) return ge.conditions;
+    return majors[index]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)) ?? [];
   };
 
-  const conditionByCode = Object.fromEntries(conditions.map((c) => [c.code, c]));
-  const majorCredit = conditionByCode['MAJOR']?.current ?? 0;
-  const generalCredit = conditionByCode['GENERAL']?.current ?? 0;
-  const otherCredit = conditionByCode['OTHER']?.current ?? 0;
+  // 전공/교양/기타 학점을 각 섹션에서 합산하여 스택 바에 사용
+  const majorCredit =
+    majors[0]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)).reduce((sum, { current }) => sum + current, 0) ??
+    0;
+  const generalCredit = ge.conditions.reduce((sum, { current }) => sum + current, 0);
+  const otherCredit = others.conditions.reduce((sum, { current }) => sum + current, 0);
 
   const toPercent = (current: number) => calculatePercentage(current, totalCredits.required);
 
@@ -96,7 +88,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
                   size="md"
                 />
               </div>
-              {!overallMet && <Badge size="xsmall" color="red">{`${shortfallCredit}학점 부족`}</Badge>}
+              {!graduatable && <Badge size="xsmall" color="red">{`${shortfallCredit}학점 부족`}</Badge>}
             </div>
             <Icon
               name="ic_chevron_down"
