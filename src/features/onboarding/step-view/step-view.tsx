@@ -35,7 +35,7 @@ const DEFAULT_ITEMS: StepViewItem[] = [
 ];
 
 const cardBaseClassName =
-  'relative flex h-160 flex-col justify-between overflow-hidden rounded-[20px] px-20 pb-8 pt-20';
+  'relative flex h-160 flex-col justify-between overflow-hidden cursor-pointer rounded-[20px] px-20 pb-8 pt-20';
 
 const shortCardIds = new Set(['required-courses', 'distribution-courses', 'free-courses']);
 
