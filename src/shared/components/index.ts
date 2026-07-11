@@ -7,6 +7,7 @@ export { ConfirmModal } from './modal/confirm-modal';
 export { Modal } from './modal/modal';
 export { NavItem } from './nav-item/nav-item';
 export { Select } from './select/select';
+export { Tabs } from './tabs/tabs';
 export { TextField } from './text-field/text-field';
 export { toast, Toaster } from './toast';
 export type { TooltipSize, TooltipVariant } from './tooltip/tooltip';
