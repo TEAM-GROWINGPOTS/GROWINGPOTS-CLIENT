@@ -27,7 +27,7 @@ const FALLBACK_ACADEMIC_INFO: SideNavigationAcademicInfoItem[] = [
 
 // TODO: 실제 endpoint로 교체
 const NAV_ITEMS = [
-  { label: '나의 현황', iconName: 'ic_home', href: '/' },
+  { label: '나의 현황', iconName: 'ic_home', href: '/graduation-dashboard' },
   { label: '학기플래너', iconName: 'ic_planner', href: '/semester-planner' },
 ] as const;
 
