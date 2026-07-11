@@ -3,6 +3,7 @@ export { StudentInfo } from './analysis-result/student-info';
 export type { CourseInfo } from './course-info-table';
 export { CourseInfoTable } from './course-info-table';
 export { GraduationResult } from './graduation-result/graduation-result';
+export { mapGraduationResponseToCards } from './graduation-result/map-graduation-response';
 export type { RequirementCardProps } from './graduation-result/requirement-card';
 export { PdfUploadStep } from './pdf-upload-step/pdf-upload-step';
 export { StudentInfoStep } from './student-info-step/student-info-step';

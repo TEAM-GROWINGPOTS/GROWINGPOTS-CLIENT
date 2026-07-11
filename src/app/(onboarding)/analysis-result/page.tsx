@@ -1,6 +1,13 @@
 'use client';
 
-import { CourseInfo, CourseInfoTable, GraduationResult, RequirementCardProps, StudentInfo } from '@features/onboarding';
+import {
+  CourseInfo,
+  CourseInfoTable,
+  GraduationResult,
+  mapGraduationResponseToCards,
+  StudentInfo,
+} from '@features/onboarding';
+import type { GraduationResponse } from '@shared/apis/types/graduation';
 import { Button } from '@shared/components/button/button';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -74,21 +81,261 @@ const courses: CourseInfo[] = [
   },
 ];
 
-const requirementItems: RequirementCardProps[] = [
-  { label: '총 학점', value: '88', total: '/120학점' },
-  { label: '졸업 평점', value: '4.08', total: '/최소 1.7' },
-  { label: '영어', value: '4', total: '/3과목' },
-  { label: 'SW인증', value: '6', total: '/6학점', variant: 'dark' },
-  { label: '전공 기초', value: '27', total: '/42학점', variant: 'dark' },
-  { label: '전공 필수', value: '27', total: '/42학점', variant: 'dark' },
-  { label: '전공 선택', value: '27', total: '/42학점', variant: 'dark' },
-  { label: '배분이수교과', value: '27', total: '/42학점' },
-  { label: '필수교과', value: '27', total: '/42학점' },
-  { label: '자유이수', value: '27', total: '/42학점' },
-  { label: '졸업능력인증', value: '통과', variant: 'highlight' },
-  { label: '논문', value: '미통과' },
-  { label: '한국어능력인증', value: '해당 없음', disabled: true },
-];
+const graduationResponse: GraduationResponse = {
+  summary: {
+    totalCredits: { current: 87, required: 130 },
+    gpa: { current: 3.85, min: 2 },
+    enrollmentStatus: '재학',
+  },
+  graduatable: false,
+  conditions: null,
+  graduationRequired: null,
+  sections: {
+    majors: [
+      {
+        majorName: '스포츠의학과',
+        majorType: 'MAIN',
+        conditions: [
+          {
+            code: 'MAJOR_BASIC',
+            name: '전공 기초',
+            current: 6,
+            required: 7,
+            unit: 'CREDITS',
+            satisfied: false,
+            chartTarget: true,
+          },
+          {
+            code: 'MAJOR_REQUIRED',
+            name: '전공 필수',
+            current: 9,
+            required: 9,
+            unit: 'CREDITS',
+            satisfied: true,
+            chartTarget: true,
+          },
+          {
+            code: 'MAJOR_ELECTIVE',
+            name: '전공 선택',
+            current: 15,
+            required: 51,
+            unit: 'CREDITS',
+            satisfied: false,
+            chartTarget: true,
+          },
+          {
+            code: 'ENGLISH_COURSE',
+            name: '영어 강의',
+            current: 7,
+            required: 3,
+            unit: 'COURSES',
+            satisfied: true,
+            chartTarget: false,
+          },
+          {
+            code: 'SW_CERT_COURSE',
+            name: 'SW 인증 강의',
+            current: 6,
+            required: 6,
+            unit: 'CREDITS',
+            satisfied: true,
+            chartTarget: false,
+          },
+        ],
+        graduationRequired: {
+          hasGraduationRequired: true,
+          satisfied: false,
+          totalCredit: 2,
+          unmetDescriptions: [],
+          items: [
+            { name: '전문실기', current: 1, required: 2, unit: 'COURSES', satisfied: false },
+            { name: '맨손체조', current: 0, required: 1, unit: 'COURSES', satisfied: false },
+          ],
+        },
+      },
+      {
+        majorName: '연극영화학과',
+        majorType: 'DOUBLE',
+        conditions: [
+          {
+            code: 'MAJOR_BASIC',
+            name: '전공 기초',
+            current: 3,
+            required: 9,
+            unit: 'CREDITS',
+            satisfied: false,
+            chartTarget: true,
+          },
+          {
+            code: 'MAJOR_REQUIRED',
+            name: '전공 필수',
+            current: 6,
+            required: 15,
+            unit: 'CREDITS',
+            satisfied: false,
+            chartTarget: true,
+          },
+          {
+            code: 'MAJOR_ELECTIVE',
+            name: '전공 선택',
+            current: 6,
+            required: 12,
+            unit: 'CREDITS',
+            satisfied: false,
+            chartTarget: true,
+          },
+          {
+            code: 'ENGLISH_COURSE',
+            name: '영어 강의',
+            current: 0,
+            required: 3,
+            unit: 'COURSES',
+            satisfied: false,
+            chartTarget: false,
+          },
+          {
+            code: 'SW_CERT_COURSE',
+            name: 'SW 인증 강의',
+            current: 0,
+            required: 0,
+            unit: 'CREDITS',
+            satisfied: true,
+            chartTarget: false,
+          },
+        ],
+        graduationRequired: null,
+      },
+      {
+        majorName: '화학공학과',
+        majorType: 'DOUBLE',
+        conditions: [
+          {
+            code: 'MAJOR_BASIC',
+            name: '전공 기초',
+            current: 0,
+            required: 9,
+            unit: 'CREDITS',
+            satisfied: false,
+            chartTarget: true,
+          },
+          {
+            code: 'MAJOR_REQUIRED',
+            name: '전공 필수',
+            current: 0,
+            required: 15,
+            unit: 'CREDITS',
+            satisfied: false,
+            chartTarget: true,
+          },
+          {
+            code: 'MAJOR_ELECTIVE',
+            name: '전공 선택',
+            current: 0,
+            required: 12,
+            unit: 'CREDITS',
+            satisfied: false,
+            chartTarget: true,
+          },
+          {
+            code: 'ENGLISH_COURSE',
+            name: '영어 강의',
+            current: 0,
+            required: 3,
+            unit: 'COURSES',
+            satisfied: false,
+            chartTarget: false,
+          },
+          {
+            code: 'SW_CERT_COURSE',
+            name: 'SW 인증 강의',
+            current: 0,
+            required: 0,
+            unit: 'CREDITS',
+            satisfied: true,
+            chartTarget: false,
+          },
+        ],
+        graduationRequired: null,
+      },
+    ],
+    ge: {
+      majorName: null,
+      majorType: null,
+      conditions: [
+        {
+          code: 'REQUIRED_GE',
+          name: '필수 교과',
+          current: 12,
+          required: 17,
+          unit: 'CREDITS',
+          satisfied: false,
+          chartTarget: true,
+        },
+        {
+          code: 'DISTRIBUTED_GE',
+          name: '배분 이수 교과',
+          current: 3,
+          required: 9,
+          unit: 'CREDITS',
+          satisfied: false,
+          chartTarget: true,
+        },
+        {
+          code: 'FREE_GE',
+          name: '자유 이수 교과',
+          current: 5,
+          required: 3,
+          unit: 'CREDITS',
+          satisfied: true,
+          chartTarget: true,
+        },
+        {
+          code: 'ENGLISH_COURSE',
+          name: '영어 강의',
+          current: 7,
+          required: 3,
+          unit: 'COURSES',
+          satisfied: true,
+          chartTarget: false,
+        },
+        {
+          code: 'SW_CERT_COURSE',
+          name: 'SW 인증 강의',
+          current: 6,
+          required: 6,
+          unit: 'CREDITS',
+          satisfied: true,
+          chartTarget: false,
+        },
+      ],
+      graduationRequired: null,
+    },
+    others: {
+      majorName: null,
+      majorType: null,
+      conditions: [
+        {
+          code: 'GENERAL_ELECTIVE',
+          name: '기타',
+          current: 21,
+          required: null,
+          unit: 'CREDITS',
+          satisfied: false,
+          chartTarget: false,
+        },
+      ],
+      graduationRequired: null,
+    },
+  },
+  certs: [
+    { certType: 'ENGLISH', result: 'PASS' },
+    { certType: 'SW', result: 'FAIL' },
+    { certType: 'TOPIK', result: 'NONE' },
+    { certType: 'THESIS', result: 'NONE' },
+  ],
+};
+
+const requirementItems = mapGraduationResponseToCards(graduationResponse);
 
 export default function AnalysisResultPage() {
   const router = useRouter();
@@ -107,7 +354,7 @@ export default function AnalysisResultPage() {
   };
 
   return (
-    <div className="w-full px-120 pt-80 pb-40">
+    <div className="w-full bg-gray-50 px-120 pt-80 pb-40">
       <div className="mb-28 flex items-end justify-between">
         <div className="flex flex-col gap-4">
           <h1 className="text-title-sb-24 text-gray-900">분석 결과를 확인해 주세요</h1>

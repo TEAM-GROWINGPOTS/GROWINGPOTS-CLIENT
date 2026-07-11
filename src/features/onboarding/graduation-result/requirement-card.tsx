@@ -29,6 +29,7 @@ const variantStyles: Record<RequirementVariant, RequirementVariantStyle> = {
     card: 'bg-lime-500',
     label: 'text-gray-700',
     value: 'text-gray-700',
+    total: 'text-gray-400',
     checkIconName: 'ic_check_circle_black',
   },
 };
