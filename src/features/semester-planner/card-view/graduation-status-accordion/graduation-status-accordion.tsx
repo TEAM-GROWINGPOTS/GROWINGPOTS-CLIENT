@@ -53,7 +53,7 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
   const hasGraduationRequired = mainMajor?.graduationRequired != null;
 
   const graduationRequiredRows: TabRow[] = (mainMajor?.graduationRequired?.items ?? []).map(
-    ({ name, current, required, unit }) => ({ key: name, name, current, required, unit }),
+    ({ name, current, required, unit }, index) => ({ key: `${index}-${name}`, name, current, required, unit }),
   );
 
   const otherRequiredRows: TabRow[] = toTabRows(

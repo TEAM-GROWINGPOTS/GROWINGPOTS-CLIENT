@@ -68,59 +68,6 @@ const PE_MAIN_MAJOR: MajorSection = {
   },
 };
 
-const NON_PE_MAIN_MAJOR: MajorSection = {
-  majorName: '컴퓨터공학과',
-  majorType: 'MAIN',
-  conditions: [
-    {
-      code: 'MAJOR_BASIC',
-      name: '전공 기초',
-      current: 6,
-      required: 7,
-      unit: 'CREDITS',
-      satisfied: false,
-      chartTarget: true,
-    },
-    {
-      code: 'MAJOR_REQUIRED',
-      name: '전공 필수',
-      current: 9,
-      required: 9,
-      unit: 'CREDITS',
-      satisfied: true,
-      chartTarget: true,
-    },
-    {
-      code: 'MAJOR_ELECTIVE',
-      name: '전공 선택',
-      current: 15,
-      required: 51,
-      unit: 'CREDITS',
-      satisfied: false,
-      chartTarget: true,
-    },
-    {
-      code: 'ENGLISH_COURSE',
-      name: '영어 강의',
-      current: 5,
-      required: 3,
-      unit: 'COURSES',
-      satisfied: true,
-      chartTarget: true,
-    },
-    {
-      code: 'SW_CERT_COURSE',
-      name: 'SW 인증 강의',
-      current: 0,
-      required: 6,
-      unit: 'CREDITS',
-      satisfied: false,
-      chartTarget: true,
-    },
-  ],
-  graduationRequired: null,
-};
-
 const MOCK_DATA: GraduationResponse = {
   summary: {
     totalCredits: { current: 44, required: 120 },
