@@ -118,9 +118,29 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
     });
   };
 
+  const handleDeleteClick = () => {
+    setRows((prev) => prev.filter((row) => !selectedIds.has(row.id)));
+    setSelectedIds(new Set());
+  };
+
   return (
     <section className="flex flex-col gap-18 rounded-lg bg-white px-24 py-20">
-      <p className="text-body-sb-16 text-gray-600">과목정보</p>
+      <div className="flex h-32 w-full items-center justify-between">
+        <p className="text-body-sb-16 text-gray-600">과목정보</p>
+        {isEditing && (
+          <div className="flex items-center gap-12">
+            <Button label="과목추가" mode="secondary_outline" size="sm" />
+            <Button
+              label="과목삭제"
+              mode="primary_solid"
+              size="sm"
+              className="bg-gray-600 enabled:hover:bg-gray-700"
+              disabled={selectedIds.size === 0}
+              onClick={handleDeleteClick}
+            />
+          </div>
+        )}
+      </div>
       <div className="flex flex-col items-center gap-19">
         <div className="flex w-full flex-col gap-10">
           <div className="flex gap-16 bg-gray-50 px-8 py-4">
