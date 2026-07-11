@@ -49,6 +49,8 @@ export const getSelectedFilterLabels = (filters: CourseFilterValues | undefined)
 export const getFilterTabByLabel = (label: string): CourseFilterTabKeyTypes | undefined =>
   FILTER_TABS.find((tab) => tab.label === label)?.value;
 
+export const FILTER_TAB_LABELS = FILTER_TABS.map(({ label }) => label);
+
 const CAMPUS_OPTIONS: FilterOption[] = [{ value: '국제캠퍼스', label: '국제캠퍼스' }];
 
 interface CollegeGroup {

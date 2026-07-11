@@ -1,5 +1,6 @@
 'use client';
 
+import { FILTER_TAB_LABELS } from '@features/semester-planner/card-view/course-filter-modal/course-filter-modal';
 import { DropDown } from '@features/semester-planner/card-view/drop-down/drop-down';
 import { SearchField } from '@features/semester-planner/card-view/search-field/search-field';
 import { IconButton } from '@shared/components';
@@ -28,8 +29,6 @@ interface AddCourseSidebarProps {
   onDirectAdd: () => void;
   renderCourse?: (course: Course) => ReactNode;
 }
-
-const FILTER_LABELS = ['캠퍼스', '전공', '이수영역', '학년', '개설학기', '학점', '기타 필수'];
 
 const SCROLL_STEP = 120;
 
@@ -93,7 +92,7 @@ export const AddCourseSidebar = ({
           onScroll={handleFilterRowScroll}
           className="flex [scrollbar-width:none] gap-6 overflow-x-auto [&::-webkit-scrollbar]:hidden"
         >
-          {FILTER_LABELS.map((label) => (
+          {FILTER_TAB_LABELS.map((label) => (
             <DropDown
               key={label}
               label={label}
