@@ -1,9 +1,8 @@
 'use client';
 
+import type { ViewMode } from '@features/semester-planner/view-mode-toggle/view-mode-toggle';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
-
-import type { ViewMode } from '../view-mode-toggle/view-mode-toggle';
 
 const VIEW_MODE_QUERY_KEY = 'view';
 const DEFAULT_VIEW_MODE: ViewMode = 'card';

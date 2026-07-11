@@ -1,5 +1,6 @@
 import '@shared/styles/globals.css';
 
+import { Toaster } from '@shared/components';
 import { pretendard } from '@shared/styles/fonts';
 import type { Metadata } from 'next';
 
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html lang="ko" className={pretendard.variable}>
       <body>
         <Providers>{children}</Providers>
+        <Toaster />
       </body>
     </html>
   );
