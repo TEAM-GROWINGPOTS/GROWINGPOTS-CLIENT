@@ -4,7 +4,7 @@ import Icon from '@shared/components/icon/icon';
 
 export default function Page() {
   return (
-    <main className="flex h-screen w-full items-center justify-between overflow-hidden bg-white p-32">
+    <main className="flex h-screen w-full items-center overflow-hidden bg-white p-32">
       <section className="h-full min-w-0 flex-[1_0_0]">
         <LoginCarousel />
       </section>
