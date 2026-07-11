@@ -1,5 +1,5 @@
 import type { RequirementAccordionItem } from '@features/main/types/requirement';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseRequirementAccordionScrollParams {
   items: RequirementAccordionItem[];
@@ -14,19 +14,21 @@ export const useRequirementAccordionScroll = ({ items, scrollTargetKey }: UseReq
   const [isAutoScrollSpaceAnimated, setIsAutoScrollSpaceAnimated] = useState(false);
   const [activeScrollTargetKey, setActiveScrollTargetKey] = useState<string | null>(null);
 
-  const updateIsAtBottom = () => {
+  const updateIsAtBottom = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const bottomGap = container.scrollHeight - container.scrollTop - container.clientHeight;
     setIsAtBottom(bottomGap <= 1);
-  };
+  }, []);
 
   useEffect(() => {
+    itemRefs.current = {};
+
     const frameId = requestAnimationFrame(updateIsAtBottom);
 
     return () => cancelAnimationFrame(frameId);
-  }, [items, hasAutoScrollSpace]);
+  }, [items, hasAutoScrollSpace, updateIsAtBottom]);
 
   useEffect(() => {
     if (!scrollTargetKey) return;
@@ -61,10 +63,10 @@ export const useRequirementAccordionScroll = ({ items, scrollTargetKey }: UseReq
     });
   }, [activeScrollTargetKey]);
 
-  const handleManualScrollStart = () => {
+  const handleManualScrollStart = useCallback(() => {
     setIsAutoScrollSpaceAnimated(true);
     setHasAutoScrollSpace(false);
-  };
+  }, []);
 
   return {
     scrollContainerRef,
