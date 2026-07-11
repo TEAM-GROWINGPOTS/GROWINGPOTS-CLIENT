@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@shared/utils/cn';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useRef, useState } from 'react';
 
 interface TableCellEditProps {
   mode: 'view' | 'edit';
@@ -14,6 +14,7 @@ interface TableCellEditProps {
 const cellBaseClassName = 'text-body-m-16 text-gray-600 flex h-32 items-center gap-2 rounded-sm bg-white px-8';
 
 export const TableCellEdit = ({ mode, value, onChange, className, suffix }: TableCellEditProps) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [touched, setTouched] = useState(false);
   const showError = touched && value.trim() === '';
 
@@ -44,8 +45,9 @@ export const TableCellEdit = ({ mode, value, onChange, className, suffix }: Tabl
 
   if (suffix) {
     return (
-      <span className={wrapperClassName}>
+      <span className={wrapperClassName} onClick={() => inputRef.current?.focus()}>
         <input
+          ref={inputRef}
           value={value}
           onChange={handleChange}
           onBlur={handleBlur}

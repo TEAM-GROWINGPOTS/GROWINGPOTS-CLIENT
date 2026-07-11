@@ -7,17 +7,22 @@ import { GraduationResult } from '@features/onboarding/graduation-result/graduat
 import { mapGraduationResponseToCards } from '@features/onboarding/graduation-result/map-graduation-response';
 import { Button } from '@shared/components/button/button';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 const requirementItems = mapGraduationResponseToCards(MOCK_GRADUATION_RESPONSE);
 
 export const AnalysisResultView = () => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
+  const [isCourseInfoValid, setIsCourseInfoValid] = useState(true);
 
   const handleEditToggleClick = () => {
     setIsEditing((prev) => !prev);
   };
+
+  const handleCourseInfoValidityChange = useCallback((isValid: boolean) => {
+    setIsCourseInfoValid(isValid);
+  }, []);
 
   const handlePdfReuploadClick = () => {
     router.push('/onboarding?step=pdf');
@@ -40,6 +45,7 @@ export const AnalysisResultView = () => {
           label={isEditing ? '저장하기' : '편집하기'}
           mode={isEditing ? 'primary_solid' : 'secondary_outline'}
           size="sm"
+          disabled={isEditing && !isCourseInfoValid}
           onClick={handleEditToggleClick}
         />
       </div>
@@ -62,7 +68,11 @@ export const AnalysisResultView = () => {
       </div>
 
       <div className="mt-20 w-full">
-        <CourseInfoTable courses={MOCK_COURSES} isEditing={isEditing} />
+        <CourseInfoTable
+          courses={MOCK_COURSES}
+          isEditing={isEditing}
+          onValidityChange={handleCourseInfoValidityChange}
+        />
       </div>
 
       <div className="mt-20 flex justify-center">

@@ -17,6 +17,7 @@ export interface CourseInfo {
 interface CourseInfoTableProps {
   courses: CourseInfo[];
   isEditing?: boolean;
+  onValidityChange?: (isValid: boolean) => void;
 }
 
 const departmentOptions = ['해당없음', '연극영화학과', '컴퓨터공학부', '후마니타스칼리지(국제)'].map((label) => ({
@@ -48,7 +49,7 @@ const toCreditValue = (value: string) =>
 const ROW_HEIGHT = 44;
 const DEFAULT_VISIBLE_ROWS = 3;
 
-export const CourseInfoTable = ({ courses, isEditing = false }: CourseInfoTableProps) => {
+export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }: CourseInfoTableProps) => {
   const [expanded, setExpanded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(() => Math.min(DEFAULT_VISIBLE_ROWS, courses.length));
   const [rows, setRows] = useState(courses);
@@ -78,6 +79,12 @@ export const CourseInfoTable = ({ courses, isEditing = false }: CourseInfoTableP
 
     return () => window.removeEventListener('resize', updateVisibleCount);
   }, [courses.length, expanded, visibleCount]);
+
+  const hasEmptyValue = rows.some((row) => row.courseName.trim() === '' || row.credit.trim() === '');
+
+  useEffect(() => {
+    onValidityChange?.(!hasEmptyValue);
+  }, [hasEmptyValue, onValidityChange]);
 
   const visibleCourses = expanded || isEditing ? rows : rows.slice(0, visibleCount);
   const canToggle = !isEditing && (expanded || rows.length > visibleCount);
