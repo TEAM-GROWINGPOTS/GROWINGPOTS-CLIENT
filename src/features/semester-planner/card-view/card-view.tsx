@@ -31,7 +31,7 @@ import Icon from '@shared/components/icon/icon';
 import { IconButton } from '@shared/components/icon-button/icon-button';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
-import { type TransitionEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { type ReactNode, type TransitionEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 const SEMESTER_CODE_MAP: Record<string, { sortValue: number; label: string }> = {
   '1': { sortValue: 1, label: '1학기' },
@@ -43,7 +43,11 @@ const SEMESTER_CODE_MAP: Record<string, { sortValue: number; label: string }> = 
 // TODO: API 연동 시 과목검색(GET /courses) 결과로 교체하고 필터 값을 쿼리 파라미터로 전달
 const LIBRARY_COURSES = MOCK_COURSE_SEARCH_ITEMS.map(toSidebarCourse);
 
-export const CardView = () => {
+interface CardViewProps {
+  viewModeToggle?: ReactNode;
+}
+
+export const CardView = ({ viewModeToggle }: CardViewProps) => {
   const {
     plannedTerms,
     gridTerms,
@@ -163,6 +167,7 @@ export const CardView = () => {
     <DndContext id="card-view-dnd" {...contextProps}>
       <div className="flex h-full">
         <div className="flex min-w-0 flex-1 flex-col px-40 pt-16 pb-40">
+          {viewModeToggle && <div className="flex justify-center pb-16">{viewModeToggle}</div>}
           <header className="flex items-center justify-between">
             <h1 className="text-title-sb-24 text-gray-900">학기 플래너</h1>
             <div className="flex items-center gap-8">
