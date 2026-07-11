@@ -24,17 +24,9 @@ const OPTIONS: ViewModeOption[] = [
   { value: 'roadmap', label: '로드맵 보기', icon: 'ic_roadmap' },
 ];
 
-interface ViewModeToggleProps {
-  onBeforeChange?: (next: ViewMode) => boolean;
-}
-
-export const ViewModeToggle = ({ onBeforeChange }: ViewModeToggleProps) => {
+export const ViewModeToggle = () => {
   const { viewMode: value, setViewMode } = useViewMode();
 
-  const onChange = (next: ViewMode) => {
-    if (onBeforeChange && !onBeforeChange(next)) return;
-    setViewMode(next);
-  };
   const buttonRefs = useRef<Record<ViewMode, HTMLButtonElement | null>>({ card: null, roadmap: null });
   const [indicatorStyle, setIndicatorStyle] = useState<IndicatorStyle | null>(null);
 
@@ -68,7 +60,7 @@ export const ViewModeToggle = ({ onBeforeChange }: ViewModeToggleProps) => {
             role="tab"
             aria-selected={isSelected}
             aria-label={label}
-            onClick={() => onChange(optionValue)}
+            onClick={() => setViewMode(optionValue)}
             className={cn(
               'text-body-m-14 relative flex shrink-0 cursor-pointer items-center gap-8 rounded-full px-12 py-8 whitespace-nowrap transition-colors duration-200 ease-out',
               isSelected ? 'text-gray-100' : 'text-gray-500',

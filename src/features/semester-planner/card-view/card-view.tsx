@@ -22,8 +22,6 @@ import { AddSemesterModal } from '@features/semester-planner/card-view/modals/ad
 import { SemesterCard } from '@features/semester-planner/card-view/semester-card/semester-card';
 import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
 import { MOCK_COURSE_SEARCH_ITEMS } from '@features/semester-planner/mocks/planner';
-import { usePlannerStore } from '@features/semester-planner/store/planner-store';
-import type { PlannerTerm } from '@features/semester-planner/types/planner';
 import { toSidebarCourse } from '@features/semester-planner/utils/map-planner';
 import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
@@ -78,10 +76,7 @@ export const CardView = ({ viewModeToggle }: CardViewProps) => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
-  const setIsDirty = usePlannerStore((state) => state.setIsDirty);
-  const setSaveHandler = usePlannerStore((state) => state.setSaveHandler);
   const boardRef = useRef<HTMLElement>(null);
-  const savedTermsRef = useRef<PlannerTerm[]>(plannedTerms);
 
   const updateScrollability = useCallback(() => {
     const board = boardRef.current;
@@ -111,22 +106,6 @@ export const CardView = ({ viewModeToggle }: CardViewProps) => {
   const handleScrollRightClick = () => {
     boardRef.current?.scrollBy({ left: 282, behavior: 'smooth' });
   };
-
-  const handleSaveClick = useCallback(() => {
-    console.log('저장하기:', plannedTerms);
-    savedTermsRef.current = plannedTerms;
-    setIsDirty(false);
-    toast.success('학기 플래너가 저장되었어요.');
-  }, [plannedTerms, setIsDirty]);
-
-  useEffect(() => {
-    setIsDirty(plannedTerms !== savedTermsRef.current);
-  }, [plannedTerms, setIsDirty]);
-
-  useEffect(() => {
-    setSaveHandler(handleSaveClick);
-    return () => setSaveHandler(null);
-  }, [handleSaveClick, setSaveHandler]);
 
   const handleFilterClick = (label: string) => {
     const tab = getFilterTabByLabel(label);
@@ -168,15 +147,12 @@ export const CardView = ({ viewModeToggle }: CardViewProps) => {
           {viewModeToggle && <div className="flex justify-center pb-16">{viewModeToggle}</div>}
           <header className="flex items-center justify-between">
             <h1 className="text-title-sb-24 text-gray-900">학기 플래너</h1>
-            <div className="flex items-center gap-8">
-              <Button label="저장하기" mode="secondary_outline" onClick={handleSaveClick} />
-              <Button
-                label="과목추가"
-                mode="primary_solid"
-                icon={<Icon name="ic_plus" size={16} />}
-                onClick={handleOpenSidebar}
-              />
-            </div>
+            <Button
+              label="과목추가"
+              mode="primary_solid"
+              icon={<Icon name="ic_plus" size={16} />}
+              onClick={handleOpenSidebar}
+            />
           </header>
 
           <GraduationStatusAccordion className="mt-20" />
