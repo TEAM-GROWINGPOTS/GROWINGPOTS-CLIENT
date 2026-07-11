@@ -197,7 +197,10 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
                   />
                 ))}
               </div>
-              <div className="grid grid-cols-[max-content_1fr_max-content] items-center gap-x-12 gap-y-8 px-4">
+              <div
+                key={activeTabIndex}
+                className="grid grid-cols-[max-content_1fr_max-content] items-center gap-x-12 gap-y-8 px-4"
+              >
                 {getTabConditions(activeTabIndex).map(({ key, name, current, required, unit }) => (
                   <Fragment key={key}>
                     <span className="text-body-sb-14 text-gray-800">{name}</span>
