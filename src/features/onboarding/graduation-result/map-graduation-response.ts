@@ -102,7 +102,6 @@ export const mapGraduationResponseToCards = ({
     {
       label: '졸업 평점',
       value: `${summary.gpa.current}`,
-      total: summary.gpa.min === null ? undefined : `/최소 ${summary.gpa.min}`,
       variant: toVariant('non-credit', summary.gpa.min === null || summary.gpa.current >= summary.gpa.min),
     },
     getMajorCard('ENGLISH_COURSE', '영어'),
