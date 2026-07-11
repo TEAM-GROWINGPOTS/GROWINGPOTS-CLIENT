@@ -1,17 +1,21 @@
 'use client';
 
-import { arrayMove } from '@dnd-kit/sortable';
 import type { SemesterCourse } from '@features/semester-planner/card-view/semester-card/semester-card';
 import { MOCK_PLANNER_RESPONSE } from '@features/semester-planner/mocks/planner';
 import type { PlannerFolder, PlannerTerm } from '@features/semester-planner/types/planner';
-import { mapCompletedTerms, mapPlannedTerms, sortPlannerTerms } from '@features/semester-planner/utils/map-planner';
+import {
+  mapCompletedTerms,
+  mapPlannedTerms,
+  sortPlannerTerms,
+  sortSemesterCourses,
+} from '@features/semester-planner/utils/map-planner';
 import { useMemo, useRef, useState } from 'react';
 
 const COMPLETED_TERMS = mapCompletedTerms(MOCK_PLANNER_RESPONSE.completedTerms);
 const INITIAL_PLANNED_TERMS = mapPlannedTerms(MOCK_PLANNER_RESPONSE.plannedTerms);
 
 export const getSelectedCourses = (term: PlannerTerm): SemesterCourse[] =>
-  term.folders.find(({ id }) => id === term.selectedFolderId)?.courses ?? [];
+  sortSemesterCourses(term.folders.find(({ id }) => id === term.selectedFolderId)?.courses ?? []);
 
 export const getFolderName = ({ yearLevel, semesterLabel, selectedFolderId, folders }: PlannerTerm): string => {
   const selectedFolder = folders.find(({ id }) => id === selectedFolderId);
@@ -50,7 +54,7 @@ export const usePlannerTerms = () => {
     if (snapshotRef.current) setPlannedTerms(snapshotRef.current);
   };
 
-  const moveCourseToTerm = (activeId: string, targetTermId: string, insertBeforeId: string | null) => {
+  const moveCourseToTerm = (activeId: string, targetTermId: string) => {
     setPlannedTerms((prev) => {
       const origin = prev.find((term) => getSelectedCourses(term).some(({ id }) => id === activeId));
       if (!origin || origin.id === targetTermId) return prev;
@@ -61,31 +65,16 @@ export const usePlannerTerms = () => {
           return updateSelectedCourses(term, (courses) => courses.filter(({ id }) => id !== activeId));
         }
         if (term.id === targetTermId) {
-          return updateSelectedCourses(term, (courses) => {
-            const overIndex = insertBeforeId ? courses.findIndex(({ id }) => id === insertBeforeId) : -1;
-            const insertIndex = overIndex >= 0 ? overIndex : courses.length;
-            const next = [...courses];
-            next.splice(insertIndex, 0, course);
-            return next;
-          });
+          return updateSelectedCourses(term, (courses) => [...courses, course]);
         }
         return term;
       });
     });
   };
 
-  const insertCourse = (termId: string, course: SemesterCourse, insertBeforeId: string | null) => {
+  const insertCourse = (termId: string, course: SemesterCourse) => {
     setPlannedTerms((prev) =>
-      prev.map((term) => {
-        if (term.id !== termId) return term;
-        return updateSelectedCourses(term, (courses) => {
-          const overIndex = insertBeforeId ? courses.findIndex(({ id }) => id === insertBeforeId) : -1;
-          const insertIndex = overIndex >= 0 ? overIndex : courses.length;
-          const next = [...courses];
-          next.splice(insertIndex, 0, course);
-          return next;
-        });
-      }),
+      prev.map((term) => (term.id !== termId ? term : updateSelectedCourses(term, (courses) => [...courses, course]))),
     );
   };
 
@@ -96,20 +85,6 @@ export const usePlannerTerms = () => {
           ? updateSelectedCourses(term, (courses) => courses.filter(({ id }) => id !== courseId))
           : term,
       ),
-    );
-  };
-
-  const reorderCourse = (termId: string, activeId: string, overId: string) => {
-    setPlannedTerms((prev) =>
-      prev.map((term) => {
-        if (term.id !== termId) return term;
-        return updateSelectedCourses(term, (courses) => {
-          const oldIndex = courses.findIndex(({ id }) => id === activeId);
-          const newIndex = courses.findIndex(({ id }) => id === overId);
-          if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return courses;
-          return arrayMove(courses, oldIndex, newIndex);
-        });
-      }),
     );
   };
 
@@ -198,7 +173,6 @@ export const usePlannerTerms = () => {
     moveCourseToTerm,
     insertCourse,
     removeCourse,
-    reorderCourse,
     addTerm,
     removeTerm,
     addFolder,

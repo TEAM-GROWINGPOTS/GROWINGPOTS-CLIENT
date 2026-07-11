@@ -56,7 +56,6 @@ export const CardView = ({ viewModeToggle }: CardViewProps) => {
     moveCourseToTerm,
     insertCourse,
     removeCourse,
-    reorderCourse,
     addTerm,
     removeTerm,
     addFolder,
@@ -71,7 +70,6 @@ export const CardView = ({ viewModeToggle }: CardViewProps) => {
     moveCourseToTerm,
     insertCourse,
     removeCourse,
-    reorderCourse,
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);

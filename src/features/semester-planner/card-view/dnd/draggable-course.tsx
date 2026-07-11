@@ -1,25 +1,18 @@
 'use client';
 
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { useDraggable } from '@dnd-kit/core';
 import type { SemesterCourse } from '@features/semester-planner/card-view/semester-card/semester-card';
 import { ClassCard } from '@shared/components/class-card/class-card';
 
-export const SortableCourse = ({ course }: { course: SemesterCourse }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+export const DraggableCourse = ({ course }: { course: SemesterCourse }) => {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: course.id,
     data: { course },
   });
   const { department, name, tags, isEnglish, isSw } = course;
 
   return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={isDragging ? 'opacity-30' : undefined}
-    >
+    <div ref={setNodeRef} {...attributes} {...listeners} className={isDragging ? 'opacity-30' : undefined}>
       <ClassCard
         department={department}
         title={name}

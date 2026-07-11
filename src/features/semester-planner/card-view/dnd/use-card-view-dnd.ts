@@ -22,10 +22,9 @@ interface UseCardViewDndInput {
   plannedTerms: PlannerTerm[];
   snapshot: () => void;
   restoreSnapshot: () => void;
-  moveCourseToTerm: (activeId: string, targetTermId: string, insertBeforeId: string | null) => void;
-  insertCourse: (termId: string, course: SemesterCourse, insertBeforeId: string | null) => void;
+  moveCourseToTerm: (activeId: string, targetTermId: string) => void;
+  insertCourse: (termId: string, course: SemesterCourse) => void;
   removeCourse: (courseId: string) => void;
-  reorderCourse: (termId: string, activeId: string, overId: string) => void;
 }
 
 export const useCardViewDnd = ({
@@ -35,14 +34,12 @@ export const useCardViewDnd = ({
   moveCourseToTerm,
   insertCourse,
   removeCourse,
-  reorderCourse,
 }: UseCardViewDndInput) => {
   const [activeCourse, setActiveCourse] = useState<SemesterCourse | null>(null);
   const [overTermId, setOverTermId] = useState<string | null>(null);
   const [isLibraryDrag, setIsLibraryDrag] = useState(false);
   const copyCountRef = useRef(0);
   const lastOverIdRef = useRef<string | null>(null);
-  const latestOverIdRef = useRef<string | null>(null);
   const dwellRef = useRef<{ container: string; timer: ReturnType<typeof setTimeout> } | null>(null);
 
   const isContainerId = (id: UniqueIdentifier) => plannedTerms.some((term) => term.id === String(id));
@@ -70,7 +67,6 @@ export const useCardViewDnd = ({
   const handleDragStart = ({ active }: DragStartEvent) => {
     snapshot();
     lastOverIdRef.current = null;
-    latestOverIdRef.current = null;
     clearDwell();
     setIsLibraryDrag(findContainer(String(active.id)) === LIBRARY_ID);
     setActiveCourse((active.data.current?.course as SemesterCourse) ?? null);
@@ -85,7 +81,6 @@ export const useCardViewDnd = ({
   };
 
   const handleDragOver = ({ active, over }: DragOverEvent) => {
-    latestOverIdRef.current = over ? String(over.id) : null;
     if (!over) {
       setOverTermId(null);
       clearDwell();
@@ -122,7 +117,7 @@ export const useCardViewDnd = ({
     clearDwell();
     const timer = setTimeout(() => {
       dwellRef.current = null;
-      moveCourseToTerm(activeId, overContainer, latestOverIdRef.current);
+      moveCourseToTerm(activeId, overContainer);
     }, DWELL_MS);
     dwellRef.current = { container: overContainer, timer };
   };
@@ -152,16 +147,11 @@ export const useCardViewDnd = ({
       if (!course) return;
       copyCountRef.current += 1;
       const copy = { ...course, id: `${course.id.replace(LIBRARY_PREFIX, 'course-')}-copy-${copyCountRef.current}` };
-      insertCourse(overContainer, copy, overId);
+      insertCourse(overContainer, copy);
       return;
     }
 
-    if (activeContainer !== overContainer) {
-      moveCourseToTerm(activeId, overContainer, overId);
-      return;
-    }
-
-    if (overId) reorderCourse(activeContainer, activeId, overId);
+    if (activeContainer !== overContainer) moveCourseToTerm(activeId, overContainer);
   };
 
   return {
