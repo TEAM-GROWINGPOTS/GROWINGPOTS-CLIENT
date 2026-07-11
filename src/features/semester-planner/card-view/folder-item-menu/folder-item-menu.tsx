@@ -8,12 +8,14 @@ interface FolderItemMenuProps {
   onRename?: () => void;
   onDelete: () => void;
   iconSize?: number;
+  /** true면 호버와 무관하게 버튼을 항상 노출한다. 기본값(false)은 부모의 group-hover에만 반응한다. */
+  alwaysVisible?: boolean;
 }
 
 const MENU_ITEM_CLASS =
-  'flex w-full cursor-pointer items-center rounded-md border border-white bg-white px-8 py-6 text-left hover:bg-gray-50';
+  'flex w-[92px] h-[33px] cursor-pointer items-center justify-between rounded-md border border-white bg-white px-8 py-6 text-left hover:bg-gray-50';
 
-export const FolderItemMenu = ({ onRename, onDelete, iconSize = 20 }: FolderItemMenuProps) => {
+export const FolderItemMenu = ({ onRename, onDelete, iconSize = 20, alwaysVisible = false }: FolderItemMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -35,14 +37,18 @@ export const FolderItemMenu = ({ onRename, onDelete, iconSize = 20 }: FolderItem
         aria-haspopup="menu"
         aria-expanded={isMenuOpen}
         aria-label="폴더 옵션 열기"
-        className={cn('invisible cursor-pointer group-hover:visible', isMenuOpen && 'visible')}
+        className={cn(
+          'cursor-pointer',
+          alwaysVisible ? 'visible' : 'invisible group-hover:visible',
+          isMenuOpen && 'visible',
+        )}
       >
         <Icon name="ic_dot_vertical" size={iconSize} className="mb-0.5 text-gray-600" />
       </button>
       {isMenuOpen && (
         <ul
           role="menu"
-          className="z-dropdown absolute top-full left-0 flex w-100 flex-col items-start rounded-lg border border-gray-100 bg-white p-4 shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]"
+          className="z-dropdown absolute top-full right-0 flex w-fit flex-col items-start rounded-lg border border-gray-100 bg-white shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]"
         >
           {onRename && (
             <li role="none" className="w-full">

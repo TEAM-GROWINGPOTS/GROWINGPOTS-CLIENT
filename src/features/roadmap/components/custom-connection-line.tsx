@@ -17,12 +17,13 @@ export const CustomConnectionLine = ({
     targetX: toX,
     targetY: toY,
     targetPosition: toPosition ?? Position.Left,
+    borderRadius: 10,
   });
 
   return (
     <g>
-      <path fill="none" stroke="#84cc16" strokeWidth={2} strokeDasharray="6 3" d={edgePath} />
-      <circle cx={toX} cy={toY} r={4} fill="#84cc16" />
+      <path fill="none" stroke="#667e07" strokeWidth={1} strokeDasharray="3 3" d={edgePath} />
+      <circle cx={toX} cy={toY} r={4} fill="#fff" stroke="#667e07" strokeWidth={1} />
     </g>
   );
 };

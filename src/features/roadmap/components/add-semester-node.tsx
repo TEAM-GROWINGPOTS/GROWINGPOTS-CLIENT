@@ -1,9 +1,18 @@
 'use client';
 
+import { IconButton } from '@shared/components/icon-button/icon-button';
+import { Tooltip } from '@shared/components/tooltip/tooltip';
+import { Handle, Position } from '@xyflow/react';
+
 export const AddSemesterNode = () => {
   return (
-    <div className="nodrag flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-xl text-gray-400 transition-colors hover:border-lime-400 hover:text-lime-500">
-      +
-    </div>
+    <>
+      <Handle type="target" position={Position.Left} style={{ opacity: 0, pointerEvents: 'none' }} />
+      <Tooltip
+        trigger={<IconButton icon="ic_plus" size="medium" aria-label="학기 추가" className="nodrag" />}
+        content="학기 추가"
+        variant="top-center"
+      />
+    </>
   );
 };

@@ -3,7 +3,7 @@
 import { FolderItemMenu } from '@features/semester-planner/card-view';
 import type { NodeCardCourse } from '@features/semester-planner/types/planner-node';
 import * as Accordion from '@radix-ui/react-accordion';
-import { Badge } from '@shared/components';
+import { Badge, ConfirmModal } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { useState } from 'react';
@@ -24,7 +24,13 @@ type BaseNodeCardProps = {
 };
 
 export type NodeCardProps =
-  | (BaseNodeCardProps & { status: 'PLANNED'; onDelete: () => void })
+  | (BaseNodeCardProps & {
+      status: 'PLANNED';
+      onDelete: () => void;
+      isMenuVisible?: boolean;
+      /** 같은 학기에 남은 버전이 이것뿐이면 true — 삭제 확인 모달 문구가 달라진다. */
+      isLastVersion?: boolean;
+    })
   | (BaseNodeCardProps & { status: 'COMPLETED' | 'IN_PROGRESS' });
 
 const STATUS_ICON: Record<'COMPLETED' | 'IN_PROGRESS', string> = {
@@ -42,6 +48,7 @@ export const NodeCard = (props: NodeCardProps) => {
   const { status, isSelected, termName, folderName, totalCredit, courses, className } = props;
   const isLime = status !== 'PLANNED' || isSelected;
   const [defaultOpen] = useState(isLime);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   return (
     <div
@@ -71,9 +78,7 @@ export const NodeCard = (props: NodeCardProps) => {
         </div>
 
         {status === 'PLANNED' && (
-          <div className="[&_button]:visible">
-            <FolderItemMenu onDelete={props.onDelete} />
-          </div>
+          <FolderItemMenu onDelete={() => setIsDeleteConfirmOpen(true)} alwaysVisible={props.isMenuVisible} />
         )}
       </div>
 
@@ -90,7 +95,7 @@ export const NodeCard = (props: NodeCardProps) => {
               />
             </Accordion.Trigger>
           </Accordion.Header>
-          <Accordion.Content className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden">
+          <Accordion.Content className="overflow-hidden">
             <div className="mt-12 h-px bg-gray-100" />
             <div className="mt-12 flex flex-col gap-8">
               {courses.map((course) => (
@@ -100,6 +105,30 @@ export const NodeCard = (props: NodeCardProps) => {
           </Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>
+
+      {status === 'PLANNED' && (
+        <ConfirmModal
+          open={isDeleteConfirmOpen}
+          onOpenChange={setIsDeleteConfirmOpen}
+          type="delete"
+          title={`${termName}의 '${folderName}'을 삭제할까요?`}
+          description={
+            props.isLastVersion ? (
+              <>
+                이 폴더는 마지막 폴더예요.
+                <br />
+                삭제하면 학기 카드도 함께 삭제되며 복구할 수 없어요.
+              </>
+            ) : (
+              '삭제한 폴더는 복구할 수 없어요.'
+            )
+          }
+          onConfirm={() => {
+            setIsDeleteConfirmOpen(false);
+            props.onDelete();
+          }}
+        />
+      )}
     </div>
   );
 };

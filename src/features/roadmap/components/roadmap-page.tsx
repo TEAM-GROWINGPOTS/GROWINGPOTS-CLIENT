@@ -26,7 +26,7 @@ export const RoadmapPage = () => {
 
   return (
     <div className="h-screen">
-      <RoadmapView view={view} onViewChange={setView} />
+      <RoadmapView onViewChange={setView} />
     </div>
   );
 };
