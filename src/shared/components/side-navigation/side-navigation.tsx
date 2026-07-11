@@ -37,7 +37,7 @@ const MOCK_USER_PROFILE = {
   grade: 4,
 } as const;
 
-const GRADE_IMAGE_BY_YEAR: Record<number, string> = {
+const GRADE_ICON_BY_YEAR: Record<number, string> = {
   1: '/images/grade_1st.png',
   2: '/images/grade_2nd.png',
   3: '/images/grade_3rd.png',
@@ -61,7 +61,7 @@ export const SideNavigation = ({
   const isInitialized = useSideNavigationStore((state) => state.isInitialized);
   const isSidebarCollapsed = isInitialized ? isCollapsed : initialIsCollapsed;
 
-  const profileImageSrc = GRADE_IMAGE_BY_YEAR[MOCK_USER_PROFILE.grade] ?? GRADE_IMAGE_BY_YEAR[1];
+  const gradeIconSrc = GRADE_ICON_BY_YEAR[MOCK_USER_PROFILE.grade] ?? GRADE_ICON_BY_YEAR[1];
 
   const initializeCollapsed = useSideNavigationStore((state) => state.initializeCollapsed);
   const toggleSidebar = useSideNavigationStore((state) => state.toggleSidebar);
@@ -153,13 +153,7 @@ export const SideNavigation = ({
         </div>
 
         <section aria-label="프로필" className="flex items-center justify-start p-12">
-          <Image
-            src={profileImageSrc}
-            alt={`${MOCK_USER_PROFILE.grade}학년`}
-            width={20}
-            height={20}
-            className="shrink-0"
-          />
+          <Image src={gradeIconSrc} alt="" width={20} height={20} className="shrink-0" />
           <div
             className={cn(
               'grid min-w-0 flex-1 transition-[grid-template-columns,opacity,transform,margin] duration-200 ease-in-out',
