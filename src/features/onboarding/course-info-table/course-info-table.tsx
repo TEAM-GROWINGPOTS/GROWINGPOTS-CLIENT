@@ -3,7 +3,6 @@
 import { TableCellEdit, TableCellSelect } from '@features/onboarding/table-cell';
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
-import { cn } from '@shared/utils/cn';
 import { useEffect, useState } from 'react';
 
 export interface CourseInfo {
@@ -49,8 +48,6 @@ const toCreditValue = (value: string) =>
 
 const ROW_HEIGHT = 44;
 const DEFAULT_VISIBLE_ROWS = 3;
-const ROW_GRID_COLUMNS = 'grid-cols-[repeat(5,minmax(0,1fr))]';
-const ROW_GRID_COLUMNS_EDITING = 'grid-cols-[20px_repeat(5,minmax(0,1fr))]';
 
 export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }: CourseInfoTableProps) => {
   const [expanded, setExpanded] = useState(false);
@@ -91,8 +88,6 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
   useEffect(() => {
     onValidityChange?.(!hasEmptyValue);
   }, [hasEmptyValue, onValidityChange]);
-
-  const rowGridClassName = cn('grid items-center gap-16', isEditing ? ROW_GRID_COLUMNS_EDITING : ROW_GRID_COLUMNS);
 
   const visibleCourses = expanded || isEditing ? rows : rows.slice(0, visibleCount);
   const canToggle = !isEditing && (expanded || rows.length > visibleCount);
@@ -147,56 +142,69 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
         )}
       </div>
       <div className="flex flex-col items-center gap-19">
-        <div className="flex w-full flex-col gap-10">
-          <div className={cn(rowGridClassName, 'bg-gray-50 px-8 py-4')}>
-            {isEditing && (
-              <button type="button" onClick={handleSelectAllClick} aria-label="전체 선택">
-                <Icon name={isAllSelected ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'} size={20} />
-              </button>
-            )}
-            {columns.map(({ key, label }) => (
-              <p key={key} className="text-body-sb-16 min-w-0 truncate px-8 py-4 text-gray-600">
-                {label}
-              </p>
+        <table className="w-full table-fixed border-separate [border-spacing:0_4px]">
+          <caption className="sr-only">과목 정보</caption>
+          <colgroup>
+            {isEditing && <col className="w-20" />}
+            {columns.map(({ key }) => (
+              <col key={key} />
             ))}
-          </div>
-          <div className="flex flex-col gap-4">
-            {visibleCourses.map((course) => (
-              <div key={course.id} className={cn(rowGridClassName, 'px-8 py-4')}>
-                {isEditing && (
-                  <button
-                    type="button"
-                    onClick={handleRowSelectClick(course.id)}
-                    aria-label={`${course.courseName} 선택`}
-                  >
-                    <Icon
-                      name={selectedIds.has(course.id) ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'}
-                      size={20}
-                    />
+          </colgroup>
+          <thead>
+            <tr className="bg-gray-50">
+              {isEditing && (
+                <th scope="col" className="px-8 py-4">
+                  <button type="button" onClick={handleSelectAllClick} aria-label="전체 선택">
+                    <Icon name={isAllSelected ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'} size={20} />
                   </button>
+                </th>
+              )}
+              {columns.map(({ key, label }) => (
+                <th key={key} scope="col" className="text-body-sb-16 truncate px-8 py-4 text-left text-gray-600">
+                  {label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {visibleCourses.map((course) => (
+              <tr key={course.id}>
+                {isEditing && (
+                  <td className="px-8 py-4 align-middle">
+                    <button
+                      type="button"
+                      onClick={handleRowSelectClick(course.id)}
+                      aria-label={`${course.courseName} 선택`}
+                    >
+                      <Icon
+                        name={selectedIds.has(course.id) ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'}
+                        size={20}
+                      />
+                    </button>
+                  </td>
                 )}
-                {columns.map((column) =>
-                  isEditing && column.type === 'select' ? (
-                    <TableCellSelect
-                      key={column.key}
-                      options={column.options}
-                      value={course[column.key]}
-                      onChange={handleCellChange(course.id, column.key)}
-                    />
-                  ) : (
-                    <TableCellEdit
-                      key={column.key}
-                      mode={isEditing ? 'edit' : 'view'}
-                      value={course[column.key]}
-                      onChange={handleCellChange(course.id, column.key)}
-                      suffix={'suffix' in column ? column.suffix : undefined}
-                    />
-                  ),
-                )}
-              </div>
+                {columns.map((column) => (
+                  <td key={column.key} className="px-8 py-4 align-middle">
+                    {isEditing && column.type === 'select' ? (
+                      <TableCellSelect
+                        options={column.options}
+                        value={course[column.key]}
+                        onChange={handleCellChange(course.id, column.key)}
+                      />
+                    ) : (
+                      <TableCellEdit
+                        mode={isEditing ? 'edit' : 'view'}
+                        value={course[column.key]}
+                        onChange={handleCellChange(course.id, column.key)}
+                        suffix={'suffix' in column ? column.suffix : undefined}
+                      />
+                    )}
+                  </td>
+                ))}
+              </tr>
             ))}
-          </div>
-        </div>
+          </tbody>
+        </table>
         {canToggle && (
           <Button
             icon={<Icon name="ic_chevron_down" size={16} className={expanded ? 'rotate-180' : undefined} />}
