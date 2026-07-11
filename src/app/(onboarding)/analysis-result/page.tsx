@@ -2,6 +2,7 @@
 
 import { CourseInfo, CourseInfoTable, GraduationResult, RequirementCardProps, StudentInfo } from '@features/onboarding';
 import { Button } from '@shared/components/button/button';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 const courses: CourseInfo[] = [
@@ -90,10 +91,19 @@ const requirementItems: RequirementCardProps[] = [
 ];
 
 export default function AnalysisResultPage() {
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
 
   const handleEditToggleClick = () => {
     setIsEditing((prev) => !prev);
+  };
+
+  const handlePdfReuploadClick = () => {
+    router.push('/onboarding?step=pdf');
+  };
+
+  const handleConfirmClick = () => {
+    router.push('/');
   };
 
   return (
@@ -136,8 +146,22 @@ export default function AnalysisResultPage() {
 
       <div className="mt-20 flex justify-center">
         <div className="flex w-416 flex-col gap-8">
-          <Button label="PDF 재업로드" mode="primary_outline" size="lg" className="w-full justify-center" />
-          <Button label="확인" mode="primary_solid" size="lg" className="w-full justify-center" />
+          <Button
+            label="PDF 재업로드"
+            mode="primary_outline"
+            size="lg"
+            className="w-full justify-center"
+            disabled={isEditing}
+            onClick={handlePdfReuploadClick}
+          />
+          <Button
+            label="확인"
+            mode="primary_solid"
+            size="lg"
+            className="w-full justify-center"
+            disabled={isEditing}
+            onClick={handleConfirmClick}
+          />
         </div>
       </div>
     </div>
