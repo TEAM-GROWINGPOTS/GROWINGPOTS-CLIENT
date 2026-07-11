@@ -1,9 +1,3 @@
-import type {
-  SemesterCardStatus,
-  SemesterCourse,
-  SemesterFolder,
-} from '@features/semester-planner/card-view/semester-card/semester-card';
-
 export type OpenedSemester = 'FIRST' | 'SECOND' | 'BOTH';
 
 export interface PlannedCourseResponse {
@@ -81,6 +75,24 @@ export interface CourseSearchItemResponse {
   inPlanner: boolean;
 }
 
+export type SemesterCardStatus = 'completed' | 'current' | 'planned';
+
+export interface SemesterCourse {
+  id: string;
+  department: string;
+  name: string;
+  tags: string[];
+  credit: number;
+  divisionName: string;
+  isEnglish?: boolean;
+  isSw?: boolean;
+}
+
+export interface SemesterFolder {
+  id: string;
+  name: string;
+}
+
 export interface PlannerFolder extends SemesterFolder {
   courses: SemesterCourse[];
 }
@@ -94,5 +106,3 @@ export interface PlannerTerm {
   selectedFolderId?: string;
   folders: PlannerFolder[];
 }
-
-export type { SemesterCardStatus, SemesterCourse, SemesterFolder };

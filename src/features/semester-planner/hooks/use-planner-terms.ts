@@ -1,8 +1,7 @@
 'use client';
 
-import type { SemesterCourse } from '@features/semester-planner/card-view/semester-card/semester-card';
 import { MOCK_PLANNER_RESPONSE } from '@features/semester-planner/mocks/planner';
-import type { PlannerFolder, PlannerTerm } from '@features/semester-planner/types/planner';
+import type { PlannerFolder, PlannerTerm, SemesterCourse } from '@features/semester-planner/types/planner';
 import {
   mapCompletedTerms,
   mapPlannedTerms,

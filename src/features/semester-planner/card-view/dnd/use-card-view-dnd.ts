@@ -9,9 +9,8 @@ import {
   type UniqueIdentifier,
 } from '@dnd-kit/core';
 import { detectCoverageCollision, DWELL_MS } from '@features/semester-planner/card-view/dnd/collision';
-import type { SemesterCourse } from '@features/semester-planner/card-view/semester-card/semester-card';
 import { getSelectedCourses } from '@features/semester-planner/hooks/use-planner-terms';
-import type { PlannerTerm } from '@features/semester-planner/types/planner';
+import type { PlannerTerm, SemesterCourse } from '@features/semester-planner/types/planner';
 import { useEffect, useRef, useState } from 'react';
 
 export const LIBRARY_ID = 'library';

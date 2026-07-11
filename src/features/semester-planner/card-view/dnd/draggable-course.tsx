@@ -1,7 +1,7 @@
 'use client';
 
 import { useDraggable } from '@dnd-kit/core';
-import type { SemesterCourse } from '@features/semester-planner/card-view/semester-card/semester-card';
+import type { SemesterCourse } from '@features/semester-planner/types/planner';
 import { ClassCard } from '@shared/components/class-card/class-card';
 
 export const DraggableCourse = ({ course }: { course: SemesterCourse }) => {

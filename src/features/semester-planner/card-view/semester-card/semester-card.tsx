@@ -3,29 +3,12 @@
 import { FolderItemMenu } from '@features/semester-planner/card-view/folder-item-menu/folder-item-menu';
 import { FolderList } from '@features/semester-planner/card-view/folder-list/folder-list';
 import { FolderRenameModal } from '@features/semester-planner/card-view/folder-rename-modal/folder-rename-modal';
+import type { SemesterCardStatus, SemesterCourse, SemesterFolder } from '@features/semester-planner/types/planner';
 import { Badge, ClassCard } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { cn } from '@shared/utils/cn';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-
-export type SemesterCardStatus = 'completed' | 'current' | 'planned';
-
-export interface SemesterCourse {
-  id: string;
-  department: string;
-  name: string;
-  tags: string[];
-  credit: number;
-  divisionName: string;
-  isEnglish?: boolean;
-  isSw?: boolean;
-}
-
-export interface SemesterFolder {
-  id: string;
-  name: string;
-}
 
 interface SemesterCardProps {
   yearLevel: number;
