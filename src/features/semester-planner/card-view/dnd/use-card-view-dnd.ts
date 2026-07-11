@@ -12,7 +12,7 @@ import { detectCoverageCollision, DWELL_MS } from '@features/semester-planner/ca
 import type { SemesterCourse } from '@features/semester-planner/card-view/semester-card/semester-card';
 import { getSelectedCourses } from '@features/semester-planner/hooks/use-planner-terms';
 import type { PlannerTerm } from '@features/semester-planner/types/planner';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export const LIBRARY_ID = 'library';
 export const LIBRARY_PREFIX = 'lib-';
@@ -63,6 +63,8 @@ export const useCardViewDnd = ({
       dwellRef.current = null;
     }
   };
+
+  useEffect(() => clearDwell, []);
 
   const handleDragStart = ({ active }: DragStartEvent) => {
     snapshot();
