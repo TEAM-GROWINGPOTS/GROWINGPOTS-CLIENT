@@ -5,7 +5,8 @@ import Icon from '@shared/components/icon/icon';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { UploadedCard, Uploader } from '../pdf-uploader';
+import { UploadedCard } from './pdf-uploader/uploaded-card/uploaded-card';
+import { Uploader } from './pdf-uploader/uploader/uploader';
 
 interface PdfUploadStepProps {
   onSubmit?: (file: File) => void;

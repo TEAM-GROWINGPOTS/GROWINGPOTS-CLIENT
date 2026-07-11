@@ -1,9 +1,11 @@
 'use client';
 
-import { TableCellEdit, TableCellSelect } from '@features/onboarding/table-cell';
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
 import { useEffect, useState } from 'react';
+
+import { TableCellEdit } from './table-cell/table-cell-edit';
+import { TableCellSelect } from './table-cell/table-cell-select';
 
 export interface CourseInfo {
   id: string;

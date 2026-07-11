@@ -1,5 +1,6 @@
-import type { CourseInfo } from '@features/onboarding/course-info-table';
 import type { GraduationResponse } from '@shared/apis/types/graduation';
+
+import { CourseInfo } from '../analysis-result/course-info-table/course-info-table';
 
 export const MOCK_COURSES: CourseInfo[] = [
   { id: '1', courseName: '세계와시민', department: '해당없음', credit: '3', semester: '1학기', area: '필수교과' },

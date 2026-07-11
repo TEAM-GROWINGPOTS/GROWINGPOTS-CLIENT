@@ -1,13 +1,14 @@
 'use client';
 
-import { MOCK_COURSES, MOCK_GRADUATION_RESPONSE } from '@features/onboarding/analysis-result/mocks/analysis-result';
-import { StudentInfo } from '@features/onboarding/analysis-result/student-info';
-import { CourseInfoTable } from '@features/onboarding/course-info-table';
-import { GraduationResult } from '@features/onboarding/graduation-result/graduation-result';
-import { mapGraduationResponseToCards } from '@features/onboarding/graduation-result/map-graduation-response';
 import { Button } from '@shared/components/button/button';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
+
+import { MOCK_COURSES, MOCK_GRADUATION_RESPONSE } from '../mocks/analysis-result';
+import { CourseInfoTable } from './course-info-table/course-info-table';
+import { GraduationResult } from './graduation-result/graduation-result';
+import { mapGraduationResponseToCards } from './graduation-result/map-graduation-response';
+import { StudentInfo } from './student-info/student-info';
 
 const requirementItems = mapGraduationResponseToCards(MOCK_GRADUATION_RESPONSE);
 
