@@ -11,7 +11,7 @@ interface TableCellEditProps {
   suffix?: string;
 }
 
-const cellBaseClassName = 'text-body-m-16 text-gray-600 flex h-32 items-center gap-2 rounded-sm bg-white px-8';
+const cellBaseClassName = 'text-body-m-16 text-gray-600 flex h-32 min-w-0 items-center gap-2 rounded-sm bg-white px-8';
 
 export const TableCellEdit = ({ mode, value, onChange, className, suffix }: TableCellEditProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -21,8 +21,8 @@ export const TableCellEdit = ({ mode, value, onChange, className, suffix }: Tabl
   if (mode === 'view') {
     return (
       <span className={cn(cellBaseClassName, className)}>
-        {value}
-        {suffix && <span>{suffix}</span>}
+        <span className="min-w-0 truncate">{value}</span>
+        {suffix && <span className="shrink-0">{suffix}</span>}
       </span>
     );
   }

@@ -3,6 +3,7 @@
 import { TableCellEdit, TableCellSelect } from '@features/onboarding/table-cell';
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
+import { cn } from '@shared/utils/cn';
 import { useEffect, useState } from 'react';
 
 export interface CourseInfo {
@@ -48,6 +49,8 @@ const toCreditValue = (value: string) =>
 
 const ROW_HEIGHT = 44;
 const DEFAULT_VISIBLE_ROWS = 3;
+const ROW_GRID_COLUMNS = 'grid-cols-[repeat(5,minmax(0,1fr))]';
+const ROW_GRID_COLUMNS_EDITING = 'grid-cols-[20px_repeat(5,minmax(0,1fr))]';
 
 export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }: CourseInfoTableProps) => {
   const [expanded, setExpanded] = useState(false);
@@ -88,6 +91,8 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
   useEffect(() => {
     onValidityChange?.(!hasEmptyValue);
   }, [hasEmptyValue, onValidityChange]);
+
+  const rowGridClassName = cn('grid items-center gap-16', isEditing ? ROW_GRID_COLUMNS_EDITING : ROW_GRID_COLUMNS);
 
   const visibleCourses = expanded || isEditing ? rows : rows.slice(0, visibleCount);
   const canToggle = !isEditing && (expanded || rows.length > visibleCount);
@@ -143,26 +148,25 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
       </div>
       <div className="flex flex-col items-center gap-19">
         <div className="flex w-full flex-col gap-10">
-          <div className="flex gap-16 bg-gray-50 px-8 py-4">
+          <div className={cn(rowGridClassName, 'bg-gray-50 px-8 py-4')}>
             {isEditing && (
-              <button type="button" onClick={handleSelectAllClick} className="shrink-0" aria-label="전체 선택">
+              <button type="button" onClick={handleSelectAllClick} aria-label="전체 선택">
                 <Icon name={isAllSelected ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'} size={20} />
               </button>
             )}
             {columns.map(({ key, label }) => (
-              <p key={key} className="text-body-sb-16 flex flex-1 px-8 py-4 text-gray-600">
+              <p key={key} className="text-body-sb-16 min-w-0 truncate px-8 py-4 text-gray-600">
                 {label}
               </p>
             ))}
           </div>
           <div className="flex flex-col gap-4">
             {visibleCourses.map((course) => (
-              <div key={course.id} className="flex gap-16 px-8 py-4">
+              <div key={course.id} className={cn(rowGridClassName, 'px-8 py-4')}>
                 {isEditing && (
                   <button
                     type="button"
                     onClick={handleRowSelectClick(course.id)}
-                    className="shrink-0"
                     aria-label={`${course.courseName} 선택`}
                   >
                     <Icon
@@ -178,7 +182,6 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
                       options={column.options}
                       value={course[column.key]}
                       onChange={handleCellChange(course.id, column.key)}
-                      className="flex-1"
                     />
                   ) : (
                     <TableCellEdit
@@ -186,7 +189,6 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
                       mode={isEditing ? 'edit' : 'view'}
                       value={course[column.key]}
                       onChange={handleCellChange(course.id, column.key)}
-                      className="flex-1"
                       suffix={'suffix' in column ? column.suffix : undefined}
                     />
                   ),
