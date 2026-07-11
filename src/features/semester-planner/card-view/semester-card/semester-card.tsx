@@ -209,7 +209,7 @@ export const SemesterCard = ({
             </ul>
           ) : (
             <div className="flex h-100 items-center justify-center rounded-md border border-dashed border-gray-300">
-              <span className="text-body-m-16 text-gray-500">과목 없음</span>
+              <span className="text-body-m-14 text-gray-400">과목 없음</span>
             </div>
           )}
           {isDropTarget && (
