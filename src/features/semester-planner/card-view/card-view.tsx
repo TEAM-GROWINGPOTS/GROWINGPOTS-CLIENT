@@ -29,7 +29,8 @@ import Icon from '@shared/components/icon/icon';
 import { IconButton } from '@shared/components/icon-button/icon-button';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
-import { type ReactNode, type TransitionEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { type TransitionEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 const SEMESTER_CODE_MAP: Record<string, { sortValue: number; label: string }> = {
   '1': { sortValue: 1, label: '1학기' },
@@ -42,10 +43,10 @@ const SEMESTER_CODE_MAP: Record<string, { sortValue: number; label: string }> = 
 const LIBRARY_COURSES = MOCK_COURSE_SEARCH_ITEMS.map(toSidebarCourse);
 
 interface CardViewProps {
-  viewModeToggle?: ReactNode;
+  sidebarSlot: HTMLDivElement | null;
 }
 
-export const CardView = ({ viewModeToggle }: CardViewProps) => {
+export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const {
     plannedTerms,
     gridTerms,
@@ -142,99 +143,100 @@ export const CardView = ({ viewModeToggle }: CardViewProps) => {
 
   return (
     <DndContext id="card-view-dnd" {...contextProps}>
-      <div className="flex h-full">
-        <div className="flex min-w-0 flex-1 flex-col px-40 pt-16 pb-40">
-          {viewModeToggle && <div className="flex justify-center pb-16">{viewModeToggle}</div>}
-          <header className="flex items-center justify-between">
-            <h1 className="text-title-sb-24 text-gray-900">학기 플래너</h1>
-            <Button
-              label="과목추가"
-              mode="primary_solid"
-              icon={<Icon name="ic_plus" size={16} />}
-              onClick={handleOpenSidebar}
-            />
-          </header>
-
-          <GraduationStatusAccordion className="mt-20" />
-
-          <div className="relative mt-24 min-h-0 flex-1">
-            <section
-              ref={boardRef}
-              onScroll={updateScrollability}
-              className="flex h-full items-start gap-24 overflow-x-auto pb-20"
-            >
-              {gridTerms.map((term) =>
-                term.status === 'planned' ? (
-                  <DroppableTerm
-                    key={term.id}
-                    term={term}
-                    isDropTarget={overTermId === term.id}
-                    onDeleteTerm={() => removeTerm(term.id)}
-                    onAddFolder={() => handleAddFolder(term.id)}
-                    onSelectFolder={(folderId) => selectFolder(term.id, folderId)}
-                    onRenameFolder={(folderId, name) => renameFolder(term.id, folderId, name)}
-                    onDeleteFolder={(folderId) => deleteFolder(term.id, folderId)}
-                  />
-                ) : (
-                  <SemesterCard
-                    key={term.id}
-                    className="max-h-full"
-                    yearLevel={term.yearLevel}
-                    semester={term.semester}
-                    semesterLabel={term.semesterLabel}
-                    status={term.status}
-                    folderName={getFolderName(term)}
-                    courses={getSelectedCourses(term)}
-                  />
-                ),
-              )}
-              <IconButton
-                icon="ic_plus"
-                aria-label="학기 추가"
-                size="medium"
-                className="shrink-0 self-center"
-                onClick={() => setIsAddSemesterOpen(true)}
-              />
-            </section>
-            {canScrollLeft && (
-              <IconButton
-                icon="ic_chevron_left"
-                aria-label="이전 학기 보기"
-                size="medium"
-                className="absolute top-1/2 left-0 -translate-y-1/2"
-                onClick={handleScrollLeftClick}
-              />
-            )}
-            {canScrollRight && (
-              <IconButton
-                icon="ic_chevron_right"
-                aria-label="다음 학기 보기"
-                size="medium"
-                className="absolute top-1/2 right-0 -translate-y-1/2"
-                onClick={handleScrollRightClick}
-              />
-            )}
-            {activeCourse && !isLibraryDrag && <TrashDropZone />}
-          </div>
-        </div>
-
-        <div
-          onTransitionEnd={handleSidebarTransitionEnd}
-          className={cn(
-            'h-full shrink-0 overflow-hidden transition-[width] duration-300 ease-out',
-            isSidebarOpen ? 'w-300' : 'w-0',
-          )}
-        >
-          <AddCourseSidebar
-            courses={LIBRARY_COURSES}
-            selectedFilterLabels={getSelectedFilterLabels(appliedFilters)}
-            onFilterClick={handleFilterClick}
-            onClose={() => setIsSidebarOpen(false)}
-            onDirectAdd={handleDirectAdd}
-            renderCourse={(course: Course) => <LibraryCourse key={course.id} course={course} />}
+      <div className="flex h-full min-w-0 flex-col px-40 pt-16 pb-40">
+        <header className="flex items-center justify-between">
+          <h1 className="text-title-sb-24 text-gray-900">학기 플래너</h1>
+          <Button
+            label="과목추가"
+            mode="primary_solid"
+            icon={<Icon name="ic_plus" size={16} />}
+            onClick={handleOpenSidebar}
           />
+        </header>
+
+        <GraduationStatusAccordion className="mt-20" />
+
+        <div className="relative mt-24 min-h-0 flex-1">
+          <section
+            ref={boardRef}
+            onScroll={updateScrollability}
+            className="flex h-full items-start gap-24 overflow-x-auto pb-20"
+          >
+            {gridTerms.map((term) =>
+              term.status === 'planned' ? (
+                <DroppableTerm
+                  key={term.id}
+                  term={term}
+                  isDropTarget={overTermId === term.id}
+                  onDeleteTerm={() => removeTerm(term.id)}
+                  onAddFolder={() => handleAddFolder(term.id)}
+                  onSelectFolder={(folderId) => selectFolder(term.id, folderId)}
+                  onRenameFolder={(folderId, name) => renameFolder(term.id, folderId, name)}
+                  onDeleteFolder={(folderId) => deleteFolder(term.id, folderId)}
+                />
+              ) : (
+                <SemesterCard
+                  key={term.id}
+                  className="max-h-full"
+                  yearLevel={term.yearLevel}
+                  semester={term.semester}
+                  semesterLabel={term.semesterLabel}
+                  status={term.status}
+                  folderName={getFolderName(term)}
+                  courses={getSelectedCourses(term)}
+                />
+              ),
+            )}
+            <IconButton
+              icon="ic_plus"
+              aria-label="학기 추가"
+              size="medium"
+              className="shrink-0 self-center"
+              onClick={() => setIsAddSemesterOpen(true)}
+            />
+          </section>
+          {canScrollLeft && (
+            <IconButton
+              icon="ic_chevron_left"
+              aria-label="이전 학기 보기"
+              size="medium"
+              className="absolute top-1/2 left-0 -translate-y-1/2"
+              onClick={handleScrollLeftClick}
+            />
+          )}
+          {canScrollRight && (
+            <IconButton
+              icon="ic_chevron_right"
+              aria-label="다음 학기 보기"
+              size="medium"
+              className="absolute top-1/2 right-0 -translate-y-1/2"
+              onClick={handleScrollRightClick}
+            />
+          )}
+          {activeCourse && !isLibraryDrag && <TrashDropZone />}
         </div>
       </div>
+
+      {sidebarSlot &&
+        createPortal(
+          <div
+            onTransitionEnd={handleSidebarTransitionEnd}
+            className={cn(
+              'h-full overflow-hidden transition-[width] duration-300 ease-out',
+              isSidebarOpen ? 'w-300' : 'w-0',
+            )}
+          >
+            <AddCourseSidebar
+              courses={LIBRARY_COURSES}
+              selectedFilterLabels={getSelectedFilterLabels(appliedFilters)}
+              onFilterClick={handleFilterClick}
+              onClose={() => setIsSidebarOpen(false)}
+              onDirectAdd={handleDirectAdd}
+              renderCourse={(course: Course) => <LibraryCourse key={course.id} course={course} />}
+            />
+          </div>,
+          sidebarSlot,
+        )}
 
       <DragOverlay dropAnimation={isLibraryDrag ? null : undefined}>
         {activeCourse && (
