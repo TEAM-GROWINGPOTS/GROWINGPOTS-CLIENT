@@ -95,7 +95,7 @@ export const NodeCard = (props: NodeCardProps) => {
               />
             </Accordion.Trigger>
           </Accordion.Header>
-          <Accordion.Content className="overflow-hidden">
+          <Accordion.Content className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden">
             <div className="mt-12 h-px bg-gray-100" />
             <div className="mt-12 flex flex-col gap-8">
               {courses.map((course) => (
