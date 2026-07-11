@@ -33,7 +33,7 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
   return (
     <Accordion.Header asChild>
       <div>
-        {isMajorNameVisible && <p className="text-body-m-14 mb-12 text-gray-500">{item.majorName}</p>}
+        {isMajorNameVisible && <p className="text-body-m-14 mb-4 text-gray-500">{item.majorName}</p>}
 
         <div className="flex items-center">
           <h3 className={cn('text-title-sb-18 min-w-0 truncate text-gray-800', isInfoIconVisible ? 'mr-4' : 'mr-8')}>
