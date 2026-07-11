@@ -104,7 +104,7 @@ export const SideNavigation = ({
             className="absolute right-24 flex h-24 w-24 cursor-pointer items-center justify-center rounded-lg transition-all duration-300 ease-in-out"
             onClick={handleToggleClick}
           >
-            <Icon name={'ic_left_panel'} size={24} className="text-gray-500" />
+            <Icon name={'ic_left_panel'} size={20} className="text-gray-500" />
           </button>
         </header>
 
