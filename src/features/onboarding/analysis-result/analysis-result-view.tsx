@@ -56,7 +56,7 @@ export const AnalysisResultView = () => {
             semester={1}
           />
         </div>
-        <div className="flex-4">
+        <div className="flex-3">
           <GraduationResult items={requirementItems} />
         </div>
       </div>

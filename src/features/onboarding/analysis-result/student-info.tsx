@@ -40,9 +40,9 @@ export const StudentInfo = ({
         </div>
         <dl className="flex w-full flex-col gap-8">
           {rows.map(({ label, value }) => (
-            <div key={label} className="text-body-m-16 flex h-24 w-full gap-16 whitespace-nowrap">
-              <dt className="flex-1 text-gray-400">{label}</dt>
-              <dd className="text-gray-600">{value}</dd>
+            <div key={label} className="text-body-m-16 flex h-24 w-full items-center gap-16">
+              <dt className="shrink-0 whitespace-nowrap text-gray-400">{label}</dt>
+              <dd className="min-w-0 flex-1 truncate text-right text-gray-600">{value}</dd>
             </div>
           ))}
         </dl>
