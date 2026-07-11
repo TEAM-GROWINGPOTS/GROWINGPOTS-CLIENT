@@ -35,16 +35,16 @@ export const TableCellEdit = ({ mode, value, onChange, className, suffix }: Tabl
     setTouched(true);
   };
 
+  const wrapperClassName = cn(
+    cellBaseClassName,
+    'border outline-none',
+    showError ? 'border-red-20' : 'border-gray-100',
+    className,
+  );
+
   if (suffix) {
     return (
-      <span
-        className={cn(
-          cellBaseClassName,
-          'border outline-none',
-          showError ? 'border-red-20' : 'border-gray-100',
-          className,
-        )}
-      >
+      <span className={wrapperClassName}>
         <input
           value={value}
           onChange={handleChange}
@@ -64,12 +64,7 @@ export const TableCellEdit = ({ mode, value, onChange, className, suffix }: Tabl
       onChange={handleChange}
       onBlur={handleBlur}
       aria-invalid={showError}
-      className={cn(
-        cellBaseClassName,
-        'border outline-none',
-        showError ? 'border-red-20' : 'border-gray-100',
-        className,
-      )}
+      className={wrapperClassName}
     />
   );
 };
