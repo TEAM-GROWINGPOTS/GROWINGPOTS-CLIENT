@@ -152,22 +152,31 @@ export const SideNavigation = ({
           </div>
         </div>
 
-        <section
-          aria-label="프로필"
-          className={cn(
-            'flex items-center p-12 transition-[gap] duration-300 ease-in-out',
-            isSidebarCollapsed ? 'justify-center' : 'gap-4',
-          )}
-        >
-          <Image src={profileImageSrc} alt={`${MOCK_USER_PROFILE.grade}학년`} width={20} height={20} />
-          {!isSidebarCollapsed && (
-            <>
-              <p className="text-body-m-16 min-w-0 flex-1 truncate text-white">{MOCK_USER_PROFILE.name}</p>
+        <section aria-label="프로필" className="flex items-center justify-start p-12">
+          <Image
+            src={profileImageSrc}
+            alt={`${MOCK_USER_PROFILE.grade}학년`}
+            width={20}
+            height={20}
+            className="shrink-0"
+          />
+          <div
+            className={cn(
+              'grid min-w-0 flex-1 transition-[grid-template-columns,opacity,transform,margin] duration-200 ease-in-out',
+              isSidebarCollapsed
+                ? 'pointer-events-none ml-0 -translate-x-1 grid-cols-[0fr] opacity-0'
+                : 'ml-4 translate-x-0 grid-cols-[1fr] opacity-100',
+            )}
+          >
+            <div className="flex min-w-0 items-center gap-4 overflow-hidden whitespace-nowrap">
+              <p className="text-body-m-16 min-w-0 flex-1 cursor-default overflow-hidden text-white">
+                {MOCK_USER_PROFILE.name}
+              </p>
               <button onClick={() => {}} type="button" aria-label="로그아웃" className="flex shrink-0 cursor-pointer">
                 <Icon name="ic_logout" size={24} className="text-gray-500" />
               </button>
-            </>
-          )}
+            </div>
+          </div>
         </section>
       </footer>
     </aside>
