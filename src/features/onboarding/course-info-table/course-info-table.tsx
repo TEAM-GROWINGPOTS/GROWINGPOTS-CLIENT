@@ -58,7 +58,10 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
 
   if (isEditing !== prevIsEditing) {
     setPrevIsEditing(isEditing);
-    if (!isEditing) setSelectedIds(new Set());
+    if (!isEditing) {
+      setSelectedIds(new Set());
+      setExpanded(true);
+    }
   }
 
   useEffect(() => {
