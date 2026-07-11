@@ -2,7 +2,7 @@
 
 import Icon from '@shared/components/icon/icon';
 
-interface UploadedFileCardProps {
+interface UploadedCardProps {
   fileName: string;
   fileSizeBytes: number;
   onRemove: () => void;
@@ -17,7 +17,7 @@ const formatFileSize = (bytes: number) => {
   return `${Number((bytes / MB).toFixed(1))} mb`;
 };
 
-export const UploadedFileCard = ({ fileName, fileSizeBytes, onRemove }: UploadedFileCardProps) => (
+export const UploadedCard = ({ fileName, fileSizeBytes, onRemove }: UploadedCardProps) => (
   <div className="flex h-69 items-center rounded-xl border border-gray-100 bg-gray-50 p-12">
     <Icon name="ic_pdf_file" size={44} />
     <div className="flex min-w-0 flex-1 flex-col pr-8 pl-12">
