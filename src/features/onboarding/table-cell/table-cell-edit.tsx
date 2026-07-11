@@ -21,7 +21,7 @@ export const TableCellEdit = ({ mode, value, onChange, className, suffix }: Tabl
     return (
       <span className={cn(cellBaseClassName, className)}>
         {value}
-        {suffix && <span className="text-gray-400">{suffix}</span>}
+        {suffix && <span>{suffix}</span>}
       </span>
     );
   }
