@@ -37,9 +37,8 @@ const HandleDot = () => (
   </svg>
 );
 
-export const SemesterNode = ({ id, data, width }: NodeProps<PlannerNodeType>) => {
-  const { displacedNodeId, reachableNodeIds, soloVersionNodeIds } = useReachability();
-  const isDropTarget = displacedNodeId === id;
+export const SemesterNode = ({ id, data, width, dragging }: NodeProps<PlannerNodeType>) => {
+  const { reachableNodeIds, soloVersionNodeIds } = useReachability();
   // React Flow는 measure 전 노드 wrapper에 visibility:hidden을 걸어둔다. 이때 width는 undefined가 아니라 0으로 내려오므로
   // 메뉴 버튼만 강제로 visible 처리하면 measure 전에 버튼만 먼저 노출된다. measure 완료(width > 0) 후에만 켠다.
   const isMeasured = width !== undefined && width > 0;
@@ -56,12 +55,7 @@ export const SemesterNode = ({ id, data, width }: NodeProps<PlannerNodeType>) =>
   };
 
   return (
-    <div
-      className={cn(
-        'transition-all duration-150',
-        isDropTarget && 'scale-[0.93] rounded-xl opacity-60 ring-2 ring-lime-400 ring-offset-2',
-      )}
-    >
+    <div className={cn('transition-all duration-150', dragging && 'opacity-70')}>
       {data.colIndex !== 0 && (
         <Handle type="target" position={Position.Left} style={HANDLE_STYLE} className={HANDLE_HIT_AREA_CLASS}>
           <HandleDot />

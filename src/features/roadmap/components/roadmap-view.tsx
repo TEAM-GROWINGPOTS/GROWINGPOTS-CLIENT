@@ -18,6 +18,7 @@ import {
   ReactFlow,
   useEdgesState,
   useNodesState,
+  ViewportPortal,
 } from '@xyflow/react';
 import Lottie from 'lottie-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -25,6 +26,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AddSemesterNode } from './add-semester-node';
 import { AddVersionNode } from './add-version-node';
 import { CustomConnectionLine } from './custom-connection-line';
+import { DropIndicatorLine } from './drop-indicator-line';
 import { RoadmapHeader } from './roadmap-header';
 import { SemesterEdge } from './semester-edge';
 import { SemesterNode } from './semester-node';
@@ -79,6 +81,41 @@ const recomputeColumnPositions = (nodes: Node<PlannerNodeData>[]): Node<PlannerN
     if (newY === undefined || n.position.y === newY) return n;
     return { ...n, position: { ...n.position, y: newY } };
   });
+};
+
+interface DropTarget {
+  targetIdx: number;
+  lineY: number;
+}
+
+// 드래그 중인 카드를 같은 컬럼의 형제들 사이 어디에 놓을지 계산한다.
+// 위로 올릴 땐 카드의 윗변, 아래로 내릴 땐 아랫변을 기준선으로 삼아 형제의 중심점과 비교한다.
+// down에서 <=를 쓰는 이유: 기준선이 마지막 형제의 중심점과 같거나 넘어간 경우까지 "지나감"으로 잡아야
+// 마지막 카드를 넘어가는 케이스가 siblings.length(맨 끝)로 자연스럽게 이어진다.
+const computeDropTarget = (
+  nodeY: number,
+  nodeHeight: number,
+  direction: 'up' | 'down',
+  siblings: Node<PlannerNodeData>[],
+): DropTarget => {
+  const siblingHeight = (s: Node<PlannerNodeData>) => s.measured?.height ?? NODE_HEIGHT;
+  const refY = direction === 'up' ? nodeY : nodeY + nodeHeight;
+
+  const targetIdx =
+    direction === 'up'
+      ? siblings.filter((s) => s.position.y + siblingHeight(s) / 2 < refY).length
+      : siblings.filter((s) => s.position.y + siblingHeight(s) / 2 <= refY).length;
+
+  if (siblings.length === 0) return { targetIdx, lineY: nodeY };
+  if (targetIdx === 0) return { targetIdx, lineY: siblings[0].position.y - ROW_MARGIN / 2 };
+  if (targetIdx === siblings.length) {
+    const last = siblings[siblings.length - 1];
+    return { targetIdx, lineY: last.position.y + siblingHeight(last) + ROW_MARGIN / 2 };
+  }
+
+  const upper = siblings[targetIdx - 1];
+  const lower = siblings[targetIdx];
+  return { targetIdx, lineY: (upper.position.y + siblingHeight(upper) + lower.position.y) / 2 };
 };
 
 // 체인(첫 완료 학기 → ... → 마지막 선택 버전)을 따라 엣지별 누적 학점을 계산한다.
@@ -169,11 +206,12 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [displacedNodeId, setDisplacedNodeId] = useState<string | null>(null);
+  const [dropIndicator, setDropIndicator] = useState<{ colX: number; y: number } | null>(null);
   const [isAddSemesterModalOpen, setIsAddSemesterModalOpen] = useState(false);
   const [isCelebrationDismissed, setIsCelebrationDismissed] = useState(false);
 
   const reconnectingEdgeId = useRef<string | null>(null);
+  const dragDirectionRef = useRef<{ lastY: number; direction: 'up' | 'down' }>({ lastY: 0, direction: 'down' });
   const nodesRef = useRef(nodes);
   useEffect(() => {
     nodesRef.current = nodes;
@@ -211,6 +249,23 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
   }, [nodes, reachability.nodeIds]);
   const showCelebration = totalCredits >= GRADUATION_REQUIREMENTS.전체 && !isCelebrationDismissed;
 
+  // 드래그 시작 시점에 이 카드가 형제들 사이에서 원래 있던 인덱스를 기록해둔다.
+  // onNodeDrag에서 targetIdx가 이 값과 같으면(=놓아도 제자리) 인디케이터 라인을 띄우지 않는다.
+  const originalIdxRef = useRef(0);
+
+  const onNodeDragStart = useCallback((_: unknown, node: Node) => {
+    dragDirectionRef.current = { lastY: node.position.y, direction: 'down' };
+
+    const colIndex = (node.data as Partial<PlannerNodeData>).colIndex;
+    const siblings = nodesRef.current.filter(
+      (n) =>
+        n.id !== node.id &&
+        typeof (n.data as Partial<PlannerNodeData>).colIndex === 'number' &&
+        (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
+    );
+    originalIdxRef.current = siblings.filter((s) => s.position.y < node.position.y).length;
+  }, []);
+
   const onNodeDrag = useCallback(
     (_: unknown, node: Node) => {
       const colX = (node.data as Partial<PlannerNodeData>).colX;
@@ -219,6 +274,11 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
 
       setNodes((nds) => nds.map((n) => (n.id === node.id ? { ...n, position: { x: colX, y: node.position.y } } : n)));
 
+      const delta = node.position.y - dragDirectionRef.current.lastY;
+      if (delta !== 0) {
+        dragDirectionRef.current = { lastY: node.position.y, direction: delta > 0 ? 'down' : 'up' };
+      }
+
       const siblings = nodesRef.current
         .filter(
           (n) =>
@@ -226,16 +286,17 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
             typeof (n.data as Partial<PlannerNodeData>).colIndex === 'number' &&
             (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
         )
-        .sort((a, b) => a.position.y - b.position.y);
+        .sort((a, b) => a.position.y - b.position.y) as Node<PlannerNodeData>[];
 
-      const displaced = siblings.find((sib) => {
-        if (sib.position.y >= node.position.y) {
-          return node.position.y > sib.position.y - NODE_HEIGHT / 2;
-        } else {
-          return node.position.y < sib.position.y + NODE_HEIGHT / 2;
-        }
-      });
-      setDisplacedNodeId(displaced?.id ?? null);
+      const nodeHeight = node.measured?.height ?? NODE_HEIGHT;
+      const { targetIdx, lineY } = computeDropTarget(
+        node.position.y,
+        nodeHeight,
+        dragDirectionRef.current.direction,
+        siblings,
+      );
+      // 놓아도 원래 자리로 돌아가는 경우엔 라인을 띄우지 않는다.
+      setDropIndicator(targetIdx === originalIdxRef.current ? null : { colX, y: lineY });
     },
     [setNodes],
   );
@@ -246,7 +307,7 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
       const colIndex = (node.data as Partial<PlannerNodeData>).colIndex;
       if (typeof colX !== 'number' || typeof colIndex !== 'number') return;
 
-      setDisplacedNodeId(null);
+      setDropIndicator(null);
 
       setNodes((nds) => {
         const siblings = nds
@@ -256,27 +317,15 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
               typeof (n.data as Partial<PlannerNodeData>).colIndex === 'number' &&
               (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
           )
-          .sort((a, b) => a.position.y - b.position.y);
+          .sort((a, b) => a.position.y - b.position.y) as Node<PlannerNodeData>[];
 
-        const displaced = siblings.find((sib) => {
-          if (sib.position.y >= node.position.y) {
-            return node.position.y > sib.position.y - NODE_HEIGHT / 2;
-          } else {
-            return node.position.y < sib.position.y + NODE_HEIGHT / 2;
-          }
-        });
-
-        let targetIdx: number;
-        if (displaced) {
-          if (displaced.position.y >= node.position.y) {
-            targetIdx = siblings.indexOf(displaced) + 1;
-          } else {
-            targetIdx = siblings.indexOf(displaced);
-          }
-        } else {
-          const insertIdx = siblings.findIndex((n) => n.position.y > node.position.y);
-          targetIdx = insertIdx === -1 ? siblings.length : insertIdx;
-        }
+        const nodeHeight = node.measured?.height ?? NODE_HEIGHT;
+        const { targetIdx } = computeDropTarget(
+          node.position.y,
+          nodeHeight,
+          dragDirectionRef.current.direction,
+          siblings,
+        );
 
         const ordered = [...siblings];
         ordered.splice(targetIdx, 0, node as Node<PlannerNodeData>);
@@ -450,7 +499,6 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
       value={{
         reachableNodeIds: reachability.nodeIds,
         reachableEdgeIds: reachability.edgeIds,
-        displacedNodeId,
         edgeCredits,
         soloVersionNodeIds,
       }}
@@ -462,6 +510,7 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onNodeDragStart={onNodeDragStart}
           onNodeDrag={onNodeDrag}
           onNodeDragStop={onNodeDragStop}
           onReconnect={onReconnect}
@@ -481,6 +530,11 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
           <Panel position="top-right">
             <RoadmapHeader />
           </Panel>
+          {dropIndicator && (
+            <ViewportPortal>
+              <DropIndicatorLine colX={dropIndicator.colX} y={dropIndicator.y} />
+            </ViewportPortal>
+          )}
         </ReactFlow>
 
         {showCelebration && (
