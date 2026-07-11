@@ -65,8 +65,10 @@ export const GraduationDashboardHeader = ({ certs, gpa }: MainHomeHeaderProps) =
     <header className="flex items-center justify-between">
       <div className="flex flex-col gap-8">
         <Image src="/images/message.svg" width={40} height={40} alt="message" />
-        <h1 className="text-title-sb-24 text-gray-700">당신은 졸업 못해요, 왜? 요건을 못 채웠으니까.</h1>
-        <p className="text-body-m-16 text-gray-400">서브텍스트, 대충 설명들</p>
+        <h1 className="text-title-sb-24 text-gray-700">내가 들은 과목을 요건별로 정리했어요</h1>
+        <p className="text-body-m-16 text-gray-400">
+          지금까지 채운 학점과 앞으로 들어야 할 과목을 한눈에 확인해 보세요
+        </p>
       </div>
 
       <ul className="mr-13 flex items-center gap-4 p-8" aria-label="졸업 현황 요약">
