@@ -25,12 +25,15 @@ export const FolderItemMenu = ({ onRename, onDelete, iconSize = 20, alwaysVisibl
         setIsMenuOpen(false);
       }
     };
-    if (isMenuOpen) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    // capture 단계에서 감지해야 한다: 로드맵 뷰에서는 이 메뉴가 React Flow의 draggable 노드 안에 있어서,
+    // bubble 단계로 등록하면 노드/캔버스의 자체 드래그·팬 핸들러가 먼저 stopPropagation을 호출해
+    // document까지 이벤트가 올라오지 못한다(엣지·핸들처럼 드래그 대상이 아닌 요소는 원래도 문제없었다).
+    if (isMenuOpen) document.addEventListener('mousedown', handleClickOutside, true);
+    return () => document.removeEventListener('mousedown', handleClickOutside, true);
   }, [isMenuOpen]);
 
   return (
-    <div ref={menuRef} className="relative flex shrink-0 items-center">
+    <div ref={menuRef} className="nodrag relative flex shrink-0 items-center">
       <button
         type="button"
         onClick={() => setIsMenuOpen((prev) => !prev)}
