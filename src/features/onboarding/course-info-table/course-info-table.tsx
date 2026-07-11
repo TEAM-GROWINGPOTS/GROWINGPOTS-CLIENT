@@ -3,7 +3,7 @@
 import { TableCellEdit, TableCellSelect } from '@features/onboarding/table-cell';
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface CourseInfo {
   id: string;
@@ -46,11 +46,9 @@ const toCreditValue = (value: string) =>
     .replace(/(\.\d).+/, '$1');
 
 const ROW_HEIGHT = 44;
-const FOOTER_RESERVED_HEIGHT = 90;
 const DEFAULT_VISIBLE_ROWS = 3;
 
 export const CourseInfoTable = ({ courses, isEditing = false }: CourseInfoTableProps) => {
-  const listRef = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(() => Math.min(DEFAULT_VISIBLE_ROWS, courses.length));
   const [rows, setRows] = useState(courses);
@@ -63,21 +61,24 @@ export const CourseInfoTable = ({ courses, isEditing = false }: CourseInfoTableP
   }
 
   useEffect(() => {
+    if (expanded || courses.length === 0) return;
+
     const updateVisibleCount = () => {
-      const el = listRef.current;
-      if (!el) return;
+      const overflow = document.body.scrollHeight - window.innerHeight;
 
-      const availableHeight = window.innerHeight - el.getBoundingClientRect().top - FOOTER_RESERVED_HEIGHT;
-      const rowsThatFit = Math.floor(availableHeight / ROW_HEIGHT);
-
-      setVisibleCount(Math.min(courses.length, Math.max(1, rowsThatFit)));
+      setVisibleCount((prev) => {
+        if (overflow > 0) return Math.max(1, prev - Math.ceil(overflow / ROW_HEIGHT));
+        if (overflow <= -ROW_HEIGHT) return Math.min(courses.length, prev + Math.floor(-overflow / ROW_HEIGHT));
+        return prev;
+      });
     };
 
     updateVisibleCount();
     window.addEventListener('resize', updateVisibleCount);
 
     return () => window.removeEventListener('resize', updateVisibleCount);
-  }, [courses.length]);
+    // visibleCount를 의존성에 포함해 조정 후 다시 측정되게 하여, 화면에 꽉 찰 때까지 자동으로 수렴시킨다.
+  }, [courses.length, expanded, visibleCount]);
 
   const visibleCourses = expanded ? rows : rows.slice(0, visibleCount);
   const canToggle = expanded || rows.length > visibleCount;
@@ -125,7 +126,7 @@ export const CourseInfoTable = ({ courses, isEditing = false }: CourseInfoTableP
               </p>
             ))}
           </div>
-          <div ref={listRef} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
             {visibleCourses.map((course) => (
               <div key={course.id} className="flex gap-16 px-8 py-4">
                 {isEditing && (
