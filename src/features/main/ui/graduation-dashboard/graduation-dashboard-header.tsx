@@ -69,7 +69,7 @@ export const GraduationDashboardHeader = ({ certs, gpa }: MainHomeHeaderProps) =
         <p className="text-body-m-16 text-gray-400">서브텍스트, 대충 설명들</p>
       </div>
 
-      <ul className="flex items-center gap-4 p-8" aria-label="졸업 현황 요약">
+      <ul className="mr-13 flex items-center gap-4 p-8" aria-label="졸업 현황 요약">
         {Object.keys(badgeLabels).map((certType) => {
           const result = certs.find((cert) => cert.certType === certType)?.result ?? 'NONE';
           const tooltipContent = getBadgeTooltipContent(certType as CertType, result, gpa);
