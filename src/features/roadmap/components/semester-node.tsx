@@ -55,7 +55,7 @@ export const SemesterNode = ({ id, data, width, dragging }: NodeProps<PlannerNod
   };
 
   return (
-    <div className={cn('transition-all duration-150', dragging && 'opacity-70')}>
+    <div className={cn('transition-opacity duration-150', dragging && 'opacity-70')}>
       {data.colIndex !== 0 && (
         <Handle type="target" position={Position.Left} style={HANDLE_STYLE} className={HANDLE_HIT_AREA_CLASS}>
           <HandleDot />

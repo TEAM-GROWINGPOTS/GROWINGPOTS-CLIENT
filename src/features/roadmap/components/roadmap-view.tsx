@@ -221,10 +221,6 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
 
   // 노드 높이 변화(아코디언 열기/닫기) 감지 → 같은 열 y 재배치
   const measuredHeightsRef = useRef<Map<string, number>>(new Map());
-  // 아코디언 CSS 애니메이션(200ms)이 진행되는 동안 ResizeObserver가 프레임마다 높이 변화를 감지해서
-  // recompute가 그때마다 실행되면 애니메이션과 경쟁하며 뚝뚝 끊겨 보인다. 트랜지션이 끝난 뒤
-  // 한 번만 재배치하도록 debounce한다.
-  const recomputeTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => {
     let changed = false;
     const next = new Map<string, number>();
@@ -236,8 +232,7 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
     }
     if (!changed) return;
     measuredHeightsRef.current = next;
-    clearTimeout(recomputeTimeoutRef.current);
-    recomputeTimeoutRef.current = setTimeout(() => setNodes(recomputeColumnPositions), 220);
+    setNodes(recomputeColumnPositions);
   }, [nodes, setNodes]);
 
   const reachability = useMemo(() => computeReachableIds(completedIds, edges), [completedIds, edges]);
