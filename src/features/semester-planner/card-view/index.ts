@@ -7,6 +7,5 @@ export { FolderItemMenu } from './folder-item-menu/folder-item-menu';
 export { FolderList } from './folder-list/folder-list';
 export { FolderRenameModal } from './folder-rename-modal/folder-rename-modal';
 export { GraduationStatusAccordion } from './graduation-status/graduation-status-accordion';
-export { SearchField } from './search-field/search-field';
 export { SemesterCard } from './semester-card/semester-card';
 export type { SemesterCardStatus, SemesterCourse, SemesterFolder } from '@features/semester-planner/types/planner';
