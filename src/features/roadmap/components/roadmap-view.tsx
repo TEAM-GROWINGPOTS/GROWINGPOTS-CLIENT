@@ -2,14 +2,11 @@
 
 import '@xyflow/react/dist/style.css';
 
+import graduation from '@features/roadmap/assets/graduation.json';
 import { ReachabilityContext } from '@features/roadmap/contexts/reachability-context';
-import {
-  Course,
-  CourseType,
-  GRADUATION_REQUIREMENTS,
-  SemesterEdgeData,
-  SemesterNodeData,
-} from '@features/roadmap/types';
+import { usePlannerGraph } from '@features/roadmap/hooks/use-planner-graph';
+import { GRADUATION_REQUIREMENTS, PlannerNodeData, SemesterEdgeData } from '@features/roadmap/types';
+import { AddSemesterModal } from '@features/semester-planner/card-view/modals/add-semester-modal';
 import {
   Background,
   BackgroundVariant,
@@ -19,169 +16,118 @@ import {
   Node,
   Panel,
   ReactFlow,
-  reconnectEdge,
   useEdgesState,
   useNodesState,
 } from '@xyflow/react';
+import Lottie from 'lottie-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AddSemesterNode } from './add-semester-node';
+import { AddVersionNode } from './add-version-node';
 import { CustomConnectionLine } from './custom-connection-line';
 import { RoadmapHeader } from './roadmap-header';
 import { SemesterEdge } from './semester-edge';
 import { SemesterNode } from './semester-node';
 
-const COL_GAP = 300;
-const ROW_GAP = 220;
-const NODE_HEIGHT = 150;
+const ROW_GAP = 150;
+const ROW_MARGIN = 20; // 같은 열 카드 사이 여백
+const NODE_HEIGHT = 300;
 
-// 카드뷰 데이터를 기반으로 구성하는 더미 데이터 (추후 props/store로 교체)
-const DUMMY_SEMESTERS: {
-  id: string;
-  label: string;
-  col: number;
-  row: number;
-  isCompleted: boolean;
-  courses: Course[];
-}[] = [
-  {
-    id: 'sem-1-1',
-    label: '1학년 1학기',
-    col: 0,
-    row: 0,
-    isCompleted: true,
-    courses: [
-      { name: '연극 문헌과 연기', credits: 6, type: '전공필수' as CourseType },
-      { name: '화술1', credits: 6, type: '전공선택' as CourseType },
-      { name: '전공탐색및기업가정신', credits: 4, type: '전공기초' as CourseType },
-      { name: '교양과목', credits: 4, type: '필수교과' as CourseType },
-      { name: '전공탐색세미나', credits: 3, type: '일반선택' as CourseType },
-    ],
-  },
-  {
-    id: 'sem-1-2-v1',
-    label: '1학년 2학기',
-    col: 1,
-    row: 0,
-    isCompleted: true,
-    courses: [
-      { name: '연기 기초', credits: 6, type: '전공필수' as CourseType },
-      { name: '화술2', credits: 6, type: '전공선택' as CourseType },
-      { name: '예술학 개론', credits: 5, type: '전공기초' as CourseType },
-      { name: '문화 교양', credits: 6, type: '필수교과' as CourseType },
-    ],
-  },
-  {
-    id: 'sem-2-1-v1',
-    label: '2학년 1학기',
-    col: 2,
-    row: 0,
-    isCompleted: false,
-    courses: [
-      { name: '고급 연기', credits: 6, type: '전공필수' as CourseType },
-      { name: '연출 기초', credits: 6, type: '전공선택' as CourseType },
-      { name: '자유 이수', credits: 5, type: '자유이수교과' as CourseType },
-      { name: '일반 교양', credits: 6, type: '필수교과' as CourseType },
-    ],
-  },
-  {
-    id: 'sem-2-1-v2',
-    label: '2학년 1학기',
-    col: 2,
-    row: 1,
-    isCompleted: false,
-    courses: [
-      { name: '무대 감독', credits: 6, type: '전공필수' as CourseType },
-      { name: '공연 기획', credits: 6, type: '전공선택' as CourseType },
-      { name: '예술 경영', credits: 5, type: '전공기초' as CourseType },
-      { name: '자유 선택', credits: 6, type: '자유이수교과' as CourseType },
-    ],
-  },
-  {
-    id: 'sem-2-1-v3',
-    label: '2학년 1학기',
-    col: 2,
-    row: 2,
-    isCompleted: false,
-    courses: [
-      { name: '실험 연극', credits: 6, type: '전공선택' as CourseType },
-      { name: '배분 교과', credits: 6, type: '배분이수교과' as CourseType },
-      { name: '일반 선택2', credits: 5, type: '일반선택' as CourseType },
-      { name: '자유 과목', credits: 6, type: '자유이수교과' as CourseType },
-    ],
-  },
-  {
-    id: 'sem-2-2-v1',
-    label: '2학년 2학기',
-    col: 3,
-    row: 0,
-    isCompleted: false,
-    courses: [
-      { name: '심화 연기', credits: 6, type: '전공필수' as CourseType },
-      { name: '무대 연출', credits: 6, type: '전공선택' as CourseType },
-      { name: '예술 정책', credits: 5, type: '전공기초' as CourseType },
-      { name: '문화 예술 교육', credits: 6, type: '필수교과' as CourseType },
-    ],
-  },
-  {
-    id: 'sem-2-2-v2',
-    label: '2학년 2학기',
-    col: 3,
-    row: 1,
-    isCompleted: false,
-    courses: [
-      { name: '공연 기획', credits: 6, type: '전공필수' as CourseType },
-      { name: '연극 비평', credits: 6, type: '전공선택' as CourseType },
-      { name: '미디어 예술', credits: 5, type: '자유이수교과' as CourseType },
-      { name: '일반선택 교과', credits: 6, type: '일반선택' as CourseType },
-    ],
-  },
-];
+// 같은 열 노드들을 실제 measured 높이 기준으로 y 재배치
+const recomputeColumnPositions = (nodes: Node<PlannerNodeData>[]): Node<PlannerNodeData>[] => {
+  const byCol = new Map<number, Node[]>();
+  for (const node of nodes) {
+    if (node.type === 'addSemesterNode' || node.type === 'addVersionNode') continue;
+    const colIndex = node.data.colIndex;
+    if (colIndex === undefined) continue;
+    if (!byCol.has(colIndex)) byCol.set(colIndex, []);
+    byCol.get(colIndex)!.push(node);
+  }
 
-const buildInitialNodes = (): Node[] => {
-  const semesterNodes: Node<SemesterNodeData>[] = DUMMY_SEMESTERS.map((sem) => ({
-    id: sem.id,
-    type: 'semesterNode',
-    position: { x: sem.col * COL_GAP, y: sem.row * ROW_GAP },
-    data: {
-      label: sem.label,
-      credits: sem.courses.reduce((s, c) => s + c.credits, 0),
-      courses: sem.courses,
-      colIndex: sem.col,
-      colX: sem.col * COL_GAP,
-      isCompleted: sem.isCompleted,
-    },
-    draggable: !sem.isCompleted,
-  }));
+  const updatedY = new Map<string, number>();
+  // colIndex → { bottom: 다음 노드가 올 y, center: 전체 중간 y }
+  const colStats = new Map<number, { bottom: number; center: number }>();
 
-  const lastCol = Math.max(...DUMMY_SEMESTERS.map((s) => s.col));
-  semesterNodes.push({
-    id: 'add-semester',
-    type: 'addSemesterNode',
-    position: { x: (lastCol + 1) * COL_GAP - 30, y: ROW_GAP },
-    data: {} as SemesterNodeData,
-    draggable: false,
-    connectable: false,
-    selectable: false,
+  for (const [colIndex, colNodes] of byCol.entries()) {
+    const sorted = [...colNodes].sort((a, b) => a.position.y - b.position.y);
+    let y = 0;
+    for (const node of sorted) {
+      updatedY.set(node.id, y);
+      y += (node.measured?.height ?? ROW_GAP) + ROW_MARGIN;
+    }
+    const totalHeight = y - ROW_MARGIN;
+    colStats.set(colIndex, { bottom: y, center: totalHeight / 2 });
+  }
+
+  let maxPlannedColIndex = -1;
+  for (const colIndex of byCol.keys()) {
+    if (colIndex > maxPlannedColIndex) maxPlannedColIndex = colIndex;
+  }
+
+  return nodes.map((n) => {
+    if (n.type === 'addVersionNode') {
+      const colIndex = (n.data as Partial<PlannerNodeData>).colIndex;
+      if (typeof colIndex !== 'number') return n;
+      const newY = colStats.get(colIndex)?.bottom ?? n.position.y;
+      return newY !== n.position.y ? { ...n, position: { ...n.position, y: newY } } : n;
+    }
+    if (n.type === 'addSemesterNode') {
+      const newY = colStats.get(maxPlannedColIndex)?.center ?? n.position.y;
+      return newY !== n.position.y ? { ...n, position: { ...n.position, y: newY } } : n;
+    }
+    const newY = updatedY.get(n.id);
+    if (newY === undefined || n.position.y === newY) return n;
+    return { ...n, position: { ...n.position, y: newY } };
   });
-
-  return semesterNodes;
 };
 
-// 이수완료 학기 간 초기 연결 (변경 불가)
-const buildInitialEdges = (): Edge<SemesterEdgeData>[] => [
-  {
-    id: 'e-init-1',
-    source: 'sem-1-1',
-    target: 'sem-1-2-v1',
-    type: 'semesterEdge',
-    data: { credits: 23, isInitial: true },
-    deletable: false,
-    reconnectable: false,
-  },
-];
+// 체인(첫 완료 학기 → ... → 마지막 선택 버전)을 따라 엣지별 누적 학점을 계산한다.
+// "컬럼당 연결은 하나"라는 불변식 덕분에 매 노드는 outgoing 엣지가 최대 하나이므로 선형 순회로 충분하다.
+const computeChainCredits = (nodes: Node<PlannerNodeData>[], edges: Edge<SemesterEdgeData>[]): Map<string, number> => {
+  const creditById = new Map(nodes.map((n) => [n.id, (n.data as Partial<PlannerNodeData>).totalCredit ?? 0]));
+  const outgoingBySource = new Map<string, Edge<SemesterEdgeData>>();
+  const hasIncoming = new Set<string>();
+  for (const e of edges) {
+    outgoingBySource.set(e.source, e);
+    hasIncoming.add(e.target);
+  }
 
-// 완료 학기에서 출발해 엣지를 따라 도달 가능한 노드/엣지 ID 계산
+  const root = nodes.find((n) => n.type === 'semesterNode' && (n.data as Partial<PlannerNodeData>).colIndex === 0);
+  const result = new Map<string, number>();
+  let cumulative = 0;
+  let current = root;
+
+  while (current) {
+    cumulative += creditById.get(current.id) ?? 0;
+    const outEdge = outgoingBySource.get(current.id);
+    if (!outEdge) break;
+    result.set(outEdge.id, cumulative);
+    current = nodes.find((n) => n.id === outEdge.target);
+  }
+
+  return result;
+};
+
+// PLANNED 상태 노드 중, 같은 컬럼(학기)에 버전이 이거 하나만 남아있는 노드의 id를 모은다.
+const computeSoloVersionIds = (nodes: Node<PlannerNodeData>[]): Set<string> => {
+  const countByCol = new Map<number, number>();
+  for (const n of nodes) {
+    if (n.type !== 'semesterNode') continue;
+    const d = n.data as Partial<PlannerNodeData>;
+    if (d.status !== 'PLANNED' || typeof d.colIndex !== 'number') continue;
+    countByCol.set(d.colIndex, (countByCol.get(d.colIndex) ?? 0) + 1);
+  }
+
+  const result = new Set<string>();
+  for (const n of nodes) {
+    if (n.type !== 'semesterNode') continue;
+    const d = n.data as Partial<PlannerNodeData>;
+    if (d.status !== 'PLANNED' || typeof d.colIndex !== 'number') continue;
+    if ((countByCol.get(d.colIndex) ?? 0) <= 1) result.add(n.id);
+  }
+  return result;
+};
+
 const computeReachableIds = (
   completedIds: Set<string>,
   edges: Edge[],
@@ -206,88 +152,86 @@ const computeReachableIds = (
   return { nodeIds, edgeIds };
 };
 
-// 체인에 포함된 노드의 과목별 이수 학점 합산
-const computeGraduationEarned = (nodes: Node[], reachableNodeIds: Set<string>): Record<string, number> => {
-  const earned: Record<string, number> = {};
-
-  for (const node of nodes) {
-    if (!reachableNodeIds.has(node.id)) continue;
-    const data = node.data as Partial<SemesterNodeData>;
-    if (!Array.isArray(data.courses)) continue;
-
-    for (const course of data.courses) {
-      earned[course.type] = (earned[course.type] ?? 0) + course.credits;
-      earned['전체'] = (earned['전체'] ?? 0) + course.credits;
-      if (['전공필수', '전공선택', '전공기초'].includes(course.type)) {
-        earned['전공'] = (earned['전공'] ?? 0) + course.credits;
-      }
-    }
-  }
-
-  return earned;
-};
-
 const nodeTypes = {
   semesterNode: SemesterNode,
   addSemesterNode: AddSemesterNode,
+  addVersionNode: AddVersionNode,
 };
 
 const edgeTypes = { semesterEdge: SemesterEdge };
 
-// 이수완료 노드 ID는 고정 (초기화 시점에 결정)
-const COMPLETED_IDS = new Set(DUMMY_SEMESTERS.filter((s) => s.isCompleted).map((s) => s.id));
-
 interface RoadmapViewProps {
-  view: 'card' | 'roadmap';
   onViewChange: (view: 'card' | 'roadmap') => void;
 }
 
-export const RoadmapView = ({ view, onViewChange }: RoadmapViewProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(buildInitialNodes());
-  const [edges, setEdges, onEdgesChange] = useEdgesState(buildInitialEdges());
-  const [displacedNodeId, setDisplacedNodeId] = useState<string | null>(null);
+export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
+  const { nodes: initialNodes, edges: initialEdges, completedIds } = usePlannerGraph();
 
-  const edgeReconnectSuccessful = useRef(true);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [displacedNodeId, setDisplacedNodeId] = useState<string | null>(null);
+  const [isAddSemesterModalOpen, setIsAddSemesterModalOpen] = useState(false);
+  const [isCelebrationDismissed, setIsCelebrationDismissed] = useState(false);
+
   const reconnectingEdgeId = useRef<string | null>(null);
-  // nodes ref: onNodeDrag 클로저에서 최신 nodes 참조 (dep 없이)
   const nodesRef = useRef(nodes);
   useEffect(() => {
     nodesRef.current = nodes;
   }, [nodes]);
 
-  // 체인 도달 가능 여부 계산 (edges 바뀔 때만 재계산)
-  const reachability = useMemo(() => computeReachableIds(COMPLETED_IDS, edges), [edges]);
+  // 노드 높이 변화(아코디언 열기/닫기) 감지 → 같은 열 y 재배치
+  const measuredHeightsRef = useRef<Map<string, number>>(new Map());
+  useEffect(() => {
+    let changed = false;
+    const next = new Map<string, number>();
+    for (const node of nodes) {
+      const h = node.measured?.height;
+      if (h === undefined) continue;
+      next.set(node.id, h);
+      if (measuredHeightsRef.current.get(node.id) !== h) changed = true;
+    }
+    if (!changed) return;
+    measuredHeightsRef.current = next;
+    setNodes(recomputeColumnPositions);
+  }, [nodes, setNodes]);
 
-  // 졸업요건 이수 학점 계산 (nodes 또는 reachability 바뀔 때)
-  const graduationEarned = useMemo(
-    () => computeGraduationEarned(nodes, reachability.nodeIds),
-    [nodes, reachability.nodeIds],
-  );
+  const reachability = useMemo(() => computeReachableIds(completedIds, edges), [completedIds, edges]);
+  const edgeCredits = useMemo(() => computeChainCredits(nodes, edges), [nodes, edges]);
+  const soloVersionNodeIds = useMemo(() => computeSoloVersionIds(nodes), [nodes]);
+  // edgeCredits(체인 선형 순회)는 "노드당 outgoing 엣지 하나"를 가정하는데, 재연결 도중 엣지 배열이
+  // 일시적으로 어긋나면 stub까지 못 가고 끊길 수 있다. reachability는 BFS라 이런 상황에 더 견고하므로
+  // 로또 표시 여부를 판단하는 총 학점은 reachable 노드 학점을 직접 합산해서 구한다.
+  const totalCredits = useMemo(() => {
+    let sum = 0;
+    for (const n of nodes) {
+      if (n.type !== 'semesterNode' || !reachability.nodeIds.has(n.id)) continue;
+      sum += (n.data as Partial<PlannerNodeData>).totalCredit ?? 0;
+    }
+    return sum;
+  }, [nodes, reachability.nodeIds]);
+  const showCelebration = totalCredits >= GRADUATION_REQUIREMENTS.전체 && !isCelebrationDismissed;
 
   const onNodeDrag = useCallback(
     (_: unknown, node: Node) => {
-      const colX = (node.data as Partial<SemesterNodeData>).colX;
-      const colIndex = (node.data as Partial<SemesterNodeData>).colIndex;
+      const colX = (node.data as Partial<PlannerNodeData>).colX;
+      const colIndex = (node.data as Partial<PlannerNodeData>).colIndex;
       if (typeof colX !== 'number' || typeof colIndex !== 'number') return;
 
-      // x축 고정
       setNodes((nds) => nds.map((n) => (n.id === node.id ? { ...n, position: { x: colX, y: node.position.y } } : n)));
 
-      // 닿은 형제의 절반(midpoint) 넘었을 때만 hover 발동
       const siblings = nodesRef.current
         .filter(
           (n) =>
             n.id !== node.id &&
-            typeof (n.data as Partial<SemesterNodeData>).colIndex === 'number' &&
-            (n.data as Partial<SemesterNodeData>).colIndex === colIndex,
+            typeof (n.data as Partial<PlannerNodeData>).colIndex === 'number' &&
+            (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
         )
         .sort((a, b) => a.position.y - b.position.y);
+
       const displaced = siblings.find((sib) => {
         if (sib.position.y >= node.position.y) {
-          // 아래쪽 형제: 드래그 카드 bottom이 형제 midpoint를 넘었을 때
           return node.position.y > sib.position.y - NODE_HEIGHT / 2;
         } else {
-          // 위쪽 형제: 드래그 카드 top이 형제 midpoint 위로 올라갔을 때
           return node.position.y < sib.position.y + NODE_HEIGHT / 2;
         }
       });
@@ -296,27 +240,24 @@ export const RoadmapView = ({ view, onViewChange }: RoadmapViewProps) => {
     [setNodes],
   );
 
-  // 드랍 시: 같은 열 내 자동 재정렬 (행 스왑)
   const onNodeDragStop = useCallback(
     (_: unknown, node: Node) => {
-      const colX = (node.data as Partial<SemesterNodeData>).colX;
-      const colIndex = (node.data as Partial<SemesterNodeData>).colIndex;
+      const colX = (node.data as Partial<PlannerNodeData>).colX;
+      const colIndex = (node.data as Partial<PlannerNodeData>).colIndex;
       if (typeof colX !== 'number' || typeof colIndex !== 'number') return;
 
       setDisplacedNodeId(null);
 
       setNodes((nds) => {
-        // 같은 열의 다른 노드들 (y 순서대로 정렬)
         const siblings = nds
           .filter(
             (n) =>
               n.id !== node.id &&
-              typeof (n.data as Partial<SemesterNodeData>).colIndex === 'number' &&
-              (n.data as Partial<SemesterNodeData>).colIndex === colIndex,
+              typeof (n.data as Partial<PlannerNodeData>).colIndex === 'number' &&
+              (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
           )
           .sort((a, b) => a.position.y - b.position.y);
 
-        // hover와 동일한 50% 겹침 기준으로 정렬 위치 결정
         const displaced = siblings.find((sib) => {
           if (sib.position.y >= node.position.y) {
             return node.position.y > sib.position.y - NODE_HEIGHT / 2;
@@ -328,46 +269,42 @@ export const RoadmapView = ({ view, onViewChange }: RoadmapViewProps) => {
         let targetIdx: number;
         if (displaced) {
           if (displaced.position.y >= node.position.y) {
-            // 아래쪽 형제가 밀려남: 드래그 노드가 형제 슬롯으로 이동
             targetIdx = siblings.indexOf(displaced) + 1;
           } else {
-            // 위쪽 형제가 밀려남: 드래그 노드가 형제 슬롯 앞으로 이동
             targetIdx = siblings.indexOf(displaced);
           }
         } else {
-          // hover 없음: 자연 위치(원래 자리) 복귀
           const insertIdx = siblings.findIndex((n) => n.position.y > node.position.y);
           targetIdx = insertIdx === -1 ? siblings.length : insertIdx;
         }
 
-        // 드랍된 노드를 삽입 후 y 재배분
         const ordered = [...siblings];
-        ordered.splice(targetIdx, 0, node);
+        ordered.splice(targetIdx, 0, node as Node<PlannerNodeData>);
+        // 순서 확정 후 임시 y(ROW_GAP 단위)를 부여 → recomputeColumnPositions가 실제 높이로 재계산
         const positionMap = new Map(ordered.map((n, i) => [n.id, i * ROW_GAP]));
 
-        return nds.map((n) => {
+        const reordered = nds.map((n) => {
           const newY = positionMap.get(n.id);
           return newY !== undefined ? { ...n, position: { x: colX, y: newY } } : n;
         });
+        return recomputeColumnPositions(reordered);
       });
     },
     [setNodes],
   );
 
-  // 연결 유효성: 바로 다음 학기 열만 허용. 이수완료 학기의 fixed 엣지는 덮어쓰기 차단
   const isValidConnection = useCallback(
     (connection: Connection | Edge) => {
       const src = nodesRef.current.find((n) => n.id === connection.source);
       const tgt = nodesRef.current.find((n) => n.id === connection.target);
       if (!src || !tgt) return false;
 
-      const srcCol = (src.data as Partial<SemesterNodeData>).colIndex;
-      const tgtCol = (tgt.data as Partial<SemesterNodeData>).colIndex;
+      const srcCol = (src.data as Partial<PlannerNodeData>).colIndex;
+      const tgtCol = (tgt.data as Partial<PlannerNodeData>).colIndex;
       if (typeof srcCol !== 'number' || typeof tgtCol !== 'number') return false;
       if (tgtCol !== srcCol + 1) return false;
 
       const rid = reconnectingEdgeId.current;
-      // initial(이수완료) 엣지가 있는 핸들은 덮어쓰기 불가
       const hasInitialFromSrc = edges.some(
         (e) => e.source === connection.source && (e.data as Partial<SemesterEdgeData>)?.isInitial && e.id !== rid,
       );
@@ -383,95 +320,127 @@ export const RoadmapView = ({ view, onViewChange }: RoadmapViewProps) => {
     [edges],
   );
 
-  const onConnect = useCallback(
-    (connection: Connection) => {
-      setEdges((prev) => {
-        const srcNode = nodesRef.current.find((n) => n.id === connection.source);
-        if (!srcNode) return prev;
+  // onConnect(새 핸들에서 드래그)와 onReconnect(기존 엣지 끝점 드래그) 모두 "컬럼당 연결은 하나"라는
+  // 불변식을 지켜야 하므로 같은 정리 로직을 공유한다. isSelected는 이 결과 edges로부터 reachability가
+  // 파생하므로 여기서 별도로 node.data를 patch하지 않는다.
+  const buildConnectionEdges = useCallback((prev: Edge<SemesterEdgeData>[], connection: Connection) => {
+    const srcNode = nodesRef.current.find((n) => n.id === connection.source);
+    if (!srcNode) return prev;
 
-        const srcCol = (srcNode.data as Partial<SemesterNodeData>).colIndex;
-        if (typeof srcCol !== 'number') return prev;
+    const srcCol = (srcNode.data as Partial<PlannerNodeData>).colIndex;
+    if (typeof srcCol !== 'number') return prev;
 
-        // 같은 소스 열(col X)의 다른 노드가 col X+1으로 연결된 기존 엣지 탐색
-        const colXNodeIds = nodesRef.current
-          .filter((n) => (n.data as Partial<SemesterNodeData>).colIndex === srcCol && n.id !== connection.source)
-          .map((n) => n.id);
+    const colXNodeIds = nodesRef.current
+      .filter((n) => (n.data as Partial<PlannerNodeData>).colIndex === srcCol && n.id !== connection.source)
+      .map((n) => n.id);
 
-        const oldEdge = prev.find((e) => colXNodeIds.includes(e.source));
-        const idsToDelete = new Set<string>();
-        const edgesToAdd: Edge<SemesterEdgeData>[] = [];
+    const oldEdge = prev.find((e) => colXNodeIds.includes(e.source));
+    const idsToDelete = new Set<string>();
+    const edgesToAdd: Edge<SemesterEdgeData>[] = [];
 
-        if (oldEdge) {
-          idsToDelete.add(oldEdge.id);
-          // 기존 소스(oldEdge.source)의 이전 입력 엣지를 새 소스로 리다이렉트
-          const incomingToOld = prev.find((e) => e.target === oldEdge.source);
-          if (incomingToOld) {
-            idsToDelete.add(incomingToOld.id);
-            edgesToAdd.push({
-              ...(incomingToOld as Edge<SemesterEdgeData>),
-              id: `e-redirect-${connection.source}-${Date.now()}`,
-              target: connection.source,
-            });
-          }
-        }
-
-        // 타겟에 이미 다른 소스가 연결된 경우도 제거
-        const extraToTgt = prev.find((e) => e.target === connection.target && !idsToDelete.has(e.id));
-        if (extraToTgt) idsToDelete.add(extraToTgt.id);
-
-        // 소스가 다른 타겟에 이미 연결된 경우도 제거
-        const extraFromSrc = prev.find(
-          (e) => e.source === connection.source && e.target !== connection.target && !idsToDelete.has(e.id),
-        );
-        if (extraFromSrc) idsToDelete.add(extraFromSrc.id);
-
-        const srcCredits = (srcNode.data as Partial<SemesterNodeData>).credits ?? 0;
+    if (oldEdge) {
+      idsToDelete.add(oldEdge.id);
+      const incomingToOld = prev.find((e) => e.target === oldEdge.source);
+      if (incomingToOld) {
+        idsToDelete.add(incomingToOld.id);
         edgesToAdd.push({
-          id: `e-${connection.source}-${connection.target}-${Date.now()}`,
-          source: connection.source,
-          target: connection.target,
-          sourceHandle: connection.sourceHandle ?? undefined,
-          targetHandle: connection.targetHandle ?? undefined,
-          type: 'semesterEdge',
-          data: { credits: srcCredits, isInitial: false } satisfies SemesterEdgeData,
-          deletable: true,
+          ...(incomingToOld as Edge<SemesterEdgeData>),
+          id: `e-redirect-${connection.source}-${Date.now()}`,
+          target: connection.source,
+        });
+      }
+    }
+
+    const extraToTgt = prev.find((e) => e.target === connection.target && !idsToDelete.has(e.id));
+    if (extraToTgt) idsToDelete.add(extraToTgt.id);
+
+    const extraFromSrc = prev.find(
+      (e) => e.source === connection.source && e.target !== connection.target && !idsToDelete.has(e.id),
+    );
+    if (extraFromSrc) idsToDelete.add(extraFromSrc.id);
+
+    // target 컬럼 스왑: target의 형제(같은 컬럼의 다른 버전)가 기존에 체인의 활성 노드였다면, 그 형제가
+    // 다음 컬럼으로 뻗던 outgoing 엣지를 새 target에서 나가도록 리다이렉트해서 뒷부분 체인이 끊기지 않게 한다.
+    const tgtNode = nodesRef.current.find((n) => n.id === connection.target);
+    const tgtCol = tgtNode ? (tgtNode.data as Partial<PlannerNodeData>).colIndex : undefined;
+    if (typeof tgtCol === 'number') {
+      const tgtColSiblingIds = nodesRef.current
+        .filter((n) => (n.data as Partial<PlannerNodeData>).colIndex === tgtCol && n.id !== connection.target)
+        .map((n) => n.id);
+
+      const oldActiveOutgoing = prev.find((e) => tgtColSiblingIds.includes(e.source) && !idsToDelete.has(e.id));
+      if (oldActiveOutgoing) {
+        idsToDelete.add(oldActiveOutgoing.id);
+        edgesToAdd.push({
+          ...(oldActiveOutgoing as Edge<SemesterEdgeData>),
+          id: `e-redirect-${connection.target}-${Date.now()}`,
+          source: connection.target,
         });
 
-        return [...prev.filter((e) => !idsToDelete.has(e.id)), ...edgesToAdd];
-      });
+        // onConnect처럼 기존 incoming 엣지가 아직 안 지워진 경우까지 정리
+        const staleIncoming = prev.find((e) => e.target === oldActiveOutgoing.source && !idsToDelete.has(e.id));
+        if (staleIncoming) idsToDelete.add(staleIncoming.id);
+      }
+    }
+
+    const srcCredits = (srcNode.data as Partial<PlannerNodeData>).totalCredit ?? 0;
+    edgesToAdd.push({
+      id: `e-${connection.source}-${connection.target}-${Date.now()}`,
+      source: connection.source,
+      target: connection.target,
+      sourceHandle: connection.sourceHandle ?? undefined,
+      targetHandle: connection.targetHandle ?? undefined,
+      type: 'semesterEdge',
+      data: { credits: srcCredits, isInitial: false } satisfies SemesterEdgeData,
+      deletable: true,
+    });
+
+    return [...prev.filter((e) => !idsToDelete.has(e.id)), ...edgesToAdd];
+  }, []);
+
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      setEdges((prev) => buildConnectionEdges(prev, connection));
     },
-    [setEdges],
+    [setEdges, buildConnectionEdges],
   );
 
-  // 드롭 시 엣지 삭제 (initial 엣지 제외)
   const onReconnectStart = useCallback((_: unknown, edge: Edge<SemesterEdgeData>) => {
-    edgeReconnectSuccessful.current = false;
     reconnectingEdgeId.current = edge.id;
   }, []);
 
   const onReconnect = useCallback(
-    (oldEdge: Edge, newConnection: Connection) => {
-      edgeReconnectSuccessful.current = true;
-      setEdges((els) => reconnectEdge(oldEdge, newConnection, els) as Edge<SemesterEdgeData>[]);
+    (_oldEdge: Edge, newConnection: Connection) => {
+      // 드래그되던 엣지를 미리 지우면 안 된다: buildConnectionEdges의 source 쪽 컬럼 스왑 로직은
+      // "형제 노드의 기존 outgoing 엣지가 아직 prev에 남아있는지"로 리다이렉트 대상을 찾기 때문에,
+      // 여기서 미리 지워버리면 그 판단 자체가 불가능해져 체인이 끊긴다. buildConnectionEdges가
+      // 구조적으로(같은 컬럼/같은 source/같은 target 매칭) 옛 엣지를 알아서 찾아 정리하게 둔다.
+      setEdges((prev) => buildConnectionEdges(prev, newConnection));
     },
-    [setEdges],
+    [setEdges, buildConnectionEdges],
   );
 
-  const onReconnectEnd = useCallback(
-    (_: unknown, edge: Edge<SemesterEdgeData>) => {
-      if (!edgeReconnectSuccessful.current && !(edge.data as Partial<SemesterEdgeData>)?.isInitial) {
-        setEdges((eds) => eds.filter((e) => e.id !== edge.id));
-      }
-      edgeReconnectSuccessful.current = true;
-      reconnectingEdgeId.current = null;
-    },
-    [setEdges],
-  );
+  // 유효한 핸들에 놓지 못하면 그냥 아무 것도 하지 않는다: edges state를 건드리지 않으므로
+  // 엣지가 원래 있던 자리(연결)로 그대로 남는다. onReconnect가 호출된 경우에만 실제로 바뀐다.
+  const onReconnectEnd = useCallback(() => {
+    reconnectingEdgeId.current = null;
+  }, []);
 
-  // + 버튼 클릭 → 카드뷰 전환
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
-      if (node.type === 'addSemesterNode') onViewChange('card');
+      if (node.type === 'addSemesterNode') {
+        setIsAddSemesterModalOpen(true);
+        return;
+      }
+      if (node.type === 'addVersionNode') onViewChange('card');
+    },
+    [onViewChange],
+  );
+
+  const handleAddSemesterSubmit = useCallback(
+    (_year: string, _semester: string) => {
+      // TODO: 실제 학기 추가(store/API) 연동은 아직 없다 — 지금은 모달 제출 후 카드뷰로 전환만 한다.
+      onViewChange('card');
     },
     [onViewChange],
   );
@@ -482,9 +451,11 @@ export const RoadmapView = ({ view, onViewChange }: RoadmapViewProps) => {
         reachableNodeIds: reachability.nodeIds,
         reachableEdgeIds: reachability.edgeIds,
         displacedNodeId,
+        edgeCredits,
+        soloVersionNodeIds,
       }}
     >
-      <div className="h-full w-full">
+      <div className="relative h-full w-full">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -501,24 +472,37 @@ export const RoadmapView = ({ view, onViewChange }: RoadmapViewProps) => {
           edgeTypes={edgeTypes}
           connectionLineComponent={CustomConnectionLine}
           isValidConnection={isValidConnection}
-          reconnectRadius={20}
-          fitView
-          fitViewOptions={{ padding: 0.2 }}
+          connectionRadius={40}
+          reconnectRadius={40}
+          defaultViewport={{ x: 40, y: 160, zoom: 1 }}
         >
-          <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#e5e7eb" />
+          <Background variant={BackgroundVariant.Dots} gap={25} size={3} color="#e5e7eb" />
           <Controls position="bottom-left" />
-
-          {/* 헤더를 캔버스 배경 위에 오버레이로 배치 */}
-          <Panel position="top-left" style={{ right: 0, margin: 0 }}>
-            <RoadmapHeader view={view} onViewChange={onViewChange} graduationEarned={graduationEarned} />
+          <Panel position="top-right">
+            <RoadmapHeader />
           </Panel>
         </ReactFlow>
+
+        {showCelebration && (
+          <div
+            className="z-analysis-loading absolute inset-0 flex cursor-pointer flex-col items-center justify-center bg-white/40"
+            onClick={() => setIsCelebrationDismissed(true)}
+          >
+            <Lottie animationData={graduation} loop autoplay className="h-400 w-400" />
+            <p className="text-title-sb-24 text-gray-700">졸업 요건을 충족했어요!</p>
+          </div>
+        )}
       </div>
+
+      <AddSemesterModal
+        open={isAddSemesterModalOpen}
+        onOpenChange={setIsAddSemesterModalOpen}
+        onSubmit={handleAddSemesterSubmit}
+      />
     </ReachabilityContext.Provider>
   );
 };
 
-// 졸업요건 충족 여부 확인 유틸 (외부에서 사용 가능)
 export const checkGraduationFulfilled = (earned: Record<string, number>): boolean => {
   return Object.entries(GRADUATION_REQUIREMENTS).every(([key, required]) => (earned[key] ?? 0) >= required);
 };
