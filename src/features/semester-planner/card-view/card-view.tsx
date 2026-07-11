@@ -1,7 +1,6 @@
 'use client';
 
 import { DndContext, DragOverlay } from '@dnd-kit/core';
-import { toast, Toaster } from '@features/onboarding';
 import {
   AddCourseSidebar,
   type Course,
@@ -23,6 +22,7 @@ import { SemesterCard } from '@features/semester-planner/card-view/semester-card
 import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
 import { MOCK_COURSE_SEARCH_ITEMS } from '@features/semester-planner/mocks/planner';
 import { toSidebarCourse } from '@features/semester-planner/utils/map-planner';
+import { toast, Toaster } from '@shared/components';
 import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
 import Icon from '@shared/components/icon/icon';
