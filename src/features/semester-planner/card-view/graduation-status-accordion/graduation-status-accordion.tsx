@@ -56,9 +56,7 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
     ({ name, current, required, unit }, index) => ({ key: `${index}-${name}`, name, current, required, unit }),
   );
 
-  const otherRequiredRows: TabRow[] = toTabRows(
-    orderConditions(mainMajor?.conditions ?? [], OTHER_REQUIRED_CODE_ORDER),
-  );
+  const otherRequiredRows: TabRow[] = toTabRows(orderConditions(ge.conditions, OTHER_REQUIRED_CODE_ORDER));
 
   const tabs = [
     ...(hasGraduationRequired ? ['졸업 필수'] : []),
