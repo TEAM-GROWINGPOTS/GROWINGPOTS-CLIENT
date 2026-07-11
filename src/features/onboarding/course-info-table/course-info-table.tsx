@@ -77,11 +77,10 @@ export const CourseInfoTable = ({ courses, isEditing = false }: CourseInfoTableP
     window.addEventListener('resize', updateVisibleCount);
 
     return () => window.removeEventListener('resize', updateVisibleCount);
-    // visibleCount를 의존성에 포함해 조정 후 다시 측정되게 하여, 화면에 꽉 찰 때까지 자동으로 수렴시킨다.
   }, [courses.length, expanded, visibleCount]);
 
-  const visibleCourses = expanded ? rows : rows.slice(0, visibleCount);
-  const canToggle = expanded || rows.length > visibleCount;
+  const visibleCourses = expanded || isEditing ? rows : rows.slice(0, visibleCount);
+  const canToggle = !isEditing && (expanded || rows.length > visibleCount);
   const isAllSelected = rows.length > 0 && selectedIds.size === rows.length;
 
   const handleToggleClick = () => {

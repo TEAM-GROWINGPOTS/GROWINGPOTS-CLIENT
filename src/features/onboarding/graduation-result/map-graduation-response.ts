@@ -16,7 +16,6 @@ const certResultLabels = {
   NONE: '해당 없음',
 };
 
-// 학점(CREDITS) 단위는 충족 시 dark, 그 외(평점/인증/과목 수)는 충족 시 highlight. 미충족은 항상 default.
 const toVariant = (group: MetricGroup, satisfied: boolean): RequirementVariant => {
   if (!satisfied) return 'default';
   return group === 'credit' ? 'dark' : 'highlight';
@@ -68,7 +67,6 @@ const toCertCard = (label: string, cert?: { result: keyof typeof certResultLabel
   return { label, value: certResultLabels[cert.result], variant: toVariant('non-credit', satisfied) };
 };
 
-// 카드 13개의 순서·라벨은 Figma(node-id 4086-40675) 고정 배치와 동일해야 한다.
 export const mapGraduationResponseToCards = ({
   summary,
   sections,
