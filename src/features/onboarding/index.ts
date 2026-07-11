@@ -1,3 +1,4 @@
+export { AnalysisLoading } from './analysis-loading/analysis-loading';
 export { GraduationResult } from './graduation-result/graduation-result';
 export { PdfUploader } from './pdf-uploader';
 export type { TableCellSelectOption } from './table-cell';

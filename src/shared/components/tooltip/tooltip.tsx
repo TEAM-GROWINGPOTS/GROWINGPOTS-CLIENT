@@ -54,10 +54,13 @@ interface TooltipProps {
   content: string;
   variant?: TooltipVariant;
   size?: TooltipSize;
+  disabled?: boolean;
 }
 
-export const Tooltip = ({ trigger, content, variant = 'bottom-center', size = 'sm' }: TooltipProps) => {
+export const Tooltip = ({ trigger, content, variant = 'bottom-center', size = 'sm', disabled }: TooltipProps) => {
   const { side, align } = variantMap[variant];
+
+  if (disabled) return trigger;
 
   return (
     <RadixTooltip.Root>
