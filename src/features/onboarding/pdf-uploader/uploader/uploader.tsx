@@ -1,10 +1,10 @@
 'use client';
 
-import { toast } from '@features/onboarding/toast';
 import { Button } from '@shared/components/button/button';
+import Icon from '@shared/components/icon/icon';
+import { toast } from '@shared/components/toast';
 import { cn } from '@shared/utils/cn';
 import { cva } from 'class-variance-authority';
-import Image from 'next/image';
 import { type ChangeEvent, type DragEvent, useEffect, useRef, useState } from 'react';
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
@@ -23,11 +23,11 @@ const dropzoneVariants = cva(
   },
 );
 
-interface PdfUploaderProps {
+interface UploaderProps {
   onFileSelect: (file: File) => void;
 }
 
-export const PdfUploader = ({ onFileSelect }: PdfUploaderProps) => {
+export const Uploader = ({ onFileSelect }: UploaderProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -86,7 +86,7 @@ export const PdfUploader = ({ onFileSelect }: PdfUploaderProps) => {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <Image src="/images/file_upload.png" alt="upload-file" width={80} height={80} />
+          <Icon name="ic_pdf_upload" size={80} />
           <p className="text-body-r-16 mb-20 text-center text-gray-900">
             파일을 끌어다 놓거나
             <br />

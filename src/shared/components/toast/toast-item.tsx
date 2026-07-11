@@ -16,7 +16,7 @@ interface ToastItemProps {
 }
 
 export const ToastItem = ({ message, variant, icon }: ToastItemProps) => (
-  <div className="flex gap-2.5 rounded-[10px] bg-gray-600 p-4">
+  <div className="flex gap-10 rounded-lg bg-gray-600 p-16">
     {icon ?? ICONS[variant]}
     <span className="text-body-m-16 text-white">{message}</span>
   </div>

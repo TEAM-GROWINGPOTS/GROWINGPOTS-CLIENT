@@ -1,1 +1,2 @@
-export { PdfUploader } from './uploader';
+export { UploadedCard } from './uploaded-card/uploaded-card';
+export { Uploader } from './uploader/uploader';
