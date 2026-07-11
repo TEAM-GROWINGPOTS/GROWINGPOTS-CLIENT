@@ -16,6 +16,7 @@ interface GraduationDashboardSectionProps {
   shortcuts: RequirementAccordionItem[];
   items: RequirementAccordionItem[];
   scrollTargetKey: string | null;
+  admissionYear?: number;
   onShortcutClick: (scrollKey?: string) => void;
 }
 
@@ -26,6 +27,7 @@ export const GraduationDashboardSection = ({
   shortcuts,
   items,
   scrollTargetKey,
+  admissionYear,
   onShortcutClick,
 }: GraduationDashboardSectionProps) => {
   return (
@@ -50,7 +52,7 @@ export const GraduationDashboardSection = ({
           <GraduationStatusLegend />
         </div>
 
-        <RequirementAccordionList items={items} scrollTargetKey={scrollTargetKey} />
+        <RequirementAccordionList items={items} scrollTargetKey={scrollTargetKey} admissionYear={admissionYear} />
       </div>
     </section>
   );

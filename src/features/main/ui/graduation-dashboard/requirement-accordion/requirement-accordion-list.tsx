@@ -9,6 +9,7 @@ interface RequirementAccordionListProps {
   items: RequirementAccordionItem[];
   defaultValue?: string[];
   scrollTargetKey?: string | null;
+  admissionYear?: number;
   className?: string;
 }
 
@@ -16,6 +17,7 @@ export const RequirementAccordionList = ({
   items,
   defaultValue,
   scrollTargetKey,
+  admissionYear,
   className,
 }: RequirementAccordionListProps) => {
   const {
@@ -37,7 +39,13 @@ export const RequirementAccordionList = ({
         onTouchMove={handleManualScrollStart}
         onWheel={handleManualScrollStart}
       >
-        <RequirementAccordion items={items} defaultValue={defaultValue} itemRefs={itemRefs} className="max-w-none" />
+        <RequirementAccordion
+          items={items}
+          defaultValue={defaultValue}
+          itemRefs={itemRefs}
+          admissionYear={admissionYear}
+          className="max-w-none"
+        />
         <div
           className={cn(
             'shrink-0 overflow-hidden',

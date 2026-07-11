@@ -4,6 +4,8 @@ import { useRequirementSection } from '@features/main/hooks/use-requirement-sect
 import { requirementData, requirementDetails } from '@features/main/mocks/requirement';
 import { GraduationDashboardHeader, GraduationDashboardSection } from '@features/main/ui/graduation-dashboard';
 
+const admissionYear = 2023;
+
 export default function GraduationDashboardPage() {
   const { tabs, selectedTab, setSelectedTab, shortcuts, items, scrollTargetKey, handleShortcutClick } =
     useRequirementSection({
@@ -22,6 +24,7 @@ export default function GraduationDashboardPage() {
           shortcuts={shortcuts}
           items={items}
           scrollTargetKey={scrollTargetKey}
+          admissionYear={admissionYear}
           onShortcutClick={handleShortcutClick}
         />
       </div>

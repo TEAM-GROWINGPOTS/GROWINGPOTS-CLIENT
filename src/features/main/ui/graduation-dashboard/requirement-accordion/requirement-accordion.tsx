@@ -1,6 +1,6 @@
 'use client';
 
-import { INFORMATION_CODES, INFORMATION_CONTENTS, NOTICE_CODES } from '@features/main/constants/requirement';
+import { getRequirementInfoContent, hasRequirementInfo, NOTICE_CODES } from '@features/main/constants/requirement';
 import type { RequirementAccordionItem } from '@features/main/types/requirement';
 import * as Accordion from '@radix-ui/react-accordion';
 import type { GraduationCondition } from '@shared/apis/types/graduation';
@@ -16,10 +16,9 @@ interface RequirementAccordionProps {
   items: RequirementAccordionItem[];
   defaultValue?: string[];
   itemRefs: RefObject<Record<string, HTMLDivElement | null>>;
+  admissionYear?: number;
   className?: string;
 }
-
-const hasRequirementInfo = ({ code }: GraduationCondition) => INFORMATION_CODES.has(code);
 
 const getRequirementNotice = ({ code, notice }: RequirementAccordionItem) => {
   if (!NOTICE_CODES.has(code)) return undefined;
@@ -27,13 +26,17 @@ const getRequirementNotice = ({ code, notice }: RequirementAccordionItem) => {
   return notice;
 };
 
-const getRequirementInfoContent = ({ code }: GraduationCondition) => INFORMATION_CONTENTS[code];
-
 const getRequirementAccordionValue = ({ code }: GraduationCondition, index: number) => {
   return `${code}-${index}`;
 };
 
-export const RequirementAccordion = ({ items, defaultValue = [], itemRefs, className }: RequirementAccordionProps) => {
+export const RequirementAccordion = ({
+  items,
+  defaultValue = [],
+  itemRefs,
+  admissionYear,
+  className,
+}: RequirementAccordionProps) => {
   return (
     <Accordion.Root type="multiple" defaultValue={defaultValue} className={cn('flex w-509 flex-col gap-12', className)}>
       {items.map((item, index) => {
@@ -51,8 +54,8 @@ export const RequirementAccordion = ({ items, defaultValue = [], itemRefs, class
           >
             <RequirementHeader
               item={item}
-              hasInfo={hasRequirementInfo(item)}
-              infoContent={getRequirementInfoContent(item)}
+              hasInfo={hasRequirementInfo(item.code, admissionYear)}
+              infoContent={getRequirementInfoContent(item.code, admissionYear)}
             />
             <Accordion.Content className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden">
               <RequirementDetail
