@@ -11,7 +11,7 @@ interface TableCellEditProps {
   suffix?: string;
 }
 
-const cellBaseClassName = 'text-body-m-16 text-gray-600 flex h-32 items-center rounded-sm bg-white px-8';
+const cellBaseClassName = 'text-body-m-16 text-gray-600 flex h-32 items-center gap-2 rounded-sm bg-white px-8';
 
 export const TableCellEdit = ({ mode, value, onChange, className, suffix }: TableCellEditProps) => {
   const [touched, setTouched] = useState(false);
@@ -50,7 +50,8 @@ export const TableCellEdit = ({ mode, value, onChange, className, suffix }: Tabl
           onChange={handleChange}
           onBlur={handleBlur}
           aria-invalid={showError}
-          className="w-full min-w-0 bg-transparent outline-none"
+          style={{ width: `${Math.max(value.length, 1)}ch` }}
+          className="min-w-0 shrink-0 bg-transparent outline-none"
         />
         <span className="shrink-0 text-gray-400">{suffix}</span>
       </span>

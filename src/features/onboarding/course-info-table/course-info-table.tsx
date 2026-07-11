@@ -54,6 +54,13 @@ export const CourseInfoTable = ({ courses, isEditing = false }: CourseInfoTableP
   const [expanded, setExpanded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(() => Math.min(DEFAULT_VISIBLE_ROWS, courses.length));
   const [rows, setRows] = useState(courses);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [prevIsEditing, setPrevIsEditing] = useState(isEditing);
+
+  if (isEditing !== prevIsEditing) {
+    setPrevIsEditing(isEditing);
+    if (!isEditing) setSelectedIds(new Set());
+  }
 
   useEffect(() => {
     const updateVisibleCount = () => {
@@ -74,6 +81,7 @@ export const CourseInfoTable = ({ courses, isEditing = false }: CourseInfoTableP
 
   const visibleCourses = expanded ? rows : rows.slice(0, visibleCount);
   const canToggle = expanded || rows.length > visibleCount;
+  const isAllSelected = rows.length > 0 && selectedIds.size === rows.length;
 
   const handleToggleClick = () => {
     setExpanded((prev) => !prev);
@@ -84,12 +92,33 @@ export const CourseInfoTable = ({ courses, isEditing = false }: CourseInfoTableP
     setRows((prev) => prev.map((row) => (row.id === id ? { ...row, [key]: nextValue } : row)));
   };
 
+  const handleSelectAllClick = () => {
+    setSelectedIds(isAllSelected ? new Set() : new Set(rows.map((row) => row.id)));
+  };
+
+  const handleRowSelectClick = (id: string) => () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
   return (
     <section className="flex flex-col gap-18 rounded-lg bg-white px-24 py-20">
       <p className="text-body-sb-16 text-gray-600">과목정보</p>
       <div className="flex flex-col items-center gap-19">
         <div className="flex w-full flex-col gap-10">
           <div className="flex gap-16 bg-gray-50 px-8 py-4">
+            {isEditing && (
+              <button type="button" onClick={handleSelectAllClick} className="shrink-0" aria-label="전체 선택">
+                <Icon name={isAllSelected ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'} size={20} />
+              </button>
+            )}
             {columns.map(({ key, label }) => (
               <p key={key} className="text-body-sb-16 flex flex-1 px-8 py-4 text-gray-600">
                 {label}
@@ -99,6 +128,19 @@ export const CourseInfoTable = ({ courses, isEditing = false }: CourseInfoTableP
           <div ref={listRef} className="flex flex-col gap-4">
             {visibleCourses.map((course) => (
               <div key={course.id} className="flex gap-16 px-8 py-4">
+                {isEditing && (
+                  <button
+                    type="button"
+                    onClick={handleRowSelectClick(course.id)}
+                    className="shrink-0"
+                    aria-label={`${course.courseName} 선택`}
+                  >
+                    <Icon
+                      name={selectedIds.has(course.id) ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'}
+                      size={20}
+                    />
+                  </button>
+                )}
                 {columns.map((column) =>
                   isEditing && column.type === 'select' ? (
                     <TableCellSelect
