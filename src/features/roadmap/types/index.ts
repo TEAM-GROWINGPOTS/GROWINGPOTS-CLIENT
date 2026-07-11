@@ -1,29 +1,29 @@
-import { Edge, Node } from '@xyflow/react';
+import type { NodeCardCourse } from '@features/semester-planner/types/planner-node';
+import type { Edge, Node } from '@xyflow/react';
 
-export type CourseType =
-  '전공필수' | '전공선택' | '전공기초' | '필수교과' | '배분이수교과' | '자유이수교과' | '일반선택';
+export type PlannerNodeStatus = 'COMPLETED' | 'IN_PROGRESS' | 'PLANNED';
 
-export interface Course {
-  name: string;
-  credits: number;
-  type: CourseType;
-}
-
-export interface SemesterNodeData extends Record<string, unknown> {
-  label: string;
-  credits: number;
-  courses: Course[];
+export interface PlannerNodeData extends Record<string, unknown> {
+  plannerTermVersionId: number;
+  locked: boolean;
   colIndex: number;
   colX: number;
-  isCompleted: boolean;
+  status: PlannerNodeStatus;
+  isSelected: boolean;
+  termName: string;
+  folderName: string;
+  totalCredit: number;
+  courses: NodeCardCourse[];
 }
+
+export type PlannerNodeType = Node<PlannerNodeData, 'semesterNode'>;
 
 export interface SemesterEdgeData extends Record<string, unknown> {
   credits: number;
   isInitial: boolean;
+  isStub?: boolean;
 }
 
-export type SemesterNodeType = Node<SemesterNodeData, 'semesterNode'>;
 export type SemesterEdgeType = Edge<SemesterEdgeData, 'semesterEdge'>;
 
 export const GRADUATION_REQUIREMENTS: Record<string, number> = {
