@@ -17,6 +17,7 @@ export interface SemesterCourse {
   name: string;
   tags: string[];
   credit: number;
+  divisionName: string;
   isEnglish?: boolean;
   isSw?: boolean;
 }

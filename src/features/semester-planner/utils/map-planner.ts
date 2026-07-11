@@ -30,7 +30,23 @@ const toCourseBase = (course: PlannerCourseFields) => ({
   name: course.courseName,
   tags: [course.divisionName, `${course.credit}학점`, OPENED_SEMESTER_LABEL[course.openedSemester]],
   credit: course.credit,
+  divisionName: course.divisionName,
 });
+
+const DIVISION_ORDER = ['전공필수', '전공선택', '전공기초', '필수교과', '배분이수교과', '자유이수교과', '기타이수교과'];
+
+const getDivisionRank = (divisionName: string): number => {
+  const index = DIVISION_ORDER.indexOf(divisionName);
+  return index === -1 ? DIVISION_ORDER.length : index;
+};
+
+export const sortSemesterCourses = (courses: SemesterCourse[]): SemesterCourse[] =>
+  [...courses].sort(
+    (a, b) =>
+      getDivisionRank(a.divisionName) - getDivisionRank(b.divisionName) ||
+      a.divisionName.localeCompare(b.divisionName, 'ko') ||
+      a.name.localeCompare(b.name, 'ko'),
+  );
 
 const toPlannerFolder = (version: PlannerVersionResponse): PlannerFolder => ({
   id: String(version.plannerTermVersionId),
@@ -102,6 +118,7 @@ export const toSidebarCourse = ({
   title: name,
   tags: [defaultDivisionName, `${credit}학점`, OPENED_SEMESTER_LABEL[openedSemester]],
   credit,
+  divisionName: defaultDivisionName,
   isEnglish,
   isSw,
 });

@@ -6,12 +6,22 @@ import { LIBRARY_PREFIX } from '@features/semester-planner/card-view/dnd/use-car
 import type { SemesterCourse } from '@features/semester-planner/card-view/semester-card/semester-card';
 import { ClassCard } from '@shared/components/class-card/class-card';
 
-const toLibrarySemesterCourse = ({ id, department, title, tags, credit, isEnglish, isSw }: Course): SemesterCourse => ({
+const toLibrarySemesterCourse = ({
+  id,
+  department,
+  title,
+  tags,
+  credit,
+  divisionName,
+  isEnglish,
+  isSw,
+}: Course): SemesterCourse => ({
   id: `${LIBRARY_PREFIX}${id}`,
   department,
   name: title,
   tags,
   credit,
+  divisionName,
   isEnglish,
   isSw,
 });
