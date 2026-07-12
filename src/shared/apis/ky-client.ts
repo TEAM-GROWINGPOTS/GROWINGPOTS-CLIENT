@@ -31,7 +31,10 @@ export const kyClient = ky.create({
       ({ request }) => {
         request.headers.set('Accept', 'application/json');
         if (typeof window !== 'undefined') {
-          const token = localStorage.getItem('accessToken');
+          const token = document.cookie
+            .split('; ')
+            .find((row) => row.startsWith('accessToken='))
+            ?.split('=')[1];
 
           if (token) {
             request.headers.set('Authorization', `Bearer ${token}`);
@@ -40,9 +43,6 @@ export const kyClient = ky.create({
       },
     ],
 
-    // afterResponse: 성공이든 실패든 서버 응답을 받은 직후, ky가 HTTP 에러를 throw하기 전에 실행
-    // - 2xx: 응답 로깅, 응답 헤더 기반 처리
-    // - 4xx/5xx: throw 직전 커스텀 처리 (토큰 refresh + 재요청 등)
     afterResponse: [
       async ({ response }) => {
         if (process.env.NODE_ENV === 'development') {
@@ -51,14 +51,20 @@ export const kyClient = ky.create({
       },
     ],
 
-    // beforeError: 실패한 경우! HTTP/네트워크/타임아웃 에러가 throw되기 직전에 실행
-    // - HTTP 에러, 네트워크 끊김, 타임아웃 에러 발생이 아니면 훅 생성 조차 되지 않음
-    // - 401 -> 로그인 페이지 리다이렉트
-    // - 에러 자체를 return 하고, QueryClient가 처리하도록 하는 방향
     beforeError: [
-      ({ error }) => {
+      async ({ error }) => {
         if (isHTTPError(error) && error.response.status === 401) {
-          console.error('인증 에러 발생! 로그인이 필요합니다.');
+          try {
+            const res = await ky.post(`${API_BASE_URL}api/v1/auth/reissue`, {
+              credentials: 'include',
+            });
+            const data = (await res.json()) as { data: { accessToken: string } };
+            const newToken = data.data.accessToken;
+            document.cookie = `accessToken=${newToken}; path=/; max-age=1800; SameSite=Lax`;
+          } catch {
+            const redirectTo = encodeURIComponent(window.location.pathname + window.location.search);
+            window.location.href = `/login?redirect=${redirectTo}`;
+          }
         }
         return error;
       },

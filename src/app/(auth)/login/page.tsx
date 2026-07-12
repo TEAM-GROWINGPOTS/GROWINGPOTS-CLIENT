@@ -1,6 +1,7 @@
 import { KakaoLoginButton } from '@features/auth/login/kakao-login-button';
 import { LoginCarousel } from '@features/auth/login/login-carousel';
 import Icon from '@shared/components/icon/icon';
+import { Suspense } from 'react';
 
 export default function Page() {
   return (
@@ -15,7 +16,9 @@ export default function Page() {
             <Icon name="ic_lime_potato" size={36} aria-label="그로잉팟 로고" />
             <Icon name="img_logo" width={202} height={36} aria-label="growing pots" className="text-gray-700" />
           </div>
-          <KakaoLoginButton />
+          <Suspense>
+            <KakaoLoginButton />
+          </Suspense>
         </div>
       </section>
     </main>
