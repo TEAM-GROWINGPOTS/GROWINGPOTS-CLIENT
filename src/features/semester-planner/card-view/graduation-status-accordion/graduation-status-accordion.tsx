@@ -2,7 +2,7 @@
 
 import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
 import * as Accordion from '@radix-ui/react-accordion';
-import type { GraduationCondition } from '@shared/apis/types/graduation';
+import type { GraduationCondition, GraduationResponse, GraduationUnit } from '@shared/apis/types/graduation';
 import { Badge, Chip, Tooltip } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
@@ -12,37 +12,73 @@ import { AccordionProgressBar } from './accordion-progress-bar';
 import { calculatePercentage } from './calculate-percentage';
 
 const MAJOR_CODES = new Set(['MAJOR_BASIC', 'MAJOR_REQUIRED', 'MAJOR_ELECTIVE']);
+const OTHER_REQUIRED_CODE_ORDER = ['SW_CERT_COURSE', 'ENGLISH_COURSE'];
+const GE_CODE_ORDER = ['DISTRIBUTED_GE', 'REQUIRED_GE', 'FREE_GE'];
+const UNIT_LABEL: Record<GraduationUnit, string> = { CREDITS: '학점', COURSES: '과목' };
+
+interface TabRow {
+  key: string;
+  name: string;
+  current: number;
+  required: number | null;
+  unit: GraduationUnit;
+}
+
+const toTabRows = (conditions: GraduationCondition[]): TabRow[] =>
+  conditions.map(({ code, name, current, required, unit }) => ({ key: code, name, current, required, unit }));
+
+const orderConditions = (conditions: GraduationCondition[], order: string[]): GraduationCondition[] =>
+  order.flatMap((code) => conditions.filter((c) => c.code === code));
 
 interface GraduationStatusAccordionProps {
   className?: string;
+  data?: GraduationResponse;
 }
 
-export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordionProps) => {
+export const GraduationStatusAccordion = ({ className, data: dataProp }: GraduationStatusAccordionProps) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [isArrowNav, setIsArrowNav] = useState(false);
   const chipContainerRef = useRef<HTMLDivElement>(null);
 
-  const data = useGraduationStatusStore((s) => s.data);
+  const storeData = useGraduationStatusStore((s) => s.data);
+  const data = dataProp ?? storeData;
 
   if (!data || !data.sections) return null;
 
   const { summary, graduatable, sections } = data;
-  const { majors, ge, others } = sections;
+  const { majors, ge } = sections;
   const { totalCredits } = summary;
 
-  const tabs = [...majors.map(({ majorName }) => majorName), '교양'];
+  const mainMajor = majors.find(({ majorType }) => majorType === 'MAIN') ?? majors[0];
+  const hasGraduationRequired = mainMajor?.graduationRequired != null;
 
-  const getTabConditions = (index: number): GraduationCondition[] => {
-    if (index === tabs.length - 1) return ge.conditions;
-    return majors[index]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)) ?? [];
+  const graduationRequiredRows: TabRow[] = (mainMajor?.graduationRequired?.items ?? []).map(
+    ({ name, current, required, unit }, index) => ({ key: `${index}-${name}`, name, current, required, unit }),
+  );
+
+  const otherRequiredRows: TabRow[] = toTabRows(orderConditions(ge.conditions, OTHER_REQUIRED_CODE_ORDER));
+
+  const tabs = [
+    ...(hasGraduationRequired ? ['졸업 필수'] : []),
+    ...majors.map(({ majorName }) => majorName),
+    '교양',
+    'SW/영어',
+  ];
+
+  const getTabConditions = (index: number): TabRow[] => {
+    if (hasGraduationRequired && index === 0) return graduationRequiredRows;
+    if (index === tabs.length - 1) return otherRequiredRows;
+    if (index === tabs.length - 2) return toTabRows(orderConditions(ge.conditions, GE_CODE_ORDER));
+    const majorIndex = hasGraduationRequired ? index - 1 : index;
+    return toTabRows(majors[majorIndex]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)) ?? []);
   };
 
-  // 전공/교양/기타 학점을 각 섹션에서 합산하여 스택 바에 사용
+  // 전공/교양 학점은 각 섹션에서 합산하고, 기타는 총 이수 학점에서 전공·교양을 제외한 나머지로 계산해 스택 바에 사용
   const majorCredit =
     majors[0]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)).reduce((sum, { current }) => sum + current, 0) ??
     0;
-  const generalCredit = ge.conditions.reduce((sum, { current }) => sum + current, 0);
-  const otherCredit = others.conditions.reduce((sum, { current }) => sum + current, 0);
+  const generalCredit = orderConditions(ge.conditions, GE_CODE_ORDER).reduce((sum, { current }) => sum + current, 0);
+  const otherCredit = totalCredits.current - majorCredit - generalCredit;
 
   const toPercent = (current: number) => calculatePercentage(current, totalCredits.required);
 
@@ -65,7 +101,12 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
   };
 
   return (
-    <Accordion.Root type="single" collapsible className={cn('w-full rounded-[8px] bg-white p-20', className)}>
+    <Accordion.Root
+      type="single"
+      collapsible
+      defaultValue="graduation-status"
+      className={cn('w-full rounded-[8px] bg-white p-20', className)}
+    >
       <Accordion.Item value="graduation-status">
         <Accordion.Header>
           <Accordion.Trigger className="group flex w-full cursor-pointer items-center justify-between">
@@ -105,7 +146,7 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
                   </div>
                 </div>
                 <div
-                  className="relative h-16 w-full overflow-hidden rounded-[2px]"
+                  className="relative h-16 w-full overflow-hidden rounded-xs"
                   style={{
                     backgroundImage:
                       'repeating-linear-gradient(to right, #f4f4f4 0px, #f4f4f4 3px, #fafafa 3px, #fafafa 6px)',
@@ -135,11 +176,11 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
             </div>
 
             {/* 탭별 요건 현황 */}
-            <div className="flex min-h-158 flex-col justify-between rounded bg-gray-50 p-16">
+            <div className="flex min-h-158 flex-col gap-16 rounded bg-gray-50 p-16">
               <div
                 ref={chipContainerRef}
                 role="tablist"
-                className="flex [scrollbar-width:none] gap-8 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+                className="flex h-30 [scrollbar-width:none] gap-8 overflow-x-auto [&::-webkit-scrollbar]:hidden"
                 onKeyDown={handleChipKeyDown}
               >
                 {tabs.map((tab, index) => (
@@ -159,14 +200,20 @@ export const GraduationStatusAccordion = ({ className }: GraduationStatusAccordi
                   />
                 ))}
               </div>
-              <div className="grid grid-cols-[max-content_1fr_max-content] items-center gap-x-12 gap-y-8 px-4">
-                {getTabConditions(activeTabIndex).map(({ code, name, current, required }) => (
-                  <Fragment key={code}>
+              <div
+                key={activeTabIndex}
+                className="grid grid-cols-[max-content_1fr_max-content] items-center gap-x-12 gap-y-8 px-4"
+              >
+                {getTabConditions(activeTabIndex).map(({ key, name, current, required, unit }) => (
+                  <Fragment key={key}>
                     <span className="text-body-sb-14 text-gray-800">{name}</span>
                     <AccordionProgressBar current={current} required={required ?? 0} />
                     <div className="flex items-center justify-end">
                       <span className="text-body-sb-14 text-gray-700">{current}</span>
-                      <span className="text-body-r-14 text-gray-400">/{required ?? '-'}학점</span>
+                      <span className="text-body-r-14 text-gray-400">
+                        /{required ?? '-'}
+                        {UNIT_LABEL[unit]}
+                      </span>
                     </div>
                   </Fragment>
                 ))}

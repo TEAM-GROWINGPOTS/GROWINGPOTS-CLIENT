@@ -1,7 +1,7 @@
 @theme {
   --animate-progress-fill: progress-fill 700ms ease-out both;
   --animate-accordion-down: accordion-down 200ms ease-out;
-  --animate-accordion-up: accordion-up 200ms ease-out;
+  --animate-accordion-up: accordion-up 200ms ease-out forwards;
 }
 
 @keyframes progress-fill {

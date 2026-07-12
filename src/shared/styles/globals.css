@@ -8,3 +8,10 @@
 @theme {
   --spacing: 0.0625rem;
 }
+
+@layer base {
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+}
