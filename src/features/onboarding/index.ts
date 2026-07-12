@@ -1,6 +1,7 @@
+export type { GraduationProgressItem } from './graduation-progress-grid/graduation-progress-grid';
+export { GraduationProgressGrid } from './graduation-progress-grid/graduation-progress-grid';
 export { GraduationResult } from './graduation-result/graduation-result';
 export { PdfUploader } from './pdf-uploader';
-export { StepView } from './step-view/step-view';
 export type { TableCellSelectOption } from './table-cell';
 export { TableCellEdit, TableCellSelect } from './table-cell';
 export { toast, Toaster } from './toast';
