@@ -3,17 +3,9 @@
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 
-import { DEFAULT_ITEMS } from './graduation-progress-grid.constants';
-import { GraduationProgressGridProps, GraduationProgressItem, LegendDotProps } from './graduation-progress-grid.types';
-import {
-  getCardClass,
-  getCardLogoDetails,
-  getProgressLevel,
-  getTotalShapeClasses,
-  isCompleted,
-} from './graduation-progress-grid.utils';
-
-export type { GraduationProgressItem };
+import { DEFAULT_ITEMS } from './constants';
+import { GraduationProgressGridProps, LegendDotProps } from './types';
+import { getCardClass, getCardLogoDetails, getProgressLevel, getTotalShapeClasses, isCompleted } from './utils';
 
 export const GraduationProgressGrid = ({
   items = DEFAULT_ITEMS,

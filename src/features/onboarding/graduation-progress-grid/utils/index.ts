@@ -1,13 +1,7 @@
 import { cn } from '@shared/utils/cn';
 
-import {
-  CARD_BASE_CLASS,
-  CARD_LOGO_CONFIG,
-  LEVEL_STYLES,
-  LOGO_COLOR_BY_LEVEL,
-  type ProgressLevel,
-} from './graduation-progress-grid.constants';
-import { GraduationProgressItem } from './graduation-progress-grid.types';
+import { CARD_BASE_CLASS, CARD_LOGO_CONFIG, LEVEL_STYLES, LOGO_COLOR_BY_LEVEL, ProgressLevel } from '../constants';
+import { GraduationProgressItem } from '../types';
 
 const clampRatio = (value: number) => Math.max(0, Math.min(value, 1));
 
