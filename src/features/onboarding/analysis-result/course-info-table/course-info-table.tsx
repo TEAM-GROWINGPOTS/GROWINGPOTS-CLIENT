@@ -147,7 +147,7 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
         <table className="w-full table-fixed border-separate [border-spacing:0_4px]">
           <caption className="sr-only">과목 정보</caption>
           <colgroup>
-            {isEditing && <col className="w-20" />}
+            {isEditing && <col className="w-40" />}
             {columns.map(({ key }) => (
               <col key={key} />
             ))}
