@@ -22,6 +22,7 @@
     "@radix-ui/react-dialog": "^1.1.18",
     "@radix-ui/react-tooltip": "^1.2.11",
     "@tanstack/react-query": "^5.101.2",
+    "@xyflow/react": "^12.11.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-autoplay": "^8.6.0",

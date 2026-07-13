@@ -1,6 +1,6 @@
 export type GraduationUnit = 'CREDITS' | 'COURSES';
 export type MajorType = 'MAIN' | 'DOUBLE';
-export type CertType = 'THESIS' | 'ENGLISH' | 'SW' | 'TOPIK' | 'GRADUATION_CERT';
+export type CertType = 'THESIS' | 'GRADUATION_CERT' | 'TOPIK' | 'GPA';
 export type CertResult = 'PASS' | 'FAIL' | 'EXEMPT' | 'NONE';
 
 export interface GraduationCondition {
