@@ -3,10 +3,13 @@
 import '@xyflow/react/dist/style.css';
 
 import graduation from '@features/semester-planner/assets/graduation.json';
+import { MAX_FOLDERS_PER_TERM } from '@features/semester-planner/constants';
 import { ReachabilityContext } from '@features/semester-planner/contexts/reachability-context';
 import { usePlannerGraph } from '@features/semester-planner/hooks/use-planner-graph';
 import { useViewMode } from '@features/semester-planner/hooks/use-view-mode';
+import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
 import {
+  AddVersionNodeData,
   GRADUATION_REQUIREMENTS,
   PlannerNodeData,
   SemesterEdgeData,
@@ -253,6 +256,24 @@ export const RoadmapView = () => {
   }, [nodes, reachability.nodeIds]);
   const showCelebration = totalCredits >= GRADUATION_REQUIREMENTS.전체 && !isCelebrationDismissed;
 
+  // 졸업 요건 아코디언의 배지가 로띠와 같은 기준(마지막 학기까지의 누적 학점)으로 갱신되도록,
+  // 연결이 바뀔 때마다 누적 학점을 그대로 스토어에 반영한다.
+  useEffect(() => {
+    const required = GRADUATION_REQUIREMENTS.전체;
+    useGraduationStatusStore.setState((state) => {
+      if (!state.data) return state;
+      const { totalCredits: prev } = state.data.summary;
+      if (prev.current === totalCredits && prev.required === required) return state;
+      return {
+        data: {
+          ...state.data,
+          summary: { ...state.data.summary, totalCredits: { current: totalCredits, required } },
+          graduatable: totalCredits >= required,
+        },
+      };
+    });
+  }, [totalCredits]);
+
   // 즉시 unmount하지 않고 opacity 전환이 끝난 뒤 dismiss 상태로 확정한다.
   const dismissCelebration = useCallback(() => {
     setIsCelebrationLeaving(true);
@@ -491,7 +512,12 @@ export const RoadmapView = () => {
         setIsAddSemesterModalOpen(true);
         return;
       }
-      if (node.type === 'addVersionNode') setViewMode('card');
+      if (
+        node.type === 'addVersionNode' &&
+        ((node.data as Partial<AddVersionNodeData>).versionCount ?? 0) < MAX_FOLDERS_PER_TERM
+      ) {
+        setViewMode('card');
+      }
     },
     [setViewMode],
   );
