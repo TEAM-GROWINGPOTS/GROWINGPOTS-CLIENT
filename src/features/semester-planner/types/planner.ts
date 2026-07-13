@@ -55,6 +55,30 @@ export interface PlannerResponse {
   plannedTerms: PlannedTermResponse[];
 }
 
+export interface PlannerSaveItem {
+  courseId: number;
+  coursePositionOrder: number;
+}
+
+export interface PlannerSaveVersion {
+  versionNo: number;
+  name: string;
+  isSelected: boolean;
+  versionOrder: number;
+  items: PlannerSaveItem[];
+}
+
+export interface PlannerSaveTerm {
+  yearLevel: number;
+  semester: number;
+  versions: PlannerSaveVersion[];
+}
+
+export interface PlannerSaveRequest {
+  plannerSimulationId: number | null;
+  terms: PlannerSaveTerm[];
+}
+
 export type SemesterCardStatus = 'completed' | 'current' | 'planned';
 
 export interface SemesterCourse {

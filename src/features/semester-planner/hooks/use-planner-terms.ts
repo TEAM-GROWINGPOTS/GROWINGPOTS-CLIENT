@@ -1,14 +1,19 @@
 'use client';
 
+import { useDebouncedValue } from '@features/semester-planner/hooks/use-debounced-value';
 import { usePlanner } from '@features/semester-planner/hooks/use-planner';
+import { useSavePlanner } from '@features/semester-planner/hooks/use-save-planner';
 import type { PlannerFolder, PlannerTerm, SemesterCourse } from '@features/semester-planner/types/planner';
 import {
   mapCompletedTerms,
   mapPlannedTerms,
   sortPlannerTerms,
   sortSemesterCourses,
+  toPlannerSaveRequest,
 } from '@features/semester-planner/utils/map-planner';
 import { useEffect, useMemo, useRef, useState } from 'react';
+
+const SAVE_DEBOUNCE_MS = 300;
 
 export const getSelectedCourses = (term: PlannerTerm): SemesterCourse[] =>
   sortSemesterCourses(term.folders.find(({ id }) => id === term.selectedFolderId)?.courses ?? []);
@@ -45,16 +50,31 @@ interface AddTermInput {
 
 export const usePlannerTerms = () => {
   const { data: planner, isLoading } = usePlanner();
-  const [plannedTerms, setPlannedTerms] = useState<PlannerTerm[]>([]);
+  const { mutate: requestSavePlanner } = useSavePlanner();
+  const [plannedTerms, setPlannedTermsState] = useState<PlannerTerm[]>([]);
   const snapshotRef = useRef<PlannerTerm[] | null>(null);
   const createdIdSeqRef = useRef(0);
   const isSeededRef = useRef(false);
+  const isDirtyRef = useRef(false);
 
   useEffect(() => {
     if (!planner || isSeededRef.current) return;
     isSeededRef.current = true;
-    setPlannedTerms(mapPlannedTerms(planner.plannedTerms));
+    setPlannedTermsState(mapPlannedTerms(planner.plannedTerms));
   }, [planner]);
+
+  const setPlannedTerms = (next: PlannerTerm[] | ((prev: PlannerTerm[]) => PlannerTerm[])) => {
+    isDirtyRef.current = true;
+    setPlannedTermsState(next);
+  };
+
+  const debouncedPlannedTerms = useDebouncedValue(plannedTerms, SAVE_DEBOUNCE_MS);
+
+  useEffect(() => {
+    if (!isDirtyRef.current) return;
+    isDirtyRef.current = false;
+    requestSavePlanner(toPlannerSaveRequest(debouncedPlannedTerms));
+  }, [debouncedPlannedTerms, requestSavePlanner]);
 
   const completedTerms = useMemo(() => (planner ? mapCompletedTerms(planner.completedTerms) : []), [planner]);
   const gridTerms = useMemo(

@@ -5,6 +5,7 @@ import type {
   PlannerCourseBaseResponse,
   PlannerFolder,
   PlannerResponse,
+  PlannerSaveRequest,
   PlannerTerm,
   PlannerVersionResponse,
   SemesterCourse,
@@ -102,3 +103,21 @@ export const mapCompletedTerms = (completedTerms: PlannerResponse['completedTerm
 
 export const mapPlannedTerms = (plannedTerms: PlannerResponse['plannedTerms']): PlannerTerm[] =>
   sortPlannerTerms(plannedTerms.map(toPlannedTerm));
+
+export const toPlannerSaveRequest = (plannedTerms: PlannerTerm[]): PlannerSaveRequest => ({
+  plannerSimulationId: null,
+  terms: plannedTerms.map(({ yearLevel, semester, selectedFolderId, folders }) => ({
+    yearLevel,
+    semester,
+    versions: folders.map((folder, folderIndex) => ({
+      versionNo: folderIndex + 1,
+      name: folder.name,
+      isSelected: folder.id === selectedFolderId,
+      versionOrder: folderIndex + 1,
+      items: folder.courses.map(({ courseId }, courseIndex) => ({
+        courseId,
+        coursePositionOrder: courseIndex + 1,
+      })),
+    })),
+  })),
+});
