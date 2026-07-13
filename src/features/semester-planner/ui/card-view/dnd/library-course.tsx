@@ -1,9 +1,9 @@
 'use client';
 
 import { useDraggable } from '@dnd-kit/core';
-import type { Course } from '@features/semester-planner/card-view/add-course-sidebar/add-course-sidebar';
-import { LIBRARY_PREFIX } from '@features/semester-planner/card-view/dnd/use-card-view-dnd';
 import type { SemesterCourse } from '@features/semester-planner/types/planner';
+import type { Course } from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar';
+import { LIBRARY_PREFIX } from '@features/semester-planner/ui/card-view/dnd/use-card-view-dnd';
 import { ClassCard } from '@shared/components/class-card/class-card';
 
 const toLibrarySemesterCourse = ({

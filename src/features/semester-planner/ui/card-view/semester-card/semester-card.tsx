@@ -1,9 +1,9 @@
 'use client';
 
-import { FolderItemMenu } from '@features/semester-planner/card-view/folder-item-menu/folder-item-menu';
-import { FolderList } from '@features/semester-planner/card-view/folder-list/folder-list';
-import { FolderRenameModal } from '@features/semester-planner/card-view/folder-rename-modal/folder-rename-modal';
 import type { SemesterCardStatus, SemesterCourse, SemesterFolder } from '@features/semester-planner/types/planner';
+import { FolderItemMenu } from '@features/semester-planner/ui/card-view/folder-item-menu/folder-item-menu';
+import { FolderList } from '@features/semester-planner/ui/card-view/folder-list/folder-list';
+import { FolderRenameModal } from '@features/semester-planner/ui/card-view/folder-rename-modal/folder-rename-modal';
 import { Badge, ClassCard } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';

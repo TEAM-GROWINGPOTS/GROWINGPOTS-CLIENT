@@ -2,6 +2,7 @@
   --animate-progress-fill: progress-fill 700ms ease-out both;
   --animate-accordion-down: accordion-down 200ms ease-out;
   --animate-accordion-up: accordion-up 200ms ease-out forwards;
+  --animate-text-rise: text-rise 800ms ease-out both;
 }
 
 @keyframes progress-fill {
@@ -29,5 +30,16 @@
   }
   to {
     height: 0;
+  }
+}
+
+@keyframes text-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

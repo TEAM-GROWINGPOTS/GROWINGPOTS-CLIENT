@@ -1,26 +1,26 @@
 'use client';
 
 import { DndContext, DragOverlay } from '@dnd-kit/core';
+import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
+import { MOCK_COURSE_SEARCH_ITEMS } from '@features/semester-planner/mocks/planner';
 import {
   AddCourseSidebar,
   type Course,
-} from '@features/semester-planner/card-view/add-course-sidebar/add-course-sidebar';
+} from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar';
 import {
   CourseFilterModal,
   type CourseFilterTabKeyTypes,
   type CourseFilterValues,
   getFilterTabByLabel,
   getSelectedFilterLabels,
-} from '@features/semester-planner/card-view/course-filter-modal/course-filter-modal';
-import { DroppableTerm } from '@features/semester-planner/card-view/dnd/droppable-term';
-import { LibraryCourse } from '@features/semester-planner/card-view/dnd/library-course';
-import { TrashDropZone } from '@features/semester-planner/card-view/dnd/trash-drop-zone';
-import { useCardViewDnd } from '@features/semester-planner/card-view/dnd/use-card-view-dnd';
-import { GraduationStatusAccordion } from '@features/semester-planner/card-view/graduation-status-accordion/graduation-status-accordion';
-import { AddSemesterModal } from '@features/semester-planner/card-view/modals/add-semester-modal';
-import { SemesterCard } from '@features/semester-planner/card-view/semester-card/semester-card';
-import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
-import { MOCK_COURSE_SEARCH_ITEMS } from '@features/semester-planner/mocks/planner';
+} from '@features/semester-planner/ui/card-view/course-filter-modal/course-filter-modal';
+import { DroppableTerm } from '@features/semester-planner/ui/card-view/dnd/droppable-term';
+import { LibraryCourse } from '@features/semester-planner/ui/card-view/dnd/library-course';
+import { TrashDropZone } from '@features/semester-planner/ui/card-view/dnd/trash-drop-zone';
+import { useCardViewDnd } from '@features/semester-planner/ui/card-view/dnd/use-card-view-dnd';
+import { GraduationStatusAccordion } from '@features/semester-planner/ui/card-view/graduation-status-accordion/graduation-status-accordion';
+import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
+import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
 import { toSidebarCourse } from '@features/semester-planner/utils/map-planner';
 import { toast, Toaster } from '@shared/components';
 import { Button } from '@shared/components/button/button';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useDroppable } from '@dnd-kit/core';
-import { TRASH_ID } from '@features/semester-planner/card-view/dnd/use-card-view-dnd';
+import { TRASH_ID } from '@features/semester-planner/ui/card-view/dnd/use-card-view-dnd';
 import { IconButton } from '@shared/components/icon-button/icon-button';
 import { cn } from '@shared/utils/cn';
 

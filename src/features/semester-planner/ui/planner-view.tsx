@@ -1,9 +1,11 @@
 'use client';
 
-import { CardView } from '@features/semester-planner/card-view/card-view';
 import { useViewMode } from '@features/semester-planner/hooks/use-view-mode';
 import { ViewModeToggle } from '@features/semester-planner/view-mode-toggle/view-mode-toggle';
 import { useState } from 'react';
+
+import { CardView } from './card-view/card-view';
+import { RoadmapView } from './road-view';
 
 export const PlannerView = () => {
   const { viewMode } = useViewMode();
@@ -16,13 +18,7 @@ export const PlannerView = () => {
           <ViewModeToggle />
         </div>
         <div className="min-h-0 flex-1">
-          {viewMode === 'roadmap' ? (
-            <section className="flex h-full items-center justify-center">
-              <p className="text-body-m-16 text-gray-500">로드맵 자리입니다.</p>
-            </section>
-          ) : (
-            <CardView sidebarSlot={sidebarSlot} />
-          )}
+          {viewMode === 'roadmap' ? <RoadmapView /> : <CardView sidebarSlot={sidebarSlot} />}
         </div>
       </div>
       <div ref={setSidebarSlot} className="h-full shrink-0" />

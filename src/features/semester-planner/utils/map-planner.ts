@@ -1,4 +1,3 @@
-import type { Course } from '@features/semester-planner/card-view/add-course-sidebar/add-course-sidebar';
 import type {
   CompletedTermResponse,
   CourseSearchItemResponse,
@@ -10,6 +9,7 @@ import type {
   PlannerVersionResponse,
   SemesterCourse,
 } from '@features/semester-planner/types/planner';
+import type { Course } from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar';
 
 const OPENED_SEMESTER_LABEL: Record<OpenedSemester, string> = {
   FIRST: '1학기',

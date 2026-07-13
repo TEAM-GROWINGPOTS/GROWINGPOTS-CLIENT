@@ -1,6 +1,6 @@
 'use client';
 
-import { FolderItemMenu } from '@features/semester-planner/card-view/folder-item-menu/folder-item-menu';
+import { FolderItemMenu } from '@features/semester-planner/ui/card-view/folder-item-menu/folder-item-menu';
 import { Button } from '@shared/components/button/button';
 import { Tooltip } from '@shared/components/tooltip/tooltip';
 import { cn } from '@shared/utils/cn';
