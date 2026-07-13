@@ -136,7 +136,13 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
                   size="md"
                 />
               </div>
-              {!graduatable && <Badge size="xsmall" color="red">{`${shortfallCredit}학점 부족`}</Badge>}
+              {graduatable ? (
+                <Badge size="xsmall" color="lime01">
+                  졸업 요건 충족
+                </Badge>
+              ) : (
+                <Badge size="xsmall" color="red">{`${shortfallCredit}학점 부족`}</Badge>
+              )}
             </div>
             <Icon
               name="ic_chevron_down"
