@@ -29,13 +29,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
+  const kakaoClientId = process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID;
+  if (!kakaoClientId) {
+    console.error('[kakao callback] NEXT_PUBLIC_KAKAO_CLIENT_ID가 정의되지 않았습니다');
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
   try {
     const tokenRes = await fetchWithTimeout('https://kauth.kakao.com/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         grant_type: 'authorization_code',
-        client_id: process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID!,
+        client_id: kakaoClientId,
         redirect_uri: `${origin}/api/auth/kakao/callback`,
         code,
       }),
