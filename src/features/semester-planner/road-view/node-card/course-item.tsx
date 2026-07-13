@@ -11,14 +11,21 @@ const MAJOR_DIVISION_CATEGORY_SET: Set<string> = new Set<MajorDivisionCategoryTy
   'MAJOR_BASIC',
 ]);
 
+// 교양 계열(GENERAL 및 하위 필수/배분이수/자유이수교과) → purple, 기타(GENERAL_ELECTIVE) → blue
+const GENERAL_EDUCATION_DIVISION_CATEGORY_SET = new Set(['GENERAL', 'REQUIRED_GE', 'DISTRIBUTED_GE', 'FREE_GE']);
+
+// 전공 → lime02, 교양 → purple, 그 외(기타) → blue
+const getDivisionBadgeColor = (divisionCategory: string): 'lime02' | 'purple' | 'blue' => {
+  if (MAJOR_DIVISION_CATEGORY_SET.has(divisionCategory)) return 'lime02';
+  if (GENERAL_EDUCATION_DIVISION_CATEGORY_SET.has(divisionCategory)) return 'purple';
+  return 'blue';
+};
+
 interface CourseItemProps {
   course: NodeCardCourse;
 }
 
 export const CourseItem = ({ course }: CourseItemProps) => {
-  // 전공 관련 divisionCategory → 배지 표기, 그 외 → 배지 미표기
-  const isMajor = course.divisionCategory !== null && MAJOR_DIVISION_CATEGORY_SET.has(course.divisionCategory);
-
   const textRef = useRef<HTMLParagraphElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
 
@@ -40,9 +47,8 @@ export const CourseItem = ({ course }: CourseItemProps) => {
         variant="bottom-start"
         disabled={!isTruncated}
       />
-      {/* 전공일 경우 배지 표기, 그 외에는 배지 미표기 */}
-      {isMajor && course.divisionName && (
-        <Badge size="xsmall" color="lime02" className="ml-8 shrink-0">
+      {course.divisionCategory && course.divisionName && (
+        <Badge size="xsmall" color={getDivisionBadgeColor(course.divisionCategory)} className="ml-8 shrink-0">
           {course.divisionName}
         </Badge>
       )}
