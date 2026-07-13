@@ -1,5 +1,7 @@
 'use client';
 
+import type { DivisionCategory } from '@features/semester-planner/types/course-search';
+import type { OpenedSemester } from '@features/semester-planner/types/planner';
 import { Button } from '@shared/components/button/button';
 import { Modal } from '@shared/components/modal/modal';
 import { Select } from '@shared/components/select/select';
@@ -10,11 +12,11 @@ export type CourseFilterTabKeyTypes = 'campus' | 'major' | 'area' | 'grade' | 's
 
 export interface CourseFilterValues {
   campus: string;
-  college: string;
-  department: string;
-  areas: string[];
-  grades: string[];
-  semesters: string[];
+  collegeName: string;
+  departmentId: string;
+  divisionCategory: DivisionCategory[];
+  year: string[];
+  semester: OpenedSemester[];
   credits: string[];
   extras: string[];
 }
@@ -26,10 +28,10 @@ interface FilterOption {
 
 const FILTER_TABS: { value: CourseFilterTabKeyTypes; label: string; fields: (keyof CourseFilterValues)[] }[] = [
   { value: 'campus', label: '캠퍼스', fields: ['campus'] },
-  { value: 'major', label: '전공', fields: ['college', 'department'] },
-  { value: 'area', label: '이수영역', fields: ['areas'] },
-  { value: 'grade', label: '학년', fields: ['grades'] },
-  { value: 'semester', label: '개설학기', fields: ['semesters'] },
+  { value: 'major', label: '전공', fields: ['collegeName', 'departmentId'] },
+  { value: 'area', label: '이수영역', fields: ['divisionCategory'] },
+  { value: 'grade', label: '학년', fields: ['year'] },
+  { value: 'semester', label: '개설학기', fields: ['semester'] },
   { value: 'credit', label: '학점', fields: ['credits'] },
   { value: 'extra', label: '기타 필수', fields: ['extras'] },
 ];
@@ -63,37 +65,35 @@ const COLLEGE_GROUPS: CollegeGroup[] = [];
 const COLLEGE_OPTIONS: FilterOption[] = COLLEGE_GROUPS.map(({ college }) => ({ value: college, label: college }));
 
 const AREA_OPTIONS: FilterOption[] = [
-  { value: '전공필수', label: '전공필수' },
-  { value: '전공기초', label: '전공기초' },
-  { value: '전공선택', label: '전공선택' },
-  { value: '필수교과', label: '필수교과' },
-  { value: '배분이수교과', label: '배분이수교과' },
-  { value: '자유이수교과', label: '자유이수교과' },
-  { value: '교직', label: '교직' },
-  { value: '교직전선', label: '교직전선' },
-  { value: '타전공인정과목', label: '타전공인정과목' },
+  { value: 'MAJOR_REQUIRED', label: '전공필수' },
+  { value: 'MAJOR_BASIC', label: '전공기초' },
+  { value: 'MAJOR_ELECTIVE', label: '전공선택' },
+  { value: 'REQUIRED_GE', label: '필수교과' },
+  { value: 'DISTRIBUTED_GE', label: '배분이수교과' },
+  { value: 'FREE_GE', label: '자유이수교과' },
+  { value: 'CROSS_MAJOR', label: '타전공인정과목' },
 ];
 
 const GRADE_OPTIONS: FilterOption[] = [
-  { value: '1학년', label: '1학년' },
-  { value: '2학년', label: '2학년' },
-  { value: '3학년', label: '3학년' },
-  { value: '4학년', label: '4학년' },
-  { value: '5학년', label: '5학년' },
+  { value: '1', label: '1학년' },
+  { value: '2', label: '2학년' },
+  { value: '3', label: '3학년' },
+  { value: '4', label: '4학년' },
+  { value: '5', label: '5학년' },
 ];
 
 const SEMESTER_OPTIONS: FilterOption[] = [
-  { value: '전체학기', label: '전체학기' },
-  { value: '1학기', label: '1학기' },
-  { value: '2학기', label: '2학기' },
+  { value: 'BOTH', label: '전체학기' },
+  { value: 'FIRST', label: '1학기' },
+  { value: 'SECOND', label: '2학기' },
 ];
 
 const CREDIT_OPTIONS: FilterOption[] = [
-  { value: '0학점', label: '0학점' },
-  { value: '1학점', label: '1학점' },
-  { value: '2학점', label: '2학점' },
-  { value: '3학점', label: '3학점' },
-  { value: '4학점 이상', label: '4학점 이상' },
+  { value: '0', label: '0학점' },
+  { value: '1', label: '1학점' },
+  { value: '2', label: '2학점' },
+  { value: '3', label: '3학점' },
+  { value: '4', label: '4학점 이상' },
 ];
 
 const EXTRA_OPTIONS: FilterOption[] = [
@@ -101,13 +101,13 @@ const EXTRA_OPTIONS: FilterOption[] = [
   { value: '영어강의', label: '영어강의' },
 ];
 
-const INITIAL_VALUES: CourseFilterValues = {
+export const INITIAL_COURSE_FILTER_VALUES: CourseFilterValues = {
   campus: '',
-  college: '',
-  department: '',
-  areas: [],
-  grades: [],
-  semesters: [],
+  collegeName: '',
+  departmentId: '',
+  divisionCategory: [],
+  year: [],
+  semester: [],
   credits: [],
   extras: [],
 };
@@ -130,13 +130,13 @@ const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFo
       setValues((prev) => ({ ...prev, [key]: next }));
 
   const departmentOptions: FilterOption[] =
-    COLLEGE_GROUPS.find(({ college }) => college === values.college)?.departments.map(({ departmentId, name }) => ({
+    COLLEGE_GROUPS.find(({ college }) => college === values.collegeName)?.departments.map(({ departmentId, name }) => ({
       value: String(departmentId),
       label: name,
     })) ?? [];
 
   const handleCollegeChange = (next: string) => {
-    setValues((prev) => ({ ...prev, college: next, department: '' }));
+    setValues((prev) => ({ ...prev, collegeName: next, departmentId: '' }));
   };
 
   return (
@@ -157,16 +157,16 @@ const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFo
           <>
             <Select
               options={COLLEGE_OPTIONS}
-              value={values.college}
+              value={values.collegeName}
               onChange={handleCollegeChange}
               placeholder="단과대학"
             />
             <Select
               options={departmentOptions}
-              value={values.department}
-              onChange={setFieldValue('department')}
+              value={values.departmentId}
+              onChange={setFieldValue('departmentId')}
               placeholder="소속학과부"
-              disabled={values.college === ''}
+              disabled={values.collegeName === ''}
             />
           </>
         )}
@@ -174,8 +174,8 @@ const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFo
           <Select
             multiple
             options={AREA_OPTIONS}
-            value={values.areas}
-            onChange={setFieldValue('areas')}
+            value={values.divisionCategory}
+            onChange={(next) => setFieldValue('divisionCategory')(next as DivisionCategory[])}
             placeholder="이수영역"
           />
         )}
@@ -183,8 +183,8 @@ const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFo
           <Select
             multiple
             options={GRADE_OPTIONS}
-            value={values.grades}
-            onChange={setFieldValue('grades')}
+            value={values.year}
+            onChange={setFieldValue('year')}
             placeholder="학년"
           />
         )}
@@ -192,8 +192,8 @@ const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFo
           <Select
             multiple
             options={SEMESTER_OPTIONS}
-            value={values.semesters}
-            onChange={setFieldValue('semesters')}
+            value={values.semester}
+            onChange={(next) => setFieldValue('semester')(next as OpenedSemester[])}
             placeholder="학기"
           />
         )}
@@ -254,7 +254,7 @@ export const CourseFilterModal = ({
       <Modal.Content className="flex h-420 w-480 flex-col">
         <Modal.Header title="과목 필터" className="text-title-sb-24 text-gray-900" />
         <CourseFilterForm
-          initialValues={initialValues ?? INITIAL_VALUES}
+          initialValues={initialValues ?? INITIAL_COURSE_FILTER_VALUES}
           initialTab={initialTab ?? 'campus'}
           onApply={handleApply}
         />

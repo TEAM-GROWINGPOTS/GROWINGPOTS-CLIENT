@@ -9,6 +9,7 @@ import {
   type CourseFilterValues,
   getFilterTabByLabel,
   getSelectedFilterLabels,
+  INITIAL_COURSE_FILTER_VALUES,
 } from '@features/semester-planner/card-view/course-filter-modal/course-filter-modal';
 import { DroppableTerm } from '@features/semester-planner/card-view/dnd/droppable-term';
 import { LibraryCourse } from '@features/semester-planner/card-view/dnd/library-course';
@@ -69,8 +70,9 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [appliedFilters, setAppliedFilters] = useState<CourseFilterValues>();
   const [filterTab, setFilterTab] = useState<CourseFilterTabKeyTypes | null>(null);
+  const { extras: _extras, ...appliedSearchParams } = appliedFilters ?? INITIAL_COURSE_FILTER_VALUES;
   const { data: libraryCourses = [], isLoading: isCoursesLoading } = useCourseSearch(
-    { keyword: searchKeyword.trim() || undefined },
+    { keyword: searchKeyword.trim() || undefined, ...appliedSearchParams },
     { enabled: isSidebarOpen },
   );
   const [canScrollLeft, setCanScrollLeft] = useState(false);
