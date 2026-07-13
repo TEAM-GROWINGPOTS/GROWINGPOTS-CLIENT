@@ -135,7 +135,7 @@ export const Select = (props: SelectProps) => {
         aria-controls={listboxId}
         aria-activedescendant={isOpen && focusedIndex >= 0 ? optionId(focusedIndex) : undefined}
         className={cn(
-          'text-body-r-16 flex w-full justify-between rounded-lg border border-gray-200 bg-white pr-14 pl-16',
+          'text-body-r-16 flex w-full justify-between rounded-lg border border-gray-200 bg-white pr-14 pl-16 disabled:cursor-not-allowed',
           isMulti ? 'min-h-48 items-start py-12' : 'h-48 items-center',
           hasValue ? 'text-gray-700' : 'text-gray-300',
         )}
