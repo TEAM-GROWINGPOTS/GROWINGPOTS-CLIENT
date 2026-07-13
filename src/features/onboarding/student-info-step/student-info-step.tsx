@@ -66,8 +66,8 @@ export const StudentInfoStep = () => {
     createStudentProfile(
       { schoolId, departmentId: Number(department), admissionYear: Number(admissionYear) },
       {
-        onSuccess: ({ studentProfileId }) => {
-          router.push(`/onboarding?step=pdf&studentProfileId=${studentProfileId}`);
+        onSuccess: () => {
+          router.push('/onboarding?step=pdf');
         },
       },
     );
