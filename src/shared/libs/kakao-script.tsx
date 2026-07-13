@@ -16,5 +16,8 @@ export const KakaoScript = () => (
         window.Kakao.init(clientId);
       }
     }}
+    onError={(e) => {
+      console.error('카카오 SDK 로드 실패', e);
+    }}
   />
 );
