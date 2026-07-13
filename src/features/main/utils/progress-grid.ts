@@ -33,14 +33,6 @@ const PROGRESS_ITEM_ORDER = [
   'ENGLISH_COURSE',
 ] as const;
 
-const getTotalCurrentCredits = (shortcuts: RequirementAccordionItem[]) => {
-  return shortcuts.reduce((total, { current, unit }) => {
-    if (unit !== 'CREDITS') return total;
-
-    return total + current;
-  }, 0);
-};
-
 const clampRatio = (value: number) => Math.max(0, Math.min(value, 1));
 
 const getCompletionRatio = (item: GraduationProgressItem) => {
@@ -90,7 +82,6 @@ export const getProgressGridItems = (
   totalCredits: GraduationResponse['summary']['totalCredits'],
 ): GraduationProgressItem[] => {
   const shortcutMap = new Map(shortcuts.map((item) => [item.code, item]));
-  const totalCurrentCredits = getTotalCurrentCredits(shortcuts);
   const requirementItems = PROGRESS_ITEM_ORDER.map((code) => {
     const item = shortcutMap.get(code);
     const meta = PROGRESS_ITEM_META[code];
@@ -113,7 +104,7 @@ export const getProgressGridItems = (
     {
       id: 'total-credit',
       title: '총학점',
-      current: totalCurrentCredits,
+      current: totalCredits.current,
       required: totalCredits.required,
       isTotal: true,
     },
