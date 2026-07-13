@@ -5,19 +5,42 @@ import Icon from '@shared/components/icon/icon';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { AnalysisLoading } from '../analysis-loading/analysis-loading';
 import { useUploadTranscript } from '../hooks/use-upload-transcript';
 import { UploadedCard } from './pdf-uploader/uploaded-card/uploaded-card';
 import { Uploader } from './pdf-uploader/uploader/uploader';
 
+const SHOW_LOADING_DELAY_MS = 300;
+const MIN_ANALYSIS_LOADING_MS = 3000;
+
 export const PdfUploadStep = () => {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
-  const { mutate: uploadTranscript, isPending } = useUploadTranscript();
+  const [isUploading, setIsUploading] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { mutate: uploadTranscript } = useUploadTranscript();
 
   const handleAnalyze = () => {
     if (!file) return;
+    setIsUploading(true);
+
+    const startedAt = Date.now();
+    const showLoadingTimer = setTimeout(() => setIsAnalyzing(true), SHOW_LOADING_DELAY_MS);
+
     uploadTranscript(file, {
-      onSuccess: () => router.push('/analysis-result'),
+      onSuccess: async () => {
+        clearTimeout(showLoadingTimer);
+        const elapsed = Date.now() - startedAt;
+        if (elapsed >= SHOW_LOADING_DELAY_MS) {
+          await new Promise((resolve) => setTimeout(resolve, Math.max(MIN_ANALYSIS_LOADING_MS - elapsed, 0)));
+        }
+        router.push('/analysis-result');
+      },
+      onError: () => {
+        clearTimeout(showLoadingTimer);
+        setIsUploading(false);
+        setIsAnalyzing(false);
+      },
     });
   };
 
@@ -40,10 +63,12 @@ export const PdfUploadStep = () => {
       <Button
         label="분석하기"
         size="lg"
-        disabled={!file || isPending}
+        disabled={!file || isUploading}
         className="mt-60 w-full"
         onClick={handleAnalyze}
       />
+
+      {isAnalyzing && <AnalysisLoading />}
     </>
   );
 };
