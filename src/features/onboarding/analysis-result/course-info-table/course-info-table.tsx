@@ -2,7 +2,8 @@
 
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
-import { useEffect, useState } from 'react';
+import { cn } from '@shared/utils/cn';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { TableCellEdit } from './table-cell/table-cell-edit';
 import { TableCellSelect } from './table-cell/table-cell-select';
@@ -57,6 +58,8 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
   const [rows, setRows] = useState(courses);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [prevIsEditing, setPrevIsEditing] = useState(isEditing);
+  const tableWrapperRef = useRef<HTMLTableElement>(null);
+  const [tableHeight, setTableHeight] = useState<number>();
 
   if (isEditing !== prevIsEditing) {
     setPrevIsEditing(isEditing);
@@ -94,6 +97,12 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
   const visibleCourses = expanded || isEditing ? rows : rows.slice(0, visibleCount);
   const canToggle = !isEditing && (expanded || rows.length > visibleCount);
   const isAllSelected = rows.length > 0 && selectedIds.size === rows.length;
+
+  useLayoutEffect(() => {
+    const wrapper = tableWrapperRef.current;
+    if (!wrapper) return;
+    setTableHeight(wrapper.scrollHeight);
+  }, [visibleCourses.length, isEditing]);
 
   const handleToggleClick = () => {
     setExpanded((prev) => !prev);
@@ -144,69 +153,77 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
         )}
       </div>
       <div className="flex flex-col items-center gap-19">
-        <table className="w-full table-fixed border-separate [border-spacing:0_4px]">
-          <caption className="sr-only">과목 정보</caption>
-          <colgroup>
-            {isEditing && <col className="w-40" />}
-            {columns.map(({ key }) => (
-              <col key={key} />
-            ))}
-          </colgroup>
-          <thead>
-            <tr className="bg-gray-50">
-              {isEditing && (
-                <th scope="col" className="px-8 py-4">
-                  <button type="button" onClick={handleSelectAllClick} aria-label="전체 선택">
-                    <Icon name={isAllSelected ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'} size={20} />
-                  </button>
-                </th>
-              )}
-              {columns.map(({ key, label }) => (
-                <th key={key} scope="col" className="text-body-sb-16 truncate px-8 py-4 text-left text-gray-600">
-                  {label}
-                </th>
+        <div
+          className={cn(
+            'w-full overflow-hidden',
+            tableHeight !== undefined && 'transition-[height] duration-300 ease-in-out',
+          )}
+          style={{ height: tableHeight }}
+        >
+          <table ref={tableWrapperRef} className="w-full table-fixed border-separate [border-spacing:0_4px]">
+            <caption className="sr-only">과목 정보</caption>
+            <colgroup>
+              {isEditing && <col className="w-40" />}
+              {columns.map(({ key }) => (
+                <col key={key} />
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {visibleCourses.map((course) => (
-              <tr key={course.id}>
+            </colgroup>
+            <thead>
+              <tr className="bg-gray-50">
                 {isEditing && (
-                  <td className="px-8 py-4 align-middle">
-                    <button
-                      type="button"
-                      onClick={handleRowSelectClick(course.id)}
-                      aria-label={`${course.courseName} 선택`}
-                    >
-                      <Icon
-                        name={selectedIds.has(course.id) ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'}
-                        size={20}
-                      />
+                  <th scope="col" className="px-8 py-4">
+                    <button type="button" onClick={handleSelectAllClick} aria-label="전체 선택">
+                      <Icon name={isAllSelected ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'} size={20} />
                     </button>
-                  </td>
+                  </th>
                 )}
-                {columns.map((column) => (
-                  <td key={column.key} className="px-8 py-4 align-middle">
-                    {isEditing && column.type === 'select' ? (
-                      <TableCellSelect
-                        options={column.options}
-                        value={course[column.key]}
-                        onChange={handleCellChange(course.id, column.key)}
-                      />
-                    ) : (
-                      <TableCellEdit
-                        mode={isEditing ? 'edit' : 'view'}
-                        value={course[column.key]}
-                        onChange={handleCellChange(course.id, column.key)}
-                        suffix={'suffix' in column ? column.suffix : undefined}
-                      />
-                    )}
-                  </td>
+                {columns.map(({ key, label }) => (
+                  <th key={key} scope="col" className="text-body-sb-16 truncate px-8 py-4 text-left text-gray-600">
+                    {label}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {visibleCourses.map((course) => (
+                <tr key={course.id}>
+                  {isEditing && (
+                    <td className="px-8 py-4 align-middle">
+                      <button
+                        type="button"
+                        onClick={handleRowSelectClick(course.id)}
+                        aria-label={`${course.courseName} 선택`}
+                      >
+                        <Icon
+                          name={selectedIds.has(course.id) ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'}
+                          size={20}
+                        />
+                      </button>
+                    </td>
+                  )}
+                  {columns.map((column) => (
+                    <td key={column.key} className="px-8 py-4 align-middle">
+                      {isEditing && column.type === 'select' ? (
+                        <TableCellSelect
+                          options={column.options}
+                          value={course[column.key]}
+                          onChange={handleCellChange(course.id, column.key)}
+                        />
+                      ) : (
+                        <TableCellEdit
+                          mode={isEditing ? 'edit' : 'view'}
+                          value={course[column.key]}
+                          onChange={handleCellChange(course.id, column.key)}
+                          suffix={'suffix' in column ? column.suffix : undefined}
+                        />
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         {canToggle && (
           <Button
             icon={<Icon name="ic_chevron_down" size={16} className={expanded ? 'rotate-180' : undefined} />}
