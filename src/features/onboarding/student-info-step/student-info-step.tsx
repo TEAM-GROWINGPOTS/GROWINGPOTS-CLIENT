@@ -5,31 +5,7 @@ import { Select } from '@shared/components/select/select';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-const SCHOOLS = [{ schoolId: 1, name: '경희대학교 국제캠퍼스' }];
-
-const SCHOOL_OPTIONS = SCHOOLS.map(({ schoolId, name }) => ({
-  value: `${schoolId}`,
-  label: name,
-}));
-
-const DEPARTMENTS = [
-  { departmentId: 101, schoolId: 1, college: '예술·디자인대학', name: '연극영화학과' },
-  { departmentId: 102, schoolId: 1, college: '공과대학', name: '컴퓨터공학과' },
-  { departmentId: 103, schoolId: 1, college: '공과대학', name: '소프트웨어학과' },
-  { departmentId: 104, schoolId: 1, college: '공과대학', name: '산업공학과' },
-];
-
-const COLLEGE_OPTIONS = [...new Set(DEPARTMENTS.map(({ college }) => college))].map((college) => ({
-  value: college,
-  label: college,
-}));
-
-const ADMISSION_YEARS = [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019];
-
-const ADMISSION_YEAR_OPTIONS = ADMISSION_YEARS.map((year) => ({
-  value: `${year}`,
-  label: `${year}년(${String(year).slice(-2)}학번)`,
-}));
+import { useOnboardingOptions, useScopedOnboardingOptions } from '../hooks/use-onboarding-options';
 
 export interface StudentInfoValues {
   schoolId: number;
@@ -44,12 +20,36 @@ export const StudentInfoStep = () => {
   const [department, setDepartment] = useState('');
   const [admissionYear, setAdmissionYear] = useState('');
 
-  const departmentOptions = DEPARTMENTS.filter(({ college: departmentCollege }) => departmentCollege === college).map(
-    ({ departmentId, name }) => ({
-      value: `${departmentId}`,
-      label: name,
+  const schoolId = school ? Number(school) : undefined;
+
+  const { data: options } = useOnboardingOptions();
+  const { data: scopedOptions } = useScopedOnboardingOptions(schoolId);
+
+  const schoolOptions = (options?.schools ?? []).map(({ schoolId: id, name }) => ({
+    value: `${id}`,
+    label: name,
+  }));
+
+  const admissionYearOptions = (options?.admissionYears ?? []).map((year) => ({
+    value: `${year}`,
+    label: `${year}년(${String(year).slice(-2)}학번)`,
+  }));
+
+  const departments = scopedOptions?.departments ?? [];
+
+  const collegeOptions = [...new Set(departments.map(({ college: departmentCollege }) => departmentCollege))].map(
+    (departmentCollege) => ({
+      value: departmentCollege,
+      label: departmentCollege,
     }),
   );
+
+  const departmentOptions = departments
+    .filter(({ college: departmentCollege }) => departmentCollege === college)
+    .map(({ departmentId, name }) => ({
+      value: `${departmentId}`,
+      label: name,
+    }));
 
   const isComplete = school !== '' && college !== '' && department !== '' && admissionYear !== '';
 
@@ -77,9 +77,9 @@ export const StudentInfoStep = () => {
         기본 정보를 입력해 주세요
       </p>
       <div className="mb-60 flex flex-col gap-12">
-        <Select options={SCHOOL_OPTIONS} value={school} onChange={handleSchoolChange} placeholder="학교" />
+        <Select options={schoolOptions} value={school} onChange={handleSchoolChange} placeholder="학교" />
         <Select
-          options={COLLEGE_OPTIONS}
+          options={collegeOptions}
           value={college}
           onChange={handleCollegeChange}
           placeholder="단과대학"
@@ -92,7 +92,7 @@ export const StudentInfoStep = () => {
           placeholder="소속학과"
           disabled={!college}
         />
-        <Select options={ADMISSION_YEAR_OPTIONS} value={admissionYear} onChange={setAdmissionYear} placeholder="학번" />
+        <Select options={admissionYearOptions} value={admissionYear} onChange={setAdmissionYear} placeholder="학번" />
       </div>
       <Button label="다음" size="lg" disabled={!isComplete} onClick={handleSubmit} />
     </>
