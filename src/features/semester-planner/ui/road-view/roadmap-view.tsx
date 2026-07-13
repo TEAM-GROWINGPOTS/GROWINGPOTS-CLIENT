@@ -567,8 +567,13 @@ export const RoadmapView = () => {
           defaultViewport={{ x: 40, y: 160, zoom: 1 }}
         >
           <Background variant={BackgroundVariant.Dots} gap={25} size={3} color="#e5e7eb" />
-          <Controls position="bottom-left" />
-          <Panel position="top-right">
+          <Controls position="bottom-left" showInteractive={false} />
+          {/* ViewModeToggle은 카드뷰/로드맵뷰 간 위치가 흔들리지 않도록 PlannerView에서 한 곳에만 렌더링한다(top-40).
+              아코디언은 창 상단에서 24px 떨어진 위치여야 하므로 react-flow 기본 패널 여백(15px)을 marginTop으로
+              덮어쓴다. 셀러브레이션 오버레이(z-analysis-loading: 40)보다 위에 떠 있어야 로딩 중에도 흰 배경이
+              씻겨 보이지 않는데, react-flow 기본 패널 z-index(5)는 클래스 특이도가 같아 소스 순서에 따라 밀릴 수
+              있어 인라인 스타일로 고정한다. */}
+          <Panel position="top-right" style={{ zIndex: 50, marginTop: 24 }}>
             <RoadmapHeader />
           </Panel>
           {dropIndicator && (
@@ -593,7 +598,8 @@ export const RoadmapView = () => {
               onComplete={dismissCelebration}
               className="h-400 w-400"
             />
-            <p className="text-title-sb-24 animate-text-rise text-gray-700">졸업 요건을 충족했어요!</p>
+            {/* 로띠 애니메이션 자체에 하단 여백이 많아 인접 배치만으로는 텍스트와 멀어 보여 음수 마진으로 당긴다. */}
+            <p className="text-title-sb-24 animate-text-rise -mt-48 text-gray-700">졸업 요건을 충족했어요!</p>
           </div>
         )}
       </div>
