@@ -45,12 +45,12 @@ export const TableCellSelect = ({ options, value, onChange, className }: TableCe
         aria-haspopup="listbox"
         className="text-body-m-16 flex h-32 w-full cursor-pointer items-center justify-between rounded-sm border border-gray-100 bg-white px-8 text-gray-600"
       >
-        <span className="truncate">{options.find((opt) => opt.value === value)?.label}</span>
-        <Icon name="ic_chevron_down" size={16} className="text-gray-500" />
+        <span className="min-w-0 truncate">{options.find((opt) => opt.value === value)?.label}</span>
+        <Icon name="ic_chevron_down" size={16} className="shrink-0 text-gray-500" />
       </button>
 
       {isOpen && (
-        <ul className="z-dropdown absolute mt-4 flex max-h-171 w-full flex-col gap-9 overflow-y-auto rounded-sm bg-white p-8">
+        <ul className="z-dropdown absolute mt-4 flex max-h-171 w-full flex-col gap-9 overflow-y-auto rounded-sm border border-gray-100 bg-white p-8 shadow-[0px_4px_4px_rgba(0,0,0,0.04)]">
           {options.map(({ value: optValue, label }) => (
             <li
               key={optValue}

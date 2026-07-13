@@ -1,5 +1,3 @@
-'use client';
-
 import Icon from '@shared/components/icon/icon';
 
 interface UploadedCardProps {
