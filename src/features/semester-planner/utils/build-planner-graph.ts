@@ -1,7 +1,6 @@
+import type { PlannerNodeData, SemesterEdgeData } from '@features/semester-planner/types/planner-graph';
 import type { PlannerApiData } from '@features/semester-planner/types/planner-node';
 import type { Edge, Node } from '@xyflow/react';
-
-import type { PlannerNodeData, SemesterEdgeData } from '../types';
 
 const COL_GAP = 370;
 

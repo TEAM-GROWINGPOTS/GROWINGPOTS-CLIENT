@@ -1,7 +1,7 @@
 'use client';
 
-import { useReachability } from '@features/roadmap/contexts/reachability-context';
-import { SemesterEdgeData } from '@features/roadmap/types';
+import { useReachability } from '@features/semester-planner/contexts/reachability-context';
+import { SemesterEdgeData } from '@features/semester-planner/types/planner-graph';
 import { BaseEdge, Edge, EdgeLabelRenderer, EdgeProps, getSmoothStepPath } from '@xyflow/react';
 
 const STUB_LENGTH = 15;

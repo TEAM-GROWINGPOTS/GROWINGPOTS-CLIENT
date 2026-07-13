@@ -1,10 +1,11 @@
 'use client';
 
-import { useReachability } from '@features/roadmap/contexts/reachability-context';
-import type { PlannerNodeType } from '@features/roadmap/types';
-import { NodeCard } from '@features/semester-planner/road-view/node-card/node-card';
+import { useReachability } from '@features/semester-planner/contexts/reachability-context';
+import type { PlannerNodeType } from '@features/semester-planner/types/planner-graph';
 import { cn } from '@shared/utils/cn';
 import { Handle, NodeProps, Position } from '@xyflow/react';
+
+import { NodeCard } from './node-card/node-card';
 
 // xyflow는 엣지 연결 지점을 핸들의 "중심"이 아니라 Position.Left는 박스의 왼쪽 끝, Position.Right는
 // 오른쪽 끝으로 계산한다(getHandlePosition). 그래서 Handle 자체를 키우면 보이는 점과 엣지가 붙는 위치가

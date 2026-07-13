@@ -1,7 +1,7 @@
 'use client';
 
-import { FolderItemMenu } from '@features/semester-planner/card-view';
 import type { NodeCardCourse } from '@features/semester-planner/types/planner-node';
+import { FolderItemMenu } from '@features/semester-planner/ui/card-view';
 import * as Accordion from '@radix-ui/react-accordion';
 import { Badge, ConfirmModal } from '@shared/components';
 import Icon from '@shared/components/icon/icon';

@@ -2,11 +2,15 @@
 
 import '@xyflow/react/dist/style.css';
 
-import graduation from '@features/roadmap/assets/graduation.json';
-import { ReachabilityContext } from '@features/roadmap/contexts/reachability-context';
-import { usePlannerGraph } from '@features/roadmap/hooks/use-planner-graph';
-import { GRADUATION_REQUIREMENTS, PlannerNodeData, SemesterEdgeData } from '@features/roadmap/types';
-import { AddSemesterModal } from '@features/semester-planner/card-view/modals/add-semester-modal';
+import graduation from '@features/semester-planner/assets/graduation.json';
+import { ReachabilityContext } from '@features/semester-planner/contexts/reachability-context';
+import { usePlannerGraph } from '@features/semester-planner/hooks/use-planner-graph';
+import {
+  GRADUATION_REQUIREMENTS,
+  PlannerNodeData,
+  SemesterEdgeData,
+} from '@features/semester-planner/types/planner-graph';
+import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
 import { cn } from '@shared/utils/cn';
 import {
   Background,

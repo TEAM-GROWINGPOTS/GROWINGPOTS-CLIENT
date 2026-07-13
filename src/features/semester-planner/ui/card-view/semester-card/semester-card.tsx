@@ -1,7 +1,7 @@
 'use client';
 
-import { FolderItemMenu } from '@features/semester-planner/card-view/folder-item-menu/folder-item-menu';
-import { FolderList } from '@features/semester-planner/card-view/folder-list/folder-list';
+import { FolderItemMenu } from '@features/semester-planner/ui/card-view/folder-item-menu/folder-item-menu';
+import { FolderList } from '@features/semester-planner/ui/card-view/folder-list/folder-list';
 import { Badge, ClassCard } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';

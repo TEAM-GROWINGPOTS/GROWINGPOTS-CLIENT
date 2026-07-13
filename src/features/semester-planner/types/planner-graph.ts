@@ -1,5 +1,6 @@
-import type { NodeCardCourse } from '@features/semester-planner/types/planner-node';
 import type { Edge, Node } from '@xyflow/react';
+
+import type { NodeCardCourse } from './planner-node';
 
 export type PlannerNodeStatus = 'COMPLETED' | 'IN_PROGRESS' | 'PLANNED';
 

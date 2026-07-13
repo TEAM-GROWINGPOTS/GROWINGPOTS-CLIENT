@@ -1,7 +1,7 @@
 'use client';
 
-import { DropDown } from '@features/semester-planner/card-view/drop-down/drop-down';
-import { SearchField } from '@features/semester-planner/card-view/search-field/search-field';
+import { DropDown } from '@features/semester-planner/ui/card-view/drop-down/drop-down';
+import { SearchField } from '@features/semester-planner/ui/card-view/search-field/search-field';
 import { IconButton } from '@shared/components';
 import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
