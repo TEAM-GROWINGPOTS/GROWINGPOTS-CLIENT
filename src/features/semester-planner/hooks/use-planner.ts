@@ -1,6 +1,6 @@
 'use client';
 
-import { getPlanner } from '@features/semester-planner/api/get-planner';
+import { getPlanner } from '@features/semester-planner/apis/get-planner';
 import { QUERY_KEY } from '@shared/apis/query-key';
 import { useQuery } from '@tanstack/react-query';
 

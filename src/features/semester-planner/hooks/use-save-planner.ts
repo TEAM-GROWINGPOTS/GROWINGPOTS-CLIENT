@@ -1,6 +1,6 @@
 'use client';
 
-import { savePlanner } from '@features/semester-planner/api/save-planner';
+import { savePlanner } from '@features/semester-planner/apis/save-planner';
 import { QUERY_KEY } from '@shared/apis/query-key';
 import { toast } from '@shared/components';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
