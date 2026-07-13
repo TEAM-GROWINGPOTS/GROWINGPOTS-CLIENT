@@ -1,6 +1,7 @@
 'use client';
 
 import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
+import { getOtherRequiredConditions } from '@features/semester-planner/utils/graduation-conditions';
 import * as Accordion from '@radix-ui/react-accordion';
 import type { GraduationCondition, GraduationResponse, GraduationUnit } from '@shared/apis/types/graduation';
 import { Badge, Chip, Tooltip } from '@shared/components';
@@ -12,7 +13,6 @@ import { AccordionProgressBar } from './accordion-progress-bar';
 import { calculatePercentage } from './calculate-percentage';
 
 const MAJOR_CODES = new Set(['MAJOR_BASIC', 'MAJOR_REQUIRED', 'MAJOR_ELECTIVE']);
-const OTHER_REQUIRED_CODE_ORDER = ['SW_CERT_COURSE', 'ENGLISH_COURSE'];
 const GE_CODE_ORDER = ['DISTRIBUTED_GE', 'REQUIRED_GE', 'FREE_GE'];
 const UNIT_LABEL: Record<GraduationUnit, string> = { CREDITS: '학점', COURSES: '과목' };
 
@@ -46,7 +46,7 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
   if (!data || !data.sections) return null;
 
   const { summary, graduatable, sections } = data;
-  const { majors, ge, others } = sections;
+  const { majors, ge } = sections;
   const { totalCredits } = summary;
 
   const mainMajor = majors.find(({ majorType }) => majorType === 'MAIN') ?? majors[0];
@@ -56,19 +56,9 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
     ({ name, current, required, unit }, index) => ({ key: `${index}-${name}`, name, current, required, unit }),
   );
 
-  // SW/영어 인증의 current는 과목 소속 섹션(전공/교양/기타)별로 나뉘어 내려와 전 섹션 합산으로 표시한다
-  const allSectionConditions = [
-    ...majors.flatMap(({ conditions }) => conditions),
-    ...ge.conditions,
-    ...others.conditions,
-  ];
-
-  const otherRequiredRows: TabRow[] = OTHER_REQUIRED_CODE_ORDER.flatMap((code) => {
-    const matched = allSectionConditions.filter((condition) => condition.code === code);
-    if (matched.length === 0) return [];
-    const [{ name, required, unit }] = matched;
-    return [{ key: code, name, current: matched.reduce((sum, { current }) => sum + current, 0), required, unit }];
-  });
+  const otherRequiredRows: TabRow[] = getOtherRequiredConditions(sections).map(
+    ({ code, name, current, required, unit }) => ({ key: code, name, current, required, unit }),
+  );
 
   const tabs = [
     ...(hasGraduationRequired ? ['졸업 필수'] : []),
