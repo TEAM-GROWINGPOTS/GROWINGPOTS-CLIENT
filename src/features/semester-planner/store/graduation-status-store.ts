@@ -253,10 +253,10 @@ const MOCK_DATA: GraduationResponse = {
     },
   },
   certs: [
-    { certType: 'ENGLISH', result: 'PASS' },
-    { certType: 'SW', result: 'FAIL' },
+    { certType: 'THESIS', result: 'FAIL' },
+    { certType: 'GRADUATION_CERT', result: 'FAIL' },
     { certType: 'TOPIK', result: 'NONE' },
-    { certType: 'THESIS', result: 'NONE' },
+    { certType: 'GPA', result: 'PASS' },
   ],
 };
 

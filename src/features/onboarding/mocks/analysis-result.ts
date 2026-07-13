@@ -318,9 +318,9 @@ export const MOCK_GRADUATION_RESPONSE: GraduationResponse = {
     },
   },
   certs: [
-    { certType: 'ENGLISH', result: 'PASS' },
-    { certType: 'SW', result: 'FAIL' },
+    { certType: 'THESIS', result: 'PASS' },
+    { certType: 'GRADUATION_CERT', result: 'FAIL' },
     { certType: 'TOPIK', result: 'NONE' },
-    { certType: 'THESIS', result: 'NONE' },
+    { certType: 'GPA', result: 'EXEMPT' },
   ],
 };
