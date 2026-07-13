@@ -71,7 +71,13 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const [appliedFilters, setAppliedFilters] = useState<CourseFilterValues>();
   const [filterTab, setFilterTab] = useState<CourseFilterTabKeyTypes | null>(null);
   const { extras: _extras, ...appliedSearchParams } = appliedFilters ?? INITIAL_COURSE_FILTER_VALUES;
-  const { data: libraryCourses = [], isLoading: isCoursesLoading } = useCourseSearch(
+  const {
+    data: libraryCourses = [],
+    isLoading: isCoursesLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useCourseSearch(
     { keyword: searchKeyword.trim() || undefined, ...appliedSearchParams },
     { enabled: isSidebarOpen },
   );
@@ -112,6 +118,10 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const handleFilterClick = (label: string) => {
     const tab = getFilterTabByLabel(label);
     if (tab) setFilterTab(tab);
+  };
+
+  const handleLoadMoreCourses = () => {
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
   };
 
   const handleDirectAdd = () => {
@@ -232,6 +242,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
               keyword={searchKeyword}
               onKeywordChange={setSearchKeyword}
               isLoading={isCoursesLoading}
+              onLoadMore={handleLoadMoreCourses}
               selectedFilterLabels={getSelectedFilterLabels(appliedFilters)}
               onFilterClick={handleFilterClick}
               onClose={() => setIsSidebarOpen(false)}

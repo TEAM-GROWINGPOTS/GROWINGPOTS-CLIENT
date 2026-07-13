@@ -10,13 +10,14 @@ import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
 import Icon from '@shared/components/icon/icon';
 import Image from 'next/image';
-import { type ReactNode, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 
 interface AddCourseSidebarProps {
   courses?: CourseSearchItemResponse[];
   keyword?: string;
   onKeywordChange?: (keyword: string) => void;
   isLoading?: boolean;
+  onLoadMore?: () => void;
   selectedFilterLabels?: string[];
   onFilterClick?: (label: string) => void;
   onClose: () => void;
@@ -25,12 +26,14 @@ interface AddCourseSidebarProps {
 }
 
 const SCROLL_STEP = 120;
+const LOAD_MORE_ROOT_MARGIN = '80px';
 
 export const AddCourseSidebar = ({
   courses = [],
   keyword: keywordProp,
   onKeywordChange,
   isLoading = false,
+  onLoadMore,
   selectedFilterLabels,
   onFilterClick,
   onClose,
@@ -59,6 +62,24 @@ export const AddCourseSidebar = ({
 
   const filteredCourses =
     keywordProp === undefined ? courses.filter(({ name }) => name.includes(keyword.trim())) : courses;
+
+  const listRef = useRef<HTMLUListElement>(null);
+  const loadMoreRef = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) onLoadMore?.();
+      },
+      { root: listRef.current, rootMargin: LOAD_MORE_ROOT_MARGIN },
+    );
+    observer.observe(target);
+
+    return () => observer.disconnect();
+  });
 
   const handleFilterRowScroll = () => {
     const row = filterRowRef.current;
@@ -146,7 +167,10 @@ export const AddCourseSidebar = ({
           </button>
         </div>
         {filteredCourses.length > 0 ? (
-          <ul className="mt-8 flex [scrollbar-width:none] flex-col gap-12 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+          <ul
+            ref={listRef}
+            className="mt-8 flex [scrollbar-width:none] flex-col gap-12 overflow-y-auto [&::-webkit-scrollbar]:hidden"
+          >
             {filteredCourses.map((course) => {
               const { courseId, departmentName, name, defaultDivisionName, credit, openedSemester, isEnglish, isSw } =
                 course;
@@ -167,6 +191,7 @@ export const AddCourseSidebar = ({
                 </li>
               );
             })}
+            <li ref={loadMoreRef} aria-hidden className="h-1 shrink-0" />
           </ul>
         ) : (
           !isLoading && (
