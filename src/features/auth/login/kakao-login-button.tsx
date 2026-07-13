@@ -1,15 +1,21 @@
 'use client';
 
 import Icon from '@shared/components/icon/icon';
+import { toast } from '@shared/components/toast/toast';
 import { useSearchParams } from 'next/navigation';
 
 export const KakaoLoginButton = () => {
   const searchParams = useSearchParams();
 
   const handleKakaoLoginClick = () => {
+    if (!window.Kakao?.isInitialized()) {
+      toast.negative('잠시 후 다시 시도해주세요.');
+      return;
+    }
     window.Kakao.Auth.authorize({
       redirectUri: `${window.location.origin}/api/auth/kakao/callback`,
       state: searchParams.get('redirect') ?? '',
+      prompt: 'login', //테스트용으로 집어넣은 것, 머지시 삭제 예정
     });
   };
 

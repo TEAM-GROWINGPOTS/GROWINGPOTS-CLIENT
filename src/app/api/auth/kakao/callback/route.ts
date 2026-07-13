@@ -5,7 +5,6 @@ interface KakaoTokenResponse {
 }
 
 interface LoginData {
-  accessToken: string;
   onboardingCompleted: boolean;
   nickname: string;
 }
@@ -17,7 +16,8 @@ interface LoginResponse {
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get('code');
-  const state = searchParams.get('state') ?? '';
+  const rawState = searchParams.get('state') ?? '';
+  const state = rawState.startsWith('/') && !rawState.startsWith('//') ? rawState : '/';
 
   if (!code) {
     return NextResponse.redirect(new URL('/login', request.url));
@@ -43,10 +43,11 @@ export async function GET(request: NextRequest) {
 
     const { access_token: oauthAccessToken } = (await tokenRes.json()) as KakaoTokenResponse;
 
-    const loginRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/oauth/login`, {
+    const loginRes = await fetch(`${process.env.API_BASE_URL}/api/v1/auth/oauth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ provider: 'KAKAO', oauthAccessToken }),
+      cache: 'no-store',
     });
 
     if (!loginRes.ok) {
@@ -59,22 +60,34 @@ export async function GET(request: NextRequest) {
     const redirectPath = data.onboardingCompleted ? state || '/' : '/onboarding';
 
     const response = NextResponse.redirect(new URL(redirectPath, request.url));
-    response.cookies.set('accessToken', data.accessToken, {
-      path: '/',
-      maxAge: 1800,
-      sameSite: 'lax',
-      httpOnly: false,
-    });
-    response.cookies.set('nickname', data.nickname, {
-      path: '/',
-      sameSite: 'lax',
-      httpOnly: false,
-    });
-    response.cookies.set('onboardingCompleted', String(data.onboardingCompleted), {
-      path: '/',
-      sameSite: 'lax',
-      httpOnly: false,
-    });
+
+    // 서버가 Set-Cookie로 내려준 HttpOnly accessToken/refreshToken을 브라우저로 포워딩
+    const loginResHeaders = loginRes.headers as Headers & { getSetCookie?: () => string[] };
+    const hasGetSetCookie = typeof loginResHeaders.getSetCookie === 'function';
+    const setCookies = hasGetSetCookie
+      ? loginResHeaders.getSetCookie!()
+      : (loginRes.headers.get('set-cookie') ?? '').split(/,(?=\s*\w+=)/).filter(Boolean);
+
+    const isLocalhost = request.nextUrl.hostname === 'localhost' || request.nextUrl.hostname === '127.0.0.1';
+    for (const cookie of setCookies) {
+      const adjusted = isLocalhost
+        ? cookie
+            .trim()
+            .replace(/;\s*Secure/gi, '')
+            .replace(/SameSite=None/gi, 'SameSite=Lax')
+        : cookie.trim();
+      response.headers.append('Set-Cookie', adjusted);
+    }
+
+    const maxAge = 60 * 60 * 24 * 15;
+    response.headers.append(
+      'Set-Cookie',
+      `nickname=${encodeURIComponent(data.nickname)}; Path=/; Max-Age=${maxAge}; SameSite=Lax`,
+    );
+    response.headers.append(
+      'Set-Cookie',
+      `onboardingCompleted=${data.onboardingCompleted}; Path=/; Max-Age=${maxAge}; SameSite=Lax`,
+    );
 
     return response;
   } catch (e) {

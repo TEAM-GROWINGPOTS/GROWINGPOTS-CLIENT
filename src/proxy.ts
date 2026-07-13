@@ -1,26 +1,25 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-const PUBLIC_PATHS = ['/login', '/api/'];
-
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isPublic = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
-  const accessToken = request.cookies.get('accessToken')?.value;
-  const onboardingCompleted = request.cookies.get('onboardingCompleted')?.value;
+  if (pathname.startsWith('/api/')) return NextResponse.next();
 
-  if (!isPublic && !accessToken) {
+  const onboardingCompleted = request.cookies.get('onboardingCompleted')?.value;
+  const isLoggedIn = onboardingCompleted !== undefined;
+
+  if (pathname === '/login') {
+    return isLoggedIn ? NextResponse.redirect(new URL('/', request.url)) : NextResponse.next();
+  }
+
+  if (!isLoggedIn) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (accessToken && onboardingCompleted !== 'true' && !isPublic && pathname !== '/onboarding') {
+  if (onboardingCompleted !== 'true' && pathname !== '/onboarding') {
     return NextResponse.redirect(new URL('/onboarding', request.url));
-  }
-
-  if (isPublic && accessToken) {
-    return NextResponse.redirect(new URL('/', request.url));
   }
 
   return NextResponse.next();

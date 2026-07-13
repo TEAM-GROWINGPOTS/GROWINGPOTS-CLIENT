@@ -9,15 +9,15 @@ import { useEffect, useState } from 'react';
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   const [queryClient] = useState(() => createQueryClient());
-  const setAuthInfo = useAuthStore((state) => state.setAuthInfo);
+  const setNickname = useAuthStore((state) => state.setNickname);
 
   useEffect(() => {
     const nickname = document.cookie
       .split('; ')
       .find((row) => row.startsWith('nickname='))
       ?.split('=')[1];
-    if (nickname) setAuthInfo(decodeURIComponent(nickname), true);
-  }, [setAuthInfo]);
+    if (nickname) setNickname(decodeURIComponent(nickname));
+  }, [setNickname]);
 
   return (
     <QueryClientProvider client={queryClient}>
