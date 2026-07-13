@@ -46,7 +46,7 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
   if (!data || !data.sections) return null;
 
   const { summary, graduatable, sections } = data;
-  const { majors, ge } = sections;
+  const { majors, ge, others } = sections;
   const { totalCredits } = summary;
 
   const mainMajor = majors.find(({ majorType }) => majorType === 'MAIN') ?? majors[0];
@@ -56,7 +56,19 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
     ({ name, current, required, unit }, index) => ({ key: `${index}-${name}`, name, current, required, unit }),
   );
 
-  const otherRequiredRows: TabRow[] = toTabRows(orderConditions(ge.conditions, OTHER_REQUIRED_CODE_ORDER));
+  // SW/영어 인증의 current는 과목 소속 섹션(전공/교양/기타)별로 나뉘어 내려와 전 섹션 합산으로 표시한다
+  const allSectionConditions = [
+    ...majors.flatMap(({ conditions }) => conditions),
+    ...ge.conditions,
+    ...others.conditions,
+  ];
+
+  const otherRequiredRows: TabRow[] = OTHER_REQUIRED_CODE_ORDER.flatMap((code) => {
+    const matched = allSectionConditions.filter((condition) => condition.code === code);
+    if (matched.length === 0) return [];
+    const [{ name, required, unit }] = matched;
+    return [{ key: code, name, current: matched.reduce((sum, { current }) => sum + current, 0), required, unit }];
+  });
 
   const tabs = [
     ...(hasGraduationRequired ? ['졸업 필수'] : []),
