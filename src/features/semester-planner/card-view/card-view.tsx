@@ -19,6 +19,7 @@ import { GraduationStatusAccordion } from '@features/semester-planner/card-view/
 import { AddSemesterModal } from '@features/semester-planner/card-view/modals/add-semester-modal';
 import { SemesterCard } from '@features/semester-planner/card-view/semester-card/semester-card';
 import { useCourseSearch } from '@features/semester-planner/hooks/use-course-search';
+import { useDebouncedValue } from '@features/semester-planner/hooks/use-debounced-value';
 import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
 import type { CourseSearchItemResponse } from '@features/semester-planner/types/course-search';
 import { Button } from '@shared/components/button/button';
@@ -70,6 +71,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [appliedFilters, setAppliedFilters] = useState<CourseFilterValues>();
   const [filterTab, setFilterTab] = useState<CourseFilterTabKeyTypes | null>(null);
+  const debouncedKeyword = useDebouncedValue(searchKeyword.trim());
   const { extras: _extras, ...appliedSearchParams } = appliedFilters ?? INITIAL_COURSE_FILTER_VALUES;
   const {
     data: libraryCourses = [],
@@ -77,10 +79,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useCourseSearch(
-    { keyword: searchKeyword.trim() || undefined, ...appliedSearchParams },
-    { enabled: isSidebarOpen },
-  );
+  } = useCourseSearch({ keyword: debouncedKeyword || undefined, ...appliedSearchParams }, { enabled: isSidebarOpen });
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
