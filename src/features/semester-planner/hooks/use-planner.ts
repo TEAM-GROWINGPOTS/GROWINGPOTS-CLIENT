@@ -7,5 +7,4 @@ export const usePlanner = () =>
   useQuery({
     queryKey: ['planner'],
     queryFn: getPlanner,
-    select: ({ data }) => data,
   });

@@ -9,9 +9,9 @@ export const useSavePlanner = () => {
 
   return useMutation({
     mutationFn: savePlanner,
-    onSuccess: (response) => {
-      if (response.data) {
-        queryClient.setQueryData(['graduation', 'PLANNED'], response);
+    onSuccess: (graduation) => {
+      if (graduation) {
+        queryClient.setQueryData(['graduation', 'PLANNED'], graduation);
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['graduation'] });

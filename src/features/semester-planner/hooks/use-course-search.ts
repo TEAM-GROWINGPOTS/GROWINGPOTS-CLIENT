@@ -20,8 +20,8 @@ export const useCourseSearch = (
     queryKey: ['courses', params],
     queryFn: ({ pageParam }) => getCourses({ ...params, page: pageParam, size: COURSE_PAGE_SIZE }),
     initialPageParam: 0,
-    getNextPageParam: ({ data }) => (data.page.hasNext ? data.page.page + 1 : undefined),
-    select: (data): CourseSearchItemResponse[] => data.pages.flatMap(({ data: { courses } }) => courses),
+    getNextPageParam: ({ page }) => (page.hasNext ? page.page + 1 : undefined),
+    select: (data): CourseSearchItemResponse[] => data.pages.flatMap(({ courses }) => courses),
     placeholderData: keepPreviousData,
     enabled: enabled && isSearchableKeyword(params.keyword ?? ''),
   });

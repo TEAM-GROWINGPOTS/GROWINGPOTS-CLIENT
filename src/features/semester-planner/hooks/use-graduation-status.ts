@@ -7,5 +7,4 @@ export const useGraduationStatus = (source?: GraduationSource) =>
   useQuery({
     queryKey: ['graduation', source ?? 'ALL'],
     queryFn: () => getGraduation(source),
-    select: ({ data }) => data,
   });

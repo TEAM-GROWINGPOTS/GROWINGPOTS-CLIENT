@@ -18,5 +18,10 @@ const toSearchParams = (params: CourseSearchParams): URLSearchParams => {
   return searchParams;
 };
 
-export const getCourses = (params: CourseSearchParams) =>
-  request.get<SuccessResponse<CourseSearchResponse>>(ENDPOINT.COURSES.LIST, { searchParams: toSearchParams(params) });
+export const getCourses = async (params: CourseSearchParams) => {
+  const response = await request.get<SuccessResponse<CourseSearchResponse>>(ENDPOINT.COURSES.LIST, {
+    searchParams: toSearchParams(params),
+  });
+
+  return response.data;
+};

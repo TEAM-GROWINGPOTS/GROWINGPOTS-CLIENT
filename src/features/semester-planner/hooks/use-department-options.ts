@@ -7,6 +7,6 @@ export const useDepartmentOptions = () =>
   useQuery({
     queryKey: ['onboarding-options'],
     queryFn: getOnboardingOptions,
-    select: ({ data }) => data.departments,
+    select: (data) => data.departments,
     staleTime: Infinity,
   });
