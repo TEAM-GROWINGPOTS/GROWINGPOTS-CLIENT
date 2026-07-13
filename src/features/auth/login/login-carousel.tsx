@@ -8,20 +8,24 @@ import { useCallback, useEffect, useState } from 'react';
 
 const SLIDES = [
   {
-    lines: ['졸업사정관리표 PDF를 업로드해 주세요', '분석해 드림'],
-    image: null,
+    label: '졸업현황 분석',
+    lines: ['졸업사정관리표를 업로드하면', '이수 현황과 졸업요건을 분석해 드려요'],
+    image: '/images/img_splash_01.webp',
   },
   {
-    lines: ['현황확인'],
-    image: null,
+    label: '현황 확인',
+    lines: ['영역별 이수 현황과 부족한 학점을', '한눈에 확인할 수 있어요'],
+    image: '/images/img_splash_02.webp',
   },
   {
-    lines: ['카드뷰'],
-    image: null,
+    label: '학기 플래너',
+    lines: ['과목을 학기별로 배치해 보며', '나에게 맞는 졸업 경로를 설계할 수 있어요'],
+    image: '/images/img_splash_03.webp',
   },
   {
+    label: '학기 로드맵',
     lines: ['졸업까지의 학기 계획을', '나만의 로드맵을 통해 완성해 보세요'],
-    image: null,
+    image: '/images/img_splash_04.webp',
   },
 ];
 
@@ -53,15 +57,20 @@ export const LoginCarousel = () => {
       <div className="flex w-545 shrink-0 flex-col items-center gap-80">
         <div ref={emblaRef} className="w-full overflow-hidden">
           <div className="flex">
-            {SLIDES.map(({ lines }, index) => (
+            {SLIDES.map(({ label, lines, image }, index) => (
               <div key={index} className="min-w-0 flex-[0_0_100%]">
                 <div className="flex flex-col items-center gap-32">
-                  <div className="text-title-sb-24 min-h-63 w-full text-center text-gray-900">
-                    {lines.map((line, i) => (
-                      <p key={i}>{line}</p>
-                    ))}
+                  <div className="flex flex-col items-center gap-12">
+                    <p className="text-body-m-16 text-center text-gray-400">{label}</p>
+                    <div className="text-title-sb-24 min-h-63 w-full text-center text-gray-900">
+                      {lines.map((line, i) => (
+                        <p key={i}>{line}</p>
+                      ))}
+                    </div>
                   </div>
-                  <div className="h-340 w-full overflow-hidden rounded-2xl border-[6px] border-gray-700 bg-gray-100" />
+                  <div className="h-340 w-full overflow-hidden rounded-2xl border-[6px] border-gray-700 bg-gray-100">
+                    {image && <img src={image} alt="" className="size-full object-cover" />}
+                  </div>
                 </div>
               </div>
             ))}
