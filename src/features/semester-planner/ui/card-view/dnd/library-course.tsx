@@ -18,7 +18,7 @@ const toLibrarySemesterCourse = ({
   isSw,
 }: CourseSearchItemResponse): SemesterCourse => ({
   id: `${LIBRARY_PREFIX}${courseId}`,
-  department: departmentName,
+  departmentName,
   name,
   tags: getCourseTags(defaultDivisionName, credit, openedSemester),
   credit,
@@ -29,7 +29,7 @@ const toLibrarySemesterCourse = ({
 
 export const LibraryCourse = ({ course }: { course: CourseSearchItemResponse }) => {
   const semesterCourse = toLibrarySemesterCourse(course);
-  const { id, department, name, tags, isEnglish, isSw } = semesterCourse;
+  const { id, departmentName, name, tags, isEnglish, isSw } = semesterCourse;
   const { attributes, listeners, setNodeRef } = useDraggable({
     id,
     data: { course: semesterCourse },
@@ -38,7 +38,7 @@ export const LibraryCourse = ({ course }: { course: CourseSearchItemResponse }) 
   return (
     <div ref={setNodeRef} {...attributes} {...listeners}>
       <ClassCard
-        department={department}
+        department={departmentName}
         title={name}
         tags={tags}
         isEnglish={isEnglish}

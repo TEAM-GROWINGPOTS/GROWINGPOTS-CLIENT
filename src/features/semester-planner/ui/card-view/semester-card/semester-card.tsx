@@ -172,14 +172,14 @@ export const SemesterCard = ({
           {courses.length > 0 ? (
             <ul className="flex min-h-0 flex-col gap-8 overflow-y-auto">
               {courses.map((course) => {
-                const { id, department, name, tags, isEnglish, isSw } = course;
+                const { id, departmentName, name, tags, isEnglish, isSw } = course;
                 return (
                   <li key={id}>
                     {renderCourse ? (
                       renderCourse(course)
                     ) : (
                       <ClassCard
-                        department={department}
+                        department={departmentName}
                         title={name}
                         tags={tags}
                         isEnglish={isEnglish}

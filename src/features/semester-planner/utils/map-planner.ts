@@ -23,7 +23,7 @@ export const getCourseTags = (divisionName: string, credit: number, openedSemest
 ];
 
 const toCourseBase = (course: PlannerCourseBaseResponse) => ({
-  department: course.departmentName,
+  departmentName: course.departmentName,
   name: course.name,
   tags: getCourseTags(course.divisionName, course.credit, course.openedSemester),
   credit: course.credit,

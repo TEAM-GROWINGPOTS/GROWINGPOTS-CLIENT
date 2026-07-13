@@ -262,7 +262,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
       <DragOverlay dropAnimation={isLibraryDrag ? null : undefined}>
         {activeCourse && (
           <ClassCard
-            department={activeCourse.department}
+            department={activeCourse.departmentName}
             title={activeCourse.name}
             tags={activeCourse.tags}
             className="shadow-small w-242 border border-gray-100"
