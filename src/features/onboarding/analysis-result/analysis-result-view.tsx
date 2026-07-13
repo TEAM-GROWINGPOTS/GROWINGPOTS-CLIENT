@@ -34,7 +34,7 @@ export const AnalysisResultView = () => {
   };
 
   return (
-    <div className="w-full bg-gray-50 px-120 pt-80 pb-40">
+    <div className="min-h-screen w-full bg-gray-50 px-120 pt-80 pb-40">
       <div className="mb-28 flex items-end justify-between">
         <div className="flex flex-col gap-4">
           <h1 className="text-title-sb-24 text-gray-900">분석 결과를 확인해 주세요</h1>
