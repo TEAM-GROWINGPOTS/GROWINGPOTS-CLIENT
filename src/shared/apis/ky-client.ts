@@ -8,6 +8,7 @@ if (!API_BASE_URL) {
 
 export const kyClient = ky.create({
   baseUrl: API_BASE_URL,
+  credentials: 'include',
   timeout: 10000,
   retry: {
     limit: 2,
