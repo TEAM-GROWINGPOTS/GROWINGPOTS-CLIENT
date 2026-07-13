@@ -43,3 +43,10 @@
     transform: translateY(0);
   }
 }
+
+[data-sonner-toaster] [data-sonner-toast][data-removed='true'] {
+  --y: translateY(0) !important;
+  transform: translateY(0) !important;
+  opacity: 0 !important;
+  transition: opacity 300ms ease !important;
+}
