@@ -5,13 +5,8 @@ import { Select } from '@shared/components/select/select';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { useCreateStudentProfile } from '../hooks/use-create-student-profile';
 import { useOnboardingOptions, useScopedOnboardingOptions } from '../hooks/use-onboarding-options';
-
-export interface StudentInfoValues {
-  schoolId: number;
-  departmentId: number;
-  admissionYear: number;
-}
 
 export const StudentInfoStep = () => {
   const router = useRouter();
@@ -24,6 +19,7 @@ export const StudentInfoStep = () => {
 
   const { data: options } = useOnboardingOptions();
   const { data: scopedOptions } = useScopedOnboardingOptions(schoolId);
+  const { mutate: createStudentProfile, isPending } = useCreateStudentProfile();
 
   const schoolOptions = (options?.schools ?? []).map(({ schoolId: id, name }) => ({
     value: `${id}`,
@@ -65,8 +61,16 @@ export const StudentInfoStep = () => {
   };
 
   const handleSubmit = () => {
-    if (!isComplete) return;
-    router.push('/onboarding?step=pdf');
+    if (!isComplete || schoolId === undefined) return;
+
+    createStudentProfile(
+      { schoolId, departmentId: Number(department), admissionYear: Number(admissionYear) },
+      {
+        onSuccess: ({ studentProfileId }) => {
+          router.push(`/onboarding?step=pdf&studentProfileId=${studentProfileId}`);
+        },
+      },
+    );
   };
 
   return (
@@ -94,7 +98,7 @@ export const StudentInfoStep = () => {
         />
         <Select options={admissionYearOptions} value={admissionYear} onChange={setAdmissionYear} placeholder="학번" />
       </div>
-      <Button label="다음" size="lg" disabled={!isComplete} onClick={handleSubmit} />
+      <Button label="다음" size="lg" disabled={!isComplete || isPending} onClick={handleSubmit} />
     </>
   );
 };

@@ -11,7 +11,7 @@ export const useOnboardingOptions = () =>
 
 export const useScopedOnboardingOptions = (schoolId?: number) =>
   useQuery({
-    queryKey: QUERY_KEY.ONBOARDING.OPTIONS(schoolId),
+    queryKey: QUERY_KEY.ONBOARDING.SCOPED_OPTIONS(schoolId),
     queryFn: () => getOnboardingOptions(schoolId),
     enabled: schoolId !== undefined,
   });
