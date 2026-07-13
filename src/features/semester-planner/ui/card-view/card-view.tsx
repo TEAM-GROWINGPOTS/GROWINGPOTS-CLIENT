@@ -60,7 +60,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     renameFolder,
     deleteFolder,
   } = usePlannerTerms();
-  const { activeCourse, overTermId, isLibraryDrag, contextProps } = useCardViewDnd({
+  const { activeCourse, overTermId, isLibraryDrag, isDropRejected, contextProps } = useCardViewDnd({
     plannedTerms,
     snapshot,
     restoreSnapshot,
@@ -259,7 +259,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
           sidebarSlot,
         )}
 
-      <DragOverlay dropAnimation={isLibraryDrag ? null : undefined}>
+      <DragOverlay dropAnimation={isLibraryDrag && !isDropRejected ? null : undefined}>
         {activeCourse && (
           <ClassCard
             department={activeCourse.departmentName}

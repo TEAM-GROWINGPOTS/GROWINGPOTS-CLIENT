@@ -11,6 +11,8 @@ import {
 import { getSelectedCourses } from '@features/semester-planner/hooks/use-planner-terms';
 import type { PlannerTerm, SemesterCourse } from '@features/semester-planner/types/planner';
 import { detectCoverageCollision, DWELL_MS } from '@features/semester-planner/ui/card-view/dnd/collision';
+import { getDropViolation } from '@features/semester-planner/ui/card-view/dnd/drop-rules';
+import { toast } from '@shared/components';
 import { useEffect, useRef, useState } from 'react';
 
 export const LIBRARY_ID = 'library';
@@ -37,6 +39,7 @@ export const useCardViewDnd = ({
   const [activeCourse, setActiveCourse] = useState<SemesterCourse | null>(null);
   const [overTermId, setOverTermId] = useState<string | null>(null);
   const [isLibraryDrag, setIsLibraryDrag] = useState(false);
+  const [isDropRejected, setIsDropRejected] = useState(false);
   const copyCountRef = useRef(0);
   const lastOverIdRef = useRef<string | null>(null);
   const dwellRef = useRef<{ container: string; timer: ReturnType<typeof setTimeout> } | null>(null);
@@ -69,6 +72,7 @@ export const useCardViewDnd = ({
     snapshot();
     lastOverIdRef.current = null;
     clearDwell();
+    setIsDropRejected(false);
     setIsLibraryDrag(findContainer(String(active.id)) === LIBRARY_ID);
     setActiveCourse((active.data.current?.course as SemesterCourse) ?? null);
   };
@@ -143,6 +147,18 @@ export const useCardViewDnd = ({
       return;
     }
 
+    const draggedCourse = active.data.current?.course as SemesterCourse | undefined;
+    const targetTerm = plannedTerms.find(({ id }) => id === overContainer);
+    if (draggedCourse && targetTerm) {
+      const violation = getDropViolation({ course: draggedCourse, targetTerm });
+      if (violation) {
+        setIsDropRejected(true);
+        restoreSnapshot();
+        toast.negative(violation);
+        return;
+      }
+    }
+
     if (activeContainer === LIBRARY_ID) {
       const course = active.data.current?.course as SemesterCourse | undefined;
       if (!course) return;
@@ -159,6 +175,7 @@ export const useCardViewDnd = ({
     activeCourse,
     overTermId,
     isLibraryDrag,
+    isDropRejected,
     contextProps: {
       collisionDetection,
       onDragStart: handleDragStart,
