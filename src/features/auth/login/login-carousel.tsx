@@ -54,12 +54,12 @@ export const LoginCarousel = () => {
     <div className="flex size-full items-center justify-between overflow-hidden rounded-3xl border border-gray-100 bg-gray-50 px-40 py-120">
       <IconButton icon="ic_chevron_left" aria-label="이전 슬라이드" onClick={handlePrevClick} />
 
-      <div className="flex w-545 shrink-0 flex-col items-center gap-80">
+      <div className="flex flex-1 flex-col items-center gap-80 overflow-hidden">
         <div ref={emblaRef} className="w-full overflow-hidden">
           <div className="flex">
             {SLIDES.map(({ label, lines, image }, index) => (
-              <div key={index} className="min-w-0 flex-[0_0_100%]">
-                <div className="flex flex-col items-center gap-32">
+              <div key={index} className="flex min-w-0 flex-[0_0_100%] justify-center">
+                <div className="flex w-545 flex-col items-center gap-32">
                   <div className="flex flex-col items-center gap-12">
                     <p className="text-body-m-16 text-center text-gray-400">{label}</p>
                     <div className="text-title-sb-24 min-h-63 w-full text-center text-gray-900">
