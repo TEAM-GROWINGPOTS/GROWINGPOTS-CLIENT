@@ -1,6 +1,6 @@
 'use client';
 
-import type { DivisionCategory } from '@features/semester-planner/types/course-search';
+import type { DivisionCategory, OtherRequired } from '@features/semester-planner/types/course-search';
 import type { OpenedSemester } from '@features/semester-planner/types/planner';
 import { Button } from '@shared/components/button/button';
 import { Modal } from '@shared/components/modal/modal';
@@ -18,7 +18,7 @@ export interface CourseFilterValues {
   year: string[];
   semester: OpenedSemester[];
   credits: string[];
-  extras: string[];
+  otherRequired: OtherRequired[];
 }
 
 interface FilterOption {
@@ -33,7 +33,7 @@ const FILTER_TABS: { value: CourseFilterTabKeyTypes; label: string; fields: (key
   { value: 'grade', label: '학년', fields: ['year'] },
   { value: 'semester', label: '개설학기', fields: ['semester'] },
   { value: 'credit', label: '학점', fields: ['credits'] },
-  { value: 'extra', label: '기타 필수', fields: ['extras'] },
+  { value: 'extra', label: '기타 필수', fields: ['otherRequired'] },
 ];
 
 const isTabSelected = (fields: (keyof CourseFilterValues)[], filters: CourseFilterValues): boolean =>
@@ -96,9 +96,9 @@ const CREDIT_OPTIONS: FilterOption[] = [
   { value: '4', label: '4학점 이상' },
 ];
 
-const EXTRA_OPTIONS: FilterOption[] = [
-  { value: 'SW인증', label: 'SW인증' },
-  { value: '영어강의', label: '영어강의' },
+const OTHER_REQUIRED_OPTIONS: FilterOption[] = [
+  { value: 'SW', label: 'SW인증' },
+  { value: 'ENGLISH', label: '영어강의' },
 ];
 
 export const INITIAL_COURSE_FILTER_VALUES: CourseFilterValues = {
@@ -109,7 +109,7 @@ export const INITIAL_COURSE_FILTER_VALUES: CourseFilterValues = {
   year: [],
   semester: [],
   credits: [],
-  extras: [],
+  otherRequired: [],
 };
 
 interface CourseFilterFormProps {
@@ -209,9 +209,9 @@ const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFo
         {activeTab === 'extra' && (
           <Select
             multiple
-            options={EXTRA_OPTIONS}
-            value={values.extras}
-            onChange={setFieldValue('extras')}
+            options={OTHER_REQUIRED_OPTIONS}
+            value={values.otherRequired}
+            onChange={(next) => setFieldValue('otherRequired')(next as OtherRequired[])}
             placeholder="기타 필수"
           />
         )}

@@ -75,14 +75,16 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const [appliedFilters, setAppliedFilters] = useState<CourseFilterValues>();
   const [filterTab, setFilterTab] = useState<CourseFilterTabKeyTypes | null>(null);
   const debouncedKeyword = useDebouncedValue(searchKeyword.trim());
-  const { extras: _extras, ...appliedSearchParams } = appliedFilters ?? INITIAL_COURSE_FILTER_VALUES;
   const {
     data: libraryCourses = [],
     isLoading: isCoursesLoading,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useCourseSearch({ keyword: debouncedKeyword || undefined, ...appliedSearchParams }, { enabled: isSidebarOpen });
+  } = useCourseSearch(
+    { keyword: debouncedKeyword || undefined, ...(appliedFilters ?? INITIAL_COURSE_FILTER_VALUES) },
+    { enabled: isSidebarOpen },
+  );
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);

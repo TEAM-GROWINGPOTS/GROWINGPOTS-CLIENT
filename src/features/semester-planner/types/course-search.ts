@@ -10,6 +10,8 @@ export type DivisionCategory =
   | 'GENERAL_ELECTIVE'
   | 'CROSS_MAJOR';
 
+export type OtherRequired = 'SW' | 'ENGLISH';
+
 export interface CourseSearchParams {
   keyword?: string;
   collegeName?: string;
@@ -18,6 +20,7 @@ export interface CourseSearchParams {
   year?: string[];
   semester?: OpenedSemester[];
   credits?: string[];
+  otherRequired?: OtherRequired[];
   campus?: string;
   page?: number;
   size?: number;
