@@ -5,16 +5,20 @@ import Icon from '@shared/components/icon/icon';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { useUploadTranscript } from '../hooks/use-upload-transcript';
 import { UploadedCard } from './pdf-uploader/uploaded-card/uploaded-card';
 import { Uploader } from './pdf-uploader/uploader/uploader';
 
 export const PdfUploadStep = () => {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
+  const { mutate: uploadTranscript, isPending } = useUploadTranscript();
 
   const handleAnalyze = () => {
     if (!file) return;
-    router.push('/analysis-result');
+    uploadTranscript(file, {
+      onSuccess: () => router.push('/analysis-result'),
+    });
   };
 
   const handleBack = () => {
@@ -33,7 +37,13 @@ export const PdfUploadStep = () => {
         {file && <UploadedCard fileName={file.name} fileSizeBytes={file.size} onRemove={() => setFile(null)} />}
       </div>
 
-      <Button label="분석하기" size="lg" disabled={!file} className="mt-60 w-full" onClick={handleAnalyze} />
+      <Button
+        label="분석하기"
+        size="lg"
+        disabled={!file || isPending}
+        className="mt-60 w-full"
+        onClick={handleAnalyze}
+      />
     </>
   );
 };
