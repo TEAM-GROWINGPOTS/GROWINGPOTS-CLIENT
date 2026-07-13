@@ -2,6 +2,7 @@ import type {
   CompletedTermResponse,
   OpenedSemester,
   PlannedTermResponse,
+  PlannerCourseBaseResponse,
   PlannerFolder,
   PlannerResponse,
   PlannerTerm,
@@ -21,20 +22,14 @@ export const getCourseTags = (divisionName: string, credit: number, openedSemest
   OPENED_SEMESTER_LABEL[openedSemester],
 ];
 
-interface PlannerCourseFields {
-  courseName: string;
-  departmentName: string;
-  divisionName: string;
-  openedSemester: OpenedSemester;
-  credit: number;
-}
-
-const toCourseBase = (course: PlannerCourseFields) => ({
+const toCourseBase = (course: PlannerCourseBaseResponse) => ({
   department: course.departmentName,
-  name: course.courseName,
+  name: course.name,
   tags: getCourseTags(course.divisionName, course.credit, course.openedSemester),
   credit: course.credit,
   divisionName: course.divisionName,
+  isEnglish: course.isEnglish,
+  isSw: course.isSw,
 });
 
 const DIVISION_ORDER = ['전공필수', '전공선택', '전공기초', '필수교과', '배분이수교과', '자유이수교과', '기타이수교과'];

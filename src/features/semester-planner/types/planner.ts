@@ -1,9 +1,8 @@
 export type OpenedSemester = 'FIRST' | 'SECOND' | 'BOTH';
 
-export interface PlannedCourseResponse {
-  plannerVersionItemId: number;
+export interface PlannerCourseBaseResponse {
   courseId: number;
-  courseName: string;
+  name: string;
   departmentName: string;
   divisionCategory: string;
   divisionName: string;
@@ -11,20 +10,17 @@ export interface PlannedCourseResponse {
   recommendedYearHigh: number | null;
   openedSemester: OpenedSemester;
   credit: number;
+  isEnglish: boolean;
+  isSw: boolean;
+}
+
+export interface PlannedCourseResponse extends PlannerCourseBaseResponse {
+  plannerVersionItemId: number;
   coursePositionOrder: number;
 }
 
-export interface CompletedCourseResponse {
+export interface CompletedCourseResponse extends PlannerCourseBaseResponse {
   studentCourseId: number;
-  courseId: number;
-  courseName: string;
-  departmentName: string;
-  divisionCategory: string;
-  divisionName: string;
-  recommendedYearLow: number | null;
-  recommendedYearHigh: number | null;
-  openedSemester: OpenedSemester;
-  credit: number;
 }
 
 export interface PlannerVersionResponse {
