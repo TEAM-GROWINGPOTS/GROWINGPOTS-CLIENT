@@ -59,6 +59,7 @@ export type SemesterCardStatus = 'completed' | 'current' | 'planned';
 
 export interface SemesterCourse {
   id: string;
+  courseId: number;
   departmentName: string;
   name: string;
   tags: string[];

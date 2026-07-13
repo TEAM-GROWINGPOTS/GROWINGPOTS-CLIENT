@@ -18,6 +18,7 @@ const toLibrarySemesterCourse = ({
   isSw,
 }: CourseSearchItemResponse): SemesterCourse => ({
   id: `${LIBRARY_PREFIX}${courseId}`,
+  courseId,
   departmentName,
   name,
   tags: getCourseTags(defaultDivisionName, credit, openedSemester),
