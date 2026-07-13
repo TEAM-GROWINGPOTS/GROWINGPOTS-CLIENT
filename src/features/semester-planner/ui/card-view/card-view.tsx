@@ -265,6 +265,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
             department={activeCourse.departmentName}
             title={activeCourse.name}
             tags={activeCourse.tags}
+            isEnglish={activeCourse.isEnglish}
+            isSw={activeCourse.isSw}
             className="shadow-small w-242 border border-gray-100"
           />
         )}
