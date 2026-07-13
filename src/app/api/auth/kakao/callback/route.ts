@@ -7,6 +7,7 @@ interface KakaoTokenResponse {
 interface LoginData {
   accessToken: string;
   onboardingCompleted: boolean;
+  nickname: string;
 }
 
 interface LoginResponse {
@@ -28,13 +29,15 @@ export async function GET(request: NextRequest) {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         grant_type: 'authorization_code',
-        client_id: process.env.KAKAO_REST_API_KEY!,
+        client_id: process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID!,
         redirect_uri: `${origin}/api/auth/kakao/callback`,
         code,
       }),
     });
 
     if (!tokenRes.ok) {
+      const errBody = await tokenRes.text();
+      console.error('[kakao callback] 카카오 토큰 교환 실패', tokenRes.status, errBody);
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
@@ -47,11 +50,13 @@ export async function GET(request: NextRequest) {
     });
 
     if (!loginRes.ok) {
+      const errBody = await loginRes.text();
+      console.error('[kakao callback] 서버 로그인 API 실패', loginRes.status, errBody);
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
     const { data } = (await loginRes.json()) as LoginResponse;
-    const redirectPath = state || (data.onboardingCompleted ? '/' : '/onboarding');
+    const redirectPath = data.onboardingCompleted ? state || '/' : '/onboarding';
 
     const response = NextResponse.redirect(new URL(redirectPath, request.url));
     response.cookies.set('accessToken', data.accessToken, {
@@ -60,9 +65,20 @@ export async function GET(request: NextRequest) {
       sameSite: 'lax',
       httpOnly: false,
     });
+    response.cookies.set('nickname', data.nickname, {
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: false,
+    });
+    response.cookies.set('onboardingCompleted', String(data.onboardingCompleted), {
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: false,
+    });
 
     return response;
-  } catch {
+  } catch (e) {
+    console.error('[kakao callback] 예외 발생', e);
     return NextResponse.redirect(new URL('/login', request.url));
   }
 }
