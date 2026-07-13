@@ -53,7 +53,7 @@ export const TableCellEdit = ({ mode, value, onChange, className, suffix }: Tabl
           onBlur={handleBlur}
           aria-invalid={showError}
           style={{ width: `${Math.max(value.length, 1)}ch` }}
-          className="min-w-0 shrink-0 bg-transparent outline-none"
+          className="max-w-full min-w-0 shrink-0 border-0 bg-transparent p-0 outline-none"
         />
         <span className="shrink-0 text-gray-400">{suffix}</span>
       </span>

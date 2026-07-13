@@ -43,11 +43,15 @@ const columns = [
   { key: 'area', label: '영역', type: 'select', options: areaOptions },
 ] as const;
 
-const toCreditValue = (value: string) =>
-  value
-    .replace(/[^0-9.]/g, '')
-    .replace(/(\..*)\./g, '$1')
-    .replace(/(\.\d).+/, '$1');
+const toCreditValue = (value: string) => {
+  const [integerPart = '', ...rest] = value.replace(/[^0-9.]/g, '').split('.');
+  const wholeNumber = integerPart.slice(0, 2);
+
+  if (rest.length === 0) return wholeNumber;
+
+  const half = rest.join('').replace(/[^5]/g, '').slice(0, 1);
+  return `${wholeNumber}.${half}`;
+};
 
 const ROW_HEIGHT = 44;
 const DEFAULT_VISIBLE_ROWS = 3;
