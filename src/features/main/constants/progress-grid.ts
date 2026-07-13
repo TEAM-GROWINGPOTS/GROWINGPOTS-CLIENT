@@ -1,4 +1,4 @@
-import { GraduationProgressItem } from '../types';
+import { GraduationProgressItem } from '@features/main/types/progress-grid';
 
 export type ProgressLevel = 1 | 2 | 3;
 

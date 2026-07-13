@@ -15,9 +15,9 @@ const getRequirementCourseKey = ({ studentCourseId, departmentName, name }: Requ
   return studentCourseId ?? `${departmentName}-${name}`;
 };
 
-const getRequirementCourseTags = ({ credit, semester }: RequirementCourse, requirementName: string) => {
+const getRequirementCourseTags = ({ credit, divisionName, semester }: RequirementCourse, requirementName: string) => {
   const tags = {
-    area: requirementName,
+    area: divisionName || requirementName,
     credit: `${credit}학점`,
     semester,
   };
