@@ -1,6 +1,6 @@
 'use client';
 
-import { MOCK_PLANNER_RESPONSE } from '@features/semester-planner/mocks/planner';
+import { usePlanner } from '@features/semester-planner/hooks/use-planner';
 import type { PlannerFolder, PlannerTerm, SemesterCourse } from '@features/semester-planner/types/planner';
 import {
   mapCompletedTerms,
@@ -8,10 +8,7 @@ import {
   sortPlannerTerms,
   sortSemesterCourses,
 } from '@features/semester-planner/utils/map-planner';
-import { useMemo, useRef, useState } from 'react';
-
-const COMPLETED_TERMS = mapCompletedTerms(MOCK_PLANNER_RESPONSE.completedTerms);
-const INITIAL_PLANNED_TERMS = mapPlannedTerms(MOCK_PLANNER_RESPONSE.plannedTerms);
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 export const getSelectedCourses = (term: PlannerTerm): SemesterCourse[] =>
   sortSemesterCourses(term.folders.find(({ id }) => id === term.selectedFolderId)?.courses ?? []);
@@ -47,12 +44,23 @@ interface AddTermInput {
 }
 
 export const usePlannerTerms = () => {
-  const [plannedTerms, setPlannedTerms] = useState<PlannerTerm[]>(INITIAL_PLANNED_TERMS);
+  const { data: planner, isLoading } = usePlanner();
+  const [plannedTerms, setPlannedTerms] = useState<PlannerTerm[]>([]);
   const snapshotRef = useRef<PlannerTerm[] | null>(null);
   const createdIdSeqRef = useRef(0);
+  const isSeededRef = useRef(false);
 
-  const completedTerms = COMPLETED_TERMS;
-  const gridTerms = useMemo(() => sortPlannerTerms([...COMPLETED_TERMS, ...plannedTerms]), [plannedTerms]);
+  useEffect(() => {
+    if (!planner || isSeededRef.current) return;
+    isSeededRef.current = true;
+    setPlannedTerms(mapPlannedTerms(planner.plannedTerms));
+  }, [planner]);
+
+  const completedTerms = useMemo(() => (planner ? mapCompletedTerms(planner.completedTerms) : []), [planner]);
+  const gridTerms = useMemo(
+    () => sortPlannerTerms([...completedTerms, ...plannedTerms]),
+    [completedTerms, plannedTerms],
+  );
 
   const snapshot = () => {
     snapshotRef.current = plannedTerms;
@@ -97,7 +105,7 @@ export const usePlannerTerms = () => {
   };
 
   const addTerm = ({ yearLevel, semester, semesterLabel }: AddTermInput): boolean => {
-    const isDuplicate = [...COMPLETED_TERMS, ...plannedTerms].some(
+    const isDuplicate = [...completedTerms, ...plannedTerms].some(
       (term) => term.yearLevel === yearLevel && term.semesterLabel === semesterLabel,
     );
     if (isDuplicate) return false;
@@ -173,6 +181,7 @@ export const usePlannerTerms = () => {
   };
 
   return {
+    isLoading,
     completedTerms,
     plannedTerms,
     gridTerms,

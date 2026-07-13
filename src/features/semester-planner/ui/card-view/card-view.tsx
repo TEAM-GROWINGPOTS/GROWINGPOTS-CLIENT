@@ -44,6 +44,7 @@ interface CardViewProps {
 
 export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const {
+    isLoading: isPlannerLoading,
     plannedTerms,
     gridTerms,
     snapshot,
@@ -150,6 +151,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     }
     setIsAddSemesterOpen(false);
   };
+
+  if (isPlannerLoading) return null;
 
   return (
     <DndContext id="card-view-dnd" {...contextProps}>
