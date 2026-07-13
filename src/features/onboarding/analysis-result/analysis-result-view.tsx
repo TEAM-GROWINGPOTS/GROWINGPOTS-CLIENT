@@ -4,9 +4,11 @@ import { Button } from '@shared/components/button/button';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
+import { useStudentCourses } from '../hooks/use-student-courses';
 import { useStudentProfile } from '../hooks/use-student-profile';
-import { MOCK_COURSES, MOCK_GRADUATION_RESPONSE } from '../mocks/analysis-result';
+import { MOCK_GRADUATION_RESPONSE } from '../mocks/analysis-result';
 import { CourseInfoTable } from './course-info-table/course-info-table';
+import { mapStudentCoursesToCourseInfo } from './course-info-table/map-student-courses';
 import { GraduationResult } from './graduation-result/graduation-result';
 import { mapGraduationResponseToCards } from './graduation-result/map-graduation-response';
 import { StudentInfo } from './student-info/student-info';
@@ -18,6 +20,7 @@ export const AnalysisResultView = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isCourseInfoValid, setIsCourseInfoValid] = useState(true);
   const { data: studentProfile } = useStudentProfile();
+  const { data: studentCourses } = useStudentCourses();
 
   const handleEditToggleClick = () => {
     setIsEditing((prev) => !prev);
@@ -73,11 +76,13 @@ export const AnalysisResultView = () => {
       </div>
 
       <div className="mt-20 w-full">
-        <CourseInfoTable
-          courses={MOCK_COURSES}
-          isEditing={isEditing}
-          onValidityChange={handleCourseInfoValidityChange}
-        />
+        {studentCourses && (
+          <CourseInfoTable
+            courses={mapStudentCoursesToCourseInfo(studentCourses.courses)}
+            isEditing={isEditing}
+            onValidityChange={handleCourseInfoValidityChange}
+          />
+        )}
       </div>
 
       <div className="mt-20 flex justify-center">
