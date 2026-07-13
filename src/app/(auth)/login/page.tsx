@@ -16,7 +16,11 @@ export default function Page() {
             <Icon name="ic_lime_potato" size={36} aria-label="그로잉팟 로고" />
             <Icon name="img_logo" width={202} height={36} aria-label="growing pots" className="text-gray-700" />
           </div>
-          <Suspense>
+          <Suspense
+            fallback={
+              <div className="min-w-[280px] self-stretch rounded-lg border border-[#FEE500] bg-[#FEE500] px-16 py-12" />
+            }
+          >
             <KakaoLoginButton />
           </Suspense>
         </div>
