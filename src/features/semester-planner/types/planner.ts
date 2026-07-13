@@ -59,22 +59,6 @@ export interface PlannerResponse {
   plannedTerms: PlannedTermResponse[];
 }
 
-export interface CourseSearchItemResponse {
-  courseId: number;
-  courseCode: string;
-  name: string;
-  credit: number;
-  departmentName: string;
-  defaultDivisionName: string;
-  recommendedYearLow: number | null;
-  recommendedYearHigh: number | null;
-  openedSemester: OpenedSemester;
-  isEnglish: boolean;
-  isSw: boolean;
-  alreadyCompleted: boolean;
-  inPlanner: boolean;
-}
-
 export type SemesterCardStatus = 'completed' | 'current' | 'planned';
 
 export interface SemesterCourse {

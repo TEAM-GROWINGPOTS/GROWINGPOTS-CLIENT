@@ -1,7 +1,7 @@
 import type { Course } from '@features/semester-planner/card-view/add-course-sidebar/add-course-sidebar';
+import type { CourseSearchItemResponse } from '@features/semester-planner/types/course-search';
 import type {
   CompletedTermResponse,
-  CourseSearchItemResponse,
   OpenedSemester,
   PlannedTermResponse,
   PlannerFolder,
