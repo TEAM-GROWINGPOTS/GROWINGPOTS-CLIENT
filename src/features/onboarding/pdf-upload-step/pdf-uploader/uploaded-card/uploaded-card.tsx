@@ -10,9 +10,9 @@ const KB = 1_000;
 const MB = 1_000_000;
 
 const formatFileSize = (bytes: number) => {
-  if (bytes < KB) return `${bytes} bytes`;
-  if (bytes < MB) return `${Math.round(bytes / KB)} kb`;
-  return `${Number((bytes / MB).toFixed(1))} mb`;
+  if (bytes < KB) return `${bytes} Bytes`;
+  if (bytes < MB) return `${Math.round(bytes / KB)} KB`;
+  return `${Number((bytes / MB).toFixed(1))} MB`;
 };
 
 export const UploadedCard = ({ fileName, fileSizeBytes, onRemove }: UploadedCardProps) => (
