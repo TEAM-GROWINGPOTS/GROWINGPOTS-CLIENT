@@ -1,10 +1,9 @@
 'use client';
 
+import { useViewMode } from '@features/semester-planner/hooks/use-view-mode';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { useLayoutEffect, useRef, useState } from 'react';
-
-import { useViewMode } from '../hooks/use-view-mode';
 
 export type ViewMode = 'card' | 'roadmap';
 
@@ -25,7 +24,8 @@ const OPTIONS: ViewModeOption[] = [
 ];
 
 export const ViewModeToggle = () => {
-  const { viewMode: value, setViewMode: onChange } = useViewMode();
+  const { viewMode: value, setViewMode } = useViewMode();
+
   const buttonRefs = useRef<Record<ViewMode, HTMLButtonElement | null>>({ card: null, roadmap: null });
   const [indicatorStyle, setIndicatorStyle] = useState<IndicatorStyle | null>(null);
 
@@ -59,7 +59,7 @@ export const ViewModeToggle = () => {
             role="tab"
             aria-selected={isSelected}
             aria-label={label}
-            onClick={() => onChange(optionValue)}
+            onClick={() => setViewMode(optionValue)}
             className={cn(
               'text-body-m-14 relative flex shrink-0 cursor-pointer items-center gap-8 rounded-full px-12 py-8 whitespace-nowrap transition-colors duration-200 ease-out',
               isSelected ? 'text-gray-100' : 'text-gray-500',
