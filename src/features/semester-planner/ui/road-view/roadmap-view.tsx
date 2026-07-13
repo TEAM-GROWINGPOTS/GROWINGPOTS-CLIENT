@@ -5,6 +5,7 @@ import '@xyflow/react/dist/style.css';
 import graduation from '@features/semester-planner/assets/graduation.json';
 import { ReachabilityContext } from '@features/semester-planner/contexts/reachability-context';
 import { usePlannerGraph } from '@features/semester-planner/hooks/use-planner-graph';
+import { useViewMode } from '@features/semester-planner/hooks/use-view-mode';
 import {
   GRADUATION_REQUIREMENTS,
   PlannerNodeData,
@@ -202,11 +203,8 @@ const nodeTypes = {
 
 const edgeTypes = { semesterEdge: SemesterEdge };
 
-interface RoadmapViewProps {
-  onViewChange: (view: 'card' | 'roadmap') => void;
-}
-
-export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
+export const RoadmapView = () => {
+  const { setViewMode } = useViewMode();
   const { nodes: initialNodes, edges: initialEdges, completedIds } = usePlannerGraph();
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -493,17 +491,17 @@ export const RoadmapView = ({ onViewChange }: RoadmapViewProps) => {
         setIsAddSemesterModalOpen(true);
         return;
       }
-      if (node.type === 'addVersionNode') onViewChange('card');
+      if (node.type === 'addVersionNode') setViewMode('card');
     },
-    [onViewChange],
+    [setViewMode],
   );
 
   const handleAddSemesterSubmit = useCallback(
     (_year: string, _semester: string) => {
       // TODO: 실제 학기 추가(store/API) 연동은 아직 없다 — 지금은 모달 제출 후 카드뷰로 전환만 한다.
-      onViewChange('card');
+      setViewMode('card');
     },
-    [onViewChange],
+    [setViewMode],
   );
 
   return (

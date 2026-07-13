@@ -1,5 +1,5 @@
+import type { PlannerResponse } from '@features/semester-planner/types/planner';
 import type { PlannerNodeData, SemesterEdgeData } from '@features/semester-planner/types/planner-graph';
-import type { PlannerApiData } from '@features/semester-planner/types/planner-node';
 import type { Edge, Node } from '@xyflow/react';
 
 const COL_GAP = 370;
@@ -14,7 +14,7 @@ export interface PlannerGraph {
   completedIds: Set<string>;
 }
 
-export function buildPlannerGraph(data: PlannerApiData): PlannerGraph {
+export function buildPlannerGraph(data: PlannerResponse): PlannerGraph {
   const nodes: Node<PlannerNodeData>[] = [];
   const edges: Edge<SemesterEdgeData>[] = [];
   const completedIds = new Set<string>();
@@ -71,15 +71,18 @@ export function buildPlannerGraph(data: PlannerApiData): PlannerGraph {
   });
   // 이후 cumulativeCredits = 완료 학기 전체 학점 합
 
-  const sortedPlanned = [...data.plannedTerms].sort((a, b) => a.termOrder - b.termOrder);
+  const sortedPlanned = [...data.plannedTerms].sort((a, b) => a.yearLevel - b.yearLevel || a.semester - b.semester);
   const colOffset = sortedCompleted.length;
 
   sortedPlanned.forEach((term, termIdx) => {
     const colIndex = colOffset + termIdx;
     const colX = colIndex * COL_GAP;
     const termName = toTermLabel(term.yearLevel, term.semester);
+    const sortedVersions = [...term.versions].sort((a, b) => a.versionOrder - b.versionOrder);
 
-    term.versions.forEach((version, rowIdx) => {
+    sortedVersions.forEach((version, rowIdx) => {
+      const sortedCourses = [...version.courses].sort((a, b) => a.coursePositionOrder - b.coursePositionOrder);
+
       nodes.push({
         id: String(version.plannerTermVersionId),
         type: 'semesterNode',
@@ -94,7 +97,7 @@ export function buildPlannerGraph(data: PlannerApiData): PlannerGraph {
           termName,
           folderName: version.name,
           totalCredit: version.totalCredit,
-          courses: version.courses.map((c) => ({
+          courses: sortedCourses.map((c) => ({
             id: c.plannerVersionItemId,
             courseName: c.courseName,
             divisionCategory: c.divisionCategory,
@@ -125,7 +128,8 @@ export function buildPlannerGraph(data: PlannerApiData): PlannerGraph {
     const lastCompletedId = String(sortedCompleted[sortedCompleted.length - 1].plannerTermVersionId);
 
     const selectedVersionIds = sortedPlanned.map((term) => {
-      const selected = term.versions.find((v) => v.isSelected) ?? term.versions[0];
+      const sortedVersions = [...term.versions].sort((a, b) => a.versionOrder - b.versionOrder);
+      const selected = sortedVersions.find((v) => v.isSelected) ?? sortedVersions[0];
       return { id: String(selected.plannerTermVersionId), totalCredit: selected.totalCredit };
     });
 
