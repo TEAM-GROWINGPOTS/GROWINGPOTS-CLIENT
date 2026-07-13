@@ -175,7 +175,7 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
             <thead>
               <tr className="bg-gray-50">
                 {isEditing && (
-                  <th scope="col" className="px-8 py-4">
+                  <th scope="col" className="px-8 py-4 text-left">
                     <button type="button" onClick={handleSelectAllClick} aria-label="전체 선택">
                       <Icon name={isAllSelected ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'} size={20} />
                     </button>

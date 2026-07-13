@@ -1,3 +1,4 @@
+import { GraduationProgressGrid } from '@features/onboarding';
 import Link from 'next/link';
 
 export default function Page() {
@@ -9,6 +10,7 @@ export default function Page() {
       >
         학기플래너로 이동 이곳 페이지명=메인홈으로 할지 논의해보아요 이것은 그냥 임시일 뿐입니다.
       </Link>
+      <GraduationProgressGrid className="mt-20" />
     </main>
   );
 }
