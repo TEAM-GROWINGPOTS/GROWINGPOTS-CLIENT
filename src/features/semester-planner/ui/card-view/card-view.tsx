@@ -32,11 +32,9 @@ import { cn } from '@shared/utils/cn';
 import { type TransitionEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-const SEMESTER_CODE_MAP: Record<string, { sortValue: number; label: string }> = {
-  '1': { sortValue: 1, label: '1학기' },
-  '2': { sortValue: 1.5, label: '여름학기' },
-  '3': { sortValue: 2, label: '2학기' },
-  '4': { sortValue: 2.5, label: '겨울학기' },
+const SEMESTER_LABEL_MAP: Record<string, string> = {
+  '1': '1학기',
+  '2': '2학기',
 };
 
 interface CardViewProps {
@@ -146,11 +144,11 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   };
 
   const handleAddSemester = (year: string, semester: string) => {
-    const semesterInfo = SEMESTER_CODE_MAP[semester];
-    if (!semesterInfo) return;
+    const semesterLabel = SEMESTER_LABEL_MAP[semester];
+    if (!semesterLabel) return;
     const yearLevel = Number.parseInt(year, 10);
 
-    const added = addTerm({ yearLevel, semester: semesterInfo.sortValue, semesterLabel: semesterInfo.label });
+    const added = addTerm({ yearLevel, semester: Number(semester), semesterLabel });
     if (!added) {
       toast.negative('이미 추가된 학기예요.');
       return;
