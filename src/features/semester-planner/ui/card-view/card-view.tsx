@@ -3,6 +3,7 @@
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { useCourseSearch } from '@features/semester-planner/hooks/use-course-search';
 import { useDebouncedValue } from '@features/semester-planner/hooks/use-debounced-value';
+import { useGraduationStatus } from '@features/semester-planner/hooks/use-graduation-status';
 import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
 import type { CourseSearchItemResponse } from '@features/semester-planner/types/course-search';
 import { AddCourseSidebar } from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar';
@@ -67,6 +68,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     insertCourse,
     removeCourse,
   });
+  const { data: graduationData } = useGraduationStatus('PLANNED');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -167,7 +169,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
           />
         </header>
 
-        <GraduationStatusAccordion className="mt-20" />
+        <GraduationStatusAccordion className="mt-20" data={graduationData} />
 
         <div className="relative mt-24 min-h-0 flex-1">
           <section
