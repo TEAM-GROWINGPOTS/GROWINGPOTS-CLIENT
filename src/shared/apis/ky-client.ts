@@ -1,7 +1,11 @@
 import ky, { isHTTPError } from 'ky';
 
-const API_BASE_URL =
-  typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ?? '');
+const API_BASE_URL = (() => {
+  if (typeof window !== 'undefined') return window.location.origin;
+  const url = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+  if (!url) throw new Error('NEXT_PUBLIC_API_BASE_URL is not defined. Add it to .env.local');
+  return url;
+})();
 
 export const kyClient = ky.create({
   baseUrl: API_BASE_URL,
