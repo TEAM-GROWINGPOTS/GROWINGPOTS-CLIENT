@@ -590,12 +590,15 @@ export const RoadmapView = () => {
             )}
             onClick={dismissCelebration}
           >
+            {/* graduation.json은 800x800 캔버스 기준 메인 그래픽이 y=461.7(중심 400)에 위치해 박스 아래로
+                치우쳐 있다. 400px로 렌더링하면 (461.7-400)/800*400 ≈ 31px만큼 시각적 중심이 아래로 밀리므로,
+                같은 값만큼 음수 마진으로 끌어올려 실제 그래픽이 오버레이 정중앙에 오도록 보정한다. */}
             <Lottie
               animationData={graduation}
               loop={false}
               autoplay
               onComplete={dismissCelebration}
-              className="h-400 w-400"
+              className="-mt-32 h-400 w-400"
             />
             {/* 로띠 애니메이션 자체에 하단 여백이 많아 인접 배치만으로는 텍스트와 멀어 보여 음수 마진으로 당긴다. */}
             <p className="text-title-sb-24 animate-text-rise -mt-48 text-gray-700">졸업 요건을 충족했어요!</p>
