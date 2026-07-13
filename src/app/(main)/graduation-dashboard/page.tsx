@@ -2,7 +2,7 @@
 
 import { useRequirementSection } from '@features/main/hooks/use-requirement-section';
 import { requirementData, requirementDetails } from '@features/main/mocks/requirement';
-import { GraduationDashboardHeader, GraduationDashboardSection } from '@features/main/ui/graduation-dashboard';
+import { GraduationDashboardHeader, GraduationDashboardSection } from '@features/main/ui';
 
 const admissionYear = 2023;
 

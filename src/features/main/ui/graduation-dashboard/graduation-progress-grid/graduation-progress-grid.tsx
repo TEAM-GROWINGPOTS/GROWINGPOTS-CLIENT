@@ -1,11 +1,16 @@
 'use client';
 
+import { DEFAULT_ITEMS } from '@features/main/constants/progress-grid';
+import { GraduationProgressGridProps, LegendDotProps } from '@features/main/types/progress-grid';
+import {
+  getCardClass,
+  getCardLogoDetails,
+  getProgressLevel,
+  getTotalShapeClasses,
+  isCompleted,
+} from '@features/main/utils/progress-grid';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
-
-import { DEFAULT_ITEMS } from './constants';
-import { GraduationProgressGridProps, LegendDotProps } from './types';
-import { getCardClass, getCardLogoDetails, getProgressLevel, getTotalShapeClasses, isCompleted } from './utils';
 
 export const GraduationProgressGrid = ({
   items = DEFAULT_ITEMS,
