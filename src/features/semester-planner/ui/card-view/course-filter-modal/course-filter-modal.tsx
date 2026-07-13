@@ -1,5 +1,6 @@
 'use client';
 
+import { useDepartmentOptions } from '@features/semester-planner/hooks/use-department-options';
 import type { DivisionCategory, OtherRequired } from '@features/semester-planner/types/course-search';
 import type { OpenedSemester } from '@features/semester-planner/types/planner';
 import { Button } from '@shared/components/button/button';
@@ -54,15 +55,6 @@ export const getFilterTabByLabel = (label: string): CourseFilterTabKeyTypes | un
 export const FILTER_TAB_LABELS = FILTER_TABS.map(({ label }) => label);
 
 const CAMPUS_OPTIONS: FilterOption[] = [{ value: '국제캠퍼스', label: '국제캠퍼스' }];
-
-interface CollegeGroup {
-  college: string;
-  departments: { departmentId: number; name: string }[];
-}
-
-const COLLEGE_GROUPS: CollegeGroup[] = [];
-
-const COLLEGE_OPTIONS: FilterOption[] = COLLEGE_GROUPS.map(({ college }) => ({ value: college, label: college }));
 
 const AREA_OPTIONS: FilterOption[] = [
   { value: 'MAJOR_REQUIRED', label: '전공필수' },
@@ -121,6 +113,7 @@ interface CourseFilterFormProps {
 const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFormProps) => {
   const [activeTab, setActiveTab] = useState<CourseFilterTabKeyTypes>(initialTab);
   const [values, setValues] = useState<CourseFilterValues>(initialValues);
+  const { data: departments = [] } = useDepartmentOptions();
 
   const handleTabChange = (next: string) => setActiveTab(next as CourseFilterTabKeyTypes);
 
@@ -129,11 +122,14 @@ const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFo
     (next: CourseFilterValues[K]) =>
       setValues((prev) => ({ ...prev, [key]: next }));
 
-  const departmentOptions: FilterOption[] =
-    COLLEGE_GROUPS.find(({ college }) => college === values.collegeName)?.departments.map(({ departmentId, name }) => ({
-      value: String(departmentId),
-      label: name,
-    })) ?? [];
+  const collegeOptions: FilterOption[] = [...new Set(departments.map(({ college }) => college))].map((college) => ({
+    value: college,
+    label: college,
+  }));
+
+  const departmentOptions: FilterOption[] = departments
+    .filter(({ college }) => college === values.collegeName)
+    .map(({ departmentId, name }) => ({ value: String(departmentId), label: name }));
 
   const handleCollegeChange = (next: string) => {
     setValues((prev) => ({ ...prev, collegeName: next, departmentId: '' }));
@@ -156,7 +152,7 @@ const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFo
         {activeTab === 'major' && (
           <>
             <Select
-              options={COLLEGE_OPTIONS}
+              options={collegeOptions}
               value={values.collegeName}
               onChange={handleCollegeChange}
               placeholder="단과대학"
