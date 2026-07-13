@@ -40,12 +40,9 @@ export const StudentInfoStep = () => {
     }),
   );
 
-  const departmentOptions = departments
-    .filter(({ college: departmentCollege }) => departmentCollege === college)
-    .map(({ departmentId, name }) => ({
-      value: `${departmentId}`,
-      label: name,
-    }));
+  const departmentOptions = departments.flatMap(({ college: departmentCollege, departmentId, name }) =>
+    departmentCollege === college ? [{ value: `${departmentId}`, label: name }] : [],
+  );
 
   const isComplete = school !== '' && college !== '' && department !== '' && admissionYear !== '';
 
