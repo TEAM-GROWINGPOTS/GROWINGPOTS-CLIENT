@@ -1,13 +1,45 @@
-import { cn } from '@shared/utils/cn';
-
 import {
   CARD_BASE_CLASS,
   CARD_LOGO_CONFIG,
   LEVEL_STYLES,
   LOGO_COLOR_BY_LEVEL,
   ProgressLevel,
-} from '../constants/progress-grid';
-import { GraduationProgressItem } from '../types/progress-grid';
+} from '@features/main/constants/progress-grid';
+import { REQUIREMENT_UNIT_LABELS } from '@features/main/constants/requirement';
+import type { GraduationProgressItem } from '@features/main/types/progress-grid';
+import type { RequirementAccordionItem } from '@features/main/types/requirement';
+import type { GraduationResponse } from '@shared/apis/types/graduation';
+import { cn } from '@shared/utils/cn';
+
+const PROGRESS_ITEM_META: Record<string, Pick<GraduationProgressItem, 'id' | 'title'>> = {
+  MAJOR_BASIC: { id: 'major-basic', title: '전공기초' },
+  MAJOR_REQUIRED: { id: 'major-required', title: '전공필수' },
+  MAJOR_ELECTIVE: { id: 'major-elective', title: '전공선택' },
+  REQUIRED_GE: { id: 'required-courses', title: '필수교과' },
+  DISTRIBUTED_GE: { id: 'distribution-courses', title: '배분이수교과' },
+  FREE_GE: { id: 'free-courses', title: '자유이수교과' },
+  SW_CERT_COURSE: { id: 'sw-certification', title: 'SW인증과목' },
+  ENGLISH_COURSE: { id: 'english-class', title: '영어 강의' },
+};
+
+const PROGRESS_ITEM_ORDER = [
+  'MAJOR_BASIC',
+  'MAJOR_REQUIRED',
+  'MAJOR_ELECTIVE',
+  'REQUIRED_GE',
+  'DISTRIBUTED_GE',
+  'FREE_GE',
+  'SW_CERT_COURSE',
+  'ENGLISH_COURSE',
+] as const;
+
+const getTotalCurrentCredits = (shortcuts: RequirementAccordionItem[]) => {
+  return shortcuts.reduce((total, { current, unit }) => {
+    if (unit !== 'CREDITS') return total;
+
+    return total + current;
+  }, 0);
+};
 
 const clampRatio = (value: number) => Math.max(0, Math.min(value, 1));
 
@@ -52,3 +84,38 @@ export const getCardLogoDetails = (item: GraduationProgressItem, level: Progress
 };
 
 export const getTotalShapeClasses = (level: ProgressLevel) => LEVEL_STYLES[level].totalShape;
+
+export const getProgressGridItems = (
+  shortcuts: RequirementAccordionItem[],
+  totalCredits: GraduationResponse['summary']['totalCredits'],
+): GraduationProgressItem[] => {
+  const shortcutMap = new Map(shortcuts.map((item) => [item.code, item]));
+  const totalCurrentCredits = getTotalCurrentCredits(shortcuts);
+  const requirementItems = PROGRESS_ITEM_ORDER.map((code) => {
+    const item = shortcutMap.get(code);
+    const meta = PROGRESS_ITEM_META[code];
+    const unitLabel = item ? (REQUIREMENT_UNIT_LABELS[item.unit] as GraduationProgressItem['unit']) : '학점';
+
+    return {
+      ...meta,
+      current: item?.current ?? 0,
+      required: item?.required ?? 0,
+      unit: unitLabel,
+      scrollKey: item?.scrollKey,
+      isConditionCheckRequired: item
+        ? item.required !== null && item.current >= item.required && !item.satisfied
+        : false,
+    };
+  });
+
+  return [
+    ...requirementItems,
+    {
+      id: 'total-credit',
+      title: '총학점',
+      current: totalCurrentCredits,
+      required: totalCredits.required,
+      isTotal: true,
+    },
+  ];
+};

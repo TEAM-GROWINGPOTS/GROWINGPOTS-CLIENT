@@ -13,8 +13,8 @@ const ALL_ITEM_ORDER = [
   'REQUIRED_GE',
   'DISTRIBUTED_GE',
   'FREE_GE',
-  'ENGLISH_COURSE',
   'SW_CERT_COURSE',
+  'ENGLISH_COURSE',
   'GENERAL_ELECTIVE',
 ];
 
@@ -125,8 +125,25 @@ const getRequirementShortcuts = (items: RequirementAccordionItem[]) => {
   const shortcuts = new Map<string, RequirementAccordionItem>();
 
   items.forEach((item) => {
-    if (shortcuts.has(item.code)) return;
-    shortcuts.set(item.code, item);
+    if (!item.chartTarget) return;
+
+    const shortcut = shortcuts.get(item.code);
+
+    if (!shortcut) {
+      shortcuts.set(item.code, item);
+      return;
+    }
+
+    const current = shortcut.current + item.current;
+    const required =
+      shortcut.required === null && item.required === null ? null : (shortcut.required ?? 0) + (item.required ?? 0);
+
+    shortcuts.set(item.code, {
+      ...shortcut,
+      current,
+      required,
+      satisfied: required === null ? shortcut.satisfied && item.satisfied : current >= required,
+    });
   });
 
   return Array.from(shortcuts.values());

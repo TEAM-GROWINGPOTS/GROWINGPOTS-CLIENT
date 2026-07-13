@@ -55,7 +55,7 @@ export const requirementData: GraduationResponse = {
           {
             code: 'SW_CERT_COURSE',
             name: 'SW 인증 강의',
-            current: 0,
+            current: 6,
             required: 6,
             unit: 'CREDITS',
             satisfied: false,

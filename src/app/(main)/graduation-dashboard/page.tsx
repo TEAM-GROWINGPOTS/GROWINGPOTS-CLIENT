@@ -22,6 +22,7 @@ export default function GraduationDashboardPage() {
           selectedTab={selectedTab}
           onTabChange={setSelectedTab}
           shortcuts={shortcuts}
+          totalCredits={requirementData.summary.totalCredits}
           items={items}
           scrollTargetKey={scrollTargetKey}
           admissionYear={admissionYear}
