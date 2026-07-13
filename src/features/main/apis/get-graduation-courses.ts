@@ -2,7 +2,7 @@ import type { GraduationMajorType } from '@features/main/apis/get-graduation';
 import type { RequirementCode, RequirementDetail } from '@features/main/types/requirement';
 import { ENDPOINT } from '@shared/apis/endpoint';
 import { request } from '@shared/apis/request';
-import type { SuccessResponse } from '@shared/apis/type';
+import type { ApiResponse } from '@shared/apis/type';
 
 export interface GetGraduationCoursesParams {
   majorType?: GraduationMajorType;
@@ -23,7 +23,7 @@ const getGraduationCoursesSearchParams = ({ majorType, studentMajorId }: GetGrad
 };
 
 export const getGraduationCourses = async ({ divisionCode, ...params }: GetGraduationCoursesRequest) => {
-  const response = await request.get<SuccessResponse<RequirementDetail>>(ENDPOINT.GRADUATION.COURSES(divisionCode), {
+  const response = await request.get<ApiResponse<RequirementDetail>>(ENDPOINT.GRADUATION.COURSES(divisionCode), {
     searchParams: getGraduationCoursesSearchParams(params),
   });
 
