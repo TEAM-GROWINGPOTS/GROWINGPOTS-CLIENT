@@ -5,19 +5,16 @@ import Icon from '@shared/components/icon/icon';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { UploadedCard, Uploader } from '../pdf-uploader';
+import { UploadedCard } from './pdf-uploader/uploaded-card/uploaded-card';
+import { Uploader } from './pdf-uploader/uploader/uploader';
 
-interface PdfUploadStepProps {
-  onSubmit?: (file: File) => void;
-}
-
-export const PdfUploadStep = ({ onSubmit }: PdfUploadStepProps) => {
+export const PdfUploadStep = () => {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
 
   const handleAnalyze = () => {
     if (!file) return;
-    onSubmit?.(file);
+    router.push('/analysis-result');
   };
 
   const handleBack = () => {
