@@ -1,7 +1,7 @@
 import { QUERY_KEY } from '@shared/apis/query-key';
 import { useQuery } from '@tanstack/react-query';
 
-import { getOnboardingOptions } from '../api/get-onboarding-options';
+import { getOnboardingOptions } from '../apis/get-onboarding-options';
 
 export const useOnboardingOptions = () =>
   useQuery({
