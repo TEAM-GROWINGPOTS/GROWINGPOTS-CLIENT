@@ -1,6 +1,5 @@
 'use client';
 
-import { useDebouncedValue } from '@features/semester-planner/hooks/use-debounced-value';
 import { usePlanner } from '@features/semester-planner/hooks/use-planner';
 import { useSavePlanner } from '@features/semester-planner/hooks/use-save-planner';
 import type { PlannerFolder, PlannerTerm, SemesterCourse } from '@features/semester-planner/types/planner';
@@ -12,8 +11,6 @@ import {
   toPlannerSaveRequest,
 } from '@features/semester-planner/utils/map-planner';
 import { useEffect, useMemo, useRef, useState } from 'react';
-
-const SAVE_DEBOUNCE_MS = 300;
 
 export const getSelectedCourses = (term: PlannerTerm): SemesterCourse[] =>
   sortSemesterCourses(term.folders.find(({ id }) => id === term.selectedFolderId)?.courses ?? []);
@@ -42,6 +39,22 @@ const updateSelectedCourses = (
   ),
 });
 
+const applyCourseMove = (terms: PlannerTerm[], activeId: string, targetTermId: string): PlannerTerm[] | null => {
+  const origin = terms.find((term) => getSelectedCourses(term).some(({ id }) => id === activeId));
+  if (!origin || origin.id === targetTermId) return null;
+  const course = getSelectedCourses(origin).find(({ id }) => id === activeId);
+  if (!course) return null;
+  return terms.map((term) => {
+    if (term.id === origin.id) {
+      return updateSelectedCourses(term, (courses) => courses.filter(({ id }) => id !== activeId));
+    }
+    if (term.id === targetTermId) {
+      return updateSelectedCourses(term, (courses) => [...courses, course]);
+    }
+    return term;
+  });
+};
+
 interface AddTermInput {
   yearLevel: number;
   semester: number;
@@ -51,30 +64,25 @@ interface AddTermInput {
 export const usePlannerTerms = () => {
   const { data: planner, isLoading } = usePlanner();
   const { mutate: requestSavePlanner } = useSavePlanner();
-  const [plannedTerms, setPlannedTermsState] = useState<PlannerTerm[]>([]);
+  const [plannedTerms, setPlannedTerms] = useState<PlannerTerm[]>([]);
   const snapshotRef = useRef<PlannerTerm[] | null>(null);
   const createdIdSeqRef = useRef(0);
   const isSeededRef = useRef(false);
-  const isDirtyRef = useRef(false);
 
   useEffect(() => {
     if (!planner || isSeededRef.current) return;
     isSeededRef.current = true;
-    setPlannedTermsState(mapPlannedTerms(planner.plannedTerms));
+    setPlannedTerms(mapPlannedTerms(planner.plannedTerms));
   }, [planner]);
 
-  const setPlannedTerms = (next: PlannerTerm[] | ((prev: PlannerTerm[]) => PlannerTerm[])) => {
-    isDirtyRef.current = true;
-    setPlannedTermsState(next);
+  const previewPlannedTerms = (next: PlannerTerm[]) => {
+    setPlannedTerms(next);
   };
 
-  const debouncedPlannedTerms = useDebouncedValue(plannedTerms, SAVE_DEBOUNCE_MS);
-
-  useEffect(() => {
-    if (!isDirtyRef.current) return;
-    isDirtyRef.current = false;
-    requestSavePlanner(toPlannerSaveRequest(debouncedPlannedTerms));
-  }, [debouncedPlannedTerms, requestSavePlanner]);
+  const commitPlannedTerms = (next: PlannerTerm[]) => {
+    setPlannedTerms(next);
+    requestSavePlanner(toPlannerSaveRequest(next));
+  };
 
   const completedTerms = useMemo(() => (planner ? mapCompletedTerms(planner.completedTerms) : []), [planner]);
   const gridTerms = useMemo(
@@ -87,41 +95,33 @@ export const usePlannerTerms = () => {
   };
 
   const restoreSnapshot = () => {
-    if (snapshotRef.current) setPlannedTerms(snapshotRef.current);
+    if (snapshotRef.current) previewPlannedTerms(snapshotRef.current);
   };
 
-  const moveCourseToTerm = (activeId: string, targetTermId: string) => {
-    setPlannedTerms((prev) => {
-      const origin = prev.find((term) => getSelectedCourses(term).some(({ id }) => id === activeId));
-      if (!origin || origin.id === targetTermId) return prev;
-      const course = getSelectedCourses(origin).find(({ id }) => id === activeId);
-      if (!course) return prev;
-      return prev.map((term) => {
-        if (term.id === origin.id) {
-          return updateSelectedCourses(term, (courses) => courses.filter(({ id }) => id !== activeId));
-        }
-        if (term.id === targetTermId) {
-          return updateSelectedCourses(term, (courses) => [...courses, course]);
-        }
-        return term;
-      });
-    });
+  const previewCourseMove = (activeId: string, targetTermId: string) => {
+    const next = applyCourseMove(plannedTerms, activeId, targetTermId);
+    if (next) previewPlannedTerms(next);
+  };
+
+  const dropCourseToTerm = (activeId: string, targetTermId: string) => {
+    const next = applyCourseMove(plannedTerms, activeId, targetTermId);
+    commitPlannedTerms(next ?? plannedTerms);
   };
 
   const insertCourse = (termId: string, course: SemesterCourse) => {
-    setPlannedTerms((prev) =>
-      prev.map((term) => (term.id !== termId ? term : updateSelectedCourses(term, (courses) => [...courses, course]))),
+    const next = plannedTerms.map((term) =>
+      term.id !== termId ? term : updateSelectedCourses(term, (courses) => [...courses, course]),
     );
+    commitPlannedTerms(next);
   };
 
   const removeCourse = (courseId: string) => {
-    setPlannedTerms((prev) =>
-      prev.map((term) =>
-        getSelectedCourses(term).some(({ id }) => id === courseId)
-          ? updateSelectedCourses(term, (courses) => courses.filter(({ id }) => id !== courseId))
-          : term,
-      ),
+    const next = plannedTerms.map((term) =>
+      getSelectedCourses(term).some(({ id }) => id === courseId)
+        ? updateSelectedCourses(term, (courses) => courses.filter(({ id }) => id !== courseId))
+        : term,
     );
+    commitPlannedTerms(next);
   };
 
   const addTerm = ({ yearLevel, semester, semesterLabel }: AddTermInput): boolean => {
@@ -132,25 +132,24 @@ export const usePlannerTerms = () => {
 
     createdIdSeqRef.current += 1;
     const folderId = `folder-new-${createdIdSeqRef.current}`;
-    setPlannedTerms((prev) =>
-      sortPlannerTerms([
-        ...prev,
-        {
-          id: `term-new-${createdIdSeqRef.current}`,
-          yearLevel,
-          semester,
-          semesterLabel,
-          status: 'planned' as const,
-          selectedFolderId: folderId,
-          folders: [{ id: folderId, name: `${yearLevel}학년 ${semesterLabel}(1)`, courses: [] }],
-        },
-      ]),
-    );
+    const next = sortPlannerTerms([
+      ...plannedTerms,
+      {
+        id: `term-new-${createdIdSeqRef.current}`,
+        yearLevel,
+        semester,
+        semesterLabel,
+        status: 'planned' as const,
+        selectedFolderId: folderId,
+        folders: [{ id: folderId, name: `${yearLevel}학년 ${semesterLabel}(1)`, courses: [] }],
+      },
+    ]);
+    commitPlannedTerms(next);
     return true;
   };
 
   const removeTerm = (termId: string) => {
-    setPlannedTerms((prev) => prev.filter(({ id }) => id !== termId));
+    commitPlannedTerms(plannedTerms.filter(({ id }) => id !== termId));
   };
 
   const addFolder = (termId: string): PlannerTerm | null => {
@@ -162,42 +161,38 @@ export const usePlannerTerms = () => {
       name: `${term.yearLevel}학년 ${term.semesterLabel}(${getNextFolderSeq(term)})`,
       courses: [],
     };
-    setPlannedTerms((prev) =>
-      prev.map((prevTerm) =>
-        prevTerm.id === termId ? { ...prevTerm, folders: [...prevTerm.folders, newFolder] } : prevTerm,
-      ),
+    const next = plannedTerms.map((prevTerm) =>
+      prevTerm.id === termId ? { ...prevTerm, folders: [...prevTerm.folders, newFolder] } : prevTerm,
     );
+    commitPlannedTerms(next);
     return term;
   };
 
   const selectFolder = (termId: string, folderId: string) => {
-    setPlannedTerms((prev) =>
-      prev.map((term) => (term.id === termId ? { ...term, selectedFolderId: folderId } : term)),
-    );
+    const next = plannedTerms.map((term) => (term.id === termId ? { ...term, selectedFolderId: folderId } : term));
+    commitPlannedTerms(next);
   };
 
   const renameFolder = (termId: string, folderId: string, name: string) => {
-    setPlannedTerms((prev) =>
-      prev.map((term) => {
-        if (term.id !== termId) return term;
-        return {
-          ...term,
-          folders: term.folders.map((folder) => (folder.id === folderId ? { ...folder, name } : folder)),
-        };
-      }),
-    );
+    const next = plannedTerms.map((term) => {
+      if (term.id !== termId) return term;
+      return {
+        ...term,
+        folders: term.folders.map((folder) => (folder.id === folderId ? { ...folder, name } : folder)),
+      };
+    });
+    commitPlannedTerms(next);
   };
 
   const deleteFolder = (termId: string, folderId: string) => {
-    setPlannedTerms((prev) =>
-      prev.flatMap((term) => {
-        if (term.id !== termId) return term;
-        const remainingFolders = term.folders.filter(({ id }) => id !== folderId);
-        if (remainingFolders.length === 0) return [];
-        const selectedFolderId = term.selectedFolderId === folderId ? remainingFolders[0].id : term.selectedFolderId;
-        return { ...term, folders: remainingFolders, selectedFolderId };
-      }),
-    );
+    const next = plannedTerms.flatMap((term) => {
+      if (term.id !== termId) return term;
+      const remainingFolders = term.folders.filter(({ id }) => id !== folderId);
+      if (remainingFolders.length === 0) return [];
+      const selectedFolderId = term.selectedFolderId === folderId ? remainingFolders[0].id : term.selectedFolderId;
+      return { ...term, folders: remainingFolders, selectedFolderId };
+    });
+    commitPlannedTerms(next);
   };
 
   return {
@@ -207,7 +202,8 @@ export const usePlannerTerms = () => {
     gridTerms,
     snapshot,
     restoreSnapshot,
-    moveCourseToTerm,
+    previewCourseMove,
+    dropCourseToTerm,
     insertCourse,
     removeCourse,
     addTerm,

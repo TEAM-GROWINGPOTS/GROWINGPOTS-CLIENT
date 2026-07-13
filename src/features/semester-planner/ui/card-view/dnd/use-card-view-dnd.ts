@@ -23,7 +23,8 @@ interface UseCardViewDndInput {
   plannedTerms: PlannerTerm[];
   snapshot: () => void;
   restoreSnapshot: () => void;
-  moveCourseToTerm: (activeId: string, targetTermId: string) => void;
+  previewCourseMove: (activeId: string, targetTermId: string) => void;
+  dropCourseToTerm: (activeId: string, targetTermId: string) => void;
   insertCourse: (termId: string, course: SemesterCourse) => void;
   removeCourse: (courseId: string) => void;
 }
@@ -32,7 +33,8 @@ export const useCardViewDnd = ({
   plannedTerms,
   snapshot,
   restoreSnapshot,
-  moveCourseToTerm,
+  previewCourseMove,
+  dropCourseToTerm,
   insertCourse,
   removeCourse,
 }: UseCardViewDndInput) => {
@@ -43,6 +45,7 @@ export const useCardViewDnd = ({
   const copyCountRef = useRef(0);
   const lastOverIdRef = useRef<string | null>(null);
   const dwellRef = useRef<{ container: string; timer: ReturnType<typeof setTimeout> } | null>(null);
+  const hasPreviewMovedRef = useRef(false);
 
   const isContainerId = (id: UniqueIdentifier) => plannedTerms.some((term) => term.id === String(id));
 
@@ -72,6 +75,7 @@ export const useCardViewDnd = ({
     snapshot();
     lastOverIdRef.current = null;
     clearDwell();
+    hasPreviewMovedRef.current = false;
     setIsDropRejected(false);
     setIsLibraryDrag(findContainer(String(active.id)) === LIBRARY_ID);
     setActiveCourse((active.data.current?.course as SemesterCourse) ?? null);
@@ -122,7 +126,8 @@ export const useCardViewDnd = ({
     clearDwell();
     const timer = setTimeout(() => {
       dwellRef.current = null;
-      moveCourseToTerm(activeId, overContainer);
+      hasPreviewMovedRef.current = true;
+      previewCourseMove(activeId, overContainer);
     }, DWELL_MS);
     dwellRef.current = { container: overContainer, timer };
   };
@@ -168,7 +173,9 @@ export const useCardViewDnd = ({
       return;
     }
 
-    if (activeContainer !== overContainer) moveCourseToTerm(activeId, overContainer);
+    if (activeContainer !== overContainer || hasPreviewMovedRef.current) {
+      dropCourseToTerm(activeId, overContainer);
+    }
   };
 
   return {
