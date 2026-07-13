@@ -48,7 +48,9 @@ const NODE_HEIGHT = 300;
 const recomputeColumnPositions = (nodes: Node<PlannerNodeData>[]): Node<PlannerNodeData>[] => {
   const byCol = new Map<number, Node[]>();
   for (const node of nodes) {
+    // + 버튼이라 재배치 대상이 아닌 노드는 건너뛴다.
     if (node.type === 'addSemesterNode' || node.type === 'addVersionNode') continue;
+    // 열 인덱스가 없는 노드도 건너뛴다(=버전이 없는 학기 노드)
     const colIndex = node.data.colIndex;
     if (colIndex === undefined) continue;
     if (!byCol.has(colIndex)) byCol.set(colIndex, []);
@@ -290,9 +292,7 @@ export const RoadmapView = () => {
     const colIndex = (node.data as Partial<PlannerNodeData>).colIndex;
     const siblings = nodesRef.current.filter(
       (n) =>
-        n.id !== node.id &&
-        typeof (n.data as Partial<PlannerNodeData>).colIndex === 'number' &&
-        (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
+        n.id !== node.id && n.type === 'semesterNode' && (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
     );
     originalIdxRef.current = siblings.filter((s) => s.position.y < node.position.y).length;
   }, []);
@@ -313,21 +313,26 @@ export const RoadmapView = () => {
       const siblings = nodesRef.current
         .filter(
           (n) =>
-            n.id !== node.id &&
-            typeof (n.data as Partial<PlannerNodeData>).colIndex === 'number' &&
-            (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
+            n.id !== node.id && n.type === 'semesterNode' && (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
         )
         .sort((a, b) => a.position.y - b.position.y) as Node<PlannerNodeData>[];
 
       const nodeHeight = node.measured?.height ?? NODE_HEIGHT;
-      const { targetIdx, lineY } = computeDropTarget(
-        node.position.y,
-        nodeHeight,
-        dragDirectionRef.current.direction,
-        siblings,
-      );
-      // 놓아도 원래 자리로 돌아가는 경우엔 라인을 띄우지 않는다.
-      setDropIndicator(targetIdx === originalIdxRef.current ? null : { colX, y: lineY });
+      const direction = dragDirectionRef.current.direction;
+      const { targetIdx, lineY } = computeDropTarget(node.position.y, nodeHeight, direction, siblings);
+
+      if (targetIdx !== originalIdxRef.current) {
+        // 순서가 실제로 바뀌는 지점: 형제 사이 경계에 라인을 띄운다.
+        setDropIndicator({ colX, y: lineY });
+      } else if (direction === 'up' && originalIdxRef.current > 0) {
+        // 아직 원래 자리를 벗어나지 않았다면, 드래그 중인 카드를 따라가지 않고 "원래 위치"와 "바로 위 형제"
+        // 사이의 고정된 지점에 미리보기 라인을 띄운다.
+        const upper = siblings[originalIdxRef.current - 1];
+        const upperHeight = upper.measured?.height ?? NODE_HEIGHT;
+        setDropIndicator({ colX, y: upper.position.y + upperHeight + ROW_MARGIN / 2 });
+      } else {
+        setDropIndicator(null);
+      }
     },
     [setNodes],
   );
@@ -345,7 +350,7 @@ export const RoadmapView = () => {
           .filter(
             (n) =>
               n.id !== node.id &&
-              typeof (n.data as Partial<PlannerNodeData>).colIndex === 'number' &&
+              n.type === 'semesterNode' &&
               (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
           )
           .sort((a, b) => a.position.y - b.position.y) as Node<PlannerNodeData>[];
