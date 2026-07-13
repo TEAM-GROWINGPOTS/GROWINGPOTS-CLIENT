@@ -1,5 +1,11 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
+function fetchWithTimeout(url: string, init: RequestInit, ms = 10_000): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { ...init, signal: controller.signal }).finally(() => clearTimeout(id));
+}
+
 interface KakaoTokenResponse {
   access_token: string;
 }
@@ -24,7 +30,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const tokenRes = await fetch('https://kauth.kakao.com/oauth/token', {
+    const tokenRes = await fetchWithTimeout('https://kauth.kakao.com/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
@@ -43,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     const { access_token: oauthAccessToken } = (await tokenRes.json()) as KakaoTokenResponse;
 
-    const loginRes = await fetch(`${process.env.API_BASE_URL}/api/v1/auth/oauth/login`, {
+    const loginRes = await fetchWithTimeout(`${process.env.API_BASE_URL}/api/v1/auth/oauth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ provider: 'KAKAO', oauthAccessToken }),
