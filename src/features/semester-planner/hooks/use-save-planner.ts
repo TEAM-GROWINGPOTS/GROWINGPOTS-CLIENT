@@ -1,6 +1,7 @@
 'use client';
 
 import { savePlanner } from '@features/semester-planner/api/save-planner';
+import { QUERY_KEY } from '@shared/apis/query-key';
 import { toast } from '@shared/components';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -11,10 +12,10 @@ export const useSavePlanner = () => {
     mutationFn: savePlanner,
     onSuccess: (graduation) => {
       if (graduation) {
-        queryClient.setQueryData(['graduation', 'PLANNED'], graduation);
+        queryClient.setQueryData(QUERY_KEY.GRADUATION.STATUS({ source: 'PLANNED' }), graduation);
         return;
       }
-      queryClient.invalidateQueries({ queryKey: ['graduation'] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY.GRADUATION.ALL });
     },
     onError: () => {
       toast.negative('플래너 저장에 실패했어요.');
