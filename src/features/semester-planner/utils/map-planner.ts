@@ -1,5 +1,3 @@
-import type { Course } from '@features/semester-planner/card-view/add-course-sidebar/add-course-sidebar';
-import type { CourseSearchItemResponse } from '@features/semester-planner/types/course-search';
 import type {
   CompletedTermResponse,
   OpenedSemester,
@@ -17,6 +15,12 @@ const OPENED_SEMESTER_LABEL: Record<OpenedSemester, string> = {
   BOTH: '전체학기',
 };
 
+export const getCourseTags = (divisionName: string, credit: number, openedSemester: OpenedSemester): string[] => [
+  divisionName,
+  `${credit}학점`,
+  OPENED_SEMESTER_LABEL[openedSemester],
+];
+
 interface PlannerCourseFields {
   courseName: string;
   departmentName: string;
@@ -28,7 +32,7 @@ interface PlannerCourseFields {
 const toCourseBase = (course: PlannerCourseFields) => ({
   department: course.departmentName,
   name: course.courseName,
-  tags: [course.divisionName, `${course.credit}학점`, OPENED_SEMESTER_LABEL[course.openedSemester]],
+  tags: getCourseTags(course.divisionName, course.credit, course.openedSemester),
   credit: course.credit,
   divisionName: course.divisionName,
 });
@@ -102,23 +106,3 @@ export const mapCompletedTerms = (completedTerms: PlannerResponse['completedTerm
 
 export const mapPlannedTerms = (plannedTerms: PlannerResponse['plannedTerms']): PlannerTerm[] =>
   sortPlannerTerms(plannedTerms.map(toPlannedTerm));
-
-export const toSidebarCourse = ({
-  courseId,
-  name,
-  credit,
-  departmentName,
-  defaultDivisionName,
-  openedSemester,
-  isEnglish,
-  isSw,
-}: CourseSearchItemResponse): Course => ({
-  id: courseId,
-  department: departmentName,
-  title: name,
-  tags: [defaultDivisionName, `${credit}학점`, OPENED_SEMESTER_LABEL[openedSemester]],
-  credit,
-  divisionName: defaultDivisionName,
-  isEnglish,
-  isSw,
-});

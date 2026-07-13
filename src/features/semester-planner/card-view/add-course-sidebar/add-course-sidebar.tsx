@@ -3,6 +3,8 @@
 import { FILTER_TAB_LABELS } from '@features/semester-planner/card-view/course-filter-modal/course-filter-modal';
 import { DropDown } from '@features/semester-planner/card-view/drop-down/drop-down';
 import { SearchField } from '@features/semester-planner/card-view/search-field/search-field';
+import type { CourseSearchItemResponse } from '@features/semester-planner/types/course-search';
+import { getCourseTags } from '@features/semester-planner/utils/map-planner';
 import { IconButton } from '@shared/components';
 import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
@@ -10,42 +12,39 @@ import Icon from '@shared/components/icon/icon';
 import Image from 'next/image';
 import { type ReactNode, useRef, useState } from 'react';
 
-export interface Course {
-  id: number;
-  department: string;
-  title: string;
-  tags: string[];
-  credit: number;
-  divisionName: string;
-  isEnglish?: boolean;
-  isSw?: boolean;
-}
-
 interface AddCourseSidebarProps {
-  courses?: Course[];
+  courses?: CourseSearchItemResponse[];
+  keyword?: string;
+  onKeywordChange?: (keyword: string) => void;
+  isLoading?: boolean;
   selectedFilterLabels?: string[];
   onFilterClick?: (label: string) => void;
   onClose: () => void;
   onDirectAdd: () => void;
-  renderCourse?: (course: Course) => ReactNode;
+  renderCourse?: (course: CourseSearchItemResponse) => ReactNode;
 }
 
 const SCROLL_STEP = 120;
 
 export const AddCourseSidebar = ({
   courses = [],
+  keyword: keywordProp,
+  onKeywordChange,
+  isLoading = false,
   selectedFilterLabels,
   onFilterClick,
   onClose,
   onDirectAdd,
   renderCourse,
 }: AddCourseSidebarProps) => {
-  const [keyword, setKeyword] = useState('');
+  const [internalKeyword, setInternalKeyword] = useState('');
   const [internalSelectedFilters, setInternalSelectedFilters] = useState<string[]>([]);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const filterRowRef = useRef<HTMLDivElement>(null);
 
+  const keyword = keywordProp ?? internalKeyword;
+  const handleKeywordChange = onKeywordChange ?? setInternalKeyword;
   const selectedFilters = selectedFilterLabels ?? internalSelectedFilters;
 
   const handleFilterClick = (label: string) => {
@@ -58,7 +57,8 @@ export const AddCourseSidebar = ({
     );
   };
 
-  const filteredCourses = courses.filter(({ title }) => title.includes(keyword.trim()));
+  const filteredCourses =
+    keywordProp === undefined ? courses.filter(({ name }) => name.includes(keyword.trim())) : courses;
 
   const handleFilterRowScroll = () => {
     const row = filterRowRef.current;
@@ -84,7 +84,12 @@ export const AddCourseSidebar = ({
         </button>
       </header>
 
-      <SearchField value={keyword} onChange={setKeyword} placeholder="검색어를 입력해 주세요" className="mt-24" />
+      <SearchField
+        value={keyword}
+        onChange={handleKeywordChange}
+        placeholder="검색어를 입력해 주세요"
+        className="mt-24"
+      />
 
       <div className="relative mt-8">
         <div
@@ -143,16 +148,17 @@ export const AddCourseSidebar = ({
         {filteredCourses.length > 0 ? (
           <ul className="mt-8 flex [scrollbar-width:none] flex-col gap-12 overflow-y-auto [&::-webkit-scrollbar]:hidden">
             {filteredCourses.map((course) => {
-              const { id, department, title, tags, isEnglish, isSw } = course;
+              const { courseId, departmentName, name, defaultDivisionName, credit, openedSemester, isEnglish, isSw } =
+                course;
               return (
-                <li key={id}>
+                <li key={courseId}>
                   {renderCourse ? (
                     renderCourse(course)
                   ) : (
                     <ClassCard
-                      department={department}
-                      title={title}
-                      tags={tags}
+                      department={departmentName}
+                      title={name}
+                      tags={getCourseTags(defaultDivisionName, credit, openedSemester)}
                       isEnglish={isEnglish}
                       isSw={isSw}
                       className="border border-gray-100"
@@ -163,17 +169,19 @@ export const AddCourseSidebar = ({
             })}
           </ul>
         ) : (
-          <div className="flex flex-1 flex-col items-center justify-center gap-12">
-            <Image src="/images/img_noresult.png" alt="" width={80} height={80} />
-            <p className="text-body-r-16 text-gray-700">검색결과가 없습니다</p>
-            <Button
-              size="sm"
-              mode="primary_outline"
-              label="직접추가"
-              icon={<Icon name="ic_plus" size={16} />}
-              onClick={onDirectAdd}
-            />
-          </div>
+          !isLoading && (
+            <div className="flex flex-1 flex-col items-center justify-center gap-12">
+              <Image src="/images/img_noresult.png" alt="" width={80} height={80} />
+              <p className="text-body-r-16 text-gray-700">검색결과가 없습니다</p>
+              <Button
+                size="sm"
+                mode="primary_outline"
+                label="직접추가"
+                icon={<Icon name="ic_plus" size={16} />}
+                onClick={onDirectAdd}
+              />
+            </div>
+          )
         )}
       </section>
     </aside>

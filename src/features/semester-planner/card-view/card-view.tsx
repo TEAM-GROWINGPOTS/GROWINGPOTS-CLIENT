@@ -2,10 +2,7 @@
 
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { toast, Toaster } from '@features/onboarding';
-import {
-  AddCourseSidebar,
-  type Course,
-} from '@features/semester-planner/card-view/add-course-sidebar/add-course-sidebar';
+import { AddCourseSidebar } from '@features/semester-planner/card-view/add-course-sidebar/add-course-sidebar';
 import {
   CourseFilterModal,
   type CourseFilterTabKeyTypes,
@@ -20,9 +17,9 @@ import { useCardViewDnd } from '@features/semester-planner/card-view/dnd/use-car
 import { GraduationStatusAccordion } from '@features/semester-planner/card-view/graduation-status/graduation-status-accordion';
 import { AddSemesterModal } from '@features/semester-planner/card-view/modals/add-semester-modal';
 import { SemesterCard } from '@features/semester-planner/card-view/semester-card/semester-card';
+import { useCourseSearch } from '@features/semester-planner/hooks/use-course-search';
 import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
-import { MOCK_COURSE_SEARCH_ITEMS } from '@features/semester-planner/mocks/planner';
-import { toSidebarCourse } from '@features/semester-planner/utils/map-planner';
+import type { CourseSearchItemResponse } from '@features/semester-planner/types/course-search';
 import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
 import Icon from '@shared/components/icon/icon';
@@ -38,9 +35,6 @@ const SEMESTER_CODE_MAP: Record<string, { sortValue: number; label: string }> = 
   '3': { sortValue: 2, label: '2학기' },
   '4': { sortValue: 2.5, label: '겨울학기' },
 };
-
-// TODO: API 연동 시 과목검색(GET /courses) 결과로 교체하고 필터 값을 쿼리 파라미터로 전달
-const LIBRARY_COURSES = MOCK_COURSE_SEARCH_ITEMS.map(toSidebarCourse);
 
 interface CardViewProps {
   sidebarSlot: HTMLDivElement | null;
@@ -72,8 +66,13 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [appliedFilters, setAppliedFilters] = useState<CourseFilterValues>();
   const [filterTab, setFilterTab] = useState<CourseFilterTabKeyTypes | null>(null);
+  const { data: libraryCourses = [], isLoading: isCoursesLoading } = useCourseSearch(
+    { keyword: searchKeyword.trim() || undefined },
+    { enabled: isSidebarOpen },
+  );
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
@@ -227,12 +226,17 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
             )}
           >
             <AddCourseSidebar
-              courses={LIBRARY_COURSES}
+              courses={libraryCourses}
+              keyword={searchKeyword}
+              onKeywordChange={setSearchKeyword}
+              isLoading={isCoursesLoading}
               selectedFilterLabels={getSelectedFilterLabels(appliedFilters)}
               onFilterClick={handleFilterClick}
               onClose={() => setIsSidebarOpen(false)}
               onDirectAdd={handleDirectAdd}
-              renderCourse={(course: Course) => <LibraryCourse key={course.id} course={course} />}
+              renderCourse={(course: CourseSearchItemResponse) => (
+                <LibraryCourse key={course.courseId} course={course} />
+              )}
             />
           </div>,
           sidebarSlot,
