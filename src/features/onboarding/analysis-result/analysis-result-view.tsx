@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@shared/components/button/button';
+import { useGraduation } from '@shared/hooks/use-graduation';
 import { useRouter } from 'next/navigation';
 import { useCallback, useRef, useState } from 'react';
 
@@ -8,7 +9,6 @@ import { useOnboardingOptions } from '../hooks/use-onboarding-options';
 import { useStudentCourses } from '../hooks/use-student-courses';
 import { useStudentProfile } from '../hooks/use-student-profile';
 import { useUpdateStudentCourses } from '../hooks/use-update-student-courses';
-import { MOCK_GRADUATION_RESPONSE } from '../mocks/analysis-result';
 import { CourseInfoTable, type CourseInfoTableRef } from './course-info-table/course-info-table';
 import {
   mapCourseInfoToPutStudentCourses,
@@ -18,8 +18,6 @@ import { GraduationResult } from './graduation-result/graduation-result';
 import { mapGraduationResponseToCards } from './graduation-result/map-graduation-response';
 import { StudentInfo } from './student-info/student-info';
 
-const requirementItems = mapGraduationResponseToCards(MOCK_GRADUATION_RESPONSE);
-
 export const AnalysisResultView = () => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
@@ -28,7 +26,9 @@ export const AnalysisResultView = () => {
   const { data: studentProfile } = useStudentProfile();
   const { data: studentCourses } = useStudentCourses();
   const { data: onboardingOptions } = useOnboardingOptions();
+  const { data: graduation } = useGraduation();
   const { mutate: updateStudentCourses, isPending: isSaving } = useUpdateStudentCourses();
+  const requirementItems = graduation ? mapGraduationResponseToCards(graduation) : [];
 
   const handleEditToggleClick = () => {
     if (!isEditing) {
