@@ -81,8 +81,8 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
     toggleSidebar();
   };
 
-  const handleReuploadClick = () => {
-    router.push('/onboarding?step=pdf');
+  const handleAnalysisResultClick = () => {
+    router.push('/analysis-result');
   };
 
   return (
@@ -142,7 +142,7 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
           <div className="flex flex-col gap-8 overflow-hidden">
             <button
               type="button"
-              onClick={handleReuploadClick}
+              onClick={handleAnalysisResultClick}
               className="flex cursor-pointer items-center justify-center gap-4 rounded bg-gray-800 px-12 py-6"
             >
               <span className="text-body-m-14 text-gray-300">졸업사정관리표</span>
