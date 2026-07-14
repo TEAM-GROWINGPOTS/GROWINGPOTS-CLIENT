@@ -43,7 +43,7 @@ export const TableCellSelect = ({ options, value, onChange, className }: TableCe
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        className="text-body-m-16 flex h-32 w-full cursor-pointer items-center justify-between rounded-sm border border-gray-100 bg-white px-8 text-gray-600"
+        className="text-body-m-16 flex h-32 w-full cursor-pointer items-center justify-between rounded-sm border border-gray-100 bg-white px-8 text-gray-600 outline-none focus:border-transparent focus:ring-2 focus:ring-gray-600"
       >
         <span className="min-w-0 truncate">{options.find((opt) => opt.value === value)?.label}</span>
         <Icon name="ic_chevron_down" size={16} className="shrink-0 text-gray-500" />

@@ -39,7 +39,7 @@ export const TableCellEdit = ({ mode, value, onChange, className, suffix }: Tabl
 
   const wrapperClassName = cn(
     cellBaseClassName,
-    'px-8 border outline-none',
+    'px-8 border outline-none focus-within:border-transparent focus-within:ring-2 focus-within:ring-gray-600',
     showError ? 'border-red-20' : 'border-gray-100',
     className,
   );
