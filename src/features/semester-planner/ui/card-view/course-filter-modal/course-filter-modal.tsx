@@ -1,6 +1,5 @@
 'use client';
 
-import { useDepartmentOptions } from '@features/semester-planner/hooks/use-department-options';
 import type { DivisionCategory, OtherRequired } from '@features/semester-planner/types/course-search';
 import type { OpenedSemester } from '@features/semester-planner/types/planner';
 import { parseApiError } from '@shared/apis/parse-api-error';
@@ -9,6 +8,7 @@ import { Button } from '@shared/components/button/button';
 import { Modal } from '@shared/components/modal/modal';
 import { Select } from '@shared/components/select/select';
 import { Tabs } from '@shared/components/tabs/tabs';
+import { useDepartmentOptions } from '@shared/hooks/use-department-options';
 import { useEffect, useState } from 'react';
 
 export type CourseFilterTabKeyTypes = 'campus' | 'major' | 'area' | 'grade' | 'semester' | 'credit' | 'extra';
