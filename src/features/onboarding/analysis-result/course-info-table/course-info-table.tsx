@@ -2,6 +2,7 @@
 
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
+import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { cn } from '@shared/utils/cn';
 import { type TransitionEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
@@ -21,6 +22,7 @@ interface CourseInfoTableProps {
   courses: CourseInfo[];
   isEditing?: boolean;
   onValidityChange?: (isValid: boolean) => void;
+  onDeleteConfirm?: () => void;
 }
 
 const departmentOptions = ['해당없음', '연극영화학과', '컴퓨터공학부', '후마니타스칼리지(국제)'].map((label) => ({
@@ -56,11 +58,17 @@ const toCreditValue = (value: string) => {
 const ROW_HEIGHT = 44;
 const DEFAULT_VISIBLE_ROWS = 3;
 
-export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }: CourseInfoTableProps) => {
+export const CourseInfoTable = ({
+  courses,
+  isEditing = false,
+  onValidityChange,
+  onDeleteConfirm,
+}: CourseInfoTableProps) => {
   const [expanded, setExpanded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(() => Math.min(DEFAULT_VISIBLE_ROWS, courses.length));
   const [rows, setRows] = useState(courses);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [prevIsEditing, setPrevIsEditing] = useState(isEditing);
   const tableWrapperRef = useRef<HTMLTableElement>(null);
   const [tableHeight, setTableHeight] = useState<number>();
@@ -147,8 +155,14 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
   };
 
   const handleDeleteClick = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
     setRows((prev) => prev.filter((row) => !selectedIds.has(row.id)));
     setSelectedIds(new Set());
+    setIsDeleteModalOpen(false);
+    onDeleteConfirm?.();
   };
 
   return (
@@ -266,6 +280,14 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
           />
         )}
       </div>
+      <ConfirmModal
+        open={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        type="delete"
+        title={`선택한 과목 ${selectedIds.size}개를 삭제할까요?`}
+        description="삭제한 과목은 복구할 수 없어요."
+        onConfirm={handleDeleteConfirm}
+      />
     </section>
   );
 };
