@@ -54,13 +54,15 @@ export const getCardClass = (
   level: ProgressLevel,
   isSelected: boolean,
   isSecondRow: boolean,
+  isDisabled: boolean,
 ): string =>
   cn(
     CARD_BASE_CLASS,
     isSecondRow && 'h-140',
     LEVEL_STYLES[level].cardBackground.base,
-    !item.isTotal && LEVEL_STYLES[level].cardBackground.hover,
+    !isDisabled && !item.isTotal && LEVEL_STYLES[level].cardBackground.hover,
     item.isTotal && 'w-[232px] justify-self-start bg-transparent',
+    isDisabled && 'pointer-events-none cursor-default',
     'transition-colors duration-300 ease-in-out',
     isSelected && 'ring-2 ring-lime-500 ring-offset-2 ring-offset-gray-100',
   );
