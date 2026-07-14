@@ -2,13 +2,18 @@
 
 import { Button } from '@shared/components/button/button';
 import { useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
+import { useOnboardingOptions } from '../hooks/use-onboarding-options';
 import { useStudentCourses } from '../hooks/use-student-courses';
 import { useStudentProfile } from '../hooks/use-student-profile';
+import { useUpdateStudentCourses } from '../hooks/use-update-student-courses';
 import { MOCK_GRADUATION_RESPONSE } from '../mocks/analysis-result';
-import { CourseInfoTable } from './course-info-table/course-info-table';
-import { mapStudentCoursesToCourseInfo } from './course-info-table/map-student-courses';
+import { CourseInfoTable, type CourseInfoTableRef } from './course-info-table/course-info-table';
+import {
+  mapCourseInfoToPutStudentCourses,
+  mapStudentCoursesToCourseInfo,
+} from './course-info-table/map-student-courses';
 import { GraduationResult } from './graduation-result/graduation-result';
 import { mapGraduationResponseToCards } from './graduation-result/map-graduation-response';
 import { StudentInfo } from './student-info/student-info';
@@ -19,11 +24,27 @@ export const AnalysisResultView = () => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isCourseInfoValid, setIsCourseInfoValid] = useState(true);
+  const courseInfoTableRef = useRef<CourseInfoTableRef>(null);
   const { data: studentProfile } = useStudentProfile();
   const { data: studentCourses } = useStudentCourses();
+  const { data: onboardingOptions } = useOnboardingOptions();
+  const { mutate: updateStudentCourses, isPending: isSaving } = useUpdateStudentCourses();
 
   const handleEditToggleClick = () => {
-    setIsEditing((prev) => !prev);
+    if (!isEditing) {
+      setIsEditing(true);
+      return;
+    }
+
+    const rows = courseInfoTableRef.current?.getCourses();
+    if (!rows || !studentCourses) return;
+
+    updateStudentCourses(
+      {
+        courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses, onboardingOptions?.departments ?? []),
+      },
+      { onSuccess: () => setIsEditing(false) },
+    );
   };
 
   const handleCourseInfoValidityChange = useCallback((isValid: boolean) => {
@@ -51,7 +72,7 @@ export const AnalysisResultView = () => {
           label={isEditing ? '저장하기' : '편집하기'}
           mode={isEditing ? 'primary_solid' : 'secondary_outline'}
           size="sm"
-          disabled={isEditing && !isCourseInfoValid}
+          disabled={isEditing && (!isCourseInfoValid || isSaving)}
           onClick={handleEditToggleClick}
         />
       </div>
@@ -78,7 +99,9 @@ export const AnalysisResultView = () => {
       <div className="mt-20 w-full">
         {studentCourses && (
           <CourseInfoTable
+            ref={courseInfoTableRef}
             courses={mapStudentCoursesToCourseInfo(studentCourses.courses)}
+            departments={onboardingOptions?.departments ?? []}
             isEditing={isEditing}
             onValidityChange={handleCourseInfoValidityChange}
           />
