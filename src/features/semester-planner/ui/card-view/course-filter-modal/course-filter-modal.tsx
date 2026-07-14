@@ -3,11 +3,13 @@
 import { useDepartmentOptions } from '@features/semester-planner/hooks/use-department-options';
 import type { DivisionCategory, OtherRequired } from '@features/semester-planner/types/course-search';
 import type { OpenedSemester } from '@features/semester-planner/types/planner';
+import { parseApiError } from '@shared/apis/parse-api-error';
+import { toast } from '@shared/components';
 import { Button } from '@shared/components/button/button';
 import { Modal } from '@shared/components/modal/modal';
 import { Select } from '@shared/components/select/select';
 import { Tabs } from '@shared/components/tabs/tabs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export type CourseFilterTabKeyTypes = 'campus' | 'major' | 'area' | 'grade' | 'semester' | 'credit' | 'extra';
 
@@ -113,7 +115,12 @@ interface CourseFilterFormProps {
 const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFormProps) => {
   const [activeTab, setActiveTab] = useState<CourseFilterTabKeyTypes>(initialTab);
   const [values, setValues] = useState<CourseFilterValues>(initialValues);
-  const { data: departments = [] } = useDepartmentOptions();
+  const { data: departments = [], isError, error } = useDepartmentOptions();
+
+  useEffect(() => {
+    if (!isError) return;
+    parseApiError(error).then((parsed) => toast.negative(parsed?.message ?? '학과 목록을 불러오지 못했어요.'));
+  }, [isError, error]);
 
   const handleTabChange = (next: string) => setActiveTab(next as CourseFilterTabKeyTypes);
 

@@ -22,6 +22,7 @@ import { useCardViewDnd } from '@features/semester-planner/ui/card-view/dnd/use-
 import { GraduationStatusAccordion } from '@features/semester-planner/ui/card-view/graduation-status-accordion/graduation-status-accordion';
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
+import { parseApiError } from '@shared/apis/parse-api-error';
 import { toast, Toaster } from '@shared/components';
 import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
@@ -29,6 +30,7 @@ import Icon from '@shared/components/icon/icon';
 import { IconButton } from '@shared/components/icon-button/icon-button';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
+import { useRouter } from 'next/navigation';
 import { type TransitionEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -44,6 +46,8 @@ interface CardViewProps {
 export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const {
     isLoading: isPlannerLoading,
+    isError: isPlannerError,
+    error: plannerError,
     plannedTerms,
     gridTerms,
     snapshot,
@@ -68,7 +72,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     insertCourse,
     removeCourse,
   });
-  const { data: graduationData } = useGraduationStatus('PLANNED');
+  const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -78,6 +82,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const {
     data: libraryCourses = [],
     isLoading: isCoursesLoading,
+    isError: isCourseSearchError,
+    error: courseSearchError,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
@@ -89,6 +95,30 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const [canScrollRight, setCanScrollRight] = useState(false);
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
   const boardRef = useRef<HTMLElement>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isPlannerError) return;
+    parseApiError(plannerError).then((parsed) => {
+      if (parsed?.status === 404) {
+        router.replace('/onboarding');
+        return;
+      }
+      toast.negative(parsed?.message ?? '플래너를 불러오지 못했어요.');
+    });
+  }, [isPlannerError, plannerError, router]);
+
+  useEffect(() => {
+    if (!isGraduationError) return;
+    parseApiError(graduationError).then((parsed) =>
+      toast.negative(parsed?.message ?? '졸업 요건 현황을 불러오지 못했어요.'),
+    );
+  }, [isGraduationError, graduationError]);
+
+  useEffect(() => {
+    if (!isCourseSearchError) return;
+    parseApiError(courseSearchError).then((parsed) => toast.negative(parsed?.message ?? '과목 검색에 실패했어요.'));
+  }, [isCourseSearchError, courseSearchError]);
 
   const updateScrollability = useCallback(() => {
     const board = boardRef.current;
@@ -157,6 +187,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   };
 
   if (isPlannerLoading) return null;
+
+  if (isPlannerError) return null;
 
   return (
     <DndContext id="card-view-dnd" {...contextProps}>
