@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://growingpots.kr/landing/sitemap.xml
