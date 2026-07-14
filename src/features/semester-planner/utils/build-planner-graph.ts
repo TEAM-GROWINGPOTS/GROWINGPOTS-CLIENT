@@ -113,7 +113,7 @@ export function buildPlannerGraph(data: PlannerResponse): PlannerGraph {
       id: `add-version-${term.plannerTermId}`,
       type: 'addVersionNode',
       position: { x: colX, y: 0 },
-      data: { colIndex, colX } as unknown as PlannerNodeData,
+      data: { colIndex, colX, versionCount: sortedVersions.length } as unknown as PlannerNodeData,
       draggable: false,
       connectable: false,
       selectable: false,

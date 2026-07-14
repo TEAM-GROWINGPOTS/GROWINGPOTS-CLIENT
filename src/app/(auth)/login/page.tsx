@@ -1,6 +1,7 @@
 import { KakaoLoginButton } from '@features/auth/login/kakao-login-button';
 import { LoginCarousel } from '@features/auth/login/login-carousel';
 import Icon from '@shared/components/icon/icon';
+import { Suspense } from 'react';
 
 export default function Page() {
   return (
@@ -12,10 +13,16 @@ export default function Page() {
       <section className="flex h-full w-520 shrink-0 items-center justify-center">
         <div className="flex w-331 flex-col items-center gap-140">
           <div className="flex items-center gap-8">
-            <Icon name="ic_lime_potato" size={36} aria-label="그로잉팟 로고" className="text-[#DAF761]" />
-            <Icon name="img_logo" width={202} height={36} aria-label="growing pots" />
+            <Icon name="ic_lime_potato" size={36} aria-label="그로잉팟 로고" />
+            <Icon name="img_logo" width={202} height={36} aria-label="growing pots" className="text-gray-700" />
           </div>
-          <KakaoLoginButton />
+          <Suspense
+            fallback={
+              <div className="min-w-[280px] self-stretch rounded-lg border border-[#FEE500] bg-[#FEE500] px-16 py-12" />
+            }
+          >
+            <KakaoLoginButton />
+          </Suspense>
         </div>
       </section>
     </main>
