@@ -18,7 +18,8 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (onboardingCompleted !== 'true' && pathname !== '/onboarding') {
+  const ONBOARDING_ALLOWED_PATHS = ['/onboarding', '/analysis-result'];
+  if (onboardingCompleted !== 'true' && !ONBOARDING_ALLOWED_PATHS.includes(pathname)) {
     return NextResponse.redirect(new URL('/onboarding', request.url));
   }
 

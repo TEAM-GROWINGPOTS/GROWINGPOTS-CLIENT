@@ -29,6 +29,7 @@ const toCourseBase = (course: PlannerCourseBaseResponse) => ({
   name: course.name,
   tags: getCourseTags(course.divisionName, course.credit, course.openedSemester),
   credit: course.credit,
+  divisionCategory: course.divisionCategory,
   divisionName: course.divisionName,
   isEnglish: course.isEnglish,
   isSw: course.isSw,
