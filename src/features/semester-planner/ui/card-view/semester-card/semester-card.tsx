@@ -67,6 +67,7 @@ export const SemesterCard = ({
   const [isFolderListOpen, setIsFolderListOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<FolderTarget | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<FolderTarget | null>(null);
+  const [isTermDeleteOpen, setIsTermDeleteOpen] = useState(false);
   const folderListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -112,6 +113,11 @@ export const SemesterCard = ({
     setDeleteTarget(null);
   };
 
+  const handleConfirmDeleteTerm = () => {
+    onDeleteTerm?.();
+    setIsTermDeleteOpen(false);
+  };
+
   const totalCredit = courses.reduce((sum, { credit }) => sum + credit, 0);
   const isPlanned = status === 'planned';
   const statusIcon = STATUS_ICON[status];
@@ -130,7 +136,7 @@ export const SemesterCard = ({
         </div>
         {isPlanned && (
           <div className="[&_button]:visible [&>div>button>svg]:text-gray-300">
-            <FolderItemMenu iconSize={20} onDelete={() => onDeleteTerm?.()} />
+            <FolderItemMenu iconSize={20} onDelete={() => setIsTermDeleteOpen(true)} />
           </div>
         )}
       </header>
@@ -226,6 +232,14 @@ export const SemesterCard = ({
             : '삭제한 폴더는 복구할 수 없어요.'
         }
         onConfirm={handleConfirmDeleteFolder}
+      />
+      <ConfirmModal
+        open={isTermDeleteOpen}
+        onOpenChange={setIsTermDeleteOpen}
+        type="delete"
+        title={`${termLabel}를 삭제할까요?`}
+        description="삭제한 학기는 복구할 수 없어요."
+        onConfirm={handleConfirmDeleteTerm}
       />
     </section>
   );
