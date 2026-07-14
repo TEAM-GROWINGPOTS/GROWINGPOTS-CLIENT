@@ -5,9 +5,8 @@ export function proxy(request: NextRequest) {
 
   if (pathname.startsWith('/api/')) return NextResponse.next();
 
-  const refreshToken = request.cookies.get('refreshToken')?.value;
   const onboardingCompleted = request.cookies.get('onboardingCompleted')?.value;
-  const isLoggedIn = refreshToken !== undefined;
+  const isLoggedIn = onboardingCompleted !== undefined;
 
   if (pathname === '/login') {
     return isLoggedIn ? NextResponse.redirect(new URL('/', request.url)) : NextResponse.next();

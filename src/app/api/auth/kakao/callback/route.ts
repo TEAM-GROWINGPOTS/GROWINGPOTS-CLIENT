@@ -83,6 +83,11 @@ export async function GET(request: NextRequest) {
       : (loginRes.headers.get('set-cookie') ?? '').split(/,(?=\s*\w+=)/).filter(Boolean);
 
     const isLocalhost = request.nextUrl.hostname === 'localhost' || request.nextUrl.hostname === '127.0.0.1';
+    const sameSite = isLocalhost ? 'SameSite=Lax' : 'SameSite=None; Secure';
+
+    // 백엔드가 예전에 Path=/api/v1/auth/reissue 로 내려준 refreshToken 잔여 쿠키 만료 처리
+    response.headers.append('Set-Cookie', `refreshToken=; Path=/api/v1/auth/reissue; Max-Age=0; HttpOnly; ${sameSite}`);
+
     for (const cookie of setCookies) {
       let adjusted = cookie.trim().replace(/;\s*Path=[^;]*/gi, '; Path=/');
       if (isLocalhost) {
@@ -98,7 +103,7 @@ export async function GET(request: NextRequest) {
     );
     response.headers.append(
       'Set-Cookie',
-      `onboardingCompleted=${data.onboardingCompleted}; Path=/; Max-Age=${maxAge}; SameSite=Lax; HttpOnly`,
+      `onboardingCompleted=${data.onboardingCompleted}; Path=/; Max-Age=${maxAge}; SameSite=Lax`,
     );
 
     return response;
