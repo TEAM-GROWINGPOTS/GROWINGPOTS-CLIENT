@@ -170,7 +170,7 @@ export const SemesterCard = ({
         <div className="my-8 border-b border-gray-200" />
         <div className="relative flex min-h-0 flex-col">
           {courses.length > 0 ? (
-            <ul className="flex min-h-0 flex-col gap-8 overflow-y-auto">
+            <ul className="flex min-h-0 [scrollbar-width:none] flex-col gap-8 overflow-y-auto [&::-webkit-scrollbar]:hidden">
               {courses.map((course) => {
                 const { id, departmentName, name, tags, isEnglish, isSw } = course;
                 return (
