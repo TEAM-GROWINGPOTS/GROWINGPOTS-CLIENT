@@ -19,20 +19,19 @@ import { GraduationStatusAccordion } from '@features/semester-planner/ui/card-vi
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
 import { parseApiError } from '@shared/apis/parse-api-error';
-import type { CourseSearchItemResponse } from '@shared/apis/types/course-search';
+import { CourseSearchItemResponse } from '@shared/apis/types/course-search';
 import { toast, Toaster } from '@shared/components';
 import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
 import Icon from '@shared/components/icon/icon';
 import { IconButton } from '@shared/components/icon-button/icon-button';
-import { AddCourseModal } from '@shared/components/modal/add-course-modal';
 import { useCourseSearch } from '@shared/hooks/use-course-search';
 import { useDebouncedValue } from '@shared/hooks/use-debounced-value';
 import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
 import { useRouter } from 'next/navigation';
-import { type TransitionEvent, useEffect, useState } from 'react';
+import { type TransitionEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 const SEMESTER_LABEL_MAP: Record<string, string> = {
@@ -76,7 +75,6 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
-  const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [appliedFilters, setAppliedFilters] = useState<CourseFilterValues>();
   const [filterTab, setFilterTab] = useState<CourseFilterTabKeyTypes | null>(null);
@@ -93,7 +91,10 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     { keyword: debouncedKeyword || undefined, ...(appliedFilters ?? INITIAL_COURSE_FILTER_VALUES) },
     { enabled: isSidebarOpen },
   );
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
+  const boardRef = useRef<HTMLElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -119,8 +120,33 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     parseApiError(courseSearchError).then((parsed) => toast.negative(parsed?.message ?? '과목 검색에 실패했어요.'));
   }, [isCourseSearchError, courseSearchError]);
 
+  const updateScrollability = useCallback(() => {
+    const board = boardRef.current;
+    if (!board) return;
+    setCanScrollLeft(board.scrollLeft > 1);
+    setCanScrollRight(board.scrollWidth - board.clientWidth - board.scrollLeft > 1);
+  }, []);
+
+  useEffect(() => {
+    updateScrollability();
+    window.addEventListener('resize', updateScrollability);
+    return () => window.removeEventListener('resize', updateScrollability);
+  }, [gridTerms, updateScrollability]);
+
   const handleSidebarTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
     if (event.target !== event.currentTarget || event.propertyName !== 'width') return;
+    updateScrollability();
+    if (!isSidebarOpen) return;
+    const board = boardRef.current;
+    board?.scrollTo({ left: board.scrollWidth, behavior: 'smooth' });
+  };
+
+  const handleScrollLeftClick = () => {
+    boardRef.current?.scrollBy({ left: -282, behavior: 'smooth' });
+  };
+
+  const handleScrollRightClick = () => {
+    boardRef.current?.scrollBy({ left: 282, behavior: 'smooth' });
   };
 
   const handleFilterClick = (label: string) => {
@@ -133,7 +159,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   };
 
   const handleDirectAdd = () => {
-    setIsAddCourseOpen(true);
+    console.log('직접추가 클릭 — 과목 직접추가 모달 연결 예정');
   };
 
   const handleOpenSidebar = () => {
@@ -181,7 +207,11 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
         <GraduationStatusAccordion className="mt-20" data={graduationData} />
 
         <div className="relative mt-24 min-h-0 flex-1">
-          <section className="flex h-full flex-wrap items-start gap-24 overflow-x-hidden overflow-y-auto pb-20">
+          <section
+            ref={boardRef}
+            onScroll={updateScrollability}
+            className="flex h-full items-start gap-24 overflow-x-auto pb-20"
+          >
             {gridTerms.map((term) =>
               term.status === 'planned' ? (
                 <DroppableTerm
@@ -215,6 +245,24 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
               onClick={() => setIsAddSemesterOpen(true)}
             />
           </section>
+          {canScrollLeft && (
+            <IconButton
+              icon="ic_chevron_left"
+              aria-label="이전 학기 보기"
+              size="medium"
+              className="absolute top-1/2 left-0 -translate-y-1/2"
+              onClick={handleScrollLeftClick}
+            />
+          )}
+          {canScrollRight && (
+            <IconButton
+              icon="ic_chevron_right"
+              aria-label="다음 학기 보기"
+              size="medium"
+              className="absolute top-1/2 right-0 -translate-y-1/2"
+              onClick={handleScrollRightClick}
+            />
+          )}
           {activeCourse && !isLibraryDrag && <TrashDropZone />}
         </div>
       </div>
@@ -260,11 +308,6 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
       </DragOverlay>
 
       <AddSemesterModal open={isAddSemesterOpen} onOpenChange={setIsAddSemesterOpen} onSubmit={handleAddSemester} />
-      <AddCourseModal
-        open={isAddCourseOpen}
-        onOpenChange={setIsAddCourseOpen}
-        onSubmit={() => setIsAddCourseOpen(false)}
-      />
       <CourseFilterModal
         open={filterTab !== null}
         onOpenChange={(open) => {
