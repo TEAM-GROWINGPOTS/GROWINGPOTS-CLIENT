@@ -49,7 +49,7 @@ export const ConfirmModal = ({
       <Modal.Content className="flex w-440 flex-col items-center">
         <Icon name={iconName} size={40} className="mb-16" />
         <Modal.Title className="text-title-sb-18 mb-8 text-center">{title}</Modal.Title>
-        {description && <Modal.Description>{description}</Modal.Description>}
+        {description && <Modal.Description className="text-center">{description}</Modal.Description>}
         <Modal.Footer className="mt-40 w-full">
           {type !== 'notice' && (
             <Button

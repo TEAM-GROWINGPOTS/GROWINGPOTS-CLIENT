@@ -73,6 +73,7 @@ export const AnalysisResultView = () => {
           courses={MOCK_COURSES}
           isEditing={isEditing}
           onValidityChange={handleCourseInfoValidityChange}
+          onDeleteConfirm={() => setIsEditing(false)}
         />
       </div>
 
