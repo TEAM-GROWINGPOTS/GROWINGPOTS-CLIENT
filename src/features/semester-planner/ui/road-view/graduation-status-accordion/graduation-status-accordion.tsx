@@ -36,7 +36,7 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
   // 비학점 요건(SW/영어 등)과 무관하게, 학점 요건만 충족하면 "요건 충족"으로 표시한다.
   const shortfall = summary.totalCredits.required - summary.totalCredits.current;
   const isCreditFulfilled = shortfall <= 0;
-  const badgeLabel = isCreditFulfilled ? '요건 충족' : `${shortfall}학점 부족`;
+  const badgeLabel = isCreditFulfilled ? '학점 요건 충족' : `${shortfall}학점 부족`;
 
   const graduationRequiredItems =
     selectedMajor.graduationRequired?.hasGraduationRequired && selectedMajor.graduationRequired.items?.length
@@ -66,7 +66,7 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
           <h3>
             <Accordion.Trigger className="group flex w-full cursor-pointer items-center justify-between px-24 py-24 transition-[padding-bottom] duration-200 data-[state=open]:pb-8">
               <div className="flex items-center gap-8">
-                <span className="text-title-sb-18 text-gray-100">졸업 요건 충족 현황</span>
+                <span className="text-title-sb-18 text-gray-100">졸업 학점 충족 현황</span>
                 <Badge size="xsmall" variant="primary" color={isCreditFulfilled ? 'lime01' : 'darkRed'}>
                   {badgeLabel}
                 </Badge>
