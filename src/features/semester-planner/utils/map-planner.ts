@@ -1,15 +1,15 @@
 import type {
   CompletedTermResponse,
-  CourseSearchItemResponse,
   OpenedSemester,
   PlannedTermResponse,
+  PlannerCourseBaseResponse,
   PlannerFolder,
   PlannerResponse,
+  PlannerSaveRequest,
   PlannerTerm,
   PlannerVersionResponse,
   SemesterCourse,
 } from '@features/semester-planner/types/planner';
-import type { Course } from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar';
 
 const OPENED_SEMESTER_LABEL: Record<OpenedSemester, string> = {
   FIRST: '1학기',
@@ -17,20 +17,21 @@ const OPENED_SEMESTER_LABEL: Record<OpenedSemester, string> = {
   BOTH: '전체학기',
 };
 
-interface PlannerCourseFields {
-  courseName: string;
-  departmentName: string;
-  divisionName: string;
-  openedSemester: OpenedSemester;
-  credit: number;
-}
+export const getCourseTags = (divisionName: string, credit: number, openedSemester: OpenedSemester): string[] => [
+  divisionName,
+  `${credit}학점`,
+  OPENED_SEMESTER_LABEL[openedSemester],
+];
 
-const toCourseBase = (course: PlannerCourseFields) => ({
-  department: course.departmentName,
-  name: course.courseName,
-  tags: [course.divisionName, `${course.credit}학점`, OPENED_SEMESTER_LABEL[course.openedSemester]],
+const toCourseBase = (course: PlannerCourseBaseResponse) => ({
+  courseId: course.courseId,
+  departmentName: course.departmentName,
+  name: course.name,
+  tags: getCourseTags(course.divisionName, course.credit, course.openedSemester),
   credit: course.credit,
   divisionName: course.divisionName,
+  isEnglish: course.isEnglish,
+  isSw: course.isSw,
 });
 
 const DIVISION_ORDER = ['전공필수', '전공선택', '전공기초', '필수교과', '배분이수교과', '자유이수교과', '기타이수교과'];
@@ -103,22 +104,20 @@ export const mapCompletedTerms = (completedTerms: PlannerResponse['completedTerm
 export const mapPlannedTerms = (plannedTerms: PlannerResponse['plannedTerms']): PlannerTerm[] =>
   sortPlannerTerms(plannedTerms.map(toPlannedTerm));
 
-export const toSidebarCourse = ({
-  courseId,
-  name,
-  credit,
-  departmentName,
-  defaultDivisionName,
-  openedSemester,
-  isEnglish,
-  isSw,
-}: CourseSearchItemResponse): Course => ({
-  id: courseId,
-  department: departmentName,
-  title: name,
-  tags: [defaultDivisionName, `${credit}학점`, OPENED_SEMESTER_LABEL[openedSemester]],
-  credit,
-  divisionName: defaultDivisionName,
-  isEnglish,
-  isSw,
+export const toPlannerSaveRequest = (plannedTerms: PlannerTerm[]): PlannerSaveRequest => ({
+  plannerSimulationId: null,
+  terms: plannedTerms.map(({ yearLevel, semester, selectedFolderId, folders }) => ({
+    yearLevel,
+    semester,
+    versions: folders.map((folder, folderIndex) => ({
+      versionNo: folderIndex + 1,
+      name: folder.name,
+      isSelected: folder.id === selectedFolderId,
+      versionOrder: folderIndex + 1,
+      items: folder.courses.map(({ courseId }, courseIndex) => ({
+        courseId,
+        coursePositionOrder: courseIndex + 1,
+      })),
+    })),
+  })),
 });
