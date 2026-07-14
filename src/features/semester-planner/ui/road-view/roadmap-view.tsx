@@ -17,7 +17,7 @@ import {
 } from '@features/semester-planner/types/planner-graph';
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
 import { parseApiError } from '@shared/apis/parse-api-error';
-import { toast, Toaster } from '@shared/components';
+import { toast } from '@shared/components';
 import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
 import { cn } from '@shared/utils/cn';
 import {
@@ -735,7 +735,6 @@ export const RoadmapView = () => {
           onOpenChange={setIsAddSemesterModalOpen}
           onSubmit={handleAddSemesterSubmit}
         />
-        <Toaster />
       </ReachabilityContext.Provider>
     </PlannerActionsContext.Provider>
   );
