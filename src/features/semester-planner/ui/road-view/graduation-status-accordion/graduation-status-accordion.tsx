@@ -151,11 +151,11 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
                 </div>
               </li>
             ))}
-            {otherRequiredConditions.map(({ code, name, current, required, unit }) => {
+            {otherRequiredConditions.map(({ code, current, required, unit }) => {
               const satisfied = required === null || current >= required;
               return (
                 <li key={code} className="flex items-center justify-between">
-                  <span className="text-body-m-16 text-gray-100">{name}</span>
+                  <span className="text-body-m-16 text-gray-100">일반 선택</span>
                   <div className="flex items-end">
                     <span className={cn('text-body-sb-16', satisfied ? 'text-lime-500' : 'text-gray-100')}>
                       {current}
