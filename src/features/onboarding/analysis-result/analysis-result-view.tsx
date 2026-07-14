@@ -4,6 +4,7 @@ import { Button } from '@shared/components/button/button';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
+import { useStudentProfile } from '../hooks/use-student-profile';
 import { MOCK_COURSES, MOCK_GRADUATION_RESPONSE } from '../mocks/analysis-result';
 import { CourseInfoTable } from './course-info-table/course-info-table';
 import { GraduationResult } from './graduation-result/graduation-result';
@@ -16,6 +17,7 @@ export const AnalysisResultView = () => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isCourseInfoValid, setIsCourseInfoValid] = useState(true);
+  const { data: studentProfile } = useStudentProfile();
 
   const handleEditToggleClick = () => {
     setIsEditing((prev) => !prev);
@@ -53,15 +55,17 @@ export const AnalysisResultView = () => {
 
       <div className="flex h-231 w-full gap-20">
         <div className="flex-1">
-          <StudentInfo
-            name="김경민"
-            enrollmentStatus="재학 중"
-            schoolName="경희대학교(국제캠퍼스)"
-            departmentName="연극영화학과 영화트랙"
-            studentNo="2023103101"
-            gradeLevel={4}
-            semester={1}
-          />
+          {studentProfile && (
+            <StudentInfo
+              name={studentProfile.name}
+              enrollmentStatus={studentProfile.enrollmentStatus}
+              schoolName={studentProfile.schoolName}
+              departmentName={studentProfile.departmentName}
+              studentNo={studentProfile.studentNo}
+              gradeLevel={studentProfile.gradeLevel}
+              semester={studentProfile.semester}
+            />
+          )}
         </div>
         <div className="flex-3">
           <GraduationResult items={requirementItems} />
