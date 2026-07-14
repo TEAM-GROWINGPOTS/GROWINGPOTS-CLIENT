@@ -102,6 +102,7 @@ export const AnalysisResultView = () => {
             ref={courseInfoTableRef}
             courses={mapStudentCoursesToCourseInfo(studentCourses.courses)}
             departments={onboardingOptions?.departments ?? []}
+            divisions={studentCourses.availableDivisions}
             isEditing={isEditing}
             onValidityChange={handleCourseInfoValidityChange}
           />

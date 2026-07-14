@@ -5,6 +5,8 @@ import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 
+import { TAKEN_SEMESTER_OPTIONS } from '../../constants/taken-semester';
+import type { Division, TakenSemester } from '../../types/course';
 import type { Department } from '../../types/onboarding';
 import { TableCellEdit } from './table-cell/table-cell-edit';
 import { TableCellSelect } from './table-cell/table-cell-select';
@@ -15,12 +17,15 @@ export interface CourseInfo {
   department: string;
   credit: string;
   semester: string;
+  semesterCode: TakenSemester;
   area: string;
+  areaId: number | null;
 }
 
 interface CourseInfoTableProps {
   courses: CourseInfo[];
   departments: Department[];
+  divisions: Division[];
   isEditing?: boolean;
   onValidityChange?: (isValid: boolean) => void;
 }
@@ -29,15 +34,7 @@ export interface CourseInfoTableRef {
   getCourses: () => CourseInfo[];
 }
 
-const semesterOptions = Array.from({ length: 8 }, (_, i) => `${i + 1}학기`).map((label) => ({
-  value: label,
-  label,
-}));
-
-const areaOptions = ['해당없음', '필수교과', '전공 기초', '전공 필수', '전공 선택'].map((label) => ({
-  value: label,
-  label,
-}));
+const semesterOptions = TAKEN_SEMESTER_OPTIONS.map(({ label }) => ({ value: label, label }));
 
 const toCreditValue = (value: string) => {
   const [integerPart = '', ...rest] = value.replace(/[^0-9.]/g, '').split('.');
@@ -53,7 +50,7 @@ const ROW_HEIGHT = 44;
 const DEFAULT_VISIBLE_ROWS = 3;
 
 export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTableProps>(
-  ({ courses, departments, isEditing = false, onValidityChange }, ref) => {
+  ({ courses, departments, divisions, isEditing = false, onValidityChange }, ref) => {
     const [expanded, setExpanded] = useState(false);
     const [visibleCount, setVisibleCount] = useState(() => Math.min(DEFAULT_VISIBLE_ROWS, courses.length));
     const [rows, setRows] = useState(courses);
@@ -63,6 +60,11 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
     const [tableHeight, setTableHeight] = useState<number>();
 
     const departmentOptions = ['해당없음', ...departments.map(({ name }) => name)].map((label) => ({
+      value: label,
+      label,
+    }));
+
+    const areaOptions = ['해당없음', ...divisions.map(({ name }) => name)].map((label) => ({
       value: label,
       label,
     }));
@@ -127,6 +129,22 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
     const handleCellChange = (id: string, key: (typeof columns)[number]['key']) => (value: string) => {
       const nextValue = key === 'credit' ? toCreditValue(value) : value;
       setRows((prev) => prev.map((row) => (row.id === id ? { ...row, [key]: nextValue } : row)));
+    };
+
+    const handleAreaChange = (id: string) => (value: string) => {
+      const division = divisions.find(({ name }) => name === value);
+      setRows((prev) =>
+        prev.map((row) => (row.id === id ? { ...row, area: value, areaId: division?.id ?? null } : row)),
+      );
+    };
+
+    const handleSemesterChange = (id: string) => (value: string) => {
+      const option = TAKEN_SEMESTER_OPTIONS.find(({ label }) => label === value);
+      setRows((prev) =>
+        prev.map((row) =>
+          row.id === id ? { ...row, semester: value, semesterCode: option?.code ?? row.semesterCode } : row,
+        ),
+      );
     };
 
     const handleSelectAllClick = () => {
@@ -223,7 +241,13 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
                           <TableCellSelect
                             options={column.options}
                             value={course[column.key]}
-                            onChange={handleCellChange(course.id, column.key)}
+                            onChange={
+                              column.key === 'area'
+                                ? handleAreaChange(course.id)
+                                : column.key === 'semester'
+                                  ? handleSemesterChange(course.id)
+                                  : handleCellChange(course.id, column.key)
+                            }
                           />
                         ) : (
                           <TableCellEdit

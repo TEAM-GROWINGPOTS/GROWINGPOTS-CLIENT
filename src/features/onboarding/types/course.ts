@@ -11,9 +11,17 @@ export interface StudentCourse {
   takenSemester: string;
 }
 
+export interface Division {
+  id: number;
+  name: string;
+}
+
 export interface StudentCourses {
   courses: StudentCourse[];
+  availableDivisions: Division[];
 }
+
+export type TakenSemester = 'FIRST' | 'SUMMER' | 'SECOND' | 'WINTER';
 
 export interface PutStudentCourseItem {
   studentCourseId: number;
@@ -23,7 +31,7 @@ export interface PutStudentCourseItem {
   credit: number;
   appliedDivisionId: number | null;
   takenYear: number;
-  takenSemester: string;
+  takenSemester: TakenSemester;
 }
 
 export interface PutStudentCoursesRequest {
