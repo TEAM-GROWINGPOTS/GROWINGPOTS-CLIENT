@@ -1,11 +1,10 @@
 'use client';
 
+import { MAX_FOLDERS_PER_TERM } from '@features/semester-planner/constants';
 import { FolderItemMenu } from '@features/semester-planner/ui/card-view/folder-item-menu/folder-item-menu';
 import { Button } from '@shared/components/button/button';
 import { Tooltip } from '@shared/components/tooltip/tooltip';
 import { cn } from '@shared/utils/cn';
-
-const MAX_FOLDERS = 5;
 
 interface Folder {
   id: string;
@@ -31,7 +30,7 @@ export const FolderList = ({
   onDeleteFolder,
   className,
 }: FolderListProps) => {
-  const isMaxFolders = folders.length >= MAX_FOLDERS;
+  const isMaxFolders = folders.length >= MAX_FOLDERS_PER_TERM;
 
   const handleAddFolderClick = () => {
     if (isMaxFolders) return;

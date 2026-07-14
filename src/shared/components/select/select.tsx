@@ -158,7 +158,7 @@ export const Select = (props: SelectProps) => {
           role="listbox"
           aria-multiselectable={isMulti || undefined}
           className={cn(
-            'absolute left-0 z-50 flex max-h-[208px] w-full flex-col overflow-y-auto rounded-[8px] border border-gray-200 bg-white p-8',
+            'absolute left-0 z-50 flex max-h-210 w-full flex-col overflow-y-auto rounded-xl border border-gray-200 bg-white p-8',
             openUpward ? 'bottom-full mb-10' : 'top-full mt-10',
           )}
         >

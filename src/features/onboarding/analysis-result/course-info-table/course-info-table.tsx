@@ -2,8 +2,15 @@
 
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
+import {
+  AddCourseModal,
+  type AddCourseValues,
+  AREA_OPTIONS,
+  SEMESTER_OPTIONS,
+} from '@shared/components/modal/add-course-modal';
+import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { cn } from '@shared/utils/cn';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { type TransitionEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { TableCellEdit } from './table-cell/table-cell-edit';
 import { TableCellSelect } from './table-cell/table-cell-select';
@@ -21,6 +28,7 @@ interface CourseInfoTableProps {
   courses: CourseInfo[];
   isEditing?: boolean;
   onValidityChange?: (isValid: boolean) => void;
+  onDeleteConfirm?: () => void;
 }
 
 const departmentOptions = ['해당없음', '연극영화학과', '컴퓨터공학부', '후마니타스칼리지(국제)'].map((label) => ({
@@ -28,19 +36,12 @@ const departmentOptions = ['해당없음', '연극영화학과', '컴퓨터공�
   label,
 }));
 
-const semesterOptions = Array.from({ length: 8 }, (_, i) => `${i + 1}학기`).map((label) => ({
-  value: label,
-  label,
-}));
-
-const areaOptions = ['필수교과', '전공 기초', '전공 필수', '전공 선택'].map((label) => ({ value: label, label }));
-
 const columns = [
   { key: 'courseName', label: '과목명', type: 'text' },
   { key: 'department', label: '개설학부', type: 'select', options: departmentOptions },
   { key: 'credit', label: '학점', type: 'text', suffix: '학점' },
-  { key: 'semester', label: '이수학기', type: 'select', options: semesterOptions },
-  { key: 'area', label: '영역', type: 'select', options: areaOptions },
+  { key: 'semester', label: '이수학기', type: 'select', options: SEMESTER_OPTIONS },
+  { key: 'area', label: '영역', type: 'select', options: AREA_OPTIONS },
 ] as const;
 
 const toCreditValue = (value: string) => {
@@ -56,20 +57,31 @@ const toCreditValue = (value: string) => {
 const ROW_HEIGHT = 44;
 const DEFAULT_VISIBLE_ROWS = 3;
 
-export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }: CourseInfoTableProps) => {
+export const CourseInfoTable = ({
+  courses,
+  isEditing = false,
+  onValidityChange,
+  onDeleteConfirm,
+}: CourseInfoTableProps) => {
   const [expanded, setExpanded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(() => Math.min(DEFAULT_VISIBLE_ROWS, courses.length));
   const [rows, setRows] = useState(courses);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [openCellKey, setOpenCellKey] = useState<string | null>(null);
   const [prevIsEditing, setPrevIsEditing] = useState(isEditing);
   const tableWrapperRef = useRef<HTMLTableElement>(null);
   const [tableHeight, setTableHeight] = useState<number>();
+  const [isHeightTransitioning, setIsHeightTransitioning] = useState(false);
+  const previousTableHeightRef = useRef<number | undefined>(undefined);
 
   if (isEditing !== prevIsEditing) {
     setPrevIsEditing(isEditing);
     if (!isEditing) {
       setSelectedIds(new Set());
       setExpanded(true);
+      setOpenCellKey(null);
     }
   }
 
@@ -105,11 +117,22 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
   useLayoutEffect(() => {
     const wrapper = tableWrapperRef.current;
     if (!wrapper) return;
-    setTableHeight(wrapper.scrollHeight);
+
+    const nextHeight = wrapper.scrollHeight;
+    if (previousTableHeightRef.current !== undefined && previousTableHeightRef.current !== nextHeight) {
+      setIsHeightTransitioning(true);
+    }
+    previousTableHeightRef.current = nextHeight;
+    setTableHeight(nextHeight);
   }, [visibleCourses.length, isEditing]);
 
   const handleToggleClick = () => {
     setExpanded((prev) => !prev);
+  };
+
+  const handleHeightTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget || e.propertyName !== 'height') return;
+    setIsHeightTransitioning(false);
   };
 
   const handleCellChange = (id: string, key: (typeof columns)[number]['key']) => (value: string) => {
@@ -134,8 +157,25 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
   };
 
   const handleDeleteClick = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleAddClick = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleAddCourseSubmit = ({ courseName, credit, area, semester }: AddCourseValues) => {
+    setRows((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), courseName, department: '해당없음', credit, semester, area },
+    ]);
+  };
+
+  const handleDeleteConfirm = () => {
     setRows((prev) => prev.filter((row) => !selectedIds.has(row.id)));
     setSelectedIds(new Set());
+    setIsDeleteModalOpen(false);
+    onDeleteConfirm?.();
   };
 
   return (
@@ -144,7 +184,7 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
         <p className="text-body-sb-16 text-gray-600">과목정보</p>
         {isEditing && (
           <div className="flex items-center gap-12">
-            <Button label="과목추가" mode="secondary_outline" size="sm" />
+            <Button label="과목추가" mode="secondary_outline" size="sm" onClick={handleAddClick} />
             <Button
               label="과목삭제"
               mode="primary_solid"
@@ -159,10 +199,12 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
       <div className="flex flex-col items-center gap-19">
         <div
           className={cn(
-            'w-full overflow-hidden',
+            'w-full',
+            isHeightTransitioning && 'overflow-hidden',
             tableHeight !== undefined && 'transition-[height] duration-300 ease-in-out',
           )}
           style={{ height: tableHeight }}
+          onTransitionEnd={handleHeightTransitionEnd}
         >
           <table ref={tableWrapperRef} className="w-full table-fixed border-separate [border-spacing:0_4px]">
             <caption className="sr-only">과목 정보</caption>
@@ -176,13 +218,25 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
               <tr className="bg-gray-50">
                 {isEditing && (
                   <th scope="col" className="px-8 py-4 text-left">
-                    <button type="button" onClick={handleSelectAllClick} aria-label="전체 선택">
+                    <button
+                      type="button"
+                      onClick={handleSelectAllClick}
+                      aria-label="전체 선택"
+                      className="mx-auto flex size-20 items-center justify-center"
+                    >
                       <Icon name={isAllSelected ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'} size={20} />
                     </button>
                   </th>
                 )}
                 {columns.map(({ key, label }) => (
-                  <th key={key} scope="col" className="text-body-sb-16 truncate px-8 py-4 text-left text-gray-600">
+                  <th
+                    key={key}
+                    scope="col"
+                    className={cn(
+                      'text-body-sb-16 truncate py-4 text-left text-gray-600',
+                      isEditing ? 'px-16' : 'px-8',
+                    )}
+                  >
                     {label}
                   </th>
                 ))}
@@ -197,6 +251,7 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
                         type="button"
                         onClick={handleRowSelectClick(course.id)}
                         aria-label={`${course.courseName} 선택`}
+                        className="mx-auto flex size-20 items-center justify-center"
                       >
                         <Icon
                           name={selectedIds.has(course.id) ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'}
@@ -212,6 +267,8 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
                           options={column.options}
                           value={course[column.key]}
                           onChange={handleCellChange(course.id, column.key)}
+                          isOpen={openCellKey === `${course.id}:${column.key}`}
+                          onOpenChange={(open) => setOpenCellKey(open ? `${course.id}:${column.key}` : null)}
                         />
                       ) : (
                         <TableCellEdit
@@ -238,6 +295,20 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
           />
         )}
       </div>
+      <ConfirmModal
+        open={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        type="delete"
+        title={`선택한 과목 ${selectedIds.size}개를 삭제할까요?`}
+        description="삭제한 과목은 복구할 수 없어요."
+        onConfirm={handleDeleteConfirm}
+      />
+      <AddCourseModal
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        courseNameOptions={rows.map((row) => row.courseName)}
+        onSubmit={handleAddCourseSubmit}
+      />
     </section>
   );
 };

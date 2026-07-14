@@ -3,7 +3,6 @@ import type { GraduationCondition, GraduationResponse } from '@shared/apis/types
 import { useMemo, useState } from 'react';
 
 import { useMergedRequirementItems } from './use-merged-requirement-items';
-import { type RequirementSectionOption, useRequirementTabs } from './use-requirement-tabs';
 
 const ALL_ITEM_ORDER = [
   'GRADUATION_REQUIRED',
@@ -21,6 +20,19 @@ const ALL_ITEM_ORDER = [
 interface UseRequirementSectionParams {
   data: GraduationResponse | null;
   details: RequirementDetail[];
+}
+
+interface RequirementSectionSource {
+  majorName: string | null;
+  graduationRequired: GraduationResponse['graduationRequired'];
+  conditions: GraduationCondition[];
+}
+
+interface RequirementSectionOption {
+  value: string;
+  label: string;
+  sections: RequirementSectionSource[];
+  shouldSort?: boolean;
 }
 
 const getRequirementScrollKey = ({ code, majorName }: Pick<RequirementAccordionItem, 'code' | 'majorName'>) => {
@@ -121,6 +133,31 @@ const getRequirementItems = (
   return sections.flatMap((section) => getSectionItems(section, details));
 };
 
+const getRequirementSectionOption = (data: GraduationResponse | null): RequirementSectionOption | undefined => {
+  if (!data) return undefined;
+
+  if (!data.sections) {
+    return {
+      value: 'CURRENT',
+      label: '현재',
+      sections: [
+        {
+          majorName: null,
+          graduationRequired: data.graduationRequired,
+          conditions: data.conditions ?? [],
+        },
+      ],
+    };
+  }
+
+  return {
+    value: 'ALL',
+    label: '전체',
+    sections: [...data.sections.majors, data.sections.ge, data.sections.others],
+    shouldSort: true,
+  };
+};
+
 const getRequirementShortcuts = (items: RequirementAccordionItem[]) => {
   const shortcuts = new Map<string, RequirementAccordionItem>();
 
@@ -150,8 +187,8 @@ const getRequirementShortcuts = (items: RequirementAccordionItem[]) => {
 };
 
 export const useRequirementSection = ({ data, details }: UseRequirementSectionParams) => {
-  const { tabs, selectedTab, setSelectedTab, selectedSectionOption } = useRequirementTabs(data);
   const [scrollTargetKey, setScrollTargetKey] = useState<string | null>(null);
+  const selectedSectionOption = useMemo(() => getRequirementSectionOption(data), [data]);
   const rawItems = useMemo(
     () => (selectedSectionOption ? getRequirementItems(selectedSectionOption, details) : []),
     [details, selectedSectionOption],
@@ -171,9 +208,6 @@ export const useRequirementSection = ({ data, details }: UseRequirementSectionPa
   };
 
   return {
-    tabs,
-    selectedTab,
-    setSelectedTab,
     shortcuts,
     items,
     scrollTargetKey,

@@ -9,7 +9,7 @@ export const Toaster = () => (
     toastOptions={{
       unstyled: true,
       classNames: {
-        toast: 'min-w-380',
+        toast: 'min-w-380 font-sans',
       },
     }}
   />
