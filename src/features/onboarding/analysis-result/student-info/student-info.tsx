@@ -33,7 +33,7 @@ export const StudentInfo = ({
           <div className="flex items-center gap-10">
             <span className="text-title-sb-20 text-gray-700">{name}</span>
             <Badge size="xsmall" color="lime01">
-              {enrollmentStatus}
+              {enrollmentStatus} 중
             </Badge>
           </div>
           <span className="text-body-m-14 text-gray-400">{schoolName}</span>
