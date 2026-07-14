@@ -46,7 +46,7 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
   if (!data || !data.sections) return null;
 
   const { summary, graduatable, sections } = data;
-  const { majors, ge } = sections;
+  const { majors, ge, others } = sections;
   const { totalCredits } = summary;
 
   const mainMajor = majors.find(({ majorType }) => majorType === 'MAIN') ?? majors[0];
@@ -75,12 +75,14 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
     return toTabRows(majors[majorIndex]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)) ?? []);
   };
 
-  // 전공/교양 학점은 각 섹션에서 합산하고, 기타는 총 이수 학점에서 전공·교양을 제외한 나머지로 계산해 스택 바에 사용
+  // 전공/교양/기타 학점은 각 섹션에서 그대로 합산해 스택 바에 사용한다.
+  // others.conditions는 GENERAL_ELECTIVE 하나만 내려오는 게 서버 계약이라(배열인 건 다른 섹션과의
+  // 구조 통일용) SW/영어 코드와 섞일 일이 없어 별도 필터 없이 그대로 합산한다.
   const majorCredit =
     majors[0]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)).reduce((sum, { current }) => sum + current, 0) ??
     0;
   const generalCredit = orderConditions(ge.conditions, GE_CODE_ORDER).reduce((sum, { current }) => sum + current, 0);
-  const otherCredit = totalCredits.current - majorCredit - generalCredit;
+  const otherCredit = others.conditions.reduce((sum, { current }) => sum + current, 0);
 
   const toPercent = (current: number) => calculatePercentage(current, totalCredits.required);
 

@@ -50,7 +50,9 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
   const otherRequiredCodes = new Set(otherRequiredConditions.map(({ code }) => code));
 
   const geConditions = ge.conditions.filter(({ code }) => !otherRequiredCodes.has(code));
-  const otherConditions = others.conditions.filter(({ code }) => !otherRequiredCodes.has(code));
+  // others.conditions는 GENERAL_ELECTIVE 하나만 내려오는 게 서버 계약이라(배열인 건 다른 섹션과의
+  // 구조 통일용) SW/영어 코드와 섞일 일이 없어 별도 필터 없이 그대로 쓴다.
+  const otherConditions = others.conditions;
 
   const tabs: TabItem[] = majors.map(({ majorName }, i) => ({
     value: String(i),
