@@ -15,7 +15,6 @@ export const KakaoLoginButton = () => {
     window.Kakao.Auth.authorize({
       redirectUri: `${window.location.origin}/api/auth/kakao/callback`,
       state: searchParams.get('redirect') ?? '',
-      prompt: 'login', //테스트용으로 집어넣은 것, 머지시 삭제 예정
     });
   };
 
