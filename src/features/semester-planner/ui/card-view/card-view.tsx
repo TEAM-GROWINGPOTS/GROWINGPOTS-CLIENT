@@ -222,7 +222,10 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
                   onAddFolder={() => handleAddFolder(term.id)}
                   onSelectFolder={(folderId) => selectFolder(term.id, folderId)}
                   onRenameFolder={(folderId, name) => renameFolder(term.id, folderId, name)}
-                  onDeleteFolder={(folderId) => deleteFolder(term.id, folderId)}
+                  onDeleteFolder={(folderId) => {
+                    deleteFolder(term.id, folderId);
+                    toast.success(`${term.yearLevel}학년 ${term.semesterLabel} 폴더가 삭제되었어요.`);
+                  }}
                 />
               ) : (
                 <SemesterCard
