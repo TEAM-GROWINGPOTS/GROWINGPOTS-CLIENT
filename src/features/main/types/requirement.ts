@@ -51,8 +51,9 @@ export interface RequirementCourse {
   name: string;
   departmentName: string;
   credit: number;
-  semester: string;
+  semester: string | null;
   taken: boolean;
   isEnglish: boolean;
   isSw: boolean;
+  area?: string | null;
 }

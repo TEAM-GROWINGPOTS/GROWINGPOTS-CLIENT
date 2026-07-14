@@ -27,6 +27,7 @@ export const GraduationProgressGrid = ({
         {items.map((item, index) => {
           const isSelected = selectedItemId === item.id;
           const isSecondRow = Math.floor(index / 3) === 1;
+          const isDisabled = item.isDisabled || !item.scrollKey;
 
           const level = getProgressLevel(item);
           const isDone = level === 3;
@@ -37,8 +38,12 @@ export const GraduationProgressGrid = ({
             <button
               key={item.id}
               type="button"
-              className={getCardClass(item, level, isSelected, isSecondRow)}
-              onClick={() => onSelectItem?.(item)}
+              className={getCardClass(item, level, isSelected, isSecondRow, isDisabled)}
+              onClick={() => {
+                if (isDisabled) return;
+                onSelectItem?.(item);
+              }}
+              disabled={isDisabled}
               aria-pressed={isSelected}
             >
               {item.isTotal && (
@@ -47,7 +52,7 @@ export const GraduationProgressGrid = ({
                     className={cn(
                       'block size-full transition-colors duration-300 ease-in-out',
                       getTotalShapeClasses(level).base,
-                      getTotalShapeClasses(level).hover,
+                      !isDisabled && getTotalShapeClasses(level).hover,
                     )}
                     fill="none"
                     preserveAspectRatio="none"
