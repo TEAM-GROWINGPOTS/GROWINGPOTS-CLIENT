@@ -64,7 +64,16 @@ export const AnalysisResultView = () => {
   };
 
   const handleConfirmClick = () => {
-    router.push('/');
+    const rows = courseInfoTableRef.current?.getCourses();
+    if (!rows || !studentCourses) {
+      router.push('/');
+      return;
+    }
+
+    updateStudentCourses(
+      { courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses) },
+      { onSuccess: () => router.push('/') },
+    );
   };
 
   return (
@@ -133,7 +142,7 @@ export const AnalysisResultView = () => {
             mode="primary_solid"
             size="lg"
             className="w-full justify-center"
-            disabled={isEditing}
+            disabled={isEditing || isSaving}
             onClick={handleConfirmClick}
           />
         </div>
