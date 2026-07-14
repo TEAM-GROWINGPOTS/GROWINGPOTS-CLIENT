@@ -47,8 +47,15 @@ export const LoginCarousel = () => {
     };
   }, [emblaApi, handleSelect]);
 
-  const handlePrevClick = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
-  const handleNextClick = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+  const handlePrevClick = useCallback(() => {
+    emblaApi?.scrollPrev();
+    emblaApi?.plugins()?.autoplay?.reset();
+  }, [emblaApi]);
+
+  const handleNextClick = useCallback(() => {
+    emblaApi?.scrollNext();
+    emblaApi?.plugins()?.autoplay?.reset();
+  }, [emblaApi]);
 
   return (
     <div className="flex size-full items-center justify-between overflow-hidden rounded-3xl border border-gray-100 bg-gray-50 px-40 py-120">
