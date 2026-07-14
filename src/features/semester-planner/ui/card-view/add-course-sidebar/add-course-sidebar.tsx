@@ -97,7 +97,7 @@ export const AddCourseSidebar = ({
   };
 
   return (
-    <aside className="flex h-full w-300 flex-col border-l border-gray-100 bg-gray-50 px-20 pt-48">
+    <aside className="flex h-full w-300 flex-col border-l border-gray-100 bg-gray-50 px-20 pt-48 pb-20">
       <header className="flex items-center justify-between">
         <h2 className="text-title-sb-20 text-gray-900">과목 추가</h2>
         <button type="button" aria-label="과목 추가 닫기" className="cursor-pointer" onClick={onClose}>
