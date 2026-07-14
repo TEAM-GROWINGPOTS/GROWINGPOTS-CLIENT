@@ -78,9 +78,9 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
   // 전공/교양/기타 학점은 각 섹션에서 그대로 합산해 스택 바에 사용한다.
   // others.conditions는 GENERAL_ELECTIVE 하나만 내려오는 게 서버 계약이라(배열인 건 다른 섹션과의
   // 구조 통일용) SW/영어 코드와 섞일 일이 없어 별도 필터 없이 그대로 합산한다.
-  const majorCredit =
-    majors[0]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)).reduce((sum, { current }) => sum + current, 0) ??
-    0;
+  const majorCredit = majors
+    .flatMap((major) => major.conditions.filter(({ code }) => MAJOR_CODES.has(code)))
+    .reduce((sum, { current }) => sum + current, 0);
   const generalCredit = orderConditions(ge.conditions, GE_CODE_ORDER).reduce((sum, { current }) => sum + current, 0);
   const otherCredit = others.conditions.reduce((sum, { current }) => sum + current, 0);
 
