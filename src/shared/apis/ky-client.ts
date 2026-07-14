@@ -7,6 +7,9 @@ const API_BASE_URL = (() => {
   return url;
 })();
 
+const MAX_REISSUE_ATTEMPTS = 3;
+let isRefreshing = false;
+
 export const kyClient = ky.create({
   baseUrl: API_BASE_URL,
   credentials: 'include',
@@ -38,16 +41,30 @@ export const kyClient = ky.create({
           console.debug(`[API] ${response.status} ${response.url}`);
         }
 
-        if (response.status === 401) {
-          try {
-            await ky.post(`${API_BASE_URL}/api/v1/auth/reissue`, { credentials: 'include' });
-            return fetch(request.clone());
-          } catch {
-            document.cookie = 'onboardingCompleted=; path=/; max-age=0; SameSite=Lax';
-            document.cookie = 'nickname=; path=/; max-age=0; SameSite=Lax';
-            const redirectTo = encodeURIComponent(window.location.pathname + window.location.search);
-            window.location.href = `/login?redirect=${redirectTo}`;
+        if (response.status === 401 && !isRefreshing) {
+          isRefreshing = true;
+          let succeeded = false;
+
+          for (let attempt = 0; attempt < MAX_REISSUE_ATTEMPTS; attempt++) {
+            try {
+              await ky.post(`${API_BASE_URL}/api/v1/auth/reissue`, { credentials: 'include' });
+              succeeded = true;
+              break;
+            } catch (error) {
+              if (isHTTPError(error)) break;
+            }
           }
+
+          isRefreshing = false;
+
+          if (succeeded) {
+            return fetch(request.clone());
+          }
+
+          document.cookie = 'onboardingCompleted=; path=/; max-age=0; SameSite=Lax';
+          document.cookie = 'nickname=; path=/; max-age=0; SameSite=Lax';
+          const redirectTo = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `/login?redirect=${redirectTo}`;
         }
       },
     ],
