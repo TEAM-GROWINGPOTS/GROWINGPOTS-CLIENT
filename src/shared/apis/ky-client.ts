@@ -61,10 +61,8 @@ export const kyClient = ky.create({
             return fetch(request.clone());
           }
 
-          document.cookie = 'onboardingCompleted=; path=/; max-age=0; SameSite=Lax';
-          document.cookie = 'nickname=; path=/; max-age=0; SameSite=Lax';
           const redirectTo = encodeURIComponent(window.location.pathname + window.location.search);
-          window.location.href = `/login?redirect=${redirectTo}`;
+          window.location.href = `/api/auth/logout?redirect=${redirectTo}`;
         }
       },
     ],
