@@ -5,6 +5,7 @@ import type { CourseInfo } from './course-info-table';
 export const mapStudentCoursesToCourseInfo = (courses: StudentCourse[]): CourseInfo[] =>
   courses.map((course) => ({
     id: `${course.studentCourseId}`,
+    courseId: null,
     courseName: course.name,
     department: course.departmentName ?? '해당없음',
     departmentId: course.departmentId,
@@ -24,7 +25,7 @@ export const mapCourseInfoToPutStudentCourses = (
 
     return {
       studentCourseId: original?.studentCourseId ?? null,
-      courseId: null,
+      courseId: row.courseId,
       rawCourseName: row.courseName,
       departmentId: row.departmentId,
       credit: Number(row.credit),

@@ -22,6 +22,7 @@ import { TableCellSelect } from './table-cell/table-cell-select';
 
 export interface CourseInfo {
   id: string;
+  courseId: number | null;
   courseName: string;
   department: string;
   departmentId: number | null;
@@ -200,13 +201,14 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
       setIsAddModalOpen(true);
     };
 
-    const handleAddCourseSubmit = ({ courseName, credit, area, semester }: AddCourseValues) => {
+    const handleAddCourseSubmit = ({ courseId, courseName, credit, area, semester }: AddCourseValues) => {
       const division = divisions.find(({ name }) => name === area);
 
       setRows((prev) => [
         ...prev,
         {
           id: crypto.randomUUID(),
+          courseId,
           courseName,
           department: '해당없음',
           departmentId: null,
@@ -356,12 +358,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
           description="삭제한 과목은 복구할 수 없어요."
           onConfirm={handleDeleteConfirm}
         />
-        <AddCourseModal
-          open={isAddModalOpen}
-          onOpenChange={setIsAddModalOpen}
-          courseNameOptions={rows.map((row) => row.courseName)}
-          onSubmit={handleAddCourseSubmit}
-        />
+        <AddCourseModal open={isAddModalOpen} onOpenChange={setIsAddModalOpen} onSubmit={handleAddCourseSubmit} />
       </section>
     );
   },
