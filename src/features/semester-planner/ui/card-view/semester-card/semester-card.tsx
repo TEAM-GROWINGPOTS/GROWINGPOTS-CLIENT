@@ -119,7 +119,7 @@ export const SemesterCard = ({
   const isLastFolder = (folders?.length ?? 0) <= 1;
 
   return (
-    <section className={cn('flex max-h-screen w-258 shrink-0 flex-col self-start rounded-xl bg-gray-800', className)}>
+    <section className={cn('flex w-258 shrink-0 flex-col self-start rounded-xl bg-gray-800', className)}>
       <header className="flex items-center justify-between px-12 pt-12">
         <div className="flex flex-row gap-8">
           {statusIcon && <Icon name={statusIcon} size={20} />}
@@ -170,7 +170,7 @@ export const SemesterCard = ({
         <div className="my-8 border-b border-gray-200" />
         <div className="relative flex min-h-0 flex-col">
           {courses.length > 0 ? (
-            <ul className="flex min-h-0 flex-col gap-8 overflow-y-auto">
+            <ul className="flex min-h-0 flex-col gap-8">
               {courses.map((course) => {
                 const { id, departmentName, name, tags, isEnglish, isSw } = course;
                 return (
