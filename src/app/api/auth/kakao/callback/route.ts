@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
     );
     response.headers.append(
       'Set-Cookie',
-      `onboardingCompleted=${data.onboardingCompleted}; Path=/; Max-Age=${maxAge}; SameSite=Lax`,
+      `onboardingCompleted=${data.onboardingCompleted}; Path=/; Max-Age=${maxAge}; SameSite=Lax; HttpOnly`,
     );
 
     return response;

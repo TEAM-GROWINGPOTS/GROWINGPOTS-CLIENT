@@ -7,7 +7,7 @@ export function GET(request: NextRequest) {
   response.headers.append('Set-Cookie', `accessToken=; ${cookieOptions}`);
   response.headers.append('Set-Cookie', `refreshToken=; ${cookieOptions}`);
   response.headers.append('Set-Cookie', `nickname=; ${cookieOptions}`);
-  response.headers.append('Set-Cookie', `onboardingCompleted=; ${cookieOptions}`);
+  response.headers.append('Set-Cookie', `onboardingCompleted=; ${cookieOptions}; HttpOnly`);
 
   return response;
 }
