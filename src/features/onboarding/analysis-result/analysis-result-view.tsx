@@ -66,13 +66,13 @@ export const AnalysisResultView = () => {
   const handleConfirmClick = () => {
     const rows = courseInfoTableRef.current?.getCourses();
     if (!rows || !studentCourses) {
-      router.push('/');
+      router.push('/graduation-dashboard');
       return;
     }
 
     updateStudentCourses(
       { courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses) },
-      { onSuccess: () => router.push('/') },
+      { onSuccess: () => router.push('/graduation-dashboard') },
     );
   };
 
