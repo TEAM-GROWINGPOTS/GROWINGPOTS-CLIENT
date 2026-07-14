@@ -149,6 +149,7 @@ export const TableCellSelect = ({
               }}
               role="option"
               aria-selected={optValue === value}
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => handleSelect(optValue)}
               onMouseEnter={() => setActiveIndex(index)}
               className={cn(

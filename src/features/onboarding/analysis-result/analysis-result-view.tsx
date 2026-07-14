@@ -1,36 +1,79 @@
 'use client';
 
 import { Button } from '@shared/components/button/button';
+import { useDepartmentOptions } from '@shared/hooks/use-department-options';
+import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
+import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
-import { MOCK_COURSES, MOCK_GRADUATION_RESPONSE } from '../mocks/analysis-result';
-import { CourseInfoTable } from './course-info-table/course-info-table';
+import { useStudentCourses } from '../hooks/use-student-courses';
+import { useUpdateStudentCourses } from '../hooks/use-update-student-courses';
+import { type CourseInfo, CourseInfoTable, type CourseInfoTableRef } from './course-info-table/course-info-table';
+import {
+  mapCourseInfoToPutStudentCourses,
+  mapStudentCoursesToCourseInfo,
+} from './course-info-table/map-student-courses';
 import { GraduationResult } from './graduation-result/graduation-result';
 import { mapGraduationResponseToCards } from './graduation-result/map-graduation-response';
 import { StudentInfo } from './student-info/student-info';
-
-const requirementItems = mapGraduationResponseToCards(MOCK_GRADUATION_RESPONSE);
 
 export const AnalysisResultView = () => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isCourseInfoValid, setIsCourseInfoValid] = useState(true);
+  const courseInfoTableRef = useRef<CourseInfoTableRef>(null);
+  const { data: studentProfile } = useStudentProfile();
+  const { data: studentCourses } = useStudentCourses();
+  const { data: departments = [] } = useDepartmentOptions();
+  const { data: graduation } = useGraduationStatus();
+  const { mutate: updateStudentCourses, isPending: isSaving } = useUpdateStudentCourses();
+  const courses = useMemo(
+    () => (studentCourses ? mapStudentCoursesToCourseInfo(studentCourses.courses) : []),
+    [studentCourses],
+  );
+  const requirementItems = graduation ? mapGraduationResponseToCards(graduation) : [];
 
   const handleEditToggleClick = () => {
-    setIsEditing((prev) => !prev);
+    if (!isEditing) {
+      setIsEditing(true);
+      return;
+    }
+
+    const rows = courseInfoTableRef.current?.getCourses();
+    if (!rows || !studentCourses) return;
+
+    updateStudentCourses(
+      { courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses) },
+      { onSuccess: () => setIsEditing(false) },
+    );
   };
 
   const handleCourseInfoValidityChange = useCallback((isValid: boolean) => {
     setIsCourseInfoValid(isValid);
   }, []);
 
+  const handleDeleteRows = (remainingCourses: CourseInfo[]) => {
+    if (!studentCourses) return;
+
+    updateStudentCourses({ courses: mapCourseInfoToPutStudentCourses(remainingCourses, studentCourses.courses) });
+  };
+
   const handlePdfReuploadClick = () => {
     router.push('/onboarding?step=pdf');
   };
 
   const handleConfirmClick = () => {
-    router.push('/');
+    const rows = courseInfoTableRef.current?.getCourses();
+    if (!rows || !studentCourses) {
+      router.push('/graduation-dashboard');
+      return;
+    }
+
+    updateStudentCourses(
+      { courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses) },
+      { onSuccess: () => router.push('/graduation-dashboard') },
+    );
   };
 
   return (
@@ -46,22 +89,24 @@ export const AnalysisResultView = () => {
           label={isEditing ? '저장하기' : '편집하기'}
           mode={isEditing ? 'primary_solid' : 'secondary_outline'}
           size="sm"
-          disabled={isEditing && !isCourseInfoValid}
+          disabled={isEditing && (!isCourseInfoValid || isSaving)}
           onClick={handleEditToggleClick}
         />
       </div>
 
       <div className="flex h-231 w-full gap-20">
         <div className="flex-1">
-          <StudentInfo
-            name="김경민"
-            enrollmentStatus="재학 중"
-            schoolName="경희대학교(국제캠퍼스)"
-            departmentName="연극영화학과 영화트랙"
-            studentNo="2023103101"
-            gradeLevel={4}
-            semester={1}
-          />
+          {studentProfile && (
+            <StudentInfo
+              name={studentProfile.name}
+              enrollmentStatus={studentProfile.enrollmentStatus}
+              schoolName={studentProfile.schoolName}
+              departmentName={studentProfile.departmentName}
+              studentNo={studentProfile.studentNo}
+              gradeLevel={studentProfile.gradeLevel}
+              semester={studentProfile.semester}
+            />
+          )}
         </div>
         <div className="flex-3">
           <GraduationResult items={requirementItems} />
@@ -69,12 +114,17 @@ export const AnalysisResultView = () => {
       </div>
 
       <div className="mt-20 w-full">
-        <CourseInfoTable
-          courses={MOCK_COURSES}
-          isEditing={isEditing}
-          onValidityChange={handleCourseInfoValidityChange}
-          onDeleteConfirm={() => setIsEditing(false)}
-        />
+        {studentCourses && (
+          <CourseInfoTable
+            ref={courseInfoTableRef}
+            courses={courses}
+            departments={departments}
+            divisions={studentCourses.availableDivisions}
+            isEditing={isEditing}
+            onValidityChange={handleCourseInfoValidityChange}
+            onDeleteRows={handleDeleteRows}
+          />
+        )}
       </div>
 
       <div className="mt-20 flex justify-center">
@@ -92,7 +142,7 @@ export const AnalysisResultView = () => {
             mode="primary_solid"
             size="lg"
             className="w-full justify-center"
-            disabled={isEditing}
+            disabled={isEditing || isSaving}
             onClick={handleConfirmClick}
           />
         </div>

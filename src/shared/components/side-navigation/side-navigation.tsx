@@ -2,6 +2,7 @@
 
 import Icon from '@shared/components/icon/icon';
 import { NavItem } from '@shared/components/nav-item/nav-item';
+import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
 import Image from 'next/image';
@@ -18,24 +19,17 @@ interface SideNavigationProps {
   initialIsCollapsed?: boolean;
 }
 
-// TODO: api 연동 후 교체
 const FALLBACK_ACADEMIC_INFO: SideNavigationAcademicInfoItem[] = [
-  { label: '학교', value: '경희대학교 국제 캠퍼스' },
-  { label: '소속학부', value: '소프트웨어 융합학과' },
-  { label: '학번', value: '00000000000' },
-  { label: '학년', value: '4학년 1학기' },
+  { label: '학교', value: '' },
+  { label: '소속학부', value: '' },
+  { label: '학번', value: '' },
+  { label: '학년', value: '' },
 ];
 
 const NAV_ITEMS = [
   { label: '나의 현황', iconName: 'ic_home', href: '/graduation-dashboard' },
   { label: '학기플래너', iconName: 'ic_planner', href: '/semester-planner' },
 ] as const;
-
-// TODO: 전역 사용자 정보 연동 후 교체
-const MOCK_USER_PROFILE = {
-  name: '사용자',
-  grade: 4,
-} as const;
 
 const GRADE_ICON_BY_YEAR: Record<number, string> = {
   1: '/images/grade_1st.png',
@@ -50,18 +44,27 @@ const isNavItemActive = (pathname: string, href: string) => {
   return pathname === href || pathname.startsWith(`${href}/`);
 };
 
-export const SideNavigation = ({
-  academicInfo = FALLBACK_ACADEMIC_INFO,
-  initialIsCollapsed = false,
-}: SideNavigationProps) => {
+export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: SideNavigationProps) => {
   const router = useRouter();
   const pathname = usePathname();
+  const { data: studentProfile } = useStudentProfile();
 
   const isCollapsed = useSideNavigationStore((state) => state.isCollapsed);
   const isInitialized = useSideNavigationStore((state) => state.isInitialized);
   const isSidebarCollapsed = isInitialized ? isCollapsed : initialIsCollapsed;
 
-  const gradeIconSrc = GRADE_ICON_BY_YEAR[MOCK_USER_PROFILE.grade] ?? GRADE_ICON_BY_YEAR[1];
+  const resolvedAcademicInfo =
+    academicInfo ??
+    (studentProfile
+      ? [
+          { label: '학교', value: studentProfile.schoolName },
+          { label: '소속학부', value: studentProfile.departmentName },
+          { label: '학번', value: studentProfile.studentNo },
+          { label: '학년', value: `${studentProfile.gradeLevel}학년 ${studentProfile.semester}학기` },
+        ]
+      : FALLBACK_ACADEMIC_INFO);
+
+  const gradeIconSrc = GRADE_ICON_BY_YEAR[studentProfile?.gradeLevel ?? 1] ?? GRADE_ICON_BY_YEAR[1];
 
   const initializeCollapsed = useSideNavigationStore((state) => state.initializeCollapsed);
   const toggleSidebar = useSideNavigationStore((state) => state.toggleSidebar);
@@ -76,6 +79,10 @@ export const SideNavigation = ({
 
   const handleToggleClick = () => {
     toggleSidebar();
+  };
+
+  const handleReuploadClick = () => {
+    router.push('/onboarding?step=pdf');
   };
 
   return (
@@ -135,13 +142,14 @@ export const SideNavigation = ({
           <div className="flex flex-col gap-8 overflow-hidden">
             <button
               type="button"
+              onClick={handleReuploadClick}
               className="flex cursor-pointer items-center justify-center gap-4 rounded bg-gray-800 px-12 py-6"
             >
               <span className="text-body-m-14 text-gray-300">졸업사정관리표</span>
             </button>
             <section aria-label="학력 정보">
               <dl className="flex min-w-[216px] cursor-default flex-col gap-12 rounded-lg bg-gray-800 p-16">
-                {academicInfo.map(({ label, value }) => (
+                {resolvedAcademicInfo.map(({ label, value }) => (
                   <div key={label} className="flex items-start justify-between whitespace-nowrap">
                     <dt className="text-body-r-14 text-gray-300">{label}</dt>
                     <dd className="text-body-m-14 text-white">{value}</dd>
@@ -164,7 +172,7 @@ export const SideNavigation = ({
           >
             <div className="flex min-w-0 items-center gap-4 overflow-hidden whitespace-nowrap">
               <p className="text-body-m-16 min-w-0 flex-1 cursor-default overflow-hidden text-white">
-                {MOCK_USER_PROFILE.name}
+                {studentProfile?.name ?? ''}
               </p>
               <button
                 onClick={() => {
