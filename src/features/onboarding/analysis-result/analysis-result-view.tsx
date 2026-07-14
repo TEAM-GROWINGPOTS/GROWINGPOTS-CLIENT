@@ -1,10 +1,10 @@
 'use client';
 
 import { Button } from '@shared/components/button/button';
+import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
-import { useStudentProfile } from '../hooks/use-student-profile';
 import { MOCK_COURSES, MOCK_GRADUATION_RESPONSE } from '../mocks/analysis-result';
 import { CourseInfoTable } from './course-info-table/course-info-table';
 import { GraduationResult } from './graduation-result/graduation-result';
