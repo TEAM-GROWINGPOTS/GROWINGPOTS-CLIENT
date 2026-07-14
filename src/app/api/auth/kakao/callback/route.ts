@@ -17,7 +17,13 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get('code');
   const rawState = searchParams.get('state') ?? '';
-  const state = rawState.startsWith('/') && !rawState.startsWith('//') ? rawState : '/';
+  let state = '/';
+  try {
+    const parsed = new URL(rawState, origin);
+    if (parsed.origin === origin) state = parsed.pathname + parsed.search;
+  } catch {
+    // 유효하지 않은 URL이면 '/'로 fallback
+  }
 
   if (!code) {
     return NextResponse.redirect(new URL('/login', request.url));
