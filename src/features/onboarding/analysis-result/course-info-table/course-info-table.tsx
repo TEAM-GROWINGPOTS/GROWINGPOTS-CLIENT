@@ -2,6 +2,12 @@
 
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
+import {
+  AddCourseModal,
+  type AddCourseValues,
+  AREA_OPTIONS,
+  SEMESTER_OPTIONS,
+} from '@shared/components/modal/add-course-modal';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { cn } from '@shared/utils/cn';
 import { type TransitionEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -30,19 +36,12 @@ const departmentOptions = ['해당없음', '연극영화학과', '컴퓨터공�
   label,
 }));
 
-const semesterOptions = Array.from({ length: 8 }, (_, i) => `${i + 1}학기`).map((label) => ({
-  value: label,
-  label,
-}));
-
-const areaOptions = ['필수교과', '전공 기초', '전공 필수', '전공 선택'].map((label) => ({ value: label, label }));
-
 const columns = [
   { key: 'courseName', label: '과목명', type: 'text' },
   { key: 'department', label: '개설학부', type: 'select', options: departmentOptions },
   { key: 'credit', label: '학점', type: 'text', suffix: '학점' },
-  { key: 'semester', label: '이수학기', type: 'select', options: semesterOptions },
-  { key: 'area', label: '영역', type: 'select', options: areaOptions },
+  { key: 'semester', label: '이수학기', type: 'select', options: SEMESTER_OPTIONS },
+  { key: 'area', label: '영역', type: 'select', options: AREA_OPTIONS },
 ] as const;
 
 const toCreditValue = (value: string) => {
@@ -69,6 +68,7 @@ export const CourseInfoTable = ({
   const [rows, setRows] = useState(courses);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [prevIsEditing, setPrevIsEditing] = useState(isEditing);
   const tableWrapperRef = useRef<HTMLTableElement>(null);
   const [tableHeight, setTableHeight] = useState<number>();
@@ -158,6 +158,17 @@ export const CourseInfoTable = ({
     setIsDeleteModalOpen(true);
   };
 
+  const handleAddClick = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleAddCourseSubmit = ({ courseName, credit, area, semester }: AddCourseValues) => {
+    setRows((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), courseName, department: '해당없음', credit, semester, area },
+    ]);
+  };
+
   const handleDeleteConfirm = () => {
     setRows((prev) => prev.filter((row) => !selectedIds.has(row.id)));
     setSelectedIds(new Set());
@@ -171,7 +182,7 @@ export const CourseInfoTable = ({
         <p className="text-body-sb-16 text-gray-600">과목정보</p>
         {isEditing && (
           <div className="flex items-center gap-12">
-            <Button label="과목추가" mode="secondary_outline" size="sm" />
+            <Button label="과목추가" mode="secondary_outline" size="sm" onClick={handleAddClick} />
             <Button
               label="과목삭제"
               mode="primary_solid"
@@ -287,6 +298,12 @@ export const CourseInfoTable = ({
         title={`선택한 과목 ${selectedIds.size}개를 삭제할까요?`}
         description="삭제한 과목은 복구할 수 없어요."
         onConfirm={handleDeleteConfirm}
+      />
+      <AddCourseModal
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        courseNameOptions={rows.map((row) => row.courseName)}
+        onSubmit={handleAddCourseSubmit}
       />
     </section>
   );
