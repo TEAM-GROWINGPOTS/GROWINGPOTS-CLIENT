@@ -33,8 +33,8 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
   const displayName = REQUIREMENT_DISPLAY_NAMES[item.code] ?? item.name;
 
   return (
-    <Accordion.Header asChild>
-      <div>
+    <Accordion.Header>
+      <Accordion.Trigger className="group block w-full cursor-pointer text-left">
         {isMajorNameVisible && <p className="text-body-m-14 mb-4 text-gray-500">{item.majorName}</p>}
 
         <div className="flex items-center">
@@ -48,13 +48,14 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
               size="sm"
               content={infoContent}
               trigger={
-                <button
-                  type="button"
+                <span
                   aria-label={`${displayName} 안내 보기`}
                   className="mr-8 flex size-20 shrink-0 items-center justify-center"
+                  role="button"
+                  onClick={(event) => event.stopPropagation()}
                 >
                   <Icon name="ic_information_outline" size={20} className="text-gray-300" />
-                </button>
+                </span>
               }
             />
           )}
@@ -77,19 +78,16 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
             )}
           </p>
 
-          <Accordion.Trigger
-            aria-label={`${displayName} 상세 보기`}
-            className="group flex size-24 shrink-0 cursor-pointer items-center justify-center"
-          >
+          <span className="flex size-24 shrink-0 items-center justify-center">
             <Icon name="ic_chevron_down" size={24} className="text-gray-500 group-data-[state=open]:hidden" />
             <Icon name="ic_chevron_up" size={24} className="hidden text-gray-500 group-data-[state=open]:block" />
-          </Accordion.Trigger>
+          </span>
         </div>
+      </Accordion.Trigger>
 
-        {hasProgress && (
-          <ProgressBar current={item.current} required={required} satisfied={isSatisfied} className="mt-12" />
-        )}
-      </div>
+      {hasProgress && (
+        <ProgressBar current={item.current} required={required} satisfied={isSatisfied} className="mt-12" />
+      )}
     </Accordion.Header>
   );
 };
