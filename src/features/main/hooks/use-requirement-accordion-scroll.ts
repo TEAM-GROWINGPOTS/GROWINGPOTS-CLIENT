@@ -9,6 +9,7 @@ interface UseRequirementAccordionScrollParams {
 export const useRequirementAccordionScroll = ({ items, scrollTargetKey }: UseRequirementAccordionScrollParams) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const activeItemsRef = useRef(items);
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [hasAutoScrollSpace, setHasAutoScrollSpace] = useState(false);
   const [isAutoScrollSpaceAnimated, setIsAutoScrollSpaceAnimated] = useState(false);
@@ -23,8 +24,12 @@ export const useRequirementAccordionScroll = ({ items, scrollTargetKey }: UseReq
   }, []);
 
   useEffect(() => {
+    activeItemsRef.current = items;
     itemRefs.current = {};
+    scrollContainerRef.current?.scrollTo({ top: 0 });
+  }, [items]);
 
+  useEffect(() => {
     const frameId = requestAnimationFrame(updateIsAtBottom);
 
     return () => cancelAnimationFrame(frameId);
@@ -56,6 +61,7 @@ export const useRequirementAccordionScroll = ({ items, scrollTargetKey }: UseReq
 
   useEffect(() => {
     if (!activeScrollTargetKey) return;
+    if (!activeItemsRef.current.some(({ scrollKey }) => scrollKey === activeScrollTargetKey)) return;
 
     const container = scrollContainerRef.current;
     const targetItem = itemRefs.current[activeScrollTargetKey];

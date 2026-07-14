@@ -163,6 +163,11 @@ export const useRequirementSection = ({ data, details }: UseRequirementSectionPa
   );
   const shortcuts = useMemo(() => getRequirementShortcuts(items), [items]);
 
+  const handleTabChange = (tab: string) => {
+    setScrollTargetKey(null);
+    setSelectedTab(tab);
+  };
+
   const handleShortcutClick = (scrollKey?: string) => {
     if (!scrollKey) return;
 
@@ -173,7 +178,7 @@ export const useRequirementSection = ({ data, details }: UseRequirementSectionPa
   return {
     tabs,
     selectedTab,
-    setSelectedTab,
+    setSelectedTab: handleTabChange,
     shortcuts,
     items,
     scrollTargetKey,
