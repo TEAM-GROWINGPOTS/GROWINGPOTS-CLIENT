@@ -23,7 +23,7 @@ export const GraduationProgressGrid = ({
       className={cn('flex h-545 w-full flex-col gap-28 overflow-visible', className)}
       aria-label="졸업 이수 현황"
     >
-      <div className="grid w-full grid-cols-[129px_minmax(0,1fr)_213px] gap-4 overflow-visible pr-12">
+      <div className="grid w-full grid-cols-[129fr_166fr_213fr] gap-4 overflow-visible pr-12">
         {items.map((item, index) => {
           const isSelected = selectedItemId === item.id;
           const isSecondRow = Math.floor(index / 3) === 1;
@@ -95,7 +95,7 @@ export const GraduationProgressGrid = ({
                 <span
                   className={cn(
                     'text-body-m-14 px-1 transition-colors duration-300 ease-in-out',
-                    isDone || (level === 1 && !logo) ? 'text-gray-400' : 'text-lime-700',
+                    level === 2 ? 'text-lime-700' : 'text-gray-400',
                   )}
                 >
                   /{item.required}
