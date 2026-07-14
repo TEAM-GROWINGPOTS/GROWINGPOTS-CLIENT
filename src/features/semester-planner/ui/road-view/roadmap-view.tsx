@@ -4,10 +4,11 @@ import '@xyflow/react/dist/style.css';
 
 import graduation from '@features/semester-planner/assets/graduation.json';
 import { MAX_FOLDERS_PER_TERM } from '@features/semester-planner/constants';
+import { PlannerActionsContext } from '@features/semester-planner/contexts/planner-actions-context';
 import { ReachabilityContext } from '@features/semester-planner/contexts/reachability-context';
 import { usePlannerGraph } from '@features/semester-planner/hooks/use-planner-graph';
+import { usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
 import { useViewMode } from '@features/semester-planner/hooks/use-view-mode';
-import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
 import {
   AddVersionNodeData,
   GRADUATION_REQUIREMENTS,
@@ -15,6 +16,9 @@ import {
   SemesterEdgeData,
 } from '@features/semester-planner/types/planner-graph';
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
+import { parseApiError } from '@shared/apis/parse-api-error';
+import { toast, Toaster } from '@shared/components';
+import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
 import { cn } from '@shared/utils/cn';
 import {
   Background,
@@ -30,6 +34,7 @@ import {
   ViewportPortal,
 } from '@xyflow/react';
 import Lottie from 'lottie-react';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AddSemesterNode } from './add-semester-node';
@@ -39,6 +44,11 @@ import { DropIndicatorLine } from './drop-indicator-line';
 import { RoadmapHeader } from './roadmap-header';
 import { SemesterEdge } from './semester-edge';
 import { SemesterNode } from './semester-node';
+
+const SEMESTER_LABEL_MAP: Record<string, string> = {
+  '1': '1학기',
+  '2': '2학기',
+};
 
 const ROW_GAP = 150;
 const ROW_MARGIN = 20; // 같은 열 카드 사이 여백
@@ -210,10 +220,25 @@ const edgeTypes = { semesterEdge: SemesterEdge };
 
 export const RoadmapView = () => {
   const { setViewMode } = useViewMode();
-  const { nodes: initialNodes, edges: initialEdges, completedIds } = usePlannerGraph();
+  const router = useRouter();
+  const {
+    isSeeded,
+    isError: isPlannerError,
+    error: plannerError,
+    completedTerms,
+    plannedTerms,
+    addTerm,
+    addFolder,
+    deleteFolder,
+    selectFolders,
+    reorderFolders,
+    waitForSave,
+  } = usePlannerTerms();
+  const { nodes: initialNodes, edges: initialEdges, completedIds } = usePlannerGraph(completedTerms, plannedTerms);
+  const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<PlannerNodeData>>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge<SemesterEdgeData>>([]);
   const [dropIndicator, setDropIndicator] = useState<{ colX: number; y: number } | null>(null);
   const [isAddSemesterModalOpen, setIsAddSemesterModalOpen] = useState(false);
   const [isCelebrationDismissed, setIsCelebrationDismissed] = useState(false);
@@ -225,6 +250,48 @@ export const RoadmapView = () => {
   useEffect(() => {
     nodesRef.current = nodes;
   }, [nodes]);
+  const edgesRef = useRef(edges);
+  useEffect(() => {
+    edgesRef.current = edges;
+  }, [edges]);
+
+  useEffect(() => {
+    if (!isPlannerError) return;
+    parseApiError(plannerError).then((parsed) => {
+      if (parsed?.status === 404) {
+        router.replace('/onboarding');
+        return;
+      }
+      toast.negative(parsed?.message ?? '플래너를 불러오지 못했어요.');
+    });
+  }, [isPlannerError, plannerError, router]);
+
+  // planner 조회가 (재조회 포함) 안정된 뒤 딱 한 번만 그래프를 시드한다. 이후의 카드 위치/연결/삭제는
+  // 로컬 nodes/edges state에서 직접 관리되고(각 핸들러가 setNodes/setEdges를 직접 호출), usePlannerTerms의
+  // plannedTerms는 저장 요청 스냅샷 용도로만 쓰인다 — GET을 다시 부르거나 이 값으로 그래프를 재구성하지 않는다.
+  // isSeeded는 usePlannerTerms 내부에서 plannedTerms를 실제로 채운 바로 그 렌더에 함께 true가 되므로,
+  // isLoading/isFetching 조합으로 직접 판단할 때 생기는 "완료 처리는 됐는데 plannedTerms는 아직 빈 배열"
+  // 한 렌더짜리 경합을 피할 수 있다.
+  const hasGraphSeededRef = useRef(false);
+  useEffect(() => {
+    if (hasGraphSeededRef.current || !isSeeded) return;
+    hasGraphSeededRef.current = true;
+    setNodes(initialNodes);
+    setEdges(initialEdges);
+  }, [isSeeded, initialNodes, initialEdges, setNodes, setEdges]);
+
+  // 학기의 마지막 폴더를 삭제하면 그 컬럼(학기) 자체가 사라지고 뒤 컬럼들의 colIndex/colX가 전부 한 칸씩
+  // 당겨져야 한다. 기존 로컬 노드의 위치를 보존해봐야 컬럼 자체가 옮겨간 노드는 x가 안 맞아 오히려
+  // 어긋나므로, 이 경우엔 buildPlannerGraph가 다시 계산한 그래프를 그대로 신뢰하고 recomputeColumnPositions로
+  // y까지 다시 맞춘다(최초 로드와 동일한 방식 — 살아남은 노드는 react-flow가 measured를 기억하고 있어서
+  // 바로 정확한 높이로 배치되고, 완전히 새로 생기는 노드만 잠깐 기본 간격으로 보였다가 보정된다).
+  const pendingFullRebuildRef = useRef(false);
+  useEffect(() => {
+    if (!pendingFullRebuildRef.current) return;
+    pendingFullRebuildRef.current = false;
+    setNodes(recomputeColumnPositions(initialNodes));
+    setEdges(initialEdges);
+  }, [initialNodes, initialEdges, setNodes, setEdges]);
 
   // 노드 높이 변화(아코디언 열기/닫기) 감지 → 같은 열 y 재배치
   const measuredHeightsRef = useRef<Map<string, number>>(new Map());
@@ -243,38 +310,24 @@ export const RoadmapView = () => {
   }, [nodes, setNodes]);
 
   const reachability = useMemo(() => computeReachableIds(completedIds, edges), [completedIds, edges]);
+  // 체인을 따라 흐르는 엣지 라벨(구간별 누적 학점)은 서버가 내려주지 않는 그래프 전용 표시라 그대로 클라이언트에서 계산한다.
   const edgeCredits = useMemo(() => computeChainCredits(nodes, edges), [nodes, edges]);
   const soloVersionNodeIds = useMemo(() => computeSoloVersionIds(nodes), [nodes]);
-  // edgeCredits(체인 선형 순회)는 "노드당 outgoing 엣지 하나"를 가정하는데, 재연결 도중 엣지 배열이
-  // 일시적으로 어긋나면 stub까지 못 가고 끊길 수 있다. reachability는 BFS라 이런 상황에 더 견고하므로
-  // 로또 표시 여부를 판단하는 총 학점은 reachable 노드 학점을 직접 합산해서 구한다.
-  const totalCredits = useMemo(() => {
-    let sum = 0;
-    for (const n of nodes) {
-      if (n.type !== 'semesterNode' || !reachability.nodeIds.has(n.id)) continue;
-      sum += (n.data as Partial<PlannerNodeData>).totalCredit ?? 0;
-    }
-    return sum;
-  }, [nodes, reachability.nodeIds]);
-  const showCelebration = totalCredits >= GRADUATION_REQUIREMENTS.전체 && !isCelebrationDismissed;
 
-  // 졸업 요건 아코디언의 배지가 로띠와 같은 기준(마지막 학기까지의 누적 학점)으로 갱신되도록,
-  // 연결이 바뀔 때마다 누적 학점을 그대로 스토어에 반영한다.
   useEffect(() => {
-    const required = GRADUATION_REQUIREMENTS.전체;
-    useGraduationStatusStore.setState((state) => {
-      if (!state.data) return state;
-      const { totalCredits: prev } = state.data.summary;
-      if (prev.current === totalCredits && prev.required === required) return state;
-      return {
-        data: {
-          ...state.data,
-          summary: { ...state.data.summary, totalCredits: { current: totalCredits, required } },
-          graduatable: totalCredits >= required,
-        },
-      };
-    });
-  }, [totalCredits]);
+    if (!isGraduationError) return;
+    parseApiError(graduationError).then((parsed) =>
+      toast.negative(parsed?.message ?? '졸업 요건 현황을 불러오지 못했어요.'),
+    );
+  }, [isGraduationError, graduationError]);
+
+  // 졸업 요건은 학기/폴더가 바뀔 때마다 저장 응답으로 다시 계산돼 오므로(useSavePlanner의 onSuccess가
+  // GRADUATION 쿼리 캐시를 갱신), 배지와 로띠 모두 그래프에서 직접 합산한 학점이 아니라 이 API 값의
+  // 학점 요건 충족 여부(요건 - 이수)를 그대로 기준으로 삼는다. 아코디언의 배지 로직과 동일한 기준이다.
+  const creditShortfall = graduationData
+    ? graduationData.summary.totalCredits.required - graduationData.summary.totalCredits.current
+    : null;
+  const showCelebration = creditShortfall !== null && creditShortfall <= 0 && !isCelebrationDismissed;
 
   // 즉시 unmount하지 않고 opacity 전환이 끝난 뒤 dismiss 상태로 확정한다.
   const dismissCelebration = useCallback(() => {
@@ -341,30 +394,38 @@ export const RoadmapView = () => {
     (_: unknown, node: Node) => {
       const colX = (node.data as Partial<PlannerNodeData>).colX;
       const colIndex = (node.data as Partial<PlannerNodeData>).colIndex;
+      const termId = (node.data as Partial<PlannerNodeData>).termId;
       if (typeof colX !== 'number' || typeof colIndex !== 'number') return;
 
       setDropIndicator(null);
 
-      setNodes((nds) => {
-        const siblings = nds
-          .filter(
-            (n) =>
-              n.id !== node.id &&
-              n.type === 'semesterNode' &&
-              (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
-          )
-          .sort((a, b) => a.position.y - b.position.y) as Node<PlannerNodeData>[];
+      const siblings = nodesRef.current
+        .filter(
+          (n) =>
+            n.id !== node.id && n.type === 'semesterNode' && (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
+        )
+        .sort((a, b) => a.position.y - b.position.y) as Node<PlannerNodeData>[];
 
-        const nodeHeight = node.measured?.height ?? NODE_HEIGHT;
-        const { targetIdx } = computeDropTarget(
-          node.position.y,
-          nodeHeight,
-          dragDirectionRef.current.direction,
-          siblings,
+      const nodeHeight = node.measured?.height ?? NODE_HEIGHT;
+      const { targetIdx } = computeDropTarget(
+        node.position.y,
+        nodeHeight,
+        dragDirectionRef.current.direction,
+        siblings,
+      );
+
+      const ordered = [...siblings];
+      ordered.splice(targetIdx, 0, node as Node<PlannerNodeData>);
+
+      // 형제 사이에서 실제로 순서가 바뀐 경우에만 폴더 순서를 저장한다.
+      if (termId && targetIdx !== originalIdxRef.current) {
+        reorderFolders(
+          termId,
+          ordered.map((n) => n.id),
         );
+      }
 
-        const ordered = [...siblings];
-        ordered.splice(targetIdx, 0, node as Node<PlannerNodeData>);
+      setNodes((nds) => {
         // 순서 확정 후 임시 y(ROW_GAP 단위)를 부여 → recomputeColumnPositions가 실제 높이로 재계산
         const positionMap = new Map(ordered.map((n, i) => [n.id, i * ROW_GAP]));
 
@@ -375,7 +436,7 @@ export const RoadmapView = () => {
         return recomputeColumnPositions(reordered);
       });
     },
-    [setNodes],
+    [setNodes, reorderFolders],
   );
 
   const isValidConnection = useCallback(
@@ -408,12 +469,17 @@ export const RoadmapView = () => {
   // onConnect(새 핸들에서 드래그)와 onReconnect(기존 엣지 끝점 드래그) 모두 "컬럼당 연결은 하나"라는
   // 불변식을 지켜야 하므로 같은 정리 로직을 공유한다. isSelected는 이 결과 edges로부터 reachability가
   // 파생하므로 여기서 별도로 node.data를 patch하지 않는다.
+  // source/target 컬럼 각각에서 "이전에 활성이던 형제"가 있었는지로 활성 폴더가 실제로 바뀌었는지 판단해
+  // changedSelections로 반환한다 — 한 번의 연결로 두 학기의 활성 폴더가 동시에 바뀔 수 있기 때문이다.
   const buildConnectionEdges = useCallback((prev: Edge<SemesterEdgeData>[], connection: Connection) => {
+    const noChange = { edges: prev, changedSelections: [] as { termId: string; folderId: string }[] };
     const srcNode = nodesRef.current.find((n) => n.id === connection.source);
-    if (!srcNode) return prev;
+    if (!srcNode) return noChange;
 
     const srcCol = (srcNode.data as Partial<PlannerNodeData>).colIndex;
-    if (typeof srcCol !== 'number') return prev;
+    if (typeof srcCol !== 'number') return noChange;
+
+    const changedSelections: { termId: string; folderId: string }[] = [];
 
     const colXNodeIds = nodesRef.current
       .filter((n) => (n.data as Partial<PlannerNodeData>).colIndex === srcCol && n.id !== connection.source)
@@ -434,6 +500,9 @@ export const RoadmapView = () => {
           target: connection.source,
         });
       }
+
+      const srcTermId = (srcNode.data as Partial<PlannerNodeData>).termId;
+      if (srcTermId) changedSelections.push({ termId: srcTermId, folderId: connection.source });
     }
 
     const extraToTgt = prev.find((e) => e.target === connection.target && !idsToDelete.has(e.id));
@@ -465,6 +534,9 @@ export const RoadmapView = () => {
         // onConnect처럼 기존 incoming 엣지가 아직 안 지워진 경우까지 정리
         const staleIncoming = prev.find((e) => e.target === oldActiveOutgoing.source && !idsToDelete.has(e.id));
         if (staleIncoming) idsToDelete.add(staleIncoming.id);
+
+        const tgtTermId = tgtNode ? (tgtNode.data as Partial<PlannerNodeData>).termId : undefined;
+        if (tgtTermId) changedSelections.push({ termId: tgtTermId, folderId: connection.target });
       }
     }
 
@@ -480,14 +552,16 @@ export const RoadmapView = () => {
       deletable: true,
     });
 
-    return [...prev.filter((e) => !idsToDelete.has(e.id)), ...edgesToAdd];
+    return { edges: [...prev.filter((e) => !idsToDelete.has(e.id)), ...edgesToAdd], changedSelections };
   }, []);
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      setEdges((prev) => buildConnectionEdges(prev, connection));
+      const { edges: nextEdges, changedSelections } = buildConnectionEdges(edgesRef.current, connection);
+      setEdges(nextEdges);
+      if (changedSelections.length > 0) selectFolders(changedSelections);
     },
-    [setEdges, buildConnectionEdges],
+    [setEdges, buildConnectionEdges, selectFolders],
   );
 
   const onReconnectStart = useCallback((_: unknown, edge: Edge<SemesterEdgeData>) => {
@@ -500,9 +574,11 @@ export const RoadmapView = () => {
       // "형제 노드의 기존 outgoing 엣지가 아직 prev에 남아있는지"로 리다이렉트 대상을 찾기 때문에,
       // 여기서 미리 지워버리면 그 판단 자체가 불가능해져 체인이 끊긴다. buildConnectionEdges가
       // 구조적으로(같은 컬럼/같은 source/같은 target 매칭) 옛 엣지를 알아서 찾아 정리하게 둔다.
-      setEdges((prev) => buildConnectionEdges(prev, newConnection));
+      const { edges: nextEdges, changedSelections } = buildConnectionEdges(edgesRef.current, newConnection);
+      setEdges(nextEdges);
+      if (changedSelections.length > 0) selectFolders(changedSelections);
     },
-    [setEdges, buildConnectionEdges],
+    [setEdges, buildConnectionEdges, selectFolders],
   );
 
   // 유효한 핸들에 놓지 못하면 그냥 아무 것도 하지 않는다: edges state를 건드리지 않으므로
@@ -511,107 +587,156 @@ export const RoadmapView = () => {
     reconnectingEdgeId.current = null;
   }, []);
 
+  const handleDeleteFolder = useCallback(
+    (termId: string, folderId: string) => {
+      const { isTermRemoved, promotedFolderId } = deleteFolder(termId, folderId);
+
+      // 학기 자체가 사라지는 경우(컬럼 재배치 필요)는 buildPlannerGraph가 다시 지은 그래프를 신뢰한다.
+      if (isTermRemoved) {
+        pendingFullRebuildRef.current = true;
+        return;
+      }
+
+      // 남은 형제 카드들과 그 밑의 "+" 버튼은 삭제로 빈 자리가 생긴 만큼 다시 채워 배치해야 한다
+      // (재정렬 때와 동일하게 recomputeColumnPositions로 y를 다시 계산).
+      setNodes((prev) => recomputeColumnPositions(prev.filter((n) => n.id !== folderId)));
+      setEdges((prev) => {
+        const incoming = prev.find((e) => e.target === folderId);
+        const outgoing = prev.find((e) => e.source === folderId);
+        const withoutDeleted = prev.filter((e) => e.source !== folderId && e.target !== folderId);
+        if (!promotedFolderId || (!incoming && !outgoing)) return withoutDeleted;
+
+        // 삭제된 폴더가 체인의 활성 노드였다면, 같은 학기에서 새로 활성화된 폴더로 체인을 이어준다.
+        const rewired: Edge<SemesterEdgeData>[] = [];
+        if (incoming) rewired.push({ ...incoming, id: `e-promote-in-${promotedFolderId}`, target: promotedFolderId });
+        if (outgoing) rewired.push({ ...outgoing, id: `e-promote-out-${promotedFolderId}`, source: promotedFolderId });
+        return [...withoutDeleted, ...rewired];
+      });
+    },
+    [deleteFolder, setNodes, setEdges],
+  );
+
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
       if (node.type === 'addSemesterNode') {
         setIsAddSemesterModalOpen(true);
         return;
       }
-      if (
-        node.type === 'addVersionNode' &&
-        ((node.data as Partial<AddVersionNodeData>).versionCount ?? 0) < MAX_FOLDERS_PER_TERM
-      ) {
-        setViewMode('card');
+      if (node.type === 'addVersionNode') {
+        const { termId, versionCount } = node.data as Partial<AddVersionNodeData>;
+        if (!termId || (versionCount ?? 0) >= MAX_FOLDERS_PER_TERM) return;
+        addFolder(termId);
+        // 카드뷰로 전환하면 usePlannerTerms가 새로 마운트되어 서버 GET으로 다시 시드된다. 저장 PUT이
+        // 끝나기 전에 전환하면 그 GET이 추가 전 상태를 받아와 화면에 반영이 늦어 보이므로, 저장이
+        // 끝난 뒤에 전환한다.
+        waitForSave().then(() => setViewMode('card'));
       }
     },
-    [setViewMode],
+    [setViewMode, addFolder, waitForSave],
   );
 
   const handleAddSemesterSubmit = useCallback(
-    (_year: string, _semester: string) => {
-      // TODO: 실제 학기 추가(store/API) 연동은 아직 없다 — 지금은 모달 제출 후 카드뷰로 전환만 한다.
-      setViewMode('card');
+    (year: string, semester: string) => {
+      const semesterLabel = SEMESTER_LABEL_MAP[semester];
+      if (!semesterLabel) return;
+      const yearLevel = Number.parseInt(year, 10);
+
+      const added = addTerm({ yearLevel, semester: Number(semester), semesterLabel });
+      if (!added) {
+        toast.negative('이미 추가된 학기예요.');
+        return;
+      }
+      setIsAddSemesterModalOpen(false);
+      // addFolder와 같은 이유로, 저장이 끝난 뒤에 카드뷰로 전환한다.
+      waitForSave().then(() => setViewMode('card'));
     },
-    [setViewMode],
+    [addTerm, waitForSave, setViewMode],
   );
 
+  if (!isSeeded) return null;
+
+  if (isPlannerError) return null;
+
   return (
-    <ReachabilityContext.Provider
-      value={{
-        reachableNodeIds: reachability.nodeIds,
-        reachableEdgeIds: reachability.edgeIds,
-        edgeCredits,
-        soloVersionNodeIds,
-      }}
-    >
-      <div className="relative h-full w-full">
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onNodeDragStart={onNodeDragStart}
-          onNodeDrag={onNodeDrag}
-          onNodeDragStop={onNodeDragStop}
-          onReconnect={onReconnect}
-          onReconnectStart={onReconnectStart}
-          onReconnectEnd={onReconnectEnd}
-          onNodeClick={onNodeClick}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          connectionLineComponent={CustomConnectionLine}
-          isValidConnection={isValidConnection}
-          connectionRadius={40}
-          reconnectRadius={40}
-          defaultViewport={{ x: 40, y: 160, zoom: 1 }}
-        >
-          <Background variant={BackgroundVariant.Dots} gap={25} size={3} color="#e5e7eb" />
-          <Controls position="bottom-left" showInteractive={false} />
-          {/* ViewModeToggle은 카드뷰/로드맵뷰 간 위치가 흔들리지 않도록 PlannerView에서 한 곳에만 렌더링한다(top-40).
+    <PlannerActionsContext.Provider value={{ onDeleteFolder: handleDeleteFolder }}>
+      <ReachabilityContext.Provider
+        value={{
+          reachableNodeIds: reachability.nodeIds,
+          reachableEdgeIds: reachability.edgeIds,
+          edgeCredits,
+          soloVersionNodeIds,
+        }}
+      >
+        <div className="relative h-full w-full">
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeDragStart={onNodeDragStart}
+            onNodeDrag={onNodeDrag}
+            onNodeDragStop={onNodeDragStop}
+            onReconnect={onReconnect}
+            onReconnectStart={onReconnectStart}
+            onReconnectEnd={onReconnectEnd}
+            onNodeClick={onNodeClick}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            connectionLineComponent={CustomConnectionLine}
+            isValidConnection={isValidConnection}
+            connectionRadius={40}
+            reconnectRadius={40}
+            defaultViewport={{ x: 40, y: 160, zoom: 1 }}
+          >
+            <Background variant={BackgroundVariant.Dots} gap={25} size={3} color="#e5e7eb" />
+            <Controls position="bottom-left" showInteractive={false} />
+            {/* ViewModeToggle은 카드뷰/로드맵뷰 간 위치가 흔들리지 않도록 PlannerView에서 한 곳에만 렌더링한다(top-40).
               아코디언은 창 상단에서 24px 떨어진 위치여야 하므로 react-flow 기본 패널 여백(15px)을 marginTop으로
               덮어쓴다. 셀러브레이션 오버레이(analysis-loading: 40)나 모달(20)보다는 아래에 있어야 하므로
               z-index는 react-flow 기본값(5)을 그대로 둔다. */}
-          <Panel position="top-right" style={{ marginTop: 24 }}>
-            <RoadmapHeader />
-          </Panel>
-          {dropIndicator && (
-            <ViewportPortal>
-              <DropIndicatorLine colX={dropIndicator.colX} y={dropIndicator.y} />
-            </ViewportPortal>
-          )}
-        </ReactFlow>
-
-        {(showCelebration || isCelebrationLeaving) && (
-          <div
-            className={cn(
-              'z-analysis-loading absolute inset-0 flex cursor-pointer flex-col items-center justify-center bg-white/40 transition-opacity duration-300',
-              isCelebrationLeaving && 'pointer-events-none opacity-0',
+            <Panel position="top-right" style={{ marginTop: 24 }}>
+              <RoadmapHeader data={graduationData} />
+            </Panel>
+            {dropIndicator && (
+              <ViewportPortal>
+                <DropIndicatorLine colX={dropIndicator.colX} y={dropIndicator.y} />
+              </ViewportPortal>
             )}
-            onClick={dismissCelebration}
-          >
-            {/* graduation.json은 800x800 캔버스 기준 메인 그래픽이 y=461.7(중심 400)에 위치해 박스 아래로
+          </ReactFlow>
+
+          {(showCelebration || isCelebrationLeaving) && (
+            <div
+              className={cn(
+                'z-analysis-loading absolute inset-0 flex cursor-pointer flex-col items-center justify-center bg-white/40 transition-opacity duration-300',
+                isCelebrationLeaving && 'pointer-events-none opacity-0',
+              )}
+              onClick={dismissCelebration}
+            >
+              {/* graduation.json은 800x800 캔버스 기준 메인 그래픽이 y=461.7(중심 400)에 위치해 박스 아래로
                 치우쳐 있다. 400px로 렌더링하면 (461.7-400)/800*400 ≈ 31px만큼 시각적 중심이 아래로 밀리므로,
                 같은 값만큼 음수 마진으로 끌어올려 실제 그래픽이 오버레이 정중앙에 오도록 보정한다. */}
-            <Lottie
-              animationData={graduation}
-              loop={false}
-              autoplay
-              onComplete={dismissCelebration}
-              className="-mt-32 h-400 w-400"
-            />
-            {/* 로띠 애니메이션 자체에 하단 여백이 많아 인접 배치만으로는 텍스트와 멀어 보여 음수 마진으로 당긴다. */}
-            <p className="text-title-sb-24 animate-text-rise -mt-48 text-gray-700">졸업 요건을 충족했어요!</p>
-          </div>
-        )}
-      </div>
+              <Lottie
+                animationData={graduation}
+                loop={false}
+                autoplay
+                onComplete={dismissCelebration}
+                className="-mt-32 h-400 w-400"
+              />
+              {/* 로띠 애니메이션 자체에 하단 여백이 많아 인접 배치만으로는 텍스트와 멀어 보여 음수 마진으로 당긴다. */}
+              <p className="text-title-sb-24 animate-text-rise -mt-48 text-gray-700">졸업 요건을 충족했어요!</p>
+            </div>
+          )}
+        </div>
 
-      <AddSemesterModal
-        open={isAddSemesterModalOpen}
-        onOpenChange={setIsAddSemesterModalOpen}
-        onSubmit={handleAddSemesterSubmit}
-      />
-    </ReachabilityContext.Provider>
+        <AddSemesterModal
+          open={isAddSemesterModalOpen}
+          onOpenChange={setIsAddSemesterModalOpen}
+          onSubmit={handleAddSemesterSubmit}
+        />
+        <Toaster />
+      </ReachabilityContext.Provider>
+    </PlannerActionsContext.Provider>
   );
 };
 

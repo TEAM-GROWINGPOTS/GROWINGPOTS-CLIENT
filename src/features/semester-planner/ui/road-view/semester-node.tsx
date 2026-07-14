@@ -1,5 +1,6 @@
 'use client';
 
+import { usePlannerActions } from '@features/semester-planner/contexts/planner-actions-context';
 import { useReachability } from '@features/semester-planner/contexts/reachability-context';
 import type { PlannerNodeType } from '@features/semester-planner/types/planner-graph';
 import { cn } from '@shared/utils/cn';
@@ -46,6 +47,7 @@ const HandleDot = () => (
 
 export const SemesterNode = ({ id, data, width, dragging }: NodeProps<PlannerNodeType>) => {
   const { reachableNodeIds, soloVersionNodeIds } = useReachability();
+  const { onDeleteFolder } = usePlannerActions();
   // React Flow는 measure 전 노드 wrapper에 visibility:hidden을 걸어둔다. 이때 width는 undefined가 아니라 0으로 내려오므로
   // 메뉴 버튼만 강제로 visible 처리하면 measure 전에 버튼만 먼저 노출된다. measure 완료(width > 0) 후에만 켠다.
   const isMeasured = width !== undefined && width > 0;
@@ -83,7 +85,7 @@ export const SemesterNode = ({ id, data, width, dragging }: NodeProps<PlannerNod
         <NodeCard
           {...baseProps}
           status="PLANNED"
-          onDelete={() => {}}
+          onDelete={() => data.termId && onDeleteFolder(data.termId, String(data.plannerTermVersionId))}
           isMenuVisible={isMeasured}
           isLastVersion={soloVersionNodeIds.has(id)}
         />
