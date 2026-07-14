@@ -1,4 +1,7 @@
 export const ENDPOINT = {
+  DIAGNOSIS: {
+    UPLOAD: '/api/v1/diagnosis/upload',
+  },
   ONBOARDING: {
     OPTIONS: '/api/v1/onboarding/options',
   },
