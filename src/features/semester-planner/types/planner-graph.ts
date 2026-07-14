@@ -19,6 +19,14 @@ export interface PlannerNodeData extends Record<string, unknown> {
 
 export type PlannerNodeType = Node<PlannerNodeData, 'semesterNode'>;
 
+export interface AddVersionNodeData extends Record<string, unknown> {
+  colIndex: number;
+  colX: number;
+  versionCount: number;
+}
+
+export type AddVersionNodeType = Node<AddVersionNodeData, 'addVersionNode'>;
+
 export interface SemesterEdgeData extends Record<string, unknown> {
   credits: number;
   isInitial: boolean;
