@@ -1,8 +1,9 @@
 'use client';
 
 import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
+import { getOtherRequiredConditions } from '@features/semester-planner/utils/graduation-conditions';
 import * as Accordion from '@radix-ui/react-accordion';
-import type { GraduationUnit } from '@shared/apis/types/graduation';
+import type { GraduationResponse, GraduationUnit } from '@shared/apis/types/graduation';
 import { Badge, Tabs } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import type { TabItem } from '@shared/components/tabs/tabs';
@@ -13,10 +14,16 @@ const MAJOR_CODES = new Set(['MAJOR_BASIC', 'MAJOR_REQUIRED', 'MAJOR_ELECTIVE'])
 
 const toUnitLabel = (unit: GraduationUnit) => (unit === 'COURSES' ? '과목' : '학점');
 
-export const GraduationStatusAccordion = () => {
+interface GraduationStatusAccordionProps {
+  className?: string;
+  data?: GraduationResponse;
+}
+
+export const GraduationStatusAccordion = ({ className, data: dataProp }: GraduationStatusAccordionProps) => {
   const [selectedMajorIndex, setSelectedMajorIndex] = useState(0);
 
-  const data = useGraduationStatusStore((state) => state.data);
+  const storeData = useGraduationStatusStore((state) => state.data);
+  const data = dataProp ?? storeData;
 
   if (!data || !data.sections) return null;
 
@@ -38,13 +45,20 @@ export const GraduationStatusAccordion = () => {
 
   const majorConditions = selectedMajor.conditions.filter(({ code }) => MAJOR_CODES.has(code));
 
+  // SW/영어는 전공·교양·기타 섹션에 나뉘어 내려오므로 getOtherRequiredConditions로 합산해 모든 탭에서 동일하게 보여준다.
+  const otherRequiredConditions = getOtherRequiredConditions(sections);
+  const otherRequiredCodes = new Set(otherRequiredConditions.map(({ code }) => code));
+
+  const geConditions = ge.conditions.filter(({ code }) => !otherRequiredCodes.has(code));
+  const otherConditions = others.conditions.filter(({ code }) => !otherRequiredCodes.has(code));
+
   const tabs: TabItem[] = majors.map(({ majorName }, i) => ({
     value: String(i),
     label: majorName,
   }));
 
   return (
-    <Accordion.Root type="single" collapsible className="w-306 rounded-xl bg-gray-800">
+    <Accordion.Root type="single" collapsible className={cn('w-306 rounded-xl bg-gray-800', className)}>
       <Accordion.Item value="graduation-status">
         <Accordion.Header asChild>
           <h3>
@@ -117,7 +131,46 @@ export const GraduationStatusAccordion = () => {
                 </div>
               </li>
             ))}
-            {[...ge.conditions, ...others.conditions].map(({ code, name, current, required, unit, satisfied }) => (
+            {geConditions.map(({ code, name, current, required, unit, satisfied }) => (
+              <li key={code} className="flex items-center justify-between">
+                <span className="text-body-m-16 text-gray-100">{name}</span>
+                <div className="flex items-end">
+                  <span className={cn('text-body-sb-16', satisfied ? 'text-lime-500' : 'text-gray-100')}>
+                    {current}
+                  </span>
+                  {required !== null ? (
+                    <span className="text-body-r-16 text-gray-400">
+                      /{required}
+                      {toUnitLabel(unit)}
+                    </span>
+                  ) : (
+                    <span className="text-body-r-16 text-gray-400">{toUnitLabel(unit)}</span>
+                  )}
+                </div>
+              </li>
+            ))}
+            {otherRequiredConditions.map(({ code, name, current, required, unit }) => {
+              const satisfied = required === null || current >= required;
+              return (
+                <li key={code} className="flex items-center justify-between">
+                  <span className="text-body-m-16 text-gray-100">{name}</span>
+                  <div className="flex items-end">
+                    <span className={cn('text-body-sb-16', satisfied ? 'text-lime-500' : 'text-gray-100')}>
+                      {current}
+                    </span>
+                    {required !== null ? (
+                      <span className="text-body-r-16 text-gray-400">
+                        /{required}
+                        {toUnitLabel(unit)}
+                      </span>
+                    ) : (
+                      <span className="text-body-r-16 text-gray-400">{toUnitLabel(unit)}</span>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+            {otherConditions.map(({ code, name, current, required, unit, satisfied }) => (
               <li key={code} className="flex items-center justify-between">
                 <span className="text-body-m-16 text-gray-100">{name}</span>
                 <div className="flex items-end">
