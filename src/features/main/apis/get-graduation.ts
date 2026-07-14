@@ -1,10 +1,7 @@
-import { ENDPOINT } from '@shared/apis/endpoint';
-import { request } from '@shared/apis/request';
-import type { ApiResponse } from '@shared/apis/type';
-import type { GraduationResponse } from '@shared/apis/types/graduation';
+import type { GraduationSource } from '@shared/apis/get-graduation';
+import { getGraduation as getGraduationRequest } from '@shared/apis/get-graduation';
 
 export type GraduationMajorType = 'ALL' | 'GE' | 'OTHERS';
-export type GraduationSource = 'COMPLETED' | 'PLANNED';
 
 export interface GetGraduationParams {
   majorType?: GraduationMajorType;
@@ -22,10 +19,5 @@ const getGraduationSearchParams = ({ majorType, source, studentMajorId }: GetGra
   return searchParams;
 };
 
-export const getGraduation = async (params: GetGraduationParams = {}) => {
-  const response = await request.get<ApiResponse<GraduationResponse>>(ENDPOINT.GRADUATION.STATUS, {
-    searchParams: getGraduationSearchParams(params),
-  });
-
-  return response.data;
-};
+export const getGraduation = (params: GetGraduationParams = {}) =>
+  getGraduationRequest(getGraduationSearchParams(params));
