@@ -184,6 +184,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
       return;
     }
     setIsAddSemesterOpen(false);
+    toast.success(`${yearLevel}학년 ${semesterLabel}가 추가되었어요.`);
   };
 
   if (isPlannerLoading) return null;
