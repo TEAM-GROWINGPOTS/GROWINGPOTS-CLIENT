@@ -1,5 +1,3 @@
-import type { OpenedSemester } from '@features/semester-planner/types/planner';
-
 export type DivisionCategory =
   | 'MAJOR_BASIC'
   | 'MAJOR_REQUIRED'
@@ -11,6 +9,8 @@ export type DivisionCategory =
   | 'CROSS_MAJOR';
 
 export type OtherRequired = 'SW' | 'ENGLISH';
+
+export type OpenedSemester = 'FIRST' | 'SECOND' | 'BOTH';
 
 export interface CourseSearchParams {
   keyword?: string;

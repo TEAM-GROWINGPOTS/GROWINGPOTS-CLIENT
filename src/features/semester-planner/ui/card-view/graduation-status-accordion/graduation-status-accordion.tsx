@@ -76,9 +76,10 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
   };
 
   // 전공/교양 학점은 각 섹션에서 합산하고, 기타는 총 이수 학점에서 전공·교양을 제외한 나머지로 계산해 스택 바에 사용
-  const majorCredit =
-    majors[0]?.conditions.filter(({ code }) => MAJOR_CODES.has(code)).reduce((sum, { current }) => sum + current, 0) ??
-    0;
+  const majorCredit = majors
+    .flatMap(({ conditions }) => conditions)
+    .filter(({ code }) => MAJOR_CODES.has(code))
+    .reduce((sum, { current }) => sum + current, 0);
   const generalCredit = orderConditions(ge.conditions, GE_CODE_ORDER).reduce((sum, { current }) => sum + current, 0);
   const otherCredit = totalCredits.current - majorCredit - generalCredit;
 
