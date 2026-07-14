@@ -69,6 +69,7 @@ export const CourseInfoTable = ({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [openCellKey, setOpenCellKey] = useState<string | null>(null);
   const [prevIsEditing, setPrevIsEditing] = useState(isEditing);
   const tableWrapperRef = useRef<HTMLTableElement>(null);
   const [tableHeight, setTableHeight] = useState<number>();
@@ -80,6 +81,7 @@ export const CourseInfoTable = ({
     if (!isEditing) {
       setSelectedIds(new Set());
       setExpanded(true);
+      setOpenCellKey(null);
     }
   }
 
@@ -265,6 +267,8 @@ export const CourseInfoTable = ({
                           options={column.options}
                           value={course[column.key]}
                           onChange={handleCellChange(course.id, column.key)}
+                          isOpen={openCellKey === `${course.id}:${column.key}`}
+                          onOpenChange={(open) => setOpenCellKey(open ? `${course.id}:${column.key}` : null)}
                         />
                       ) : (
                         <TableCellEdit
