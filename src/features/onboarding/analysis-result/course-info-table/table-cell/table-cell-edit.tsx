@@ -11,7 +11,8 @@ interface TableCellEditProps {
   suffix?: string;
 }
 
-const cellBaseClassName = 'text-body-m-16 text-gray-600 flex h-32 min-w-0 items-center gap-2 rounded-sm bg-white ';
+const cellBaseClassName =
+  'text-body-m-16 text-gray-600 flex h-32 w-full min-w-0 items-center gap-2 rounded-sm bg-white';
 
 export const TableCellEdit = ({ mode, value, onChange, className, suffix }: TableCellEditProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,7 +39,7 @@ export const TableCellEdit = ({ mode, value, onChange, className, suffix }: Tabl
 
   const wrapperClassName = cn(
     cellBaseClassName,
-    'border outline-none',
+    'px-8 border outline-none',
     showError ? 'border-red-20' : 'border-gray-100',
     className,
   );

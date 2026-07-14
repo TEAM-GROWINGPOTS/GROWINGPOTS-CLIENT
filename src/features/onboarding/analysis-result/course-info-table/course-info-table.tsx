@@ -202,7 +202,14 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
                   </th>
                 )}
                 {columns.map(({ key, label }) => (
-                  <th key={key} scope="col" className="text-body-sb-16 truncate px-8 py-4 text-left text-gray-600">
+                  <th
+                    key={key}
+                    scope="col"
+                    className={cn(
+                      'text-body-sb-16 truncate py-4 text-left text-gray-600',
+                      isEditing ? 'px-16' : 'px-8',
+                    )}
+                  >
                     {label}
                   </th>
                 ))}
