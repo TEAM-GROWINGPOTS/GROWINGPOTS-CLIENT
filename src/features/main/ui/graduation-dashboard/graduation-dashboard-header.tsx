@@ -6,7 +6,7 @@ import Image from 'next/image';
 const badgeLabels: Record<CertType, string> = {
   THESIS: '졸업논문',
   GRADUATION_CERT: '졸업능력인증',
-  TOPIK: '한국어능력인정',
+  TOPIK: '한국어능력인증',
   GPA: '졸업 평점',
 };
 
@@ -50,7 +50,7 @@ const getBadgeImageSrc = (certType: CertType, result: GraduationCert['result']) 
 const getBadgeTooltipContent = (certType: CertType, result: GraduationCert['result'], gpa: number) => {
   const label = badgeLabels[certType];
 
-  if (certType === 'GPA') return `${label} ${gpa}`;
+  if (certType === 'GPA') return `평점 ${gpa}/1.7`;
   if (result === 'PASS') return `${label} 통과`;
   if (result === 'EXEMPT') return `${label} 면제`;
   if (result === 'NONE') return `${label} 해당없음`;
@@ -81,7 +81,7 @@ export const GraduationDashboardHeader = ({ certs, gpa }: GraduationDashboardHea
                 size="md"
                 content={tooltipContent}
                 trigger={
-                  <button type="button" aria-label={tooltipContent} className="flex">
+                  <button type="button" aria-label={tooltipContent} className="flex cursor-pointer">
                     <Image
                       src={getBadgeImageSrc(certType as CertType, result)}
                       width={60}

@@ -34,12 +34,12 @@ export const LEVEL_STYLES: Record<ProgressLevel, LevelStyle> = {
 export const CARD_LOGO_CONFIG: Partial<Record<string, CardLogoConfig>> = {
   'major-required': {
     name: 'ic_logo_white',
-    positionClass: 'left-[69px] top-[68px]',
+    positionClass: 'right-22 bottom-5',
     size: { width: 75, height: 81 },
   },
   'sw-certification': {
     name: 'ic_logo_black',
-    positionClass: 'left-[54px] top-[80px] rotate-[0.91deg]',
+    positionClass: 'right-16 bottom-10 rotate-[0.91deg]',
     size: { width: 58.095, height: 63.221 },
   },
 };
