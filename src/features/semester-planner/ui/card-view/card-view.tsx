@@ -192,8 +192,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
 
   return (
     <DndContext id="card-view-dnd" {...contextProps}>
-      {/* pt-80: PlannerView가 겹쳐 그리는 ViewModeToggle(top-40, 노드뷰와 동일 위치)과 헤더가 겹치지 않도록 여유를 둔다. */}
-      <div className="flex h-full min-w-0 flex-col px-40 pt-80 pb-40">
+      {/* pt-[100px]: PlannerView가 겹쳐 그리는 ViewModeToggle(top-40, 노드뷰와 동일 위치)과 헤더가 겹치지 않도록 여유를 둔다. */}
+      <div className="flex h-full min-w-0 flex-col px-48 pt-[100px] pb-24">
         <header className="flex items-center justify-between">
           <h1 className="text-title-sb-24 text-gray-900">학기 플래너</h1>
           <Button
