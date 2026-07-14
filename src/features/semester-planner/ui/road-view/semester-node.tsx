@@ -85,7 +85,9 @@ export const SemesterNode = ({ id, data, width, dragging }: NodeProps<PlannerNod
         <NodeCard
           {...baseProps}
           status="PLANNED"
-          onDelete={() => data.termId && onDeleteFolder(data.termId, String(data.plannerTermVersionId))}
+          onDelete={() =>
+            data.termId && onDeleteFolder(data.termId, String(data.plannerTermVersionId), data.folderName)
+          }
           isMenuVisible={isMeasured}
           isLastVersion={soloVersionNodeIds.has(id)}
         />

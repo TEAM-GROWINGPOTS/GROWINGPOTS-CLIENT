@@ -588,8 +588,9 @@ export const RoadmapView = () => {
   }, []);
 
   const handleDeleteFolder = useCallback(
-    (termId: string, folderId: string) => {
+    (termId: string, folderId: string, folderName: string) => {
       const { isTermRemoved, promotedFolderId } = deleteFolder(termId, folderId);
+      toast.success(`${folderName} 폴더가 삭제되었어요.`);
 
       // 학기 자체가 사라지는 경우(컬럼 재배치 필요)는 buildPlannerGraph가 다시 지은 그래프를 신뢰한다.
       if (isTermRemoved) {
