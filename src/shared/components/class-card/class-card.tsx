@@ -81,7 +81,7 @@ export const ClassCard = ({
         variant="bottom-start"
         disabled={!isTitleTruncated}
         trigger={
-          <h3 ref={titleRef} className="text-body-sb-16 w-full truncate text-gray-900">
+          <h3 ref={titleRef} className="text-body-sb-16 w-full cursor-default truncate text-gray-900">
             {title}
             {type === 'disabled' && <span className="sr-only">(비활성)</span>}
           </h3>
@@ -90,17 +90,23 @@ export const ClassCard = ({
       {note && <span className="text-caption-m-10 text-red-20">{note}</span>}
       {tags.length > 0 && (
         <div className={cn('flex flex-wrap items-center gap-4', size === 'max' ? 'mt-auto pt-12' : 'mt-12')}>
-          {tags.map((tag, index) => (
-            <Badge
-              key={`${tag}-${index}`}
-              size="xsmall"
-              variant="primary"
-              color={index === 0 ? getTagColor(tag) : 'gray'}
-              className={index === 0 ? 'max-w-70' : undefined}
-            >
-              {index === 0 ? <span className="truncate">{tag}</span> : tag}
-            </Badge>
-          ))}
+          {tags.map((tag, index) => {
+            const shouldTruncate = index === 0;
+            return (
+              <Badge
+                key={`${tag}-${index}`}
+                size="xsmall"
+                variant="primary"
+                color={shouldTruncate ? getTagColor(tag) : 'gray'}
+                truncate={shouldTruncate}
+                tooltipOnTruncate={shouldTruncate}
+                tooltipContent={tag}
+                className={cn('cursor-default', shouldTruncate && 'max-w-70')}
+              >
+                {tag}
+              </Badge>
+            );
+          })}
         </div>
       )}
       {type === 'disabled' && <div className="bg-white-50 absolute inset-0 rounded-[inherit]" />}

@@ -1,7 +1,17 @@
-﻿import Icon from '@shared/components/icon/icon';
+﻿'use client';
+
+import Icon from '@shared/components/icon/icon';
+import { Tooltip } from '@shared/components/tooltip/tooltip';
 import { cn } from '@shared/utils/cn';
 import { cva, type VariantProps } from 'class-variance-authority';
-import type { ComponentPropsWithoutRef, MouseEvent, ReactNode } from 'react';
+import {
+  type ComponentPropsWithoutRef,
+  type MouseEvent,
+  type ReactNode,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 const badgeVariants = cva('inline-flex w-fit items-center justify-center gap-4 rounded-[0.25rem] whitespace-nowrap', {
   variants: {
@@ -82,6 +92,9 @@ interface BadgeProps
   rightIconName?: string;
   rightIconClassName?: string;
   onRightIconClick?: (event: MouseEvent<HTMLSpanElement>) => void;
+  truncate?: boolean;
+  tooltipOnTruncate?: boolean;
+  tooltipContent?: string;
 }
 
 export const Badge = ({
@@ -95,14 +108,33 @@ export const Badge = ({
   rightIconName,
   rightIconClassName,
   onRightIconClick,
+  truncate = false,
+  tooltipOnTruncate = false,
+  tooltipContent,
   ...props
 }: BadgeProps) => {
-  return (
+  const contentRef = useRef<HTMLSpanElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+
+  useLayoutEffect(() => {
+    if (!truncate) return;
+    const badgeContentElement = contentRef.current;
+    if (!badgeContentElement) return;
+    setIsTruncated(badgeContentElement.scrollWidth > badgeContentElement.clientWidth);
+  }, [children, truncate]);
+
+  const trigger = (
     <span className={cn(badgeVariants({ variant, color, size }), className)} {...props}>
       {size === 'xsmall' && leftIconName && (
         <Icon name={leftIconName} size={16} className={cn('shrink-0', leftIconClassName)} />
       )}
-      {children}
+      {truncate ? (
+        <span ref={contentRef} className="truncate">
+          {children}
+        </span>
+      ) : (
+        children
+      )}
       {size === 'xsmall' && rightIconName && (
         <span
           onClick={onRightIconClick}
@@ -116,5 +148,16 @@ export const Badge = ({
         </span>
       )}
     </span>
+  );
+
+  if (!tooltipOnTruncate) return trigger;
+
+  return (
+    <Tooltip
+      content={tooltipContent ?? (typeof children === 'string' ? children : '')}
+      variant="bottom-start"
+      disabled={!isTruncated}
+      trigger={trigger}
+    />
   );
 };
