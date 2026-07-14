@@ -38,7 +38,7 @@ interface CourseInfoTableProps {
   divisions: Division[];
   isEditing?: boolean;
   onValidityChange?: (isValid: boolean) => void;
-  onDeleteConfirm?: () => void;
+  onDeleteRows?: (remainingCourses: CourseInfo[]) => void;
 }
 
 export interface CourseInfoTableRef {
@@ -59,7 +59,7 @@ const ROW_HEIGHT = 44;
 const DEFAULT_VISIBLE_ROWS = 3;
 
 export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTableProps>(
-  ({ courses, departments, divisions, isEditing = false, onValidityChange, onDeleteConfirm }, ref) => {
+  ({ courses, departments, divisions, isEditing = false, onValidityChange, onDeleteRows }, ref) => {
     const [expanded, setExpanded] = useState(false);
     const [visibleCount, setVisibleCount] = useState(() => Math.min(DEFAULT_VISIBLE_ROWS, courses.length));
     const [rows, setRows] = useState(courses);
@@ -221,10 +221,11 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
     };
 
     const handleDeleteConfirm = () => {
-      setRows((prev) => prev.filter((row) => !selectedIds.has(row.id)));
+      const remainingRows = rows.filter((row) => !selectedIds.has(row.id));
+      setRows(remainingRows);
       setSelectedIds(new Set());
       setIsDeleteModalOpen(false);
-      onDeleteConfirm?.();
+      onDeleteRows?.(remainingRows);
     };
 
     return (

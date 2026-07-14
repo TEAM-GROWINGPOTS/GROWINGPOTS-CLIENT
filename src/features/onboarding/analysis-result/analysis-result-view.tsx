@@ -2,14 +2,14 @@
 
 import { Button } from '@shared/components/button/button';
 import { useDepartmentOptions } from '@shared/hooks/use-department-options';
+import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
 import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { useRouter } from 'next/navigation';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { useStudentCourses } from '../hooks/use-student-courses';
 import { useUpdateStudentCourses } from '../hooks/use-update-student-courses';
-import { MOCK_GRADUATION_RESPONSE } from '../mocks/analysis-result';
-import { CourseInfoTable, type CourseInfoTableRef } from './course-info-table/course-info-table';
+import { type CourseInfo, CourseInfoTable, type CourseInfoTableRef } from './course-info-table/course-info-table';
 import {
   mapCourseInfoToPutStudentCourses,
   mapStudentCoursesToCourseInfo,
@@ -17,8 +17,6 @@ import {
 import { GraduationResult } from './graduation-result/graduation-result';
 import { mapGraduationResponseToCards } from './graduation-result/map-graduation-response';
 import { StudentInfo } from './student-info/student-info';
-
-const requirementItems = mapGraduationResponseToCards(MOCK_GRADUATION_RESPONSE);
 
 export const AnalysisResultView = () => {
   const router = useRouter();
@@ -28,7 +26,13 @@ export const AnalysisResultView = () => {
   const { data: studentProfile } = useStudentProfile();
   const { data: studentCourses } = useStudentCourses();
   const { data: departments = [] } = useDepartmentOptions();
+  const { data: graduation } = useGraduationStatus();
   const { mutate: updateStudentCourses, isPending: isSaving } = useUpdateStudentCourses();
+  const courses = useMemo(
+    () => (studentCourses ? mapStudentCoursesToCourseInfo(studentCourses.courses) : []),
+    [studentCourses],
+  );
+  const requirementItems = graduation ? mapGraduationResponseToCards(graduation) : [];
 
   const handleEditToggleClick = () => {
     if (!isEditing) {
@@ -48,6 +52,12 @@ export const AnalysisResultView = () => {
   const handleCourseInfoValidityChange = useCallback((isValid: boolean) => {
     setIsCourseInfoValid(isValid);
   }, []);
+
+  const handleDeleteRows = (remainingCourses: CourseInfo[]) => {
+    if (!studentCourses) return;
+
+    updateStudentCourses({ courses: mapCourseInfoToPutStudentCourses(remainingCourses, studentCourses.courses) });
+  };
 
   const handlePdfReuploadClick = () => {
     router.push('/onboarding?step=pdf');
@@ -98,12 +108,12 @@ export const AnalysisResultView = () => {
         {studentCourses && (
           <CourseInfoTable
             ref={courseInfoTableRef}
-            courses={mapStudentCoursesToCourseInfo(studentCourses.courses)}
+            courses={courses}
             departments={departments}
             divisions={studentCourses.availableDivisions}
             isEditing={isEditing}
             onValidityChange={handleCourseInfoValidityChange}
-            onDeleteConfirm={() => setIsEditing(false)}
+            onDeleteRows={handleDeleteRows}
           />
         )}
       </div>
