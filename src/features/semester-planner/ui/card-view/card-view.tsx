@@ -1,18 +1,18 @@
 'use client';
 
 import { DndContext, DragOverlay } from '@dnd-kit/core';
+import { useCourseSearch } from '@features/semester-planner/hooks/use-course-search';
+import { useDebouncedValue } from '@features/semester-planner/hooks/use-debounced-value';
 import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
-import { MOCK_COURSE_SEARCH_ITEMS } from '@features/semester-planner/mocks/planner';
-import {
-  AddCourseSidebar,
-  type Course,
-} from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar';
+import type { CourseSearchItemResponse } from '@features/semester-planner/types/course-search';
+import { AddCourseSidebar } from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar';
 import {
   CourseFilterModal,
   type CourseFilterTabKeyTypes,
   type CourseFilterValues,
   getFilterTabByLabel,
   getSelectedFilterLabels,
+  INITIAL_COURSE_FILTER_VALUES,
 } from '@features/semester-planner/ui/card-view/course-filter-modal/course-filter-modal';
 import { DroppableTerm } from '@features/semester-planner/ui/card-view/dnd/droppable-term';
 import { LibraryCourse } from '@features/semester-planner/ui/card-view/dnd/library-course';
@@ -21,26 +21,23 @@ import { useCardViewDnd } from '@features/semester-planner/ui/card-view/dnd/use-
 import { GraduationStatusAccordion } from '@features/semester-planner/ui/card-view/graduation-status-accordion/graduation-status-accordion';
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
-import { toSidebarCourse } from '@features/semester-planner/utils/map-planner';
+import { parseApiError } from '@shared/apis/parse-api-error';
 import { toast, Toaster } from '@shared/components';
 import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
 import Icon from '@shared/components/icon/icon';
 import { IconButton } from '@shared/components/icon-button/icon-button';
+import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
+import { useRouter } from 'next/navigation';
 import { type TransitionEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-const SEMESTER_CODE_MAP: Record<string, { sortValue: number; label: string }> = {
-  '1': { sortValue: 1, label: '1학기' },
-  '2': { sortValue: 1.5, label: '여름학기' },
-  '3': { sortValue: 2, label: '2학기' },
-  '4': { sortValue: 2.5, label: '겨울학기' },
+const SEMESTER_LABEL_MAP: Record<string, string> = {
+  '1': '1학기',
+  '2': '2학기',
 };
-
-// TODO: API 연동 시 과목검색(GET /courses) 결과로 교체하고 필터 값을 쿼리 파라미터로 전달
-const LIBRARY_COURSES = MOCK_COURSE_SEARCH_ITEMS.map(toSidebarCourse);
 
 interface CardViewProps {
   sidebarSlot: HTMLDivElement | null;
@@ -48,11 +45,15 @@ interface CardViewProps {
 
 export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const {
+    isLoading: isPlannerLoading,
+    isError: isPlannerError,
+    error: plannerError,
     plannedTerms,
     gridTerms,
     snapshot,
     restoreSnapshot,
-    moveCourseToTerm,
+    previewCourseMove,
+    dropCourseToTerm,
     insertCourse,
     removeCourse,
     addTerm,
@@ -62,22 +63,62 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     renameFolder,
     deleteFolder,
   } = usePlannerTerms();
-  const { activeCourse, overTermId, isLibraryDrag, contextProps } = useCardViewDnd({
+  const { activeCourse, overTermId, isLibraryDrag, isDropRejected, contextProps } = useCardViewDnd({
     plannedTerms,
     snapshot,
     restoreSnapshot,
-    moveCourseToTerm,
+    previewCourseMove,
+    dropCourseToTerm,
     insertCourse,
     removeCourse,
   });
+  const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [appliedFilters, setAppliedFilters] = useState<CourseFilterValues>();
   const [filterTab, setFilterTab] = useState<CourseFilterTabKeyTypes | null>(null);
+  const debouncedKeyword = useDebouncedValue(searchKeyword.trim());
+  const {
+    data: libraryCourses = [],
+    isLoading: isCoursesLoading,
+    isError: isCourseSearchError,
+    error: courseSearchError,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useCourseSearch(
+    { keyword: debouncedKeyword || undefined, ...(appliedFilters ?? INITIAL_COURSE_FILTER_VALUES) },
+    { enabled: isSidebarOpen },
+  );
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
   const boardRef = useRef<HTMLElement>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isPlannerError) return;
+    parseApiError(plannerError).then((parsed) => {
+      if (parsed?.status === 404) {
+        router.replace('/onboarding');
+        return;
+      }
+      toast.negative(parsed?.message ?? '플래너를 불러오지 못했어요.');
+    });
+  }, [isPlannerError, plannerError, router]);
+
+  useEffect(() => {
+    if (!isGraduationError) return;
+    parseApiError(graduationError).then((parsed) =>
+      toast.negative(parsed?.message ?? '졸업 요건 현황을 불러오지 못했어요.'),
+    );
+  }, [isGraduationError, graduationError]);
+
+  useEffect(() => {
+    if (!isCourseSearchError) return;
+    parseApiError(courseSearchError).then((parsed) => toast.negative(parsed?.message ?? '과목 검색에 실패했어요.'));
+  }, [isCourseSearchError, courseSearchError]);
 
   const updateScrollability = useCallback(() => {
     const board = boardRef.current;
@@ -113,6 +154,10 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     if (tab) setFilterTab(tab);
   };
 
+  const handleLoadMoreCourses = () => {
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+  };
+
   const handleDirectAdd = () => {
     console.log('직접추가 클릭 — 과목 직접추가 모달 연결 예정');
   };
@@ -129,17 +174,21 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   };
 
   const handleAddSemester = (year: string, semester: string) => {
-    const semesterInfo = SEMESTER_CODE_MAP[semester];
-    if (!semesterInfo) return;
+    const semesterLabel = SEMESTER_LABEL_MAP[semester];
+    if (!semesterLabel) return;
     const yearLevel = Number.parseInt(year, 10);
 
-    const added = addTerm({ yearLevel, semester: semesterInfo.sortValue, semesterLabel: semesterInfo.label });
+    const added = addTerm({ yearLevel, semester: Number(semester), semesterLabel });
     if (!added) {
       toast.negative('이미 추가된 학기예요.');
       return;
     }
     setIsAddSemesterOpen(false);
   };
+
+  if (isPlannerLoading) return null;
+
+  if (isPlannerError) return null;
 
   return (
     <DndContext id="card-view-dnd" {...contextProps}>
@@ -154,7 +203,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
           />
         </header>
 
-        <GraduationStatusAccordion className="mt-20" />
+        <GraduationStatusAccordion className="mt-20" data={graduationData} />
 
         <div className="relative mt-24 min-h-0 flex-1">
           <section
@@ -227,23 +276,31 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
             )}
           >
             <AddCourseSidebar
-              courses={LIBRARY_COURSES}
+              courses={libraryCourses}
+              keyword={searchKeyword}
+              onKeywordChange={setSearchKeyword}
+              isLoading={isCoursesLoading}
+              onLoadMore={handleLoadMoreCourses}
               selectedFilterLabels={getSelectedFilterLabels(appliedFilters)}
               onFilterClick={handleFilterClick}
               onClose={() => setIsSidebarOpen(false)}
               onDirectAdd={handleDirectAdd}
-              renderCourse={(course: Course) => <LibraryCourse key={course.id} course={course} />}
+              renderCourse={(course: CourseSearchItemResponse) => (
+                <LibraryCourse key={course.courseId} course={course} />
+              )}
             />
           </div>,
           sidebarSlot,
         )}
 
-      <DragOverlay dropAnimation={isLibraryDrag ? null : undefined}>
+      <DragOverlay dropAnimation={isLibraryDrag && !isDropRejected ? null : undefined}>
         {activeCourse && (
           <ClassCard
-            department={activeCourse.department}
+            department={activeCourse.departmentName}
             title={activeCourse.name}
             tags={activeCourse.tags}
+            isEnglish={activeCourse.isEnglish}
+            isSw={activeCourse.isSw}
             className="shadow-small w-242 border border-gray-100"
           />
         )}

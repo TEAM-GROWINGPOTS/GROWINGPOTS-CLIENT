@@ -1,9 +1,8 @@
 export type OpenedSemester = 'FIRST' | 'SECOND' | 'BOTH';
 
-export interface PlannedCourseResponse {
-  plannerVersionItemId: number;
+export interface PlannerCourseBaseResponse {
   courseId: number;
-  courseName: string;
+  name: string;
   departmentName: string;
   divisionCategory: string;
   divisionName: string;
@@ -11,20 +10,17 @@ export interface PlannedCourseResponse {
   recommendedYearHigh: number | null;
   openedSemester: OpenedSemester;
   credit: number;
+  isEnglish: boolean;
+  isSw: boolean;
+}
+
+export interface PlannedCourseResponse extends PlannerCourseBaseResponse {
+  plannerVersionItemId: number;
   coursePositionOrder: number;
 }
 
-export interface CompletedCourseResponse {
+export interface CompletedCourseResponse extends PlannerCourseBaseResponse {
   studentCourseId: number;
-  courseId: number;
-  courseName: string;
-  departmentName: string;
-  divisionCategory: string;
-  divisionName: string;
-  recommendedYearLow: number | null;
-  recommendedYearHigh: number | null;
-  openedSemester: OpenedSemester;
-  credit: number;
 }
 
 export interface PlannerVersionResponse {
@@ -59,27 +55,36 @@ export interface PlannerResponse {
   plannedTerms: PlannedTermResponse[];
 }
 
-export interface CourseSearchItemResponse {
+export interface PlannerSaveItem {
   courseId: number;
-  courseCode: string;
+  coursePositionOrder: number;
+}
+
+export interface PlannerSaveVersion {
+  versionNo: number;
   name: string;
-  credit: number;
-  departmentName: string;
-  defaultDivisionName: string;
-  recommendedYearLow: number | null;
-  recommendedYearHigh: number | null;
-  openedSemester: OpenedSemester;
-  isEnglish: boolean;
-  isSw: boolean;
-  alreadyCompleted: boolean;
-  inPlanner: boolean;
+  isSelected: boolean;
+  versionOrder: number;
+  items: PlannerSaveItem[];
+}
+
+export interface PlannerSaveTerm {
+  yearLevel: number;
+  semester: number;
+  versions: PlannerSaveVersion[];
+}
+
+export interface PlannerSaveRequest {
+  plannerSimulationId: number | null;
+  terms: PlannerSaveTerm[];
 }
 
 export type SemesterCardStatus = 'completed' | 'current' | 'planned';
 
 export interface SemesterCourse {
   id: string;
-  department: string;
+  courseId: number;
+  departmentName: string;
   name: string;
   tags: string[];
   credit: number;
