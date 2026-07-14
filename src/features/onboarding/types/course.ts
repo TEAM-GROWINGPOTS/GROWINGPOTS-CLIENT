@@ -24,7 +24,7 @@ export interface StudentCourses {
 export type TakenSemester = 'FIRST' | 'SUMMER' | 'SECOND' | 'WINTER';
 
 export interface PutStudentCourseItem {
-  studentCourseId: number;
+  studentCourseId: number | null;
   courseId: number | null;
   rawCourseName: string;
   departmentId: number | null;
