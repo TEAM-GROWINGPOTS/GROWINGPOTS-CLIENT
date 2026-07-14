@@ -2,6 +2,14 @@ export type GraduationUnit = 'CREDITS' | 'COURSES';
 export type MajorType = 'MAIN' | 'DOUBLE';
 export type CertType = 'THESIS' | 'GRADUATION_CERT' | 'TOPIK' | 'GPA';
 export type CertResult = 'PASS' | 'FAIL' | 'EXEMPT' | 'NONE';
+export type GraduationMajorFilter = 'ALL' | 'GE' | 'OTHERS';
+export type GraduationSource = 'COMPLETED' | 'PLANNED';
+
+export interface GraduationQueryParams {
+  majorType?: GraduationMajorFilter;
+  studentMajorId?: number;
+  source?: GraduationSource;
+}
 
 export interface GraduationCondition {
   code: string;

@@ -1,10 +1,10 @@
 'use client';
 
 import { useDraggable } from '@dnd-kit/core';
-import type { CourseSearchItemResponse } from '@features/semester-planner/types/course-search';
 import type { SemesterCourse } from '@features/semester-planner/types/planner';
 import { LIBRARY_PREFIX } from '@features/semester-planner/ui/card-view/dnd/use-card-view-dnd';
 import { getCourseTags } from '@features/semester-planner/utils/map-planner';
+import type { CourseSearchItemResponse } from '@shared/apis/types/course-search';
 import { ClassCard } from '@shared/components/class-card/class-card';
 
 const toLibrarySemesterCourse = ({
