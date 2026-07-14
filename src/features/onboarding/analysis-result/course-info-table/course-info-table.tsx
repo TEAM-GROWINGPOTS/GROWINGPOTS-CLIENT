@@ -73,12 +73,12 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
     const [isHeightTransitioning, setIsHeightTransitioning] = useState(false);
     const previousTableHeightRef = useRef<number | undefined>(undefined);
 
-    const departmentOptions = ['해당없음', ...departments.map(({ name }) => name)].map((label) => ({
+    const departmentOptions = [...departments.map(({ name }) => name).reverse(), '해당없음'].map((label) => ({
       value: label,
       label,
     }));
 
-    const areaOptions = ['해당없음', ...divisions.map(({ name }) => name)].map((label) => ({
+    const areaOptions = [...divisions.map(({ name }) => name).reverse(), '해당없음'].map((label) => ({
       value: label,
       label,
     }));
