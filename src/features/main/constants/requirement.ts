@@ -10,6 +10,10 @@ export const ALL_TAB_VALUE = 'ALL';
 export const GE_TAB_VALUE = 'GE';
 export const OTHERS_TAB_VALUE = 'OTHERS';
 
+export const REQUIREMENT_DISPLAY_NAMES: Record<string, string> = {
+  GENERAL_ELECTIVE: '일반선택',
+};
+
 export const SEMESTER_LABELS: Record<RequirementSemester, string> = {
   FIRST: '1학기',
   SECOND: '2학기',

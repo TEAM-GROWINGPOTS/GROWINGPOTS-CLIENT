@@ -2,6 +2,7 @@ import {
   CURRENT_ONLY_CODES,
   HIDDEN_BADGE_CODES,
   HIDDEN_MAJOR_NAME_CODES,
+  REQUIREMENT_DISPLAY_NAMES,
   REQUIREMENT_UNIT_LABELS,
 } from '@features/main/constants/requirement';
 import * as Accordion from '@radix-ui/react-accordion';
@@ -29,6 +30,7 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
   const unit = REQUIREMENT_UNIT_LABELS[item.unit];
   const isInfoIconVisible = Boolean(hasInfo && infoContent);
   const isMajorNameVisible = Boolean(item.majorName && !HIDDEN_MAJOR_NAME_CODES.has(item.code));
+  const displayName = REQUIREMENT_DISPLAY_NAMES[item.code] ?? item.name;
 
   return (
     <Accordion.Header asChild>
@@ -37,7 +39,7 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
 
         <div className="flex items-center">
           <h3 className={cn('text-title-sb-18 min-w-0 truncate text-gray-800', isInfoIconVisible ? 'mr-4' : 'mr-8')}>
-            {item.name}
+            {displayName}
           </h3>
 
           {isInfoIconVisible && infoContent && (
@@ -48,7 +50,7 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
               trigger={
                 <button
                   type="button"
-                  aria-label={`${item.name} 안내 보기`}
+                  aria-label={`${displayName} 안내 보기`}
                   className="mr-8 flex size-20 shrink-0 items-center justify-center"
                 >
                   <Icon name="ic_information_outline" size={20} className="text-gray-300" />
@@ -76,7 +78,7 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
           </p>
 
           <Accordion.Trigger
-            aria-label={`${item.name} 상세 보기`}
+            aria-label={`${displayName} 상세 보기`}
             className="group flex size-24 shrink-0 cursor-pointer items-center justify-center"
           >
             <Icon name="ic_chevron_down" size={24} className="text-gray-500 group-data-[state=open]:hidden" />
