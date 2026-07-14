@@ -31,6 +31,11 @@ export const GraduationDashboardSection = ({
   onShortcutClick,
 }: GraduationDashboardSectionProps) => {
   const progressGridItems = getProgressGridItems(shortcuts, totalCredits);
+  const enabledScrollKeys = new Set(items.map(({ scrollKey }) => scrollKey).filter(Boolean));
+  const interactiveProgressGridItems = progressGridItems.map((item) => ({
+    ...item,
+    isDisabled: !item.scrollKey || !enabledScrollKeys.has(item.scrollKey),
+  }));
 
   return (
     <section className="rounded-2xl bg-white p-24">
@@ -38,7 +43,7 @@ export const GraduationDashboardSection = ({
 
       <div className="mt-29 grid grid-cols-2 gap-20">
         <GraduationProgressGrid
-          items={progressGridItems}
+          items={interactiveProgressGridItems}
           onSelectItem={({ scrollKey }) => onShortcutClick(scrollKey)}
         />
         <RequirementAccordionList items={items} scrollTargetKey={scrollTargetKey} admissionYear={admissionYear} />

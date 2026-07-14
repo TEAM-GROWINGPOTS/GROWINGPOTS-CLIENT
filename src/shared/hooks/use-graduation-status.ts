@@ -7,5 +7,5 @@ import { useQuery } from '@tanstack/react-query';
 export const useGraduationStatus = (source?: GraduationSource) =>
   useQuery({
     queryKey: QUERY_KEY.GRADUATION.STATUS({ source: source ?? 'ALL' }),
-    queryFn: () => getGraduation(source),
+    queryFn: () => getGraduation(source ? new URLSearchParams({ source }) : undefined),
   });

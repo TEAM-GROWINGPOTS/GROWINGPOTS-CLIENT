@@ -15,14 +15,17 @@ const getRequirementCourseKey = ({ studentCourseId, departmentName, name }: Requ
   return studentCourseId ?? `${departmentName}-${name}`;
 };
 
-const getRequirementCourseTags = ({ credit, divisionName, semester }: RequirementCourse, requirementName: string) => {
+const getRequirementCourseTags = (
+  { area, credit, divisionName, semester }: RequirementCourse,
+  requirementName: string,
+) => {
   const tags = {
-    area: divisionName || requirementName,
+    area: area ?? (divisionName || requirementName),
     credit: `${credit}학점`,
     semester,
   };
 
-  return [tags.area, tags.credit, tags.semester];
+  return [tags.area, tags.credit, tags.semester].filter((tag): tag is string => Boolean(tag));
 };
 
 export const RequirementClassList = ({

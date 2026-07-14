@@ -1,8 +1,8 @@
 'use client';
 
-import { getCourses } from '@features/semester-planner/apis/get-courses';
-import type { CourseSearchItemResponse, CourseSearchParams } from '@features/semester-planner/types/course-search';
+import { getCourses } from '@shared/apis/get-courses';
 import { QUERY_KEY } from '@shared/apis/query-key';
+import type { CourseSearchItemResponse, CourseSearchParams } from '@shared/apis/types/course-search';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 
 const COURSE_PAGE_SIZE = 20;

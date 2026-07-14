@@ -5,9 +5,9 @@ import type { GraduationResponse } from '@shared/apis/types/graduation';
 
 export type GraduationSource = 'COMPLETED' | 'PLANNED';
 
-export const getGraduation = async (source?: GraduationSource) => {
+export const getGraduation = async (searchParams?: URLSearchParams) => {
   const response = await request.get<SuccessResponse<GraduationResponse>>(ENDPOINT.GRADUATION.STATUS, {
-    searchParams: source ? { source } : undefined,
+    searchParams,
   });
 
   return response.data;
