@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+@import './tokens/typography.css';
+@import './tokens/colors.css';
+@import './tokens/z-index.css';
+@import './tokens/shadows.css';
+@import './tokens/animations.css';
+
+@theme {
+  --spacing: 0.0625rem;
+}
+
+@layer base {
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--Gray-gray-200, #e7e7e7) var(--Gray-gray-200, #e7e7e7);
+  }
+
+  *::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    border-radius: 40px;
+    background: var(--Gray-gray-200, #e7e7e7);
+  }
+
+  *::-webkit-scrollbar-track {
+    border-radius: 40px;
+    background: var(--Gray-gray-200, #e7e7e7);
+  }
+}
