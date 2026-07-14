@@ -4,6 +4,7 @@ export const Toaster = () => (
   <SonnerToaster
     position="bottom-center"
     offset={40}
+    duration={2000}
     visibleToasts={1}
     toastOptions={{
       unstyled: true,

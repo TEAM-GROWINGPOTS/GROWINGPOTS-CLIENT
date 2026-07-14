@@ -12,7 +12,7 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 const isPdf = (file: File) => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 
 const dropzoneVariants = cva(
-  'flex w-full flex-col items-center justify-start rounded-xl border border-dashed border-gray-200 transition-colors pt-32 pb-12',
+  'flex w-full flex-col items-center justify-start rounded-xl border border-dashed border-gray-200 transition-colors pt-32 pb-24',
   {
     variants: {
       isDragOver: {
@@ -87,7 +87,7 @@ export const Uploader = ({ onFileSelect }: UploaderProps) => {
           onDrop={handleDrop}
         >
           <Icon name="ic_pdf_upload" size={80} />
-          <p className="text-body-r-16 mb-20 text-center text-gray-900">
+          <p className="text-body-r-16 mt-4 mb-28 text-center text-gray-900">
             파일을 끌어다 놓거나
             <br />
             ‘파일선택’을 눌러 업로드해 주세요.
