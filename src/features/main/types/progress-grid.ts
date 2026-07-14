@@ -8,6 +8,7 @@ export interface GraduationProgressItem {
   unit?: GraduationProgressUnit;
   isTotal?: boolean;
   isConditionCheckRequired?: boolean;
+  isDisabled?: boolean;
   scrollKey?: string;
 }
 

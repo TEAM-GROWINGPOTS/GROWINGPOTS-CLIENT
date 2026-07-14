@@ -6,6 +6,9 @@ export const HIDDEN_BADGE_CODES = new Set<string>(['GENERAL_ELECTIVE']);
 export const HIDDEN_MAJOR_NAME_CODES = new Set<string>(['ENGLISH_COURSE', 'SW_CERT_COURSE']);
 export const INFORMATION_CODES = new Set<string>(['GRADUATION_REQUIRED', 'DISTRIBUTED_GE', 'FREE_GE']);
 export const NOTICE_CODES = new Set<string>(['GRADUATION_REQUIRED', 'REQUIRED_GE', 'DISTRIBUTED_GE']);
+export const ALL_TAB_VALUE = 'ALL';
+export const GE_TAB_VALUE = 'GE';
+export const OTHERS_TAB_VALUE = 'OTHERS';
 
 export const SEMESTER_LABELS: Record<RequirementSemester, string> = {
   FIRST: '1학기',

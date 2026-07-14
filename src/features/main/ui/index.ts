@@ -1,3 +1,4 @@
+export { GraduationDashboardContainer } from './graduation-dashboard/graduation-dashboard-container';
 export { GraduationDashboardHeader } from './graduation-dashboard/graduation-dashboard-header';
 export { GraduationDashboardSection } from './graduation-dashboard/graduation-dashboard-section';
 export {
