@@ -1,17 +1,17 @@
 import { toast } from '@shared/components/toast';
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 
+const handleGlobalError = () => {
+  toast.negative('요청에 실패했어요.');
+};
+
 export const createQueryClient = () =>
   new QueryClient({
     queryCache: new QueryCache({
-      onError: () => {
-        toast.negative('요청에 실패했어요.');
-      },
+      onError: handleGlobalError,
     }),
     mutationCache: new MutationCache({
-      onError: () => {
-        toast.negative('요청에 실패했어요.');
-      },
+      onError: handleGlobalError,
     }),
     defaultOptions: {
       queries: {
