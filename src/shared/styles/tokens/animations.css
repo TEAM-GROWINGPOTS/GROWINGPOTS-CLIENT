@@ -44,3 +44,20 @@
   }
 }
 
+@keyframes toast-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(0) scale(0.98);
+  }
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-removed='true'] {
+  --y: translateY(0) !important;
+  animation: toast-fade-out 400ms cubic-bezier(0.33, 1, 0.68, 1) forwards !important;
+  transition: none !important;
+}
