@@ -4,4 +4,9 @@ export const QUERY_KEY = {
     ME: () => [...QUERY_KEY.STUDENTS.ALL, 'me'] as const,
     ME_COURSES: () => [...QUERY_KEY.STUDENTS.ALL, 'me', 'courses'] as const,
   },
-} as const;
+  ONBOARDING: {
+    ALL: ['onboarding'] as const,
+    OPTIONS: () => [...QUERY_KEY.ONBOARDING.ALL, 'options'] as const,
+    SCOPED_OPTIONS: (schoolId?: number) => [...QUERY_KEY.ONBOARDING.ALL, 'options', 'scoped', schoolId] as const,
+  },
+};
