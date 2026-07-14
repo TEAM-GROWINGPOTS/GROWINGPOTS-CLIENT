@@ -1,5 +1,76 @@
 import type { GraduationResponse } from '@shared/apis/types/graduation';
 
+import { CourseInfo } from '../analysis-result/course-info-table/course-info-table';
+
+export const MOCK_COURSES: CourseInfo[] = [
+  { id: '1', courseName: '세계와시민', department: '해당없음', credit: '3', semester: '1학기', area: '필수교과' },
+  {
+    id: '2',
+    courseName: '인간의가치탐색',
+    department: '해당없음',
+    credit: '3',
+    semester: '2학기',
+    area: '필수교과',
+  },
+  {
+    id: '3',
+    courseName: '빅뱅에서문명까지',
+    department: '해당없음',
+    credit: '3',
+    semester: '2학기',
+    area: '필수교과',
+  },
+  {
+    id: '4',
+    courseName: '고전으로읽는리더십',
+    department: '해당없음',
+    credit: '3',
+    semester: '1학기',
+    area: '필수교과',
+  },
+  { id: '5', courseName: '한국사의이해', department: '해당없음', credit: '3', semester: '2학기', area: '필수교과' },
+  {
+    id: '6',
+    courseName: '영화의이해',
+    department: '연극영화학과',
+    credit: '3',
+    semester: '3학기',
+    area: '전공 기초',
+  },
+  {
+    id: '7',
+    courseName: '연기실습기초',
+    department: '연극영화학과',
+    credit: '3',
+    semester: '3학기',
+    area: '전공 필수',
+  },
+  {
+    id: '8',
+    courseName: '시나리오작법',
+    department: '연극영화학과',
+    credit: '3',
+    semester: '4학기',
+    area: '전공 필수',
+  },
+  {
+    id: '9',
+    courseName: '영화편집실습',
+    department: '연극영화학과',
+    credit: '3',
+    semester: '4학기',
+    area: '전공 선택',
+  },
+  {
+    id: '10',
+    courseName: '다큐멘터리제작',
+    department: '연극영화학과',
+    credit: '3',
+    semester: '5학기',
+    area: '전공 선택',
+  },
+];
+
 export const MOCK_GRADUATION_RESPONSE: GraduationResponse = {
   summary: {
     totalCredits: { current: 87, required: 130 },

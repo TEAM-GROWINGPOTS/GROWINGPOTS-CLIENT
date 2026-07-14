@@ -1,6 +1,7 @@
 'use client';
 
 import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
+import { getOtherRequiredConditions } from '@features/semester-planner/utils/graduation-conditions';
 import * as Accordion from '@radix-ui/react-accordion';
 import type { GraduationCondition, GraduationResponse, GraduationUnit } from '@shared/apis/types/graduation';
 import { Badge, Chip, Tooltip } from '@shared/components';
@@ -12,7 +13,6 @@ import { AccordionProgressBar } from './accordion-progress-bar';
 import { calculatePercentage } from './calculate-percentage';
 
 const MAJOR_CODES = new Set(['MAJOR_BASIC', 'MAJOR_REQUIRED', 'MAJOR_ELECTIVE']);
-const OTHER_REQUIRED_CODE_ORDER = ['SW_CERT_COURSE', 'ENGLISH_COURSE'];
 const GE_CODE_ORDER = ['DISTRIBUTED_GE', 'REQUIRED_GE', 'FREE_GE'];
 const UNIT_LABEL: Record<GraduationUnit, string> = { CREDITS: '학점', COURSES: '과목' };
 
@@ -56,7 +56,9 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
     ({ name, current, required, unit }, index) => ({ key: `${index}-${name}`, name, current, required, unit }),
   );
 
-  const otherRequiredRows: TabRow[] = toTabRows(orderConditions(ge.conditions, OTHER_REQUIRED_CODE_ORDER));
+  const otherRequiredRows: TabRow[] = getOtherRequiredConditions(sections).map(
+    ({ code, name, current, required, unit }) => ({ key: code, name, current, required, unit }),
+  );
 
   const tabs = [
     ...(hasGraduationRequired ? ['졸업 필수'] : []),
@@ -125,7 +127,13 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
                   size="md"
                 />
               </div>
-              {!graduatable && <Badge size="xsmall" color="red">{`${shortfallCredit}학점 부족`}</Badge>}
+              {graduatable ? (
+                <Badge size="xsmall" color="lime01">
+                  졸업 요건 충족
+                </Badge>
+              ) : (
+                <Badge size="xsmall" color="red">{`${shortfallCredit}학점 부족`}</Badge>
+              )}
             </div>
             <Icon
               name="ic_chevron_down"

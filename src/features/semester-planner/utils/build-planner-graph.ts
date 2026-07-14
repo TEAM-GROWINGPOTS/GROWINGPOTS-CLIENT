@@ -45,7 +45,7 @@ export function buildPlannerGraph(data: PlannerResponse): PlannerGraph {
         totalCredit: term.totalCredit,
         courses: term.courses.map((c) => ({
           id: c.studentCourseId,
-          courseName: c.courseName,
+          courseName: c.name,
           divisionCategory: c.divisionCategory,
           divisionName: c.divisionName,
         })),
@@ -99,7 +99,7 @@ export function buildPlannerGraph(data: PlannerResponse): PlannerGraph {
           totalCredit: version.totalCredit,
           courses: sortedCourses.map((c) => ({
             id: c.plannerVersionItemId,
-            courseName: c.courseName,
+            courseName: c.name,
             divisionCategory: c.divisionCategory,
             divisionName: c.divisionName,
           })),

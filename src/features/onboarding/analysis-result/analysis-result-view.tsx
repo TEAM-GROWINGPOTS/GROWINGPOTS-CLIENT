@@ -1,50 +1,24 @@
 'use client';
 
 import { Button } from '@shared/components/button/button';
-import { useGraduation } from '@shared/hooks/use-graduation';
 import { useRouter } from 'next/navigation';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 
-import { useOnboardingOptions } from '../hooks/use-onboarding-options';
-import { useStudentCourses } from '../hooks/use-student-courses';
-import { useStudentProfile } from '../hooks/use-student-profile';
-import { useUpdateStudentCourses } from '../hooks/use-update-student-courses';
-import { CourseInfoTable, type CourseInfoTableRef } from './course-info-table/course-info-table';
-import {
-  mapCourseInfoToPutStudentCourses,
-  mapStudentCoursesToCourseInfo,
-} from './course-info-table/map-student-courses';
+import { MOCK_COURSES, MOCK_GRADUATION_RESPONSE } from '../mocks/analysis-result';
+import { CourseInfoTable } from './course-info-table/course-info-table';
 import { GraduationResult } from './graduation-result/graduation-result';
 import { mapGraduationResponseToCards } from './graduation-result/map-graduation-response';
 import { StudentInfo } from './student-info/student-info';
+
+const requirementItems = mapGraduationResponseToCards(MOCK_GRADUATION_RESPONSE);
 
 export const AnalysisResultView = () => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isCourseInfoValid, setIsCourseInfoValid] = useState(true);
-  const courseInfoTableRef = useRef<CourseInfoTableRef>(null);
-  const { data: studentProfile } = useStudentProfile();
-  const { data: studentCourses } = useStudentCourses();
-  const { data: onboardingOptions } = useOnboardingOptions();
-  const { data: graduation } = useGraduation();
-  const { mutate: updateStudentCourses, isPending: isSaving } = useUpdateStudentCourses();
-  const requirementItems = graduation ? mapGraduationResponseToCards(graduation) : [];
 
   const handleEditToggleClick = () => {
-    if (!isEditing) {
-      setIsEditing(true);
-      return;
-    }
-
-    const rows = courseInfoTableRef.current?.getCourses();
-    if (!rows || !studentCourses) return;
-
-    updateStudentCourses(
-      {
-        courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses, onboardingOptions?.departments ?? []),
-      },
-      { onSuccess: () => setIsEditing(false) },
-    );
+    setIsEditing((prev) => !prev);
   };
 
   const handleCourseInfoValidityChange = useCallback((isValid: boolean) => {
@@ -72,24 +46,22 @@ export const AnalysisResultView = () => {
           label={isEditing ? '저장하기' : '편집하기'}
           mode={isEditing ? 'primary_solid' : 'secondary_outline'}
           size="sm"
-          disabled={isEditing && (!isCourseInfoValid || isSaving)}
+          disabled={isEditing && !isCourseInfoValid}
           onClick={handleEditToggleClick}
         />
       </div>
 
       <div className="flex h-231 w-full gap-20">
         <div className="flex-1">
-          {studentProfile && (
-            <StudentInfo
-              name={studentProfile.name}
-              enrollmentStatus={studentProfile.enrollmentStatus}
-              schoolName={studentProfile.schoolName}
-              departmentName={studentProfile.departmentName}
-              studentNo={studentProfile.studentNo}
-              gradeLevel={studentProfile.gradeLevel}
-              semester={studentProfile.semester}
-            />
-          )}
+          <StudentInfo
+            name="김경민"
+            enrollmentStatus="재학 중"
+            schoolName="경희대학교(국제캠퍼스)"
+            departmentName="연극영화학과 영화트랙"
+            studentNo="2023103101"
+            gradeLevel={4}
+            semester={1}
+          />
         </div>
         <div className="flex-3">
           <GraduationResult items={requirementItems} />
@@ -97,16 +69,12 @@ export const AnalysisResultView = () => {
       </div>
 
       <div className="mt-20 w-full">
-        {studentCourses && (
-          <CourseInfoTable
-            ref={courseInfoTableRef}
-            courses={mapStudentCoursesToCourseInfo(studentCourses.courses)}
-            departments={onboardingOptions?.departments ?? []}
-            divisions={studentCourses.availableDivisions}
-            isEditing={isEditing}
-            onValidityChange={handleCourseInfoValidityChange}
-          />
-        )}
+        <CourseInfoTable
+          courses={MOCK_COURSES}
+          isEditing={isEditing}
+          onValidityChange={handleCourseInfoValidityChange}
+          onDeleteConfirm={() => setIsEditing(false)}
+        />
       </div>
 
       <div className="mt-20 flex justify-center">
