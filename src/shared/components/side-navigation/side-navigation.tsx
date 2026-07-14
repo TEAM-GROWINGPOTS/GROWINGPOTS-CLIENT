@@ -81,6 +81,10 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
     toggleSidebar();
   };
 
+  const handleReuploadClick = () => {
+    router.push('/onboarding?step=pdf');
+  };
+
   return (
     <aside
       aria-label="사이드 내비게이션"
@@ -138,6 +142,7 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
           <div className="flex flex-col gap-8 overflow-hidden">
             <button
               type="button"
+              onClick={handleReuploadClick}
               className="flex cursor-pointer items-center justify-center gap-4 rounded bg-gray-800 px-12 py-6"
             >
               <span className="text-body-m-14 text-gray-300">졸업사정관리표</span>
