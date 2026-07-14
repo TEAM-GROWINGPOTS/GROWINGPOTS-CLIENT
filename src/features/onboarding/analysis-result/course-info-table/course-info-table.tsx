@@ -114,7 +114,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
           <div
             ref={wrapperRef}
             className={cn('w-full transition-[max-height] duration-300 ease-in-out', isCollapsed && 'overflow-hidden')}
-            style={{ maxHeight: isCollapsed ? collapsedHeight : 3000 }}
+            style={{ maxHeight: isCollapsed ? collapsedHeight : 10000 }}
           >
             <table className="w-full table-fixed border-separate [border-spacing:0_4px]">
               <caption className="sr-only">과목 정보</caption>

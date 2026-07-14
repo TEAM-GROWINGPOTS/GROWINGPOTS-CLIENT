@@ -130,7 +130,8 @@ export const AddCourseModal = ({ open, onOpenChange, onSubmit }: AddCourseModalP
 
   const handleSubmit = () => {
     if (!canSubmit || !matchedCourse) return;
-    onSubmit({ courseId: matchedCourse.courseId, courseName: courseName.trim(), credit: finalCredit, area, semester });
+    const submitCredit = finalCredit.endsWith('.') ? finalCredit.slice(0, -1) : finalCredit;
+    onSubmit({ courseId: matchedCourse.courseId, courseName: courseName.trim(), credit: submitCredit, area, semester });
     handleClose();
   };
 
