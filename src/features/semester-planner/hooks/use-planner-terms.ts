@@ -66,12 +66,35 @@ interface AddTermInput {
   semesterLabel: string;
 }
 
+export interface DeleteFolderResult {
+  /** 삭제된 폴더가 그 학기의 마지막 폴더여서, 학기(컬럼) 자체가 통째로 사라졌는지 */
+  isTermRemoved: boolean;
+  /** 삭제된 폴더가 활성 폴더였다면, 새로 활성 폴더가 된 폴더 id (아니면 null) */
+  promotedFolderId: string | null;
+}
+
+// plannedTerms와 isSeeded를 한 state로 묶어, 시드 effect가 setState를 한 번만 호출하고도
+// plannedTerms가 실제로 채워진 바로 그 렌더에 isSeeded도 함께 true가 되게 한다 — 그래야 소비하는 쪽
+// (RoadmapView 등)이 "isFetching은 끝났는데 plannedTerms는 아직 빈 배열"인 한 렌더짜리 경합을 보지 않는다.
+// effect의 시드 여부 판단 자체는(자기 자신이 쓰는 state를 다시 읽으면 cascading render로 취급되므로)
+// state가 아닌 ref로 가드한다.
+interface PlannedTermsState {
+  terms: PlannerTerm[];
+  isSeeded: boolean;
+}
+
 export const usePlannerTerms = () => {
-  const { data: planner, isLoading, isError, error, refetch: refetchPlanner } = usePlanner();
-  const [plannedTerms, setPlannedTerms] = useState<PlannerTerm[]>([]);
+  const { data: planner, isLoading, isFetching, isError, error, refetch: refetchPlanner } = usePlanner();
+  const [plannedState, setPlannedState] = useState<PlannedTermsState>({ terms: [], isSeeded: false });
+  const plannedTerms = plannedState.terms;
+  const isSeeded = plannedState.isSeeded;
   const snapshotRef = useRef<PlannerTerm[] | null>(null);
   const createdIdSeqRef = useRef(0);
   const isSeededRef = useRef(false);
+
+  const setPlannedTerms = (terms: PlannerTerm[]) => {
+    setPlannedState((prev) => ({ ...prev, terms }));
+  };
 
   const reseedPlannedTerms = async (serverPlannedTerms: PlannedTermResponse[] | null) => {
     if (serverPlannedTerms) {
@@ -82,13 +105,16 @@ export const usePlannerTerms = () => {
     if (latestPlanner) setPlannedTerms(mapPlannedTerms(latestPlanner.plannedTerms));
   };
 
-  const { mutate: requestSavePlanner } = useSavePlanner({ onSaveError: reseedPlannedTerms });
+  const { mutateAsync: requestSavePlanner } = useSavePlanner({ onSaveError: reseedPlannedTerms });
+  // 마지막 저장 요청의 완료(성공/실패 무관) 시점. 저장 직후 다른 화면으로 전환해야 하는 흐름(노드뷰의
+  // 학기/폴더 추가)에서, 전환된 화면이 새로 GET하기 전에 이 저장이 먼저 끝나도록 기다리는 용도다.
+  const lastSavePromiseRef = useRef<Promise<unknown>>(Promise.resolve());
 
   useEffect(() => {
-    if (!planner || isSeededRef.current) return;
+    if (!planner || isFetching || isSeededRef.current) return;
     isSeededRef.current = true;
-    setPlannedTerms(mapPlannedTerms(planner.plannedTerms));
-  }, [planner]);
+    setPlannedState({ terms: mapPlannedTerms(planner.plannedTerms), isSeeded: true });
+  }, [planner, isFetching]);
 
   const previewPlannedTerms = (next: PlannerTerm[]) => {
     setPlannedTerms(next);
@@ -96,8 +122,10 @@ export const usePlannerTerms = () => {
 
   const commitPlannedTerms = (next: PlannerTerm[]) => {
     setPlannedTerms(next);
-    requestSavePlanner(toPlannerSaveRequest(next));
+    lastSavePromiseRef.current = requestSavePlanner(toPlannerSaveRequest(next)).catch(() => {});
   };
+
+  const waitForSave = () => lastSavePromiseRef.current;
 
   const completedTerms = useMemo(() => (planner ? mapCompletedTerms(planner.completedTerms) : []), [planner]);
   const gridTerms = useMemo(
@@ -183,10 +211,18 @@ export const usePlannerTerms = () => {
     return term;
   };
 
-  const selectFolder = (termId: string, folderId: string) => {
-    const next = plannedTerms.map((term) => (term.id === termId ? { ...term, selectedFolderId: folderId } : term));
+  // 노드뷰의 엣지 연결 하나가 두 학기의 활성 폴더를 동시에 바꿀 수 있어, 한 번의 커밋으로 묶어 반영한다.
+  // 두 번 나눠 selectFolder를 호출하면 두 번째 호출이 첫 번째 변경 전의 plannedTerms를 기준으로 계산돼 덮어써진다.
+  const selectFolders = (selections: { termId: string; folderId: string }[]) => {
+    const folderIdByTermId = new Map(selections.map(({ termId, folderId }) => [termId, folderId]));
+    const next = plannedTerms.map((term) => {
+      const folderId = folderIdByTermId.get(term.id);
+      return folderId ? { ...term, selectedFolderId: folderId } : term;
+    });
     commitPlannedTerms(next);
   };
+
+  const selectFolder = (termId: string, folderId: string) => selectFolders([{ termId, folderId }]);
 
   const renameFolder = (termId: string, folderId: string, name: string) => {
     const next = plannedTerms.map((term) => {
@@ -199,21 +235,42 @@ export const usePlannerTerms = () => {
     commitPlannedTerms(next);
   };
 
-  const deleteFolder = (termId: string, folderId: string) => {
-    const next = plannedTerms.flatMap((term) => {
+  const deleteFolder = (termId: string, folderId: string): DeleteFolderResult => {
+    const term = plannedTerms.find(({ id }) => id === termId);
+    if (!term) return { isTermRemoved: false, promotedFolderId: null };
+
+    const remainingFolders = term.folders.filter(({ id }) => id !== folderId);
+    const isTermRemoved = remainingFolders.length === 0;
+    const promotedFolderId = !isTermRemoved && term.selectedFolderId === folderId ? remainingFolders[0].id : null;
+
+    const next = plannedTerms.flatMap((prevTerm) => {
+      if (prevTerm.id !== termId) return prevTerm;
+      if (isTermRemoved) return [];
+      const selectedFolderId = promotedFolderId ?? prevTerm.selectedFolderId;
+      return { ...prevTerm, folders: remainingFolders, selectedFolderId };
+    });
+    commitPlannedTerms(next);
+    return { isTermRemoved, promotedFolderId };
+  };
+
+  const reorderFolders = (termId: string, orderedFolderIds: string[]) => {
+    const next = plannedTerms.map((term) => {
       if (term.id !== termId) return term;
-      const remainingFolders = term.folders.filter(({ id }) => id !== folderId);
-      if (remainingFolders.length === 0) return [];
-      const selectedFolderId = term.selectedFolderId === folderId ? remainingFolders[0].id : term.selectedFolderId;
-      return { ...term, folders: remainingFolders, selectedFolderId };
+      const folderById = new Map(term.folders.map((folder) => [folder.id, folder]));
+      const folders = orderedFolderIds
+        .map((id) => folderById.get(id))
+        .filter((folder): folder is PlannerFolder => folder !== undefined);
+      return { ...term, folders };
     });
     commitPlannedTerms(next);
   };
 
   return {
     isLoading,
+    isFetching,
     isError,
     error,
+    isSeeded,
     refetchPlanner,
     completedTerms,
     plannedTerms,
@@ -228,7 +285,10 @@ export const usePlannerTerms = () => {
     removeTerm,
     addFolder,
     selectFolder,
+    selectFolders,
     renameFolder,
     deleteFolder,
+    reorderFolders,
+    waitForSave,
   };
 };

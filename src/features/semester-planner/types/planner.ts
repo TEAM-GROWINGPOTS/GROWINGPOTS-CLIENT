@@ -88,6 +88,8 @@ export interface SemesterCourse {
   name: string;
   tags: string[];
   credit: number;
+  /** 학기 트리(get-planner)에 배치된 과목만 내려온다. 아직 배치 전인 검색 라이브러리 과목엔 없다. */
+  divisionCategory?: string;
   divisionName: string;
   isEnglish?: boolean;
   isSw?: boolean;

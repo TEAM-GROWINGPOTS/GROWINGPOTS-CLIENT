@@ -6,6 +6,8 @@ export type PlannerNodeStatus = 'COMPLETED' | 'IN_PROGRESS' | 'PLANNED';
 
 export interface PlannerNodeData extends Record<string, unknown> {
   plannerTermVersionId: number;
+  /** planned 폴더가 속한 학기(PlannerTerm)의 id. 폴더 추가/삭제/전환/재정렬 요청에 쓴다. completed/current 학기는 없다. */
+  termId?: string;
   locked: boolean;
   colIndex: number;
   colX: number;
@@ -20,6 +22,7 @@ export interface PlannerNodeData extends Record<string, unknown> {
 export type PlannerNodeType = Node<PlannerNodeData, 'semesterNode'>;
 
 export interface AddVersionNodeData extends Record<string, unknown> {
+  termId: string;
   colIndex: number;
   colX: number;
   versionCount: number;

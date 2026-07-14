@@ -84,12 +84,10 @@ export async function GET(request: NextRequest) {
 
     const isLocalhost = request.nextUrl.hostname === 'localhost' || request.nextUrl.hostname === '127.0.0.1';
     for (const cookie of setCookies) {
-      const adjusted = isLocalhost
-        ? cookie
-            .trim()
-            .replace(/;\s*Secure/gi, '')
-            .replace(/SameSite=None/gi, 'SameSite=Lax')
-        : cookie.trim();
+      let adjusted = cookie.trim().replace(/;\s*Path=[^;]*/gi, '; Path=/');
+      if (isLocalhost) {
+        adjusted = adjusted.replace(/;\s*Secure/gi, '').replace(/SameSite=None/gi, 'SameSite=Lax');
+      }
       response.headers.append('Set-Cookie', adjusted);
     }
 

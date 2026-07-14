@@ -1,4 +1,4 @@
-import type { PlannerResponse } from '@features/semester-planner/types/planner';
+import type { PlannerFolder, PlannerTerm } from '@features/semester-planner/types/planner';
 import type { PlannerNodeData, SemesterEdgeData } from '@features/semester-planner/types/planner-graph';
 import type { Edge, Node } from '@xyflow/react';
 
@@ -8,45 +8,47 @@ function toTermLabel(yearLevel: number, semester: number): string {
   return `${yearLevel}학년 ${semester}학기`;
 }
 
+const getFolderCredit = (folder: PlannerFolder): number => folder.courses.reduce((sum, { credit }) => sum + credit, 0);
+
 export interface PlannerGraph {
   nodes: Node<PlannerNodeData>[];
   edges: Edge<SemesterEdgeData>[];
   completedIds: Set<string>;
 }
 
-export function buildPlannerGraph(data: PlannerResponse): PlannerGraph {
+export function buildPlannerGraph(completedTerms: PlannerTerm[], plannedTerms: PlannerTerm[]): PlannerGraph {
   const nodes: Node<PlannerNodeData>[] = [];
   const edges: Edge<SemesterEdgeData>[] = [];
   const completedIds = new Set<string>();
 
-  const sortedCompleted = [...data.completedTerms].sort((a, b) => a.yearLevel - b.yearLevel || a.semester - b.semester);
-
   // 누적 학점 추적 (엣지 라벨 = 해당 엣지 source까지의 누적)
   let cumulativeCredits = 0;
 
-  sortedCompleted.forEach((term, colIndex) => {
-    const nodeId = String(term.plannerTermVersionId);
+  completedTerms.forEach((term, colIndex) => {
+    const folder = term.folders[0];
+    const nodeId = folder.id;
     const colX = colIndex * COL_GAP;
     completedIds.add(nodeId);
+    const totalCredit = getFolderCredit(folder);
 
     nodes.push({
       id: nodeId,
       type: 'semesterNode',
       position: { x: colX, y: 100 },
       data: {
-        plannerTermVersionId: term.plannerTermVersionId,
+        plannerTermVersionId: Number(nodeId),
         locked: true,
         colIndex,
         colX,
-        status: term.status,
+        status: term.status === 'current' ? 'IN_PROGRESS' : 'COMPLETED',
         isSelected: true,
-        termName: term.name,
-        folderName: term.name,
-        totalCredit: term.totalCredit,
-        courses: term.courses.map((c) => ({
-          id: c.studentCourseId,
+        termName: folder.name,
+        folderName: folder.name,
+        totalCredit,
+        courses: folder.courses.map((c) => ({
+          id: Number(c.id),
           courseName: c.name,
-          divisionCategory: c.divisionCategory,
+          divisionCategory: c.divisionCategory ?? null,
           divisionName: c.divisionName,
         })),
       },
@@ -54,7 +56,7 @@ export function buildPlannerGraph(data: PlannerResponse): PlannerGraph {
     });
 
     if (colIndex > 0) {
-      const prevId = String(sortedCompleted[colIndex - 1].plannerTermVersionId);
+      const prevId = completedTerms[colIndex - 1].folders[0].id;
       edges.push({
         id: `e-init-${prevId}-${nodeId}`,
         source: prevId,
@@ -67,40 +69,39 @@ export function buildPlannerGraph(data: PlannerResponse): PlannerGraph {
       });
     }
 
-    cumulativeCredits += term.totalCredit;
+    cumulativeCredits += totalCredit;
   });
   // 이후 cumulativeCredits = 완료 학기 전체 학점 합
 
-  const sortedPlanned = [...data.plannedTerms].sort((a, b) => a.yearLevel - b.yearLevel || a.semester - b.semester);
-  const colOffset = sortedCompleted.length;
+  const colOffset = completedTerms.length;
 
-  sortedPlanned.forEach((term, termIdx) => {
+  plannedTerms.forEach((term, termIdx) => {
     const colIndex = colOffset + termIdx;
     const colX = colIndex * COL_GAP;
     const termName = toTermLabel(term.yearLevel, term.semester);
-    const sortedVersions = [...term.versions].sort((a, b) => a.versionOrder - b.versionOrder);
 
-    sortedVersions.forEach((version, rowIdx) => {
-      const sortedCourses = [...version.courses].sort((a, b) => a.coursePositionOrder - b.coursePositionOrder);
+    term.folders.forEach((folder, rowIdx) => {
+      const totalCredit = getFolderCredit(folder);
 
       nodes.push({
-        id: String(version.plannerTermVersionId),
+        id: folder.id,
         type: 'semesterNode',
         position: { x: colX, y: rowIdx },
         data: {
-          plannerTermVersionId: version.plannerTermVersionId,
+          plannerTermVersionId: Number(folder.id),
+          termId: term.id,
           locked: false,
           colIndex,
           colX,
           status: 'PLANNED',
-          isSelected: version.isSelected,
+          isSelected: folder.id === term.selectedFolderId,
           termName,
-          folderName: version.name,
-          totalCredit: version.totalCredit,
-          courses: sortedCourses.map((c) => ({
-            id: c.plannerVersionItemId,
+          folderName: folder.name,
+          totalCredit,
+          courses: folder.courses.map((c) => ({
+            id: Number(c.id),
             courseName: c.name,
-            divisionCategory: c.divisionCategory,
+            divisionCategory: c.divisionCategory ?? null,
             divisionName: c.divisionName,
           })),
         },
@@ -110,30 +111,29 @@ export function buildPlannerGraph(data: PlannerResponse): PlannerGraph {
 
     // 각 planned 컬럼 아래 버전 추가 버튼
     nodes.push({
-      id: `add-version-${term.plannerTermId}`,
+      id: `add-version-${term.id}`,
       type: 'addVersionNode',
       position: { x: colX, y: 0 },
-      data: { colIndex, colX, versionCount: sortedVersions.length } as unknown as PlannerNodeData,
+      data: { termId: term.id, colIndex, colX, versionCount: term.folders.length } as unknown as PlannerNodeData,
       draggable: false,
       connectable: false,
       selectable: false,
     });
   });
 
-  // 선택 체인 엣지: 마지막 완료학기 → 각 계획학기의 isSelected 버전
+  // 선택 체인 엣지: 마지막 완료학기 → 각 계획학기의 선택된 폴더
   let lastChainNodeId: string | null =
-    sortedCompleted.length > 0 ? String(sortedCompleted[sortedCompleted.length - 1].plannerTermVersionId) : null;
+    completedTerms.length > 0 ? completedTerms[completedTerms.length - 1].folders[0].id : null;
 
-  if (sortedCompleted.length > 0 && sortedPlanned.length > 0) {
-    const lastCompletedId = String(sortedCompleted[sortedCompleted.length - 1].plannerTermVersionId);
+  if (completedTerms.length > 0 && plannedTerms.length > 0) {
+    const lastCompletedId = completedTerms[completedTerms.length - 1].folders[0].id;
 
-    const selectedVersionIds = sortedPlanned.map((term) => {
-      const sortedVersions = [...term.versions].sort((a, b) => a.versionOrder - b.versionOrder);
-      const selected = sortedVersions.find((v) => v.isSelected) ?? sortedVersions[0];
-      return { id: String(selected.plannerTermVersionId), totalCredit: selected.totalCredit };
+    const selectedFolders = plannedTerms.map((term) => {
+      const selected = term.folders.find(({ id }) => id === term.selectedFolderId) ?? term.folders[0];
+      return { id: selected.id, totalCredit: getFolderCredit(selected) };
     });
 
-    const chainIds = [{ id: lastCompletedId, totalCredit: 0 }, ...selectedVersionIds];
+    const chainIds = [{ id: lastCompletedId, totalCredit: 0 }, ...selectedFolders];
     let chainCumulative = cumulativeCredits; // 완료 전체 합에서 시작
 
     for (let i = 0; i < chainIds.length - 1; i++) {
@@ -152,11 +152,11 @@ export function buildPlannerGraph(data: PlannerResponse): PlannerGraph {
     }
 
     cumulativeCredits = chainCumulative;
-    lastChainNodeId = selectedVersionIds[selectedVersionIds.length - 1].id;
+    lastChainNodeId = selectedFolders[selectedFolders.length - 1].id;
   }
 
   // + 버튼 노드
-  const lastColIndex = colOffset + sortedPlanned.length;
+  const lastColIndex = colOffset + plannedTerms.length;
   nodes.push({
     id: 'add-semester',
     type: 'addSemesterNode',

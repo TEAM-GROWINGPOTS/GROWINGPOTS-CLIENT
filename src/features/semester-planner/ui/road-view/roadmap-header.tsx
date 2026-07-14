@@ -1,7 +1,13 @@
 'use client';
 
+import type { GraduationResponse } from '@shared/apis/types/graduation';
+
 import { GraduationStatusAccordion } from './graduation-status-accordion';
 
-export const RoadmapHeader = () => {
-  return <GraduationStatusAccordion />;
+interface RoadmapHeaderProps {
+  data?: GraduationResponse;
+}
+
+export const RoadmapHeader = ({ data }: RoadmapHeaderProps) => {
+  return <GraduationStatusAccordion data={data} />;
 };

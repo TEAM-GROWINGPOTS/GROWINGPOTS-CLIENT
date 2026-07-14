@@ -5,8 +5,9 @@ export function proxy(request: NextRequest) {
 
   if (pathname.startsWith('/api/')) return NextResponse.next();
 
+  const refreshToken = request.cookies.get('refreshToken')?.value;
   const onboardingCompleted = request.cookies.get('onboardingCompleted')?.value;
-  const isLoggedIn = onboardingCompleted !== undefined;
+  const isLoggedIn = refreshToken !== undefined;
 
   if (pathname === '/login') {
     return isLoggedIn ? NextResponse.redirect(new URL('/', request.url)) : NextResponse.next();
@@ -18,7 +19,8 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (onboardingCompleted !== 'true' && pathname !== '/onboarding') {
+  const ONBOARDING_ALLOWED_PATHS = ['/onboarding', '/analysis-result'];
+  if (onboardingCompleted !== 'true' && !ONBOARDING_ALLOWED_PATHS.includes(pathname)) {
     return NextResponse.redirect(new URL('/onboarding', request.url));
   }
 
