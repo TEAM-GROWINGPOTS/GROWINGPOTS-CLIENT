@@ -8,7 +8,7 @@ import { type ComponentPropsWithoutRef, useLayoutEffect, useRef, useState } from
 export type ClassCardType = 'default' | 'disabled';
 export type ClassCardSize = 'default' | 'max';
 
-const classCardVariants = cva('flex w-auto flex-col items-start rounded-sm bg-white px-16 py-12', {
+const classCardVariants = cva('flex w-auto flex-col items-start rounded-sm bg-white p-14', {
   variants: {
     type: {
       default: '',
