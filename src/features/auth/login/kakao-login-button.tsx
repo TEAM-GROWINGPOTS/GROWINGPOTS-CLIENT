@@ -8,14 +8,14 @@ export const KakaoLoginButton = () => {
   const searchParams = useSearchParams();
 
   const handleKakaoLoginClick = () => {
-    if (!window.Kakao?.isInitialized()) {
+    const kakaoClientId = process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID;
+    if (!kakaoClientId) {
       toast.negative('잠시 후 다시 시도해주세요.');
       return;
     }
-    window.Kakao.Auth.authorize({
-      redirectUri: `${window.location.origin}/api/auth/kakao/callback`,
-      state: searchParams.get('redirect') ?? '',
-    });
+    const redirectUri = `${window.location.origin}/api/auth/kakao/callback`;
+    const state = searchParams.get('redirect') ?? '';
+    window.location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${kakaoClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&state=${encodeURIComponent(state)}`;
   };
 
   return (

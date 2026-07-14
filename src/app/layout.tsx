@@ -1,7 +1,6 @@
 import '@shared/styles/globals.css';
 
 import { Toaster } from '@shared/components';
-import { KakaoScript } from '@shared/libs/kakao-script';
 import { pretendard } from '@shared/styles/fonts';
 import type { Metadata } from 'next';
 
@@ -20,7 +19,6 @@ export default function RootLayout({
   return (
     <html lang="ko" className={pretendard.variable}>
       <body>
-        <KakaoScript />
         <Providers>{children}</Providers>
         <Toaster />
       </body>
