@@ -162,7 +162,11 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     console.log('직접추가 클릭 — 과목 직접추가 모달 연결 예정');
   };
 
-  const handleOpenSidebar = () => {
+  const handleToggleSidebar = () => {
+    if (isSidebarOpen) {
+      setIsSidebarOpen(false);
+      return;
+    }
     setIsSidebarOpen(true);
     closeSideNavigation();
   };
@@ -201,7 +205,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
             label="과목추가"
             mode="primary_solid"
             icon={<Icon name="ic_plus" size={16} />}
-            onClick={handleOpenSidebar}
+            onClick={handleToggleSidebar}
           />
         </header>
 
