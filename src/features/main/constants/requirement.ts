@@ -38,10 +38,10 @@ export const getRequirementInfoContent = (code: string, admissionYear?: number) 
 
   if (code === 'DISTRIBUTED_GE') {
     if (admissionYear !== undefined && admissionYear < 2024) {
-      return '23학번까지는 영역 제한 없이 12학점 이상만 이수하면 통과예요.';
+      return '23학번까지는 영역 제한 없이 12학점 이상만 이수하면 통과예요';
     }
 
-    return '5개의 영역 중 3개 영역을 선택해 9학점 이상의 이수가 필요해요.';
+    return '5개의 영역 중 3개 영역을 선택해 9학점 이상의 이수가 필요해요';
   }
 
   return INFORMATION_CONTENTS[code];
