@@ -2,7 +2,7 @@
 
 import { Button } from '@shared/components/button/button';
 import { Select } from '@shared/components/select/select';
-import { cn } from '@shared/utils/cn';
+import { TextField } from '@shared/components/text-field/text-field';
 import { useRef, useState } from 'react';
 
 import { Modal } from './modal';
@@ -70,8 +70,8 @@ export const AddCourseModal = ({ open, onOpenChange, courseNameOptions, onSubmit
     resetForm();
   };
 
-  const handleCourseNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCourseName(e.target.value);
+  const handleCourseNameChange = (value: string) => {
+    setCourseName(value);
     setShowError(false);
   };
 
@@ -98,24 +98,15 @@ export const AddCourseModal = ({ open, onOpenChange, courseNameOptions, onSubmit
         <div className="flex flex-col gap-32">
           <Modal.Header title="과목 추가" className="text-title-sb-24 flex-1" />
           <div className="flex w-416 flex-col items-start gap-16">
-            <div className="flex w-full flex-col gap-6">
-              <input
-                ref={inputRef}
-                value={courseName}
-                onChange={handleCourseNameChange}
-                onBlur={handleCourseNameBlur}
-                onKeyDown={handleCourseNameKeyDown}
-                placeholder="과목명을 입력해 주세요"
-                aria-invalid={showError}
-                className={cn(
-                  'text-body-r-16 h-48 w-full rounded-lg border bg-white px-16 py-12 text-gray-800 outline-none placeholder:text-gray-300',
-                  showError ? 'border-red-20' : 'border-gray-200 focus:border-gray-600',
-                )}
-              />
-              {showError && (
-                <p className="text-body-r-16 text-red-20">* 일치하는 과목명이 없습니다. 다시 확인해 주세요.</p>
-              )}
-            </div>
+            <TextField
+              ref={inputRef}
+              value={courseName}
+              onChange={handleCourseNameChange}
+              onBlur={handleCourseNameBlur}
+              onKeyDown={handleCourseNameKeyDown}
+              placeholder="과목명을 입력해 주세요"
+              errorMessage={showError ? '* 일치하는 과목명이 없습니다. 다시 확인해 주세요.' : undefined}
+            />
             <Select options={CREDIT_OPTIONS} value={credit} onChange={setCredit} placeholder="학점" />
             <Select options={AREA_OPTIONS} value={area} onChange={setArea} placeholder="이수 영역" />
             <Select options={SEMESTER_OPTIONS} value={semester} onChange={setSemester} placeholder="수강학기" />
