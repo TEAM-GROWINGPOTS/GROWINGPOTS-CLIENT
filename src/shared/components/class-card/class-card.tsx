@@ -1,7 +1,9 @@
-import { Badge } from '@shared/components';
+'use client';
+
+import { Badge, Tooltip } from '@shared/components';
 import { cn } from '@shared/utils/cn';
 import { cva } from 'class-variance-authority';
-import type { ComponentPropsWithoutRef } from 'react';
+import { type ComponentPropsWithoutRef, useLayoutEffect, useRef, useState } from 'react';
 
 export type ClassCardType = 'default' | 'disabled';
 export type ClassCardSize = 'default' | 'max';
@@ -63,14 +65,28 @@ export const ClassCard = ({
   ...props
 }: ClassCardProps) => {
   const note = getNote(isEnglish, isSw);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const [isTitleTruncated, setIsTitleTruncated] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = titleRef.current;
+    if (el) setIsTitleTruncated(el.scrollWidth > el.clientWidth);
+  }, [title]);
 
   return (
     <article className={cn(classCardVariants({ type, size }), className)} {...props}>
       {department && !isSw && <span className="text-caption-m-10 mb-2 text-gray-400">{department}</span>}
-      <h3 className="text-body-sb-16 w-full truncate text-gray-900" title={title}>
-        {title}
-        {type === 'disabled' && <span className="sr-only">(비활성)</span>}
-      </h3>
+      <Tooltip
+        content={title}
+        variant="bottom-start"
+        disabled={!isTitleTruncated}
+        trigger={
+          <h3 ref={titleRef} className="text-body-sb-16 w-full truncate text-gray-900">
+            {title}
+            {type === 'disabled' && <span className="sr-only">(비활성)</span>}
+          </h3>
+        }
+      />
       {note && <span className="text-caption-m-10 text-red-20">{note}</span>}
       {tags.length > 0 && (
         <div className={cn('flex flex-wrap items-center gap-4', size === 'max' ? 'mt-auto pt-12' : 'mt-12')}>
