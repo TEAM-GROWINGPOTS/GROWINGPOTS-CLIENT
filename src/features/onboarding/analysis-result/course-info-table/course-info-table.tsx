@@ -191,7 +191,12 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
               <tr className="bg-gray-50">
                 {isEditing && (
                   <th scope="col" className="px-8 py-4 text-left">
-                    <button type="button" onClick={handleSelectAllClick} aria-label="전체 선택">
+                    <button
+                      type="button"
+                      onClick={handleSelectAllClick}
+                      aria-label="전체 선택"
+                      className="flex size-20 items-center justify-center"
+                    >
                       <Icon name={isAllSelected ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'} size={20} />
                     </button>
                   </th>
@@ -212,6 +217,7 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
                         type="button"
                         onClick={handleRowSelectClick(course.id)}
                         aria-label={`${course.courseName} 선택`}
+                        className="flex size-20 items-center justify-center"
                       >
                         <Icon
                           name={selectedIds.has(course.id) ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'}
