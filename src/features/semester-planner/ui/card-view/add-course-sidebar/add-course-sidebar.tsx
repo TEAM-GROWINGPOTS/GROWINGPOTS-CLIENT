@@ -1,10 +1,10 @@
 'use client';
 
-import type { CourseSearchItemResponse } from '@features/semester-planner/types/course-search';
 import { FILTER_TAB_LABELS } from '@features/semester-planner/ui/card-view/course-filter-modal/course-filter-modal';
 import { DropDown } from '@features/semester-planner/ui/card-view/drop-down/drop-down';
 import { SearchField } from '@features/semester-planner/ui/card-view/search-field/search-field';
 import { getCourseTags } from '@features/semester-planner/utils/map-planner';
+import type { CourseSearchItemResponse } from '@shared/apis/types/course-search';
 import { IconButton } from '@shared/components';
 import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';

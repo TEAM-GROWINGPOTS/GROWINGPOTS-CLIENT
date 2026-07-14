@@ -1,7 +1,7 @@
-import type { CourseSearchParams, CourseSearchResponse } from '@features/semester-planner/types/course-search';
 import { ENDPOINT } from '@shared/apis/endpoint';
 import { request } from '@shared/apis/request';
 import type { SuccessResponse } from '@shared/apis/type';
+import type { CourseSearchParams, CourseSearchResponse } from '@shared/apis/types/course-search';
 
 const toSearchParams = (params: CourseSearchParams): URLSearchParams => {
   const searchParams = new URLSearchParams();

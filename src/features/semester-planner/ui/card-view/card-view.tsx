@@ -1,10 +1,7 @@
 'use client';
 
 import { DndContext, DragOverlay } from '@dnd-kit/core';
-import { useCourseSearch } from '@features/semester-planner/hooks/use-course-search';
-import { useDebouncedValue } from '@features/semester-planner/hooks/use-debounced-value';
 import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
-import type { CourseSearchItemResponse } from '@features/semester-planner/types/course-search';
 import { AddCourseSidebar } from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar';
 import {
   CourseFilterModal,
@@ -22,11 +19,15 @@ import { GraduationStatusAccordion } from '@features/semester-planner/ui/card-vi
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
 import { parseApiError } from '@shared/apis/parse-api-error';
+import type { CourseSearchItemResponse } from '@shared/apis/types/course-search';
 import { toast, Toaster } from '@shared/components';
 import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
 import Icon from '@shared/components/icon/icon';
 import { IconButton } from '@shared/components/icon-button/icon-button';
+import { AddCourseModal } from '@shared/components/modal/add-course-modal';
+import { useCourseSearch } from '@shared/hooks/use-course-search';
+import { useDebouncedValue } from '@shared/hooks/use-debounced-value';
 import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
@@ -75,6 +76,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
+  const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [appliedFilters, setAppliedFilters] = useState<CourseFilterValues>();
   const [filterTab, setFilterTab] = useState<CourseFilterTabKeyTypes | null>(null);
@@ -131,7 +133,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   };
 
   const handleDirectAdd = () => {
-    console.log('직접추가 클릭 — 과목 직접추가 모달 연결 예정');
+    setIsAddCourseOpen(true);
   };
 
   const handleOpenSidebar = () => {
@@ -258,6 +260,11 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
       </DragOverlay>
 
       <AddSemesterModal open={isAddSemesterOpen} onOpenChange={setIsAddSemesterOpen} onSubmit={handleAddSemester} />
+      <AddCourseModal
+        open={isAddCourseOpen}
+        onOpenChange={setIsAddCourseOpen}
+        onSubmit={() => setIsAddCourseOpen(false)}
+      />
       <CourseFilterModal
         open={filterTab !== null}
         onOpenChange={(open) => {
