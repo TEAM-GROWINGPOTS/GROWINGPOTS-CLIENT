@@ -1,6 +1,6 @@
 'use client';
 
-import { getGraduation, type GraduationSource } from '@features/semester-planner/apis/get-graduation';
+import { getGraduation, type GraduationSource } from '@shared/apis/get-graduation';
 import { QUERY_KEY } from '@shared/apis/query-key';
 import { useQuery } from '@tanstack/react-query';
 

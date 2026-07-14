@@ -3,7 +3,6 @@
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { useCourseSearch } from '@features/semester-planner/hooks/use-course-search';
 import { useDebouncedValue } from '@features/semester-planner/hooks/use-debounced-value';
-import { useGraduationStatus } from '@features/semester-planner/hooks/use-graduation-status';
 import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
 import type { CourseSearchItemResponse } from '@features/semester-planner/types/course-search';
 import { AddCourseSidebar } from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar';
@@ -28,6 +27,7 @@ import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
 import Icon from '@shared/components/icon/icon';
 import { IconButton } from '@shared/components/icon-button/icon-button';
+import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
 import { useRouter } from 'next/navigation';
