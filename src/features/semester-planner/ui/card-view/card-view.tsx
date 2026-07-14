@@ -210,7 +210,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
           <section
             ref={boardRef}
             onScroll={updateScrollability}
-            className="flex h-full items-start gap-24 overflow-x-auto pb-20"
+            className="flex h-full [scrollbar-width:none] items-start gap-24 overflow-x-auto pb-20 [&::-webkit-scrollbar]:hidden"
           >
             {gridTerms.map((term) =>
               term.status === 'planned' ? (
