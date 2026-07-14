@@ -1,11 +1,15 @@
 'use client';
 
+import { getCourses } from '@shared/apis/get-courses';
+import { QUERY_KEY } from '@shared/apis/query-key';
 import type { DepartmentResponse } from '@shared/apis/types/onboarding-options';
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
-import { AddCourseModal, type AddCourseValues, SEMESTER_OPTIONS } from '@shared/components/modal/add-course-modal';
+import { AddCourseModal, SEMESTER_OPTIONS } from '@shared/components/modal/add-course-modal';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
+import { useDebouncedValue } from '@shared/hooks/use-debounced-value';
 import { cn } from '@shared/utils/cn';
+import { useQuery } from '@tanstack/react-query';
 import {
   forwardRef,
   type TransitionEvent,
@@ -57,6 +61,7 @@ const toCreditValue = (value: string) => {
 
 const ROW_HEIGHT = 44;
 const DEFAULT_VISIBLE_ROWS = 3;
+const COURSE_NAME_MATCH_SIZE = 50;
 
 export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTableProps>(
   ({ courses, departments, divisions, isEditing = false, onValidityChange, onDeleteRows }, ref) => {
@@ -66,12 +71,29 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [addCourseName, setAddCourseName] = useState('');
+    const [addCourseCredit, setAddCourseCredit] = useState('');
+    const [addCourseArea, setAddCourseArea] = useState('');
+    const [addCourseSemester, setAddCourseSemester] = useState('');
+    const [addCourseShowError, setAddCourseShowError] = useState(false);
     const [openCellKey, setOpenCellKey] = useState<string | null>(null);
     const [prevIsEditing, setPrevIsEditing] = useState(isEditing);
     const tableWrapperRef = useRef<HTMLTableElement>(null);
     const [tableHeight, setTableHeight] = useState<number>();
     const [isHeightTransitioning, setIsHeightTransitioning] = useState(false);
     const previousTableHeightRef = useRef<number | undefined>(undefined);
+
+    const debouncedAddCourseName = useDebouncedValue(addCourseName.trim());
+    const { data: searchedCourses = [] } = useQuery({
+      queryKey: QUERY_KEY.COURSES.SEARCH({ keyword: debouncedAddCourseName, size: COURSE_NAME_MATCH_SIZE }),
+      queryFn: () => getCourses({ keyword: debouncedAddCourseName, size: COURSE_NAME_MATCH_SIZE }),
+      select: (data) => data.courses,
+      enabled: debouncedAddCourseName !== '',
+    });
+    const matchedCourse = searchedCourses.find((course) => course.name === addCourseName.trim());
+    const isAddCourseNameValid = matchedCourse !== undefined;
+    const canSubmitAddCourse =
+      isAddCourseNameValid && addCourseCredit !== '' && addCourseArea !== '' && addCourseSemester !== '';
 
     const departmentOptions = ['해당없음', ...departments.map(({ name }) => name)].map((label) => ({
       value: label,
@@ -201,23 +223,47 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
       setIsAddModalOpen(true);
     };
 
-    const handleAddCourseSubmit = ({ courseId, courseName, credit, area, semester }: AddCourseValues) => {
-      const division = divisions.find(({ name }) => name === area);
+    const resetAddCourseForm = () => {
+      setAddCourseName('');
+      setAddCourseCredit('');
+      setAddCourseArea('');
+      setAddCourseSemester('');
+      setAddCourseShowError(false);
+    };
+
+    const handleAddModalOpenChange = (nextOpen: boolean) => {
+      setIsAddModalOpen(nextOpen);
+      if (!nextOpen) resetAddCourseForm();
+    };
+
+    const handleAddCourseNameChange = (value: string) => {
+      setAddCourseName(value);
+      setAddCourseShowError(false);
+    };
+
+    const handleAddCourseNameBlur = () => {
+      setAddCourseShowError(addCourseName.trim() !== '' && !isAddCourseNameValid);
+    };
+
+    const handleAddCourseSubmit = () => {
+      if (!canSubmitAddCourse || !matchedCourse) return;
+      const division = divisions.find(({ name }) => name === addCourseArea);
 
       setRows((prev) => [
         ...prev,
         {
           id: crypto.randomUUID(),
-          courseId,
-          courseName,
+          courseId: matchedCourse.courseId,
+          courseName: addCourseName.trim(),
           department: '해당없음',
           departmentId: null,
-          credit,
-          semester,
-          area,
+          credit: addCourseCredit,
+          semester: addCourseSemester,
+          area: addCourseArea,
           areaId: division?.id ?? null,
         },
       ]);
+      handleAddModalOpenChange(false);
     };
 
     const handleDeleteConfirm = () => {
@@ -359,7 +405,22 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
           description="삭제한 과목은 복구할 수 없어요."
           onConfirm={handleDeleteConfirm}
         />
-        <AddCourseModal open={isAddModalOpen} onOpenChange={setIsAddModalOpen} onSubmit={handleAddCourseSubmit} />
+        <AddCourseModal
+          open={isAddModalOpen}
+          onOpenChange={handleAddModalOpenChange}
+          courseName={addCourseName}
+          onCourseNameChange={handleAddCourseNameChange}
+          onCourseNameBlur={handleAddCourseNameBlur}
+          courseNameErrorMessage={addCourseShowError ? '* 일치하는 과목명이 없습니다. 다시 확인해 주세요.' : undefined}
+          credit={addCourseCredit}
+          onCreditChange={setAddCourseCredit}
+          area={addCourseArea}
+          onAreaChange={setAddCourseArea}
+          semester={addCourseSemester}
+          onSemesterChange={setAddCourseSemester}
+          canSubmit={canSubmitAddCourse}
+          onSubmit={handleAddCourseSubmit}
+        />
       </section>
     );
   },
