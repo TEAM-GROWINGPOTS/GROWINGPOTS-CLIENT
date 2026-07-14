@@ -166,7 +166,14 @@ export const SideNavigation = ({
               <p className="text-body-m-16 min-w-0 flex-1 cursor-default overflow-hidden text-white">
                 {MOCK_USER_PROFILE.name}
               </p>
-              <button onClick={() => {}} type="button" aria-label="로그아웃" className="flex shrink-0 cursor-pointer">
+              <button
+                onClick={() => {
+                  window.location.href = '/api/auth/logout';
+                }}
+                type="button"
+                aria-label="로그아웃"
+                className="flex shrink-0 cursor-pointer"
+              >
                 <Icon name="ic_logout" size={24} className="text-gray-500" />
               </button>
             </div>
