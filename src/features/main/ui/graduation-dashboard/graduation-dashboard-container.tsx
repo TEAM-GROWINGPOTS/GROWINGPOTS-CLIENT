@@ -17,8 +17,11 @@ export const GraduationDashboardContainer = () => {
     admissionYear,
     certs = [],
     gpa = 0,
+    isError,
     handleShortcutClick,
   } = useGraduationDashboard();
+
+  if (isError) return null;
 
   return (
     <div className="mx-auto flex flex-col gap-24">
