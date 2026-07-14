@@ -57,9 +57,17 @@ export const useRequirementAccordionScroll = ({ items, scrollTargetKey }: UseReq
   useEffect(() => {
     if (!activeScrollTargetKey) return;
 
-    itemRefs.current[activeScrollTargetKey]?.scrollIntoView({
+    const container = scrollContainerRef.current;
+    const targetItem = itemRefs.current[activeScrollTargetKey];
+    if (!container || !targetItem) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = targetItem.getBoundingClientRect();
+    const scrollTop = targetRect.top - containerRect.top + container.scrollTop;
+
+    container.scrollTo({
+      top: scrollTop,
       behavior: 'smooth',
-      block: 'start',
     });
   }, [activeScrollTargetKey]);
 
