@@ -3,7 +3,7 @@
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { type TransitionEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { TableCellEdit } from './table-cell/table-cell-edit';
 import { TableCellSelect } from './table-cell/table-cell-select';
@@ -64,6 +64,8 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
   const [prevIsEditing, setPrevIsEditing] = useState(isEditing);
   const tableWrapperRef = useRef<HTMLTableElement>(null);
   const [tableHeight, setTableHeight] = useState<number>();
+  const [isHeightTransitioning, setIsHeightTransitioning] = useState(false);
+  const previousTableHeightRef = useRef<number | undefined>(undefined);
 
   if (isEditing !== prevIsEditing) {
     setPrevIsEditing(isEditing);
@@ -105,11 +107,22 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
   useLayoutEffect(() => {
     const wrapper = tableWrapperRef.current;
     if (!wrapper) return;
-    setTableHeight(wrapper.scrollHeight);
+
+    const nextHeight = wrapper.scrollHeight;
+    if (previousTableHeightRef.current !== undefined && previousTableHeightRef.current !== nextHeight) {
+      setIsHeightTransitioning(true);
+    }
+    previousTableHeightRef.current = nextHeight;
+    setTableHeight(nextHeight);
   }, [visibleCourses.length, isEditing]);
 
   const handleToggleClick = () => {
     setExpanded((prev) => !prev);
+  };
+
+  const handleHeightTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget || e.propertyName !== 'height') return;
+    setIsHeightTransitioning(false);
   };
 
   const handleCellChange = (id: string, key: (typeof columns)[number]['key']) => (value: string) => {
@@ -159,10 +172,12 @@ export const CourseInfoTable = ({ courses, isEditing = false, onValidityChange }
       <div className="flex flex-col items-center gap-19">
         <div
           className={cn(
-            'w-full overflow-hidden',
+            'w-full',
+            isHeightTransitioning && 'overflow-hidden',
             tableHeight !== undefined && 'transition-[height] duration-300 ease-in-out',
           )}
           style={{ height: tableHeight }}
+          onTransitionEnd={handleHeightTransitionEnd}
         >
           <table ref={tableWrapperRef} className="w-full table-fixed border-separate [border-spacing:0_4px]">
             <caption className="sr-only">과목 정보</caption>
