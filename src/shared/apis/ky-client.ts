@@ -33,18 +33,15 @@ export const kyClient = ky.create({
     ],
 
     afterResponse: [
-      async ({ response }) => {
+      async ({ request, response }) => {
         if (process.env.NODE_ENV === 'development') {
           console.debug(`[API] ${response.status} ${response.url}`);
         }
-      },
-    ],
 
-    beforeError: [
-      async ({ error }) => {
-        if (isHTTPError(error) && error.response.status === 401) {
+        if (response.status === 401) {
           try {
             await ky.post(`${API_BASE_URL}/api/v1/auth/reissue`, { credentials: 'include' });
+            return fetch(request.clone());
           } catch {
             document.cookie = 'onboardingCompleted=; path=/; max-age=0; SameSite=Lax';
             document.cookie = 'nickname=; path=/; max-age=0; SameSite=Lax';
@@ -52,7 +49,6 @@ export const kyClient = ky.create({
             window.location.href = `/login?redirect=${redirectTo}`;
           }
         }
-        return error;
       },
     ],
   },
