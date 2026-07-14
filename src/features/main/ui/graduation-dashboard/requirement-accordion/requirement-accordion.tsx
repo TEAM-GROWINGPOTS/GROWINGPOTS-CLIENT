@@ -50,7 +50,7 @@ export const RequirementAccordion = ({
               itemRefs.current[scrollKey] = element;
             }}
             value={itemValue}
-            className="rounded-lg bg-gray-50 px-20 pt-12 pb-16"
+            className="rounded-lg bg-gray-50 p-16"
           >
             <RequirementHeader
               item={item}
