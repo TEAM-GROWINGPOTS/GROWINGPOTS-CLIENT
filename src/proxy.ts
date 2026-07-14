@@ -5,6 +5,8 @@ export function proxy(request: NextRequest) {
 
   if (pathname.startsWith('/api/')) return NextResponse.next();
 
+  if (pathname === '/landing' || pathname.startsWith('/landing/')) return NextResponse.next();
+
   const onboardingCompleted = request.cookies.get('onboardingCompleted')?.value;
   const isLoggedIn = onboardingCompleted !== undefined;
 
@@ -27,5 +29,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.webp).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|robots.txt|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.webp).*)'],
 };
