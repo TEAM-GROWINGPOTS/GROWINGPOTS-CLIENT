@@ -2,16 +2,12 @@
 
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
-import {
-  AddCourseModal,
-  type AddCourseValues,
-  AREA_OPTIONS,
-  SEMESTER_OPTIONS,
-} from '@shared/components/modal/add-course-modal';
+import { AddCourseModal, type AddCourseValues, SEMESTER_OPTIONS } from '@shared/components/modal/add-course-modal';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { cn } from '@shared/utils/cn';
 import { type TransitionEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
+import type { Division } from '../../types/course';
 import { TableCellEdit } from './table-cell/table-cell-edit';
 import { TableCellSelect } from './table-cell/table-cell-select';
 
@@ -26,6 +22,7 @@ export interface CourseInfo {
 
 interface CourseInfoTableProps {
   courses: CourseInfo[];
+  divisions: Division[];
   isEditing?: boolean;
   onValidityChange?: (isValid: boolean) => void;
   onDeleteConfirm?: () => void;
@@ -35,14 +32,6 @@ const departmentOptions = ['해당없음', '연극영화학과', '컴퓨터공�
   value: label,
   label,
 }));
-
-const columns = [
-  { key: 'courseName', label: '과목명', type: 'text' },
-  { key: 'department', label: '개설학부', type: 'select', options: departmentOptions },
-  { key: 'credit', label: '학점', type: 'text', suffix: '학점' },
-  { key: 'semester', label: '이수학기', type: 'select', options: SEMESTER_OPTIONS },
-  { key: 'area', label: '영역', type: 'select', options: AREA_OPTIONS },
-] as const;
 
 const toCreditValue = (value: string) => {
   const [integerPart = '', ...rest] = value.replace(/[^0-9.]/g, '').split('.');
@@ -59,6 +48,7 @@ const DEFAULT_VISIBLE_ROWS = 3;
 
 export const CourseInfoTable = ({
   courses,
+  divisions,
   isEditing = false,
   onValidityChange,
   onDeleteConfirm,
@@ -75,6 +65,19 @@ export const CourseInfoTable = ({
   const [tableHeight, setTableHeight] = useState<number>();
   const [isHeightTransitioning, setIsHeightTransitioning] = useState(false);
   const previousTableHeightRef = useRef<number | undefined>(undefined);
+
+  const areaOptions = ['해당없음', ...divisions.map(({ name }) => name)].map((label) => ({
+    value: label,
+    label,
+  }));
+
+  const columns = [
+    { key: 'courseName', label: '과목명', type: 'text' },
+    { key: 'department', label: '개설학부', type: 'select', options: departmentOptions },
+    { key: 'credit', label: '학점', type: 'text', suffix: '학점' },
+    { key: 'semester', label: '이수학기', type: 'select', options: SEMESTER_OPTIONS },
+    { key: 'area', label: '영역', type: 'select', options: areaOptions },
+  ] as const;
 
   if (isEditing !== prevIsEditing) {
     setPrevIsEditing(isEditing);

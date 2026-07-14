@@ -5,8 +5,10 @@ import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
-import { MOCK_COURSES, MOCK_GRADUATION_RESPONSE } from '../mocks/analysis-result';
+import { useStudentCourses } from '../hooks/use-student-courses';
+import { MOCK_GRADUATION_RESPONSE } from '../mocks/analysis-result';
 import { CourseInfoTable } from './course-info-table/course-info-table';
+import { mapStudentCoursesToCourseInfo } from './course-info-table/map-student-courses';
 import { GraduationResult } from './graduation-result/graduation-result';
 import { mapGraduationResponseToCards } from './graduation-result/map-graduation-response';
 import { StudentInfo } from './student-info/student-info';
@@ -18,6 +20,7 @@ export const AnalysisResultView = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isCourseInfoValid, setIsCourseInfoValid] = useState(true);
   const { data: studentProfile } = useStudentProfile();
+  const { data: studentCourses } = useStudentCourses();
 
   const handleEditToggleClick = () => {
     setIsEditing((prev) => !prev);
@@ -73,12 +76,15 @@ export const AnalysisResultView = () => {
       </div>
 
       <div className="mt-20 w-full">
-        <CourseInfoTable
-          courses={MOCK_COURSES}
-          isEditing={isEditing}
-          onValidityChange={handleCourseInfoValidityChange}
-          onDeleteConfirm={() => setIsEditing(false)}
-        />
+        {studentCourses && (
+          <CourseInfoTable
+            courses={mapStudentCoursesToCourseInfo(studentCourses.courses)}
+            divisions={studentCourses.availableDivisions}
+            isEditing={isEditing}
+            onValidityChange={handleCourseInfoValidityChange}
+            onDeleteConfirm={() => setIsEditing(false)}
+          />
+        )}
       </div>
 
       <div className="mt-20 flex justify-center">
