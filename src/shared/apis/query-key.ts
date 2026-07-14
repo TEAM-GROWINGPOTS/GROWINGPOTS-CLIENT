@@ -2,6 +2,7 @@ export const QUERY_KEY = {
   ONBOARDING: {
     ALL: ['onboarding'] as const,
     OPTIONS: () => [...QUERY_KEY.ONBOARDING.ALL, 'options'] as const,
+    SCOPED_OPTIONS: (schoolId?: number) => [...QUERY_KEY.ONBOARDING.ALL, 'options', 'scoped', schoolId] as const,
   },
   COURSES: {
     ALL: ['courses'] as const,
@@ -13,6 +14,5 @@ export const QUERY_KEY = {
   GRADUATION: {
     ALL: ['graduation'] as const,
     STATUS: (params: object) => [...QUERY_KEY.GRADUATION.ALL, 'status', params] as const,
-    SCOPED_OPTIONS: (schoolId?: number) => [...QUERY_KEY.ONBOARDING.ALL, 'options', 'scoped', schoolId] as const,
   },
 };

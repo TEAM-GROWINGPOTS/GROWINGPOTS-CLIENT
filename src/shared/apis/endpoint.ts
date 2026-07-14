@@ -10,6 +10,7 @@ export const ENDPOINT = {
   },
   GRADUATION: {
     STATUS: '/api/v1/students/me/graduation',
+  },
   STUDENTS: {
     CREATE: '/api/v1/students',
   },
