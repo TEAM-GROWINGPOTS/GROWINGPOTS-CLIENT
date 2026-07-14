@@ -302,7 +302,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
             tags={activeCourse.tags}
             isEnglish={activeCourse.isEnglish}
             isSw={activeCourse.isSw}
-            className="shadow-small w-242 border border-gray-100"
+            className="shadow-small w-242 scale-105 border border-gray-100 opacity-85"
           />
         )}
       </DragOverlay>
