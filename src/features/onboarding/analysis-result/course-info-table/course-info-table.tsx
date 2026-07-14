@@ -6,15 +6,7 @@ import Icon from '@shared/components/icon/icon';
 import { AddCourseModal, type AddCourseValues, SEMESTER_OPTIONS } from '@shared/components/modal/add-course-modal';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { cn } from '@shared/utils/cn';
-import {
-  forwardRef,
-  type TransitionEvent,
-  useEffect,
-  useImperativeHandle,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 
 import type { Division } from '../../types/course';
 import { TableCellEdit } from './table-cell/table-cell-edit';
@@ -55,23 +47,21 @@ const toCreditValue = (value: string) => {
   return `${wholeNumber}.${half}`;
 };
 
-const ROW_HEIGHT = 44;
-const DEFAULT_VISIBLE_ROWS = 3;
+const MIN_ROWS_TO_COLLAPSE = 3;
+const MIN_COLLAPSED_HEIGHT = 44;
 
 export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTableProps>(
   ({ courses, departments, divisions, isEditing = false, onValidityChange, onDeleteRows }, ref) => {
     const [expanded, setExpanded] = useState(false);
-    const [visibleCount, setVisibleCount] = useState(() => Math.min(DEFAULT_VISIBLE_ROWS, courses.length));
     const [rows, setRows] = useState(courses);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [openCellKey, setOpenCellKey] = useState<string | null>(null);
     const [prevIsEditing, setPrevIsEditing] = useState(isEditing);
-    const tableWrapperRef = useRef<HTMLTableElement>(null);
-    const [tableHeight, setTableHeight] = useState<number>();
-    const [isHeightTransitioning, setIsHeightTransitioning] = useState(false);
-    const previousTableHeightRef = useRef<number | undefined>(undefined);
+    const wrapperRef = useRef<HTMLDivElement>(null);
+    const restOfPageHeightRef = useRef<number | undefined>(undefined);
+    const [collapsedHeight, setCollapsedHeight] = useState<number>();
 
     const departmentOptions = [...departments.map(({ name }) => name).reverse(), '해당없음'].map((label) => ({
       value: label,
@@ -106,54 +96,43 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
       }
     }
 
-    useEffect(() => {
-      if (expanded || courses.length === 0) return;
-
-      const updateVisibleCount = () => {
-        const overflow = document.body.scrollHeight - window.innerHeight;
-
-        setVisibleCount((prev) => {
-          if (overflow > 0) return Math.max(1, prev - Math.ceil(overflow / ROW_HEIGHT));
-          if (overflow <= -ROW_HEIGHT) return Math.min(courses.length, prev + Math.floor(-overflow / ROW_HEIGHT));
-          return prev;
-        });
-      };
-
-      updateVisibleCount();
-      window.addEventListener('resize', updateVisibleCount);
-
-      return () => window.removeEventListener('resize', updateVisibleCount);
-    }, [courses.length, expanded, visibleCount]);
-
     const hasEmptyValue = rows.some((row) => row.courseName.trim() === '' || row.credit.trim() === '');
 
     useEffect(() => {
       onValidityChange?.(!hasEmptyValue);
     }, [hasEmptyValue, onValidityChange]);
 
-    const visibleCourses = expanded || isEditing ? rows : rows.slice(0, visibleCount);
-    const canToggle = !isEditing && (expanded || rows.length > visibleCount);
+    const isCollapsed = !expanded && !isEditing;
+    const canToggle = !isEditing && rows.length > MIN_ROWS_TO_COLLAPSE;
     const isAllSelected = rows.length > 0 && selectedIds.size === rows.length;
 
     useLayoutEffect(() => {
-      const wrapper = tableWrapperRef.current;
+      if (!isCollapsed) return;
+      const wrapper = wrapperRef.current;
       if (!wrapper) return;
 
-      const nextHeight = wrapper.scrollHeight;
-      if (previousTableHeightRef.current !== undefined && previousTableHeightRef.current !== nextHeight) {
-        setIsHeightTransitioning(true);
-      }
-      previousTableHeightRef.current = nextHeight;
-      setTableHeight(nextHeight);
-    }, [visibleCourses.length, isEditing]);
+      const updateCollapsedHeight = () => {
+        const naturalHeight = wrapper.scrollHeight;
+        const appliedHeight = wrapper.getBoundingClientRect().height;
+        const bodyHeight = document.body.scrollHeight;
+
+        if (bodyHeight > window.innerHeight) {
+          restOfPageHeightRef.current = bodyHeight - appliedHeight;
+        }
+        const restOfPageHeight = restOfPageHeightRef.current ?? Math.max(0, bodyHeight - naturalHeight);
+
+        const availableHeight = window.innerHeight - restOfPageHeight;
+        setCollapsedHeight(Math.max(MIN_COLLAPSED_HEIGHT, Math.min(naturalHeight, availableHeight)));
+      };
+
+      updateCollapsedHeight();
+      window.addEventListener('resize', updateCollapsedHeight);
+
+      return () => window.removeEventListener('resize', updateCollapsedHeight);
+    }, [isCollapsed, rows.length]);
 
     const handleToggleClick = () => {
       setExpanded((prev) => !prev);
-    };
-
-    const handleHeightTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
-      if (e.target !== e.currentTarget || e.propertyName !== 'height') return;
-      setIsHeightTransitioning(false);
     };
 
     const handleCellChange = (id: string, key: (typeof columns)[number]['key']) => (value: string) => {
@@ -248,15 +227,11 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
         </div>
         <div className="flex flex-col items-center gap-19">
           <div
-            className={cn(
-              'w-full',
-              isHeightTransitioning && 'overflow-hidden',
-              tableHeight !== undefined && 'transition-[height] duration-300 ease-in-out',
-            )}
-            style={{ height: tableHeight }}
-            onTransitionEnd={handleHeightTransitionEnd}
+            ref={wrapperRef}
+            className={cn('w-full transition-[max-height] duration-300 ease-in-out', isCollapsed && 'overflow-hidden')}
+            style={{ maxHeight: isCollapsed ? collapsedHeight : 3000 }}
           >
-            <table ref={tableWrapperRef} className="w-full table-fixed border-separate [border-spacing:0_4px]">
+            <table className="w-full table-fixed border-separate [border-spacing:0_4px]">
               <caption className="sr-only">과목 정보</caption>
               <colgroup>
                 {isEditing && <col className="w-40" />}
@@ -293,7 +268,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
                 </tr>
               </thead>
               <tbody>
-                {visibleCourses.map((course) => (
+                {rows.map((course) => (
                   <tr key={course.id}>
                     {isEditing && (
                       <td className="px-8 py-4 align-middle">
