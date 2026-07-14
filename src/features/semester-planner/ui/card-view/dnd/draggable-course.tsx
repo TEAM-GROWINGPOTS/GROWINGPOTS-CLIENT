@@ -9,12 +9,12 @@ export const DraggableCourse = ({ course }: { course: SemesterCourse }) => {
     id: course.id,
     data: { course },
   });
-  const { department, name, tags, isEnglish, isSw } = course;
+  const { departmentName, name, tags, isEnglish, isSw } = course;
 
   return (
     <div ref={setNodeRef} {...attributes} {...listeners} className={isDragging ? 'opacity-30' : undefined}>
       <ClassCard
-        department={department}
+        department={departmentName}
         title={name}
         tags={tags}
         isEnglish={isEnglish}

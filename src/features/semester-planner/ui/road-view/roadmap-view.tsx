@@ -3,10 +3,13 @@
 import '@xyflow/react/dist/style.css';
 
 import graduation from '@features/semester-planner/assets/graduation.json';
+import { MAX_FOLDERS_PER_TERM } from '@features/semester-planner/constants';
 import { ReachabilityContext } from '@features/semester-planner/contexts/reachability-context';
 import { usePlannerGraph } from '@features/semester-planner/hooks/use-planner-graph';
 import { useViewMode } from '@features/semester-planner/hooks/use-view-mode';
+import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
 import {
+  AddVersionNodeData,
   GRADUATION_REQUIREMENTS,
   PlannerNodeData,
   SemesterEdgeData,
@@ -45,7 +48,9 @@ const NODE_HEIGHT = 300;
 const recomputeColumnPositions = (nodes: Node<PlannerNodeData>[]): Node<PlannerNodeData>[] => {
   const byCol = new Map<number, Node[]>();
   for (const node of nodes) {
+    // + 버튼이라 재배치 대상이 아닌 노드는 건너뛴다.
     if (node.type === 'addSemesterNode' || node.type === 'addVersionNode') continue;
+    // 열 인덱스가 없는 노드도 건너뛴다(=버전이 없는 학기 노드)
     const colIndex = node.data.colIndex;
     if (colIndex === undefined) continue;
     if (!byCol.has(colIndex)) byCol.set(colIndex, []);
@@ -253,6 +258,24 @@ export const RoadmapView = () => {
   }, [nodes, reachability.nodeIds]);
   const showCelebration = totalCredits >= GRADUATION_REQUIREMENTS.전체 && !isCelebrationDismissed;
 
+  // 졸업 요건 아코디언의 배지가 로띠와 같은 기준(마지막 학기까지의 누적 학점)으로 갱신되도록,
+  // 연결이 바뀔 때마다 누적 학점을 그대로 스토어에 반영한다.
+  useEffect(() => {
+    const required = GRADUATION_REQUIREMENTS.전체;
+    useGraduationStatusStore.setState((state) => {
+      if (!state.data) return state;
+      const { totalCredits: prev } = state.data.summary;
+      if (prev.current === totalCredits && prev.required === required) return state;
+      return {
+        data: {
+          ...state.data,
+          summary: { ...state.data.summary, totalCredits: { current: totalCredits, required } },
+          graduatable: totalCredits >= required,
+        },
+      };
+    });
+  }, [totalCredits]);
+
   // 즉시 unmount하지 않고 opacity 전환이 끝난 뒤 dismiss 상태로 확정한다.
   const dismissCelebration = useCallback(() => {
     setIsCelebrationLeaving(true);
@@ -269,9 +292,7 @@ export const RoadmapView = () => {
     const colIndex = (node.data as Partial<PlannerNodeData>).colIndex;
     const siblings = nodesRef.current.filter(
       (n) =>
-        n.id !== node.id &&
-        typeof (n.data as Partial<PlannerNodeData>).colIndex === 'number' &&
-        (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
+        n.id !== node.id && n.type === 'semesterNode' && (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
     );
     originalIdxRef.current = siblings.filter((s) => s.position.y < node.position.y).length;
   }, []);
@@ -292,21 +313,26 @@ export const RoadmapView = () => {
       const siblings = nodesRef.current
         .filter(
           (n) =>
-            n.id !== node.id &&
-            typeof (n.data as Partial<PlannerNodeData>).colIndex === 'number' &&
-            (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
+            n.id !== node.id && n.type === 'semesterNode' && (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
         )
         .sort((a, b) => a.position.y - b.position.y) as Node<PlannerNodeData>[];
 
       const nodeHeight = node.measured?.height ?? NODE_HEIGHT;
-      const { targetIdx, lineY } = computeDropTarget(
-        node.position.y,
-        nodeHeight,
-        dragDirectionRef.current.direction,
-        siblings,
-      );
-      // 놓아도 원래 자리로 돌아가는 경우엔 라인을 띄우지 않는다.
-      setDropIndicator(targetIdx === originalIdxRef.current ? null : { colX, y: lineY });
+      const direction = dragDirectionRef.current.direction;
+      const { targetIdx, lineY } = computeDropTarget(node.position.y, nodeHeight, direction, siblings);
+
+      if (targetIdx !== originalIdxRef.current) {
+        // 순서가 실제로 바뀌는 지점: 형제 사이 경계에 라인을 띄운다.
+        setDropIndicator({ colX, y: lineY });
+      } else if (direction === 'up' && originalIdxRef.current > 0) {
+        // 아직 원래 자리를 벗어나지 않았다면, 드래그 중인 카드를 따라가지 않고 "원래 위치"와 "바로 위 형제"
+        // 사이의 고정된 지점에 미리보기 라인을 띄운다.
+        const upper = siblings[originalIdxRef.current - 1];
+        const upperHeight = upper.measured?.height ?? NODE_HEIGHT;
+        setDropIndicator({ colX, y: upper.position.y + upperHeight + ROW_MARGIN / 2 });
+      } else {
+        setDropIndicator(null);
+      }
     },
     [setNodes],
   );
@@ -324,7 +350,7 @@ export const RoadmapView = () => {
           .filter(
             (n) =>
               n.id !== node.id &&
-              typeof (n.data as Partial<PlannerNodeData>).colIndex === 'number' &&
+              n.type === 'semesterNode' &&
               (n.data as Partial<PlannerNodeData>).colIndex === colIndex,
           )
           .sort((a, b) => a.position.y - b.position.y) as Node<PlannerNodeData>[];
@@ -491,7 +517,12 @@ export const RoadmapView = () => {
         setIsAddSemesterModalOpen(true);
         return;
       }
-      if (node.type === 'addVersionNode') setViewMode('card');
+      if (
+        node.type === 'addVersionNode' &&
+        ((node.data as Partial<AddVersionNodeData>).versionCount ?? 0) < MAX_FOLDERS_PER_TERM
+      ) {
+        setViewMode('card');
+      }
     },
     [setViewMode],
   );
@@ -536,8 +567,12 @@ export const RoadmapView = () => {
           defaultViewport={{ x: 40, y: 160, zoom: 1 }}
         >
           <Background variant={BackgroundVariant.Dots} gap={25} size={3} color="#e5e7eb" />
-          <Controls position="bottom-left" />
-          <Panel position="top-right">
+          <Controls position="bottom-left" showInteractive={false} />
+          {/* ViewModeToggle은 카드뷰/로드맵뷰 간 위치가 흔들리지 않도록 PlannerView에서 한 곳에만 렌더링한다(top-40).
+              아코디언은 창 상단에서 24px 떨어진 위치여야 하므로 react-flow 기본 패널 여백(15px)을 marginTop으로
+              덮어쓴다. 셀러브레이션 오버레이(analysis-loading: 40)나 모달(20)보다는 아래에 있어야 하므로
+              z-index는 react-flow 기본값(5)을 그대로 둔다. */}
+          <Panel position="top-right" style={{ marginTop: 24 }}>
             <RoadmapHeader />
           </Panel>
           {dropIndicator && (
@@ -555,14 +590,18 @@ export const RoadmapView = () => {
             )}
             onClick={dismissCelebration}
           >
+            {/* graduation.json은 800x800 캔버스 기준 메인 그래픽이 y=461.7(중심 400)에 위치해 박스 아래로
+                치우쳐 있다. 400px로 렌더링하면 (461.7-400)/800*400 ≈ 31px만큼 시각적 중심이 아래로 밀리므로,
+                같은 값만큼 음수 마진으로 끌어올려 실제 그래픽이 오버레이 정중앙에 오도록 보정한다. */}
             <Lottie
               animationData={graduation}
               loop={false}
               autoplay
               onComplete={dismissCelebration}
-              className="h-400 w-400"
+              className="-mt-32 h-400 w-400"
             />
-            <p className="text-title-sb-24 animate-text-rise text-gray-700">졸업 요건을 충족했어요!</p>
+            {/* 로띠 애니메이션 자체에 하단 여백이 많아 인접 배치만으로는 텍스트와 멀어 보여 음수 마진으로 당긴다. */}
+            <p className="text-title-sb-24 animate-text-rise -mt-48 text-gray-700">졸업 요건을 충족했어요!</p>
           </div>
         )}
       </div>

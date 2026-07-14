@@ -20,14 +20,16 @@ export const GraduationStatusAccordion = () => {
 
   if (!data || !data.sections) return null;
 
-  const { summary, graduatable, sections } = data;
+  const { summary, sections } = data;
   const { majors, ge, others } = sections;
 
   const hasMultipleMajors = majors.length > 1;
   const selectedMajor = majors[selectedMajorIndex];
 
+  // 비학점 요건(SW/영어 등)과 무관하게, 학점 요건만 충족하면 "요건 충족"으로 표시한다.
   const shortfall = summary.totalCredits.required - summary.totalCredits.current;
-  const badgeLabel = graduatable ? '요건 충족' : shortfall > 0 ? `${shortfall}학점 부족` : '요건 미충족';
+  const isCreditFulfilled = shortfall <= 0;
+  const badgeLabel = isCreditFulfilled ? '요건 충족' : `${shortfall}학점 부족`;
 
   const graduationRequiredItems =
     selectedMajor.graduationRequired?.hasGraduationRequired && selectedMajor.graduationRequired.items?.length
@@ -46,10 +48,10 @@ export const GraduationStatusAccordion = () => {
       <Accordion.Item value="graduation-status">
         <Accordion.Header asChild>
           <h3>
-            <Accordion.Trigger className="group flex w-full items-center justify-between px-24 py-24 transition-[padding-bottom] duration-200 data-[state=open]:pb-8">
+            <Accordion.Trigger className="group flex w-full cursor-pointer items-center justify-between px-24 py-24 transition-[padding-bottom] duration-200 data-[state=open]:pb-8">
               <div className="flex items-center gap-8">
                 <span className="text-title-sb-18 text-gray-100">졸업 요건 충족 현황</span>
-                <Badge size="xsmall" variant="primary" color={graduatable ? 'lime01' : 'darkRed'}>
+                <Badge size="xsmall" variant="primary" color={isCreditFulfilled ? 'lime01' : 'darkRed'}>
                   {badgeLabel}
                 </Badge>
               </div>
