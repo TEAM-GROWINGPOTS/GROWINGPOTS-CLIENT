@@ -2,7 +2,12 @@
 
 import { usePlanner } from '@features/semester-planner/hooks/use-planner';
 import { useSavePlanner } from '@features/semester-planner/hooks/use-save-planner';
-import type { PlannerFolder, PlannerTerm, SemesterCourse } from '@features/semester-planner/types/planner';
+import type {
+  PlannedTermResponse,
+  PlannerFolder,
+  PlannerTerm,
+  SemesterCourse,
+} from '@features/semester-planner/types/planner';
 import {
   mapCompletedTerms,
   mapPlannedTerms,
@@ -62,12 +67,22 @@ interface AddTermInput {
 }
 
 export const usePlannerTerms = () => {
-  const { data: planner, isLoading } = usePlanner();
-  const { mutate: requestSavePlanner } = useSavePlanner();
+  const { data: planner, isLoading, isError, error, refetch: refetchPlanner } = usePlanner();
   const [plannedTerms, setPlannedTerms] = useState<PlannerTerm[]>([]);
   const snapshotRef = useRef<PlannerTerm[] | null>(null);
   const createdIdSeqRef = useRef(0);
   const isSeededRef = useRef(false);
+
+  const reseedPlannedTerms = async (serverPlannedTerms: PlannedTermResponse[] | null) => {
+    if (serverPlannedTerms) {
+      setPlannedTerms(mapPlannedTerms(serverPlannedTerms));
+      return;
+    }
+    const { data: latestPlanner } = await refetchPlanner();
+    if (latestPlanner) setPlannedTerms(mapPlannedTerms(latestPlanner.plannedTerms));
+  };
+
+  const { mutate: requestSavePlanner } = useSavePlanner({ onSaveError: reseedPlannedTerms });
 
   useEffect(() => {
     if (!planner || isSeededRef.current) return;
@@ -197,6 +212,9 @@ export const usePlannerTerms = () => {
 
   return {
     isLoading,
+    isError,
+    error,
+    refetchPlanner,
     completedTerms,
     plannedTerms,
     gridTerms,
