@@ -1,13 +1,14 @@
 'use client';
 
 import Icon from '@shared/components/icon/icon';
+import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { NavItem } from '@shared/components/nav-item/nav-item';
 import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface SideNavigationAcademicInfoItem {
   label: string;
@@ -48,6 +49,7 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
   const router = useRouter();
   const pathname = usePathname();
   const { data: studentProfile } = useStudentProfile();
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const isCollapsed = useSideNavigationStore((state) => state.isCollapsed);
   const isInitialized = useSideNavigationStore((state) => state.isInitialized);
@@ -83,6 +85,14 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
 
   const handleAnalysisResultClick = () => {
     router.push('/analysis-result');
+  };
+
+  const handleLogoutClick = () => {
+    setIsLogoutModalOpen(true);
+  };
+
+  const handleLogoutConfirm = () => {
+    window.location.href = '/api/auth/logout';
   };
 
   return (
@@ -175,9 +185,7 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
                 {studentProfile?.name ?? ''}
               </p>
               <button
-                onClick={() => {
-                  window.location.href = '/api/auth/logout';
-                }}
+                onClick={handleLogoutClick}
                 type="button"
                 aria-label="로그아웃"
                 className="flex shrink-0 cursor-pointer"
@@ -188,6 +196,14 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
           </div>
         </section>
       </footer>
+
+      <ConfirmModal
+        open={isLogoutModalOpen}
+        onOpenChange={setIsLogoutModalOpen}
+        type="logout"
+        title="정말 로그아웃 하시겠어요?"
+        onConfirm={handleLogoutConfirm}
+      />
     </aside>
   );
 };
