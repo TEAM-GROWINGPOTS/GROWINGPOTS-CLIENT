@@ -294,7 +294,9 @@ export const RoadmapView = () => {
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
-  // 노드 높이 변화(아코디언 열기/닫기) 감지 → 같은 열 y 재배치
+  // 노드 높이 변화(아코디언 열기/닫기) 감지 → 같은 열 y 재배치.
+  // 노드 개수가 바뀐 경우(컬럼 삭제 등)도 감지해야 한다 — 살아남은 노드들의 개별 높이는 그대로여도
+  // "+" 버튼이 참조하는 마지막 컬럼 자체가 바뀌었을 수 있어, 높이 값만 비교해선 재계산이 누락된다.
   const measuredHeightsRef = useRef<Map<string, number>>(new Map());
   useEffect(() => {
     let changed = false;
@@ -305,6 +307,7 @@ export const RoadmapView = () => {
       next.set(node.id, h);
       if (measuredHeightsRef.current.get(node.id) !== h) changed = true;
     }
+    if (next.size !== measuredHeightsRef.current.size) changed = true;
     if (!changed) return;
     measuredHeightsRef.current = next;
     setNodes(recomputeColumnPositions);
