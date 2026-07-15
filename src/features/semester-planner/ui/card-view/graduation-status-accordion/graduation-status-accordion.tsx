@@ -116,7 +116,7 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
           <Accordion.Trigger className="group flex w-full cursor-pointer items-center justify-between">
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-4">
-                <p className="text-title-sb-18 text-gray-800">졸업 요건 충족 현황</p>
+                <p className="text-title-sb-18 text-gray-800">졸업 학점 충족 현황</p>
                 <Tooltip
                   trigger={
                     <span className="-ml-6 pl-6" onClick={(e) => e.stopPropagation()}>
