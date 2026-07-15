@@ -179,7 +179,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   }, [gridTerms, updateScrollability]);
 
   useEffect(() => {
-    const pendingTerm = peekPendingFocusTerm();
+    const pendingTerm = pendingScrollTermRef.current || peekPendingFocusTerm();
     if (!pendingTerm) return;
     const termIndex = gridTerms.findIndex(
       ({ yearLevel, semesterLabel }) =>
@@ -188,7 +188,13 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     if (termIndex === -1) return;
     const board = boardRef.current;
     if (!board) return;
-    clearPendingFocusTerm();
+
+    if (pendingScrollTermRef.current) {
+      pendingScrollTermRef.current = null;
+    } else {
+      clearPendingFocusTerm();
+    }
+
     const cardCenter = termIndex * CARD_SCROLL_STEP + CARD_WIDTH / 2;
     board.scrollTo({
       left: Math.max(cardCenter - board.clientWidth / 2, 0),
