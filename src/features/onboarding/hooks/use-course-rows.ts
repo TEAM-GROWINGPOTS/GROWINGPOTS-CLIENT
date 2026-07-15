@@ -103,7 +103,6 @@ export const useCourseRows = ({
     const division = divisions.find(({ name }) => name === area);
 
     setRows((prev) => [
-      ...prev,
       {
         id: crypto.randomUUID(),
         courseId,
@@ -115,6 +114,7 @@ export const useCourseRows = ({
         area,
         areaId: division?.id ?? null,
       },
+      ...prev,
     ]);
   };
 
