@@ -50,7 +50,7 @@ export const TextField = ({
         />
         {maxLength !== undefined && (
           <span className="text-body-r-14 ml-8 shrink-0 text-gray-300">
-            <span className={cn(value.length >= 1 && 'text-lime-600')}>{value.length}</span>/{maxLength}
+            <span className={cn(value.length >= 1 && 'text-gray-700')}>{value.length}</span>/{maxLength}
           </span>
         )}
       </div>
