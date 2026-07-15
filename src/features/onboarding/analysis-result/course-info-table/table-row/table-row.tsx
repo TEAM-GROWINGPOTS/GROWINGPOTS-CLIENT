@@ -1,5 +1,6 @@
 import type { Column } from '@features/onboarding/types/course-info-table';
 import Icon from '@shared/components/icon/icon';
+import { formatTakenSemester, getTakenSemesterValue } from '@shared/utils/taken-semester-format';
 
 import type { CourseInfo } from '../course-info-table';
 import { TableCellEdit } from '../table-cell/table-cell-edit';
@@ -9,6 +10,7 @@ interface TableRowProps {
   course: CourseInfo;
   columns: readonly Column[];
   isEditing: boolean;
+  isInvalid: boolean;
   isSelected: boolean;
   openCellKey: string | null;
   onOpenCellKeyChange: (key: string | null) => void;
@@ -16,12 +18,14 @@ interface TableRowProps {
   onCellChange: (id: string, key: Column['key']) => (value: string) => void;
   onDepartmentChange: (id: string) => (value: string) => void;
   onAreaChange: (id: string) => (value: string) => void;
+  onSemesterChange: (id: string) => (value: string) => void;
 }
 
 export const TableRow = ({
   course,
   columns,
   isEditing,
+  isInvalid,
   isSelected,
   openCellKey,
   onOpenCellKeyChange,
@@ -29,6 +33,7 @@ export const TableRow = ({
   onCellChange,
   onDepartmentChange,
   onAreaChange,
+  onSemesterChange,
 }: TableRowProps) => (
   <tr>
     {isEditing && (
@@ -48,13 +53,23 @@ export const TableRow = ({
         {isEditing && column.type === 'select' ? (
           <TableCellSelect
             options={column.options ?? []}
-            value={course[column.key]}
+            value={
+              column.key === 'department'
+                ? (course.departmentId?.toString() ?? '')
+                : column.key === 'area'
+                  ? (course.areaId?.toString() ?? '')
+                  : column.key === 'semester'
+                    ? getTakenSemesterValue(course.takenYear, course.semester)
+                    : course[column.key]
+            }
             onChange={
               column.key === 'department'
                 ? onDepartmentChange(course.id)
                 : column.key === 'area'
                   ? onAreaChange(course.id)
-                  : onCellChange(course.id, column.key)
+                  : column.key === 'semester'
+                    ? onSemesterChange(course.id)
+                    : onCellChange(course.id, column.key)
             }
             isOpen={openCellKey === `${course.id}:${column.key}`}
             onOpenChange={(open) => onOpenCellKeyChange(open ? `${course.id}:${column.key}` : null)}
@@ -62,9 +77,12 @@ export const TableRow = ({
         ) : (
           <TableCellEdit
             mode={isEditing ? 'edit' : 'view'}
-            value={course[column.key]}
+            value={
+              column.key === 'semester' ? formatTakenSemester(course.takenYear, course.semester) : course[column.key]
+            }
             onChange={onCellChange(course.id, column.key)}
             suffix={column.suffix}
+            className={!isEditing && column.key === 'courseName' && isInvalid ? 'text-red-20' : undefined}
           />
         )}
       </td>

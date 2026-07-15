@@ -26,6 +26,7 @@ export const TableCellSelect = ({
   onOpenChange,
   className,
 }: TableCellSelectProps) => {
+  const isInvalid = !options.some((option) => option.value === value);
   const ref = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLLIElement | null)[]>([]);
   const listboxId = useId();
@@ -128,7 +129,10 @@ export const TableCellSelect = ({
         aria-haspopup="listbox"
         aria-controls={listboxId}
         aria-activedescendant={isOpen ? `${listboxId}-${activeIndex}` : undefined}
-        className="text-body-m-16 flex h-32 w-full cursor-pointer items-center justify-between rounded-sm border border-gray-100 bg-white px-8 text-gray-600 outline-hidden focus:border-transparent focus:ring-2 focus:ring-gray-600"
+        className={cn(
+          'text-body-m-16 flex h-32 w-full cursor-pointer items-center justify-between rounded-sm border bg-white px-8 text-gray-600 outline-hidden focus:border-transparent focus:ring-2 focus:ring-gray-600',
+          isInvalid ? 'border-red-20' : 'border-gray-100',
+        )}
       >
         <span className="min-w-0 truncate">{options.find((opt) => opt.value === value)?.label}</span>
         <Icon name="ic_chevron_down" size={16} className="shrink-0 text-gray-500" />

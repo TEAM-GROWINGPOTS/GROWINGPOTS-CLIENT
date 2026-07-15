@@ -2,7 +2,6 @@
 
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
-import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -14,10 +13,20 @@ import { Uploader } from './pdf-uploader/uploader/uploader';
 const SHOW_LOADING_DELAY_MS = 300;
 const MIN_ANALYSIS_LOADING_MS = 3000;
 
+const isOnboardingCompletedCookie = () => {
+  if (typeof document === 'undefined') return true;
+  return (
+    document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('onboardingCompleted='))
+      ?.split('=')[1] === 'true'
+  );
+};
+
 export const PdfUploadStep = () => {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
-  const { data: studentProfile } = useStudentProfile();
+  const [isOnboardingCompleted] = useState(isOnboardingCompletedCookie);
   const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { mutate: uploadTranscript } = useUploadTranscript();
@@ -52,7 +61,7 @@ export const PdfUploadStep = () => {
 
   return (
     <>
-      {!studentProfile && (
+      {!isOnboardingCompleted && (
         <button type="button" onClick={handleBack} aria-label="이전으로" className="mb-24 cursor-pointer self-start">
           <Icon name="ic_chevron_left" size={24} />
         </button>
