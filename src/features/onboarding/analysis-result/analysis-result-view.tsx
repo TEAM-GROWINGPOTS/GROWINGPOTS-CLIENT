@@ -7,6 +7,7 @@ import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useRef, useState } from 'react';
 
+import { useCompleteOnboarding } from '../hooks/use-complete-onboarding';
 import { useStudentCourses } from '../hooks/use-student-courses';
 import { useUpdateStudentCourses } from '../hooks/use-update-student-courses';
 import { type CourseInfo, CourseInfoTable, type CourseInfoTableRef } from './course-info-table/course-info-table';
@@ -28,6 +29,7 @@ export const AnalysisResultView = () => {
   const { data: departments = [] } = useDepartmentOptions();
   const { data: graduation } = useGraduationStatus();
   const { mutate: updateStudentCourses, isPending: isSaving } = useUpdateStudentCourses();
+  const { mutateAsync: completeOnboarding } = useCompleteOnboarding();
   const courses = useMemo(
     () => (studentCourses ? mapStudentCoursesToCourseInfo(studentCourses.courses) : []),
     [studentCourses],
@@ -63,16 +65,22 @@ export const AnalysisResultView = () => {
     router.push('/onboarding?step=pdf');
   };
 
-  const handleConfirmClick = () => {
+  const handleConfirmClick = async () => {
     const rows = courseInfoTableRef.current?.getCourses();
     if (!rows || !studentCourses) {
+      await completeOnboarding();
       router.push('/graduation-dashboard');
       return;
     }
 
     updateStudentCourses(
       { courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses) },
-      { onSuccess: () => router.push('/graduation-dashboard') },
+      {
+        onSuccess: async () => {
+          await completeOnboarding();
+          router.push('/graduation-dashboard');
+        },
+      },
     );
   };
 
