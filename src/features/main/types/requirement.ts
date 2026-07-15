@@ -44,6 +44,11 @@ export interface RequirementMajor {
   courses: RequirementCourse[];
 }
 
+export interface RequirementCourseArea {
+  code: string;
+  name: string;
+}
+
 export interface RequirementCourse {
   divisionCode: RequirementCode;
   divisionName: string;
@@ -55,5 +60,5 @@ export interface RequirementCourse {
   taken: boolean;
   isEnglish: boolean;
   isSw: boolean;
-  area?: string | null;
+  area?: RequirementCourseArea | null;
 }

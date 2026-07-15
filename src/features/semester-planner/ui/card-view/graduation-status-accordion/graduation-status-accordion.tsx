@@ -1,6 +1,5 @@
 'use client';
 
-import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
 import { getOtherRequiredConditions } from '@features/semester-planner/utils/graduation-conditions';
 import * as Accordion from '@radix-ui/react-accordion';
 import type { GraduationCondition, GraduationResponse, GraduationUnit } from '@shared/apis/types/graduation';
@@ -35,13 +34,10 @@ interface GraduationStatusAccordionProps {
   data?: GraduationResponse;
 }
 
-export const GraduationStatusAccordion = ({ className, data: dataProp }: GraduationStatusAccordionProps) => {
+export const GraduationStatusAccordion = ({ className, data }: GraduationStatusAccordionProps) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [isArrowNav, setIsArrowNav] = useState(false);
   const chipContainerRef = useRef<HTMLDivElement>(null);
-
-  const storeData = useGraduationStatusStore((s) => s.data);
-  const data = dataProp ?? storeData;
 
   if (!data || !data.sections) return null;
 
@@ -164,16 +160,16 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
                 >
                   <div className="absolute inset-y-0 left-0 flex h-full w-full">
                     <div
-                      className="bg-blue-10 animate-progress-fill h-full origin-left"
-                      style={{ width: `${toPercent(otherCredit)}%` }}
+                      className="animate-progress-fill h-full origin-left bg-lime-400"
+                      style={{ width: `${toPercent(majorCredit)}%` }}
                     />
                     <div
                       className="bg-purple-10 animate-progress-fill h-full origin-left"
                       style={{ width: `${toPercent(generalCredit)}%`, animationDelay: '600ms' }}
                     />
                     <div
-                      className="animate-progress-fill h-full origin-left bg-lime-400"
-                      style={{ width: `${toPercent(majorCredit)}%`, animationDelay: '1200ms' }}
+                      className="bg-blue-10 animate-progress-fill h-full origin-left"
+                      style={{ width: `${toPercent(otherCredit)}%`, animationDelay: '1200ms' }}
                     />
                   </div>
                 </div>
