@@ -1,6 +1,5 @@
 'use client';
 
-import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
 import { getOtherRequiredConditions } from '@features/semester-planner/utils/graduation-conditions';
 import * as Accordion from '@radix-ui/react-accordion';
 import type { GraduationCondition, GraduationResponse, GraduationUnit } from '@shared/apis/types/graduation';
@@ -35,13 +34,10 @@ interface GraduationStatusAccordionProps {
   data?: GraduationResponse;
 }
 
-export const GraduationStatusAccordion = ({ className, data: dataProp }: GraduationStatusAccordionProps) => {
+export const GraduationStatusAccordion = ({ className, data }: GraduationStatusAccordionProps) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [isArrowNav, setIsArrowNav] = useState(false);
   const chipContainerRef = useRef<HTMLDivElement>(null);
-
-  const storeData = useGraduationStatusStore((s) => s.data);
-  const data = dataProp ?? storeData;
 
   if (!data || !data.sections) return null;
 
