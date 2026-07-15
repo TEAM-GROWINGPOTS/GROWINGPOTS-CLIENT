@@ -1,6 +1,5 @@
 'use client';
 
-import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
 import { getOtherRequiredConditions } from '@features/semester-planner/utils/graduation-conditions';
 import * as Accordion from '@radix-ui/react-accordion';
 import type { GraduationResponse, GraduationUnit } from '@shared/apis/types/graduation';
@@ -19,11 +18,8 @@ interface GraduationStatusAccordionProps {
   data?: GraduationResponse;
 }
 
-export const GraduationStatusAccordion = ({ className, data: dataProp }: GraduationStatusAccordionProps) => {
+export const GraduationStatusAccordion = ({ className, data }: GraduationStatusAccordionProps) => {
   const [selectedMajorIndex, setSelectedMajorIndex] = useState(0);
-
-  const storeData = useGraduationStatusStore((state) => state.data);
-  const data = dataProp ?? storeData;
 
   if (!data || !data.sections) return null;
 
@@ -151,11 +147,11 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
                 </div>
               </li>
             ))}
-            {otherRequiredConditions.map(({ code, current, required, unit }) => {
+            {otherRequiredConditions.map(({ code, name, current, required, unit }) => {
               const satisfied = required === null || current >= required;
               return (
                 <li key={code} className="flex items-center justify-between">
-                  <span className="text-body-m-16 text-gray-100">일반 선택</span>
+                  <span className="text-body-m-16 text-gray-100">{name}</span>
                   <div className="flex items-end">
                     <span className={cn('text-body-sb-16', satisfied ? 'text-lime-500' : 'text-gray-100')}>
                       {current}
@@ -172,9 +168,9 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
                 </li>
               );
             })}
-            {otherConditions.map(({ code, name, current, required, unit, satisfied }) => (
+            {otherConditions.map(({ code, current, required, unit, satisfied }) => (
               <li key={code} className="flex items-center justify-between">
-                <span className="text-body-m-16 text-gray-100">{name}</span>
+                <span className="text-body-m-16 text-gray-100">일반 선택</span>
                 <div className="flex items-end">
                   <span className={cn('text-body-sb-16', satisfied ? 'text-lime-500' : 'text-gray-100')}>
                     {current}
