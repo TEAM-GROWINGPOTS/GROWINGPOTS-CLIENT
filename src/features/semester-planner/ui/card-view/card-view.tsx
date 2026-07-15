@@ -17,6 +17,7 @@ import { TrashDropZone } from '@features/semester-planner/ui/card-view/dnd/trash
 import { useCardViewDnd } from '@features/semester-planner/ui/card-view/dnd/use-card-view-dnd';
 import { GraduationStatusAccordion } from '@features/semester-planner/ui/card-view/graduation-status-accordion/graduation-status-accordion';
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
+import { PrerequisiteModal } from '@features/semester-planner/ui/card-view/modals/prerequisite-modal';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
 import { parseApiError } from '@shared/apis/parse-api-error';
 import { CourseSearchItemResponse } from '@shared/apis/types/course-search';
@@ -67,7 +68,15 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     renameFolder,
     deleteFolder,
   } = usePlannerTerms();
-  const { activeCourse, overTermId, isLibraryDrag, isDropRejected, contextProps } = useCardViewDnd({
+  const {
+    activeCourse,
+    overTermId,
+    isLibraryDrag,
+    isDropRejected,
+    prerequisiteModal,
+    setPrerequisiteModal,
+    contextProps,
+  } = useCardViewDnd({
     plannedTerms,
     snapshot,
     restoreSnapshot,
@@ -377,6 +386,18 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
       </DragOverlay>
 
       <AddSemesterModal open={isAddSemesterOpen} onOpenChange={setIsAddSemesterOpen} onSubmit={handleAddSemester} />
+      {prerequisiteModal && (
+        <PrerequisiteModal
+          open
+          onOpenChange={(open) => {
+            if (!open) setPrerequisiteModal(null);
+          }}
+          type={prerequisiteModal.type}
+          courseName={prerequisiteModal.courseName}
+          prerequisiteName={prerequisiteModal.prerequisiteName}
+          onConfirm={prerequisiteModal.onConfirm}
+        />
+      )}
       <CourseFilterModal
         open={filterTab !== null}
         onOpenChange={(open) => {

@@ -10,6 +10,7 @@ export const ENDPOINT = {
   },
   PLANNER: {
     ROOT: '/api/v1/planner',
+    PREREQUISITE_CHECK: '/api/v1/planner/prerequisite-check',
   },
   GRADUATION: {
     STATUS: '/api/v1/students/me/graduation',
