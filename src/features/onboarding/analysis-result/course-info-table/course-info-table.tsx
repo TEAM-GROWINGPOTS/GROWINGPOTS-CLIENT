@@ -1,24 +1,19 @@
 'use client';
 
+import { useCollapsibleHeight } from '@features/onboarding/hooks/use-collapsible-height';
+import { useCourseRows } from '@features/onboarding/hooks/use-course-rows';
+import type { Division } from '@features/onboarding/types/course';
+import { getCourseInfoColumns } from '@features/onboarding/utils/get-course-info-columns';
 import type { DepartmentResponse } from '@shared/apis/types/onboarding-options';
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
-import { AddCourseModal, type AddCourseValues, SEMESTER_OPTIONS } from '@shared/components/modal/add-course-modal';
+import { AddCourseModal } from '@shared/components/modal/add-course-modal';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { cn } from '@shared/utils/cn';
-import {
-  forwardRef,
-  type TransitionEvent,
-  useEffect,
-  useImperativeHandle,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 
-import type { Division } from '../../types/course';
-import { TableCellEdit } from './table-cell/table-cell-edit';
-import { TableCellSelect } from './table-cell/table-cell-select';
+import { TableHeader } from './table-header/table-header';
+import { TableRow } from './table-row/table-row';
 
 export interface CourseInfo {
   id: string;
@@ -45,153 +40,44 @@ export interface CourseInfoTableRef {
   getCourses: () => CourseInfo[];
 }
 
-const toCreditValue = (value: string) => {
-  const [integerPart = '', ...rest] = value.replace(/[^0-9.]/g, '').split('.');
-  const wholeNumber = integerPart.slice(0, 2);
-
-  if (rest.length === 0) return wholeNumber;
-
-  const half = rest.join('').replace(/[^5]/g, '').slice(0, 1);
-  return `${wholeNumber}.${half}`;
-};
-
-const ROW_HEIGHT = 44;
-const DEFAULT_VISIBLE_ROWS = 3;
-
 export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTableProps>(
   ({ courses, departments, divisions, isEditing = false, onValidityChange, onDeleteRows }, ref) => {
-    const [expanded, setExpanded] = useState(false);
-    const [visibleCount, setVisibleCount] = useState(() => Math.min(DEFAULT_VISIBLE_ROWS, courses.length));
-    const [rows, setRows] = useState(courses);
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [openCellKey, setOpenCellKey] = useState<string | null>(null);
-    const [prevIsEditing, setPrevIsEditing] = useState(isEditing);
-    const tableWrapperRef = useRef<HTMLTableElement>(null);
-    const [tableHeight, setTableHeight] = useState<number>();
-    const [isHeightTransitioning, setIsHeightTransitioning] = useState(false);
-    const previousTableHeightRef = useRef<number | undefined>(undefined);
 
-    const departmentOptions = ['해당없음', ...departments.map(({ name }) => name)].map((label) => ({
-      value: label,
-      label,
-    }));
+    const {
+      rows,
+      selectedIds,
+      isAllSelected,
+      openCellKey,
+      setOpenCellKey,
+      handleCellChange,
+      handleDepartmentChange,
+      handleAreaChange,
+      handleSelectAllClick,
+      handleRowSelectClick,
+      handleAddCourseSubmit,
+      handleDeleteConfirm,
+    } = useCourseRows({ courses, isEditing, departments, divisions, onValidityChange, onDeleteRows });
 
-    const areaOptions = ['해당없음', ...divisions.map(({ name }) => name)].map((label) => ({
-      value: label,
-      label,
-    }));
-
-    const columns = [
-      { key: 'courseName', label: '과목명', type: 'text' },
-      { key: 'department', label: '개설학부', type: 'select', options: departmentOptions },
-      { key: 'credit', label: '학점', type: 'text', suffix: '학점' },
-      { key: 'semester', label: '이수학기', type: 'select', options: SEMESTER_OPTIONS },
-      { key: 'area', label: '영역', type: 'select', options: areaOptions },
-    ] as const;
+    const { wrapperRef, isCollapsed, canToggle, collapsedHeight, expanded, handleToggleClick } = useCollapsibleHeight(
+      isEditing,
+      rows.length,
+    );
 
     useImperativeHandle(ref, () => ({ getCourses: () => rows }), [rows]);
 
-    useEffect(() => {
-      if (!isEditing) setRows(courses);
-    }, [courses, isEditing]);
+    const departmentOptions = [...departments.map(({ name }) => name).reverse(), '해당없음'].map((label) => ({
+      value: label,
+      label,
+    }));
 
-    if (isEditing !== prevIsEditing) {
-      setPrevIsEditing(isEditing);
-      if (!isEditing) {
-        setSelectedIds(new Set());
-        setExpanded(true);
-        setOpenCellKey(null);
-      }
-    }
+    const areaOptions = [...divisions.map(({ name }) => name).reverse(), '해당없음'].map((label) => ({
+      value: label,
+      label,
+    }));
 
-    useEffect(() => {
-      if (expanded || courses.length === 0) return;
-
-      const updateVisibleCount = () => {
-        const overflow = document.body.scrollHeight - window.innerHeight;
-
-        setVisibleCount((prev) => {
-          if (overflow > 0) return Math.max(1, prev - Math.ceil(overflow / ROW_HEIGHT));
-          if (overflow <= -ROW_HEIGHT) return Math.min(courses.length, prev + Math.floor(-overflow / ROW_HEIGHT));
-          return prev;
-        });
-      };
-
-      updateVisibleCount();
-      window.addEventListener('resize', updateVisibleCount);
-
-      return () => window.removeEventListener('resize', updateVisibleCount);
-    }, [courses.length, expanded, visibleCount]);
-
-    const hasEmptyValue = rows.some((row) => row.courseName.trim() === '' || row.credit.trim() === '');
-
-    useEffect(() => {
-      onValidityChange?.(!hasEmptyValue);
-    }, [hasEmptyValue, onValidityChange]);
-
-    const visibleCourses = expanded || isEditing ? rows : rows.slice(0, visibleCount);
-    const canToggle = !isEditing && (expanded || rows.length > visibleCount);
-    const isAllSelected = rows.length > 0 && selectedIds.size === rows.length;
-
-    useLayoutEffect(() => {
-      const wrapper = tableWrapperRef.current;
-      if (!wrapper) return;
-
-      const nextHeight = wrapper.scrollHeight;
-      if (previousTableHeightRef.current !== undefined && previousTableHeightRef.current !== nextHeight) {
-        setIsHeightTransitioning(true);
-      }
-      previousTableHeightRef.current = nextHeight;
-      setTableHeight(nextHeight);
-    }, [visibleCourses.length, isEditing]);
-
-    const handleToggleClick = () => {
-      setExpanded((prev) => !prev);
-    };
-
-    const handleHeightTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
-      if (e.target !== e.currentTarget || e.propertyName !== 'height') return;
-      setIsHeightTransitioning(false);
-    };
-
-    const handleCellChange = (id: string, key: (typeof columns)[number]['key']) => (value: string) => {
-      const nextValue = key === 'credit' ? toCreditValue(value) : value;
-      setRows((prev) => prev.map((row) => (row.id === id ? { ...row, [key]: nextValue } : row)));
-    };
-
-    const handleDepartmentChange = (id: string) => (value: string) => {
-      const department = departments.find(({ name }) => name === value);
-      setRows((prev) =>
-        prev.map((row) =>
-          row.id === id ? { ...row, department: value, departmentId: department?.departmentId ?? null } : row,
-        ),
-      );
-    };
-
-    const handleAreaChange = (id: string) => (value: string) => {
-      const division = divisions.find(({ name }) => name === value);
-      setRows((prev) =>
-        prev.map((row) => (row.id === id ? { ...row, area: value, areaId: division?.id ?? null } : row)),
-      );
-    };
-
-    const handleSelectAllClick = () => {
-      setSelectedIds(isAllSelected ? new Set() : new Set(rows.map((row) => row.id)));
-    };
-
-    const handleRowSelectClick = (id: string) => () => {
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        if (next.has(id)) {
-          next.delete(id);
-        } else {
-          next.add(id);
-        }
-        return next;
-      });
-    };
+    const columns = getCourseInfoColumns(departmentOptions, areaOptions);
 
     const handleDeleteClick = () => {
       setIsDeleteModalOpen(true);
@@ -201,31 +87,9 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
       setIsAddModalOpen(true);
     };
 
-    const handleAddCourseSubmit = ({ courseId, courseName, credit, area, semester }: AddCourseValues) => {
-      const division = divisions.find(({ name }) => name === area);
-
-      setRows((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          courseId,
-          courseName,
-          department: '해당없음',
-          departmentId: null,
-          credit,
-          semester,
-          area,
-          areaId: division?.id ?? null,
-        },
-      ]);
-    };
-
-    const handleDeleteConfirm = () => {
-      const remainingRows = rows.filter((row) => !selectedIds.has(row.id));
-      setRows(remainingRows);
-      setSelectedIds(new Set());
+    const handleDeleteConfirmClick = () => {
+      handleDeleteConfirm();
       setIsDeleteModalOpen(false);
-      onDeleteRows?.(remainingRows);
     };
 
     return (
@@ -248,15 +112,11 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
         </div>
         <div className="flex flex-col items-center gap-19">
           <div
-            className={cn(
-              'w-full',
-              isHeightTransitioning && 'overflow-hidden',
-              tableHeight !== undefined && 'transition-[height] duration-300 ease-in-out',
-            )}
-            style={{ height: tableHeight }}
-            onTransitionEnd={handleHeightTransitionEnd}
+            ref={wrapperRef}
+            className={cn('w-full transition-[max-height] duration-300 ease-in-out', isCollapsed && 'overflow-hidden')}
+            style={{ maxHeight: isCollapsed ? collapsedHeight : 10000 }}
           >
-            <table ref={tableWrapperRef} className="w-full table-fixed border-separate [border-spacing:0_4px]">
+            <table className="w-full table-fixed border-separate [border-spacing:0_4px]">
               <caption className="sr-only">과목 정보</caption>
               <colgroup>
                 {isEditing && <col className="w-40" />}
@@ -264,79 +124,27 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
                   <col key={key} />
                 ))}
               </colgroup>
-              <thead>
-                <tr className="bg-gray-50">
-                  {isEditing && (
-                    <th scope="col" className="px-8 py-4 text-left">
-                      <button
-                        type="button"
-                        onClick={handleSelectAllClick}
-                        aria-label="전체 선택"
-                        className="mx-auto flex size-20 items-center justify-center"
-                      >
-                        <Icon name={isAllSelected ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'} size={20} />
-                      </button>
-                    </th>
-                  )}
-                  {columns.map(({ key, label }) => (
-                    <th
-                      key={key}
-                      scope="col"
-                      className={cn(
-                        'text-body-sb-16 truncate py-4 text-left text-gray-600',
-                        isEditing ? 'px-16' : 'px-8',
-                      )}
-                    >
-                      {label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
+              <TableHeader
+                columns={columns}
+                isEditing={isEditing}
+                isAllSelected={isAllSelected}
+                onSelectAllClick={handleSelectAllClick}
+              />
               <tbody>
-                {visibleCourses.map((course) => (
-                  <tr key={course.id}>
-                    {isEditing && (
-                      <td className="px-8 py-4 align-middle">
-                        <button
-                          type="button"
-                          onClick={handleRowSelectClick(course.id)}
-                          aria-label={`${course.courseName} 선택`}
-                          className="mx-auto flex size-20 items-center justify-center"
-                        >
-                          <Icon
-                            name={selectedIds.has(course.id) ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'}
-                            size={20}
-                          />
-                        </button>
-                      </td>
-                    )}
-                    {columns.map((column) => (
-                      <td key={column.key} className="px-8 py-4 align-middle">
-                        {isEditing && column.type === 'select' ? (
-                          <TableCellSelect
-                            options={column.options}
-                            value={course[column.key]}
-                            onChange={
-                              column.key === 'department'
-                                ? handleDepartmentChange(course.id)
-                                : column.key === 'area'
-                                  ? handleAreaChange(course.id)
-                                  : handleCellChange(course.id, column.key)
-                            }
-                            isOpen={openCellKey === `${course.id}:${column.key}`}
-                            onOpenChange={(open) => setOpenCellKey(open ? `${course.id}:${column.key}` : null)}
-                          />
-                        ) : (
-                          <TableCellEdit
-                            mode={isEditing ? 'edit' : 'view'}
-                            value={course[column.key]}
-                            onChange={handleCellChange(course.id, column.key)}
-                            suffix={'suffix' in column ? column.suffix : undefined}
-                          />
-                        )}
-                      </td>
-                    ))}
-                  </tr>
+                {rows.map((course) => (
+                  <TableRow
+                    key={course.id}
+                    course={course}
+                    columns={columns}
+                    isEditing={isEditing}
+                    isSelected={selectedIds.has(course.id)}
+                    openCellKey={openCellKey}
+                    onOpenCellKeyChange={setOpenCellKey}
+                    onRowSelectClick={handleRowSelectClick}
+                    onCellChange={handleCellChange}
+                    onDepartmentChange={handleDepartmentChange}
+                    onAreaChange={handleAreaChange}
+                  />
                 ))}
               </tbody>
             </table>
@@ -357,7 +165,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
           type="delete"
           title={`선택한 과목 ${selectedIds.size}개를 삭제할까요?`}
           description="삭제한 과목은 복구할 수 없어요."
-          onConfirm={handleDeleteConfirm}
+          onConfirm={handleDeleteConfirmClick}
         />
         <AddCourseModal open={isAddModalOpen} onOpenChange={setIsAddModalOpen} onSubmit={handleAddCourseSubmit} />
       </section>
