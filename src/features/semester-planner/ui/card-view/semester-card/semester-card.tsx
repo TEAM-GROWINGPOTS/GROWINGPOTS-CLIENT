@@ -183,7 +183,7 @@ export const SemesterCard = ({
           {courses.length > 0 ? (
             <ul className="flex min-h-0 [scrollbar-width:none] flex-col gap-8 overflow-y-auto [&::-webkit-scrollbar]:hidden">
               {courses.map((course) => {
-                const { id, departmentName, name, tags, isEnglish, isSw } = course;
+                const { id, departmentName, name, tags, isEnglish, isSw, retakeDisplay } = course;
                 return (
                   <li key={id}>
                     {renderCourse ? (
@@ -195,6 +195,7 @@ export const SemesterCard = ({
                         tags={tags}
                         isEnglish={isEnglish}
                         isSw={isSw}
+                        retakeDisplay={retakeDisplay}
                         className="w-full border border-gray-100"
                       />
                     )}

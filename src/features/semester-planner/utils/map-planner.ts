@@ -33,6 +33,7 @@ const toCourseBase = (course: PlannerCourseBaseResponse) => ({
   divisionName: course.divisionName,
   isEnglish: course.isEnglish,
   isSw: course.isSw,
+  retakeDisplay: course.retakeDisplay,
 });
 
 const DIVISION_ORDER = ['전공필수', '전공선택', '전공기초', '필수교과', '배분이수교과', '자유이수교과', '기타이수교과'];

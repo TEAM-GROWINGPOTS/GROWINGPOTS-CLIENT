@@ -1,5 +1,7 @@
 export type OpenedSemester = 'FIRST' | 'SECOND' | 'BOTH';
 
+export type RetakeDisplay = 'BADGE' | 'DIMMED';
+
 export interface PlannerCourseBaseResponse {
   courseId: number;
   name: string;
@@ -12,6 +14,7 @@ export interface PlannerCourseBaseResponse {
   credit: number;
   isEnglish: boolean;
   isSw: boolean;
+  retakeDisplay?: RetakeDisplay;
 }
 
 export interface PlannedCourseResponse extends PlannerCourseBaseResponse {
@@ -84,6 +87,7 @@ export type SemesterCardStatus = 'completed' | 'current' | 'planned';
 export interface SemesterCourse {
   id: string;
   courseId: number;
+  retakeDisplay?: RetakeDisplay;
   departmentName: string;
   name: string;
   tags: string[];
