@@ -21,7 +21,7 @@ export const kyClient = ky.create({
     shouldRetry: ({ error }) => {
       if (isHTTPError(error)) {
         const status = error.response.status;
-        if (status >= 400 && status < 500 && status !== 429) {
+        if ((status >= 400 && status < 500 && status !== 429) || status >= 500) {
           return false;
         }
       }
