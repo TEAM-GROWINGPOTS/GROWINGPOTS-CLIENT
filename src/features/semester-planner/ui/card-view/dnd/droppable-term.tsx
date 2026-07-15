@@ -5,9 +5,11 @@ import { getFolderName, getSelectedCourses } from '@features/semester-planner/ho
 import type { PlannerTerm } from '@features/semester-planner/types/planner';
 import { DraggableCourse } from '@features/semester-planner/ui/card-view/dnd/draggable-course';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
+import type { Ref } from 'react';
 
 interface DroppableTermProps {
   term: PlannerTerm;
+  cardRef?: Ref<HTMLElement>;
   isDropTarget: boolean;
   onDeleteTerm: () => void;
   onAddFolder: () => void;
@@ -18,6 +20,7 @@ interface DroppableTermProps {
 
 export const DroppableTerm = ({
   term,
+  cardRef,
   isDropTarget,
   onDeleteTerm,
   onAddFolder,
@@ -31,6 +34,7 @@ export const DroppableTerm = ({
   return (
     <div ref={setNodeRef} className="h-full">
       <SemesterCard
+        ref={cardRef}
         className="max-h-full"
         yearLevel={yearLevel}
         semester={semester}

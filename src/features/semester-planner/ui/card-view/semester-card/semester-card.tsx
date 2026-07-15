@@ -8,9 +8,10 @@ import { Badge, ClassCard } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { cn } from '@shared/utils/cn';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, type Ref, useEffect, useRef, useState } from 'react';
 
 interface SemesterCardProps {
+  ref?: Ref<HTMLElement>;
   yearLevel: number;
   semester: number;
   semesterLabel?: string;
@@ -47,6 +48,7 @@ const STATUS_ICON: Record<SemesterCardStatus, string | null> = {
 };
 
 export const SemesterCard = ({
+  ref,
   yearLevel,
   semester,
   semesterLabel,
@@ -125,7 +127,10 @@ export const SemesterCard = ({
   const isLastFolder = (folders?.length ?? 0) <= 1;
 
   return (
-    <section className={cn('flex max-h-screen w-258 shrink-0 flex-col self-start rounded-xl bg-gray-800', className)}>
+    <section
+      ref={ref}
+      className={cn('flex max-h-screen w-258 shrink-0 flex-col self-start rounded-xl bg-gray-800', className)}
+    >
       <header className="flex items-center justify-between px-12 pt-12">
         <div className="flex flex-row gap-8">
           {statusIcon && <Icon name={statusIcon} size={20} />}

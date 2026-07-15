@@ -93,6 +93,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   );
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [lastCardElement, setLastCardElement] = useState<HTMLElement | null>(null);
+  const [addSemesterButtonTop, setAddSemesterButtonTop] = useState<number | null>(null);
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
   const boardRef = useRef<HTMLElement>(null);
   const router = useRouter();
@@ -119,6 +121,18 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     if (!isCourseSearchError) return;
     parseApiError(courseSearchError).then((parsed) => toast.negative(parsed?.message ?? '과목 검색에 실패했어요.'));
   }, [isCourseSearchError, courseSearchError]);
+
+  const handleLastCardRef = useCallback((node: HTMLElement | null) => {
+    setLastCardElement(node);
+    setAddSemesterButtonTop(node ? node.offsetHeight / 2 : null);
+  }, []);
+
+  useEffect(() => {
+    if (!lastCardElement) return;
+    const observer = new ResizeObserver(() => setAddSemesterButtonTop(lastCardElement.offsetHeight / 2));
+    observer.observe(lastCardElement);
+    return () => observer.disconnect();
+  }, [lastCardElement]);
 
   const updateScrollability = useCallback(() => {
     const board = boardRef.current;
@@ -217,11 +231,13 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
             onScroll={updateScrollability}
             className="flex h-full [scrollbar-width:none] items-start gap-24 overflow-x-auto pb-20 [&::-webkit-scrollbar]:hidden"
           >
-            {gridTerms.map((term) =>
-              term.status === 'planned' ? (
+            {gridTerms.map((term, index) => {
+              const cardRef = index === gridTerms.length - 1 ? handleLastCardRef : undefined;
+              return term.status === 'planned' ? (
                 <DroppableTerm
                   key={term.id}
                   term={term}
+                  cardRef={cardRef}
                   isDropTarget={overTermId === term.id}
                   onDeleteTerm={() => {
                     removeTerm(term.id);
@@ -238,6 +254,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
               ) : (
                 <SemesterCard
                   key={term.id}
+                  ref={cardRef}
                   className="max-h-full"
                   yearLevel={term.yearLevel}
                   semester={term.semester}
@@ -246,13 +263,14 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
                   folderName={getFolderName(term)}
                   courses={getSelectedCourses(term)}
                 />
-              ),
-            )}
+              );
+            })}
             <IconButton
               icon="ic_plus"
               aria-label="학기 추가"
               size="medium"
-              className="shrink-0 self-center"
+              className={cn('shrink-0', addSemesterButtonTop === null ? 'self-center' : '-translate-y-1/2 self-start')}
+              style={addSemesterButtonTop === null ? undefined : { marginTop: addSemesterButtonTop }}
               onClick={() => setIsAddSemesterOpen(true)}
             />
           </section>
