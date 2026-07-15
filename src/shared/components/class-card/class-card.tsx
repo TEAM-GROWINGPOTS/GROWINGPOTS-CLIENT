@@ -47,6 +47,7 @@ interface ClassCardProps extends Omit<ComponentPropsWithoutRef<'article'>, 'chil
   department?: string;
   title: string;
   tags: string[];
+  note?: string;
   isEnglish?: boolean;
   isSw?: boolean;
   type?: ClassCardType;
@@ -57,6 +58,7 @@ export const ClassCard = ({
   department,
   title,
   tags,
+  note: customNote,
   isEnglish = false,
   isSw = false,
   type = 'default',

@@ -31,6 +31,7 @@ import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
 import Icon from '@shared/components/icon/icon';
 import { IconButton } from '@shared/components/icon-button/icon-button';
+import { AddCourseModal } from '@shared/components/modal/add-course-modal';
 import { useCourseSearch } from '@shared/hooks/use-course-search';
 import { useDebouncedValue } from '@shared/hooks/use-debounced-value';
 import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
@@ -86,6 +87,11 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
+  const [isAddCourseModalOpen, setIsAddCourseModalOpen] = useState(false);
+  const [addCourseName, setAddCourseName] = useState('');
+  const [addCourseCredit, setAddCourseCredit] = useState('');
+  const [addCourseArea, setAddCourseArea] = useState('');
+  const [addCourseSemester, setAddCourseSemester] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [appliedFilters, setAppliedFilters] = useState<CourseFilterValues>();
   const [filterTab, setFilterTab] = useState<CourseFilterTabKeyTypes | null>(null);
@@ -102,6 +108,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     { keyword: debouncedKeyword || undefined, ...(appliedFilters ?? INITIAL_COURSE_FILTER_VALUES) },
     { enabled: isSidebarOpen },
   );
+  const canSubmitAddCourse =
+    addCourseName.trim() !== '' && addCourseCredit !== '' && addCourseArea !== '' && addCourseSemester !== '';
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [lastCardElement, setLastCardElement] = useState<HTMLElement | null>(null);
@@ -218,7 +226,24 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   };
 
   const handleDirectAdd = () => {
-    console.log('직접추가 클릭 — 과목 직접추가 모달 연결 예정');
+    setIsAddCourseModalOpen(true);
+  };
+
+  const resetAddCourseForm = () => {
+    setAddCourseName('');
+    setAddCourseCredit('');
+    setAddCourseArea('');
+    setAddCourseSemester('');
+  };
+
+  const handleAddCourseModalOpenChange = (nextOpen: boolean) => {
+    setIsAddCourseModalOpen(nextOpen);
+    if (!nextOpen) resetAddCourseForm();
+  };
+
+  const handleAddCourseSubmit = () => {
+    if (!canSubmitAddCourse) return;
+    handleAddCourseModalOpenChange(false);
   };
 
   const handleToggleSidebar = () => {
@@ -408,6 +433,20 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
       </DragOverlay>
 
       <AddSemesterModal open={isAddSemesterOpen} onOpenChange={setIsAddSemesterOpen} onSubmit={handleAddSemester} />
+      <AddCourseModal
+        open={isAddCourseModalOpen}
+        onOpenChange={handleAddCourseModalOpenChange}
+        courseName={addCourseName}
+        onCourseNameChange={setAddCourseName}
+        credit={addCourseCredit}
+        onCreditChange={setAddCourseCredit}
+        area={addCourseArea}
+        onAreaChange={setAddCourseArea}
+        semester={addCourseSemester}
+        onSemesterChange={setAddCourseSemester}
+        canSubmit={canSubmitAddCourse}
+        onSubmit={handleAddCourseSubmit}
+      />
       <CourseFilterModal
         open={filterTab !== null}
         onOpenChange={(open) => {

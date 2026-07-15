@@ -1,18 +1,12 @@
 'use client';
 
-import { getCourses } from '@shared/apis/get-courses';
-import { QUERY_KEY } from '@shared/apis/query-key';
 import { Button } from '@shared/components/button/button';
 import { Select } from '@shared/components/select/select';
 import { TextField } from '@shared/components/text-field/text-field';
-import { useDebouncedValue } from '@shared/hooks/use-debounced-value';
 import { cn } from '@shared/utils/cn';
-import { useQuery } from '@tanstack/react-query';
-import { useRef, useState } from 'react';
+import { type KeyboardEvent, useRef, useState } from 'react';
 
 import { Modal } from './modal';
-
-const COURSE_NAME_MATCH_SIZE = 50;
 
 interface SelectOption {
   value: string;
@@ -20,6 +14,14 @@ interface SelectOption {
 }
 
 const DIRECT_INPUT_CREDIT = 'DIRECT';
+
+export interface AddCourseValues {
+  courseId: number;
+  courseName: string;
+  credit: string;
+  area: string;
+  semester: string;
+}
 
 export const CREDIT_OPTIONS: SelectOption[] = [
   ...Array.from({ length: 5 }, (_, i) => `${i}`).map((value) => ({ value, label: `${value}학점` })),
@@ -51,92 +53,79 @@ export const SEMESTER_OPTIONS: SelectOption[] = ['1학기', '여름학기', '2�
   label,
 }));
 
-export interface AddCourseValues {
-  courseId: number;
-  courseName: string;
-  credit: string;
-  area: string;
-  semester: string;
-}
-
 interface AddCourseModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (values: AddCourseValues) => void;
+  courseName: string;
+  onCourseNameChange: (value: string) => void;
+  onCourseNameBlur?: () => void;
+  courseNameErrorMessage?: string;
+  credit: string;
+  onCreditChange: (value: string) => void;
+  area: string;
+  onAreaChange: (value: string) => void;
+  semester: string;
+  onSemesterChange: (value: string) => void;
+  canSubmit: boolean;
+  onSubmit: () => void;
 }
 
-export const AddCourseModal = ({ open, onOpenChange, onSubmit }: AddCourseModalProps) => {
-  const [courseName, setCourseName] = useState('');
-  const [credit, setCredit] = useState('');
-  const [customCredit, setCustomCredit] = useState('');
-  const [area, setArea] = useState('');
-  const [semester, setSemester] = useState('');
-  const [touched, setTouched] = useState(false);
+export const AddCourseModal = ({
+  open,
+  onOpenChange,
+  courseName,
+  onCourseNameChange,
+  onCourseNameBlur,
+  courseNameErrorMessage,
+  credit,
+  onCreditChange,
+  area,
+  onAreaChange,
+  semester,
+  onSemesterChange,
+  canSubmit,
+  onSubmit,
+}: AddCourseModalProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isDirectCredit, setIsDirectCredit] = useState(false);
+  const [customCredit, setCustomCredit] = useState('');
 
-  const debouncedCourseName = useDebouncedValue(courseName.trim());
-  const { data: searchedCourses = [], isFetching: isSearchingCourse } = useQuery({
-    queryKey: QUERY_KEY.COURSES.SEARCH({ keyword: debouncedCourseName, size: COURSE_NAME_MATCH_SIZE }),
-    queryFn: () => getCourses({ keyword: debouncedCourseName, size: COURSE_NAME_MATCH_SIZE }),
-    select: (data) => data.courses,
-    enabled: debouncedCourseName !== '',
-  });
-  const matchedCourse = searchedCourses.find((course) => course.name === courseName.trim());
-  const isCourseNameValid = matchedCourse !== undefined;
-  const isSearchSettled = debouncedCourseName === courseName.trim() && !isSearchingCourse;
-  const showError = touched && courseName.trim() !== '' && isSearchSettled && !isCourseNameValid;
-  const isDirectCredit = credit === DIRECT_INPUT_CREDIT;
-  const finalCredit = isDirectCredit ? customCredit : credit;
-  const canSubmit = isCourseNameValid && finalCredit !== '' && area !== '' && semester !== '';
+  const handleOpenChange = (nextOpen: boolean) => {
+    onOpenChange(nextOpen);
+    if (nextOpen) return;
 
-  const resetForm = () => {
-    setCourseName('');
-    setCredit('');
+    setIsDirectCredit(false);
     setCustomCredit('');
-    setArea('');
-    setSemester('');
-    setTouched(false);
   };
 
-  const handleClose = () => {
-    onOpenChange(false);
-    resetForm();
-  };
-
-  const handleCourseNameChange = (value: string) => {
-    setCourseName(value);
-    setTouched(false);
-  };
-
-  const handleCourseNameBlur = () => {
-    setTouched(true);
-  };
-
-  const handleCourseNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-      e.preventDefault();
+  const handleCourseNameKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+      event.preventDefault();
       inputRef.current?.blur();
     }
   };
 
   const handleCreditChange = (value: string) => {
-    setCredit(value);
-    if (value !== DIRECT_INPUT_CREDIT) setCustomCredit('');
+    if (value === DIRECT_INPUT_CREDIT) {
+      setIsDirectCredit(true);
+      setCustomCredit('');
+      onCreditChange('');
+      return;
+    }
+
+    setIsDirectCredit(false);
+    setCustomCredit('');
+    onCreditChange(value);
   };
 
   const handleCustomCreditChange = (value: string) => {
-    setCustomCredit(toCreditValue(value));
-  };
-
-  const handleSubmit = () => {
-    if (!canSubmit || !matchedCourse) return;
-    const submitCredit = finalCredit.endsWith('.') ? finalCredit.slice(0, -1) : finalCredit;
-    onSubmit({ courseId: matchedCourse.courseId, courseName: courseName.trim(), credit: submitCredit, area, semester });
-    handleClose();
+    const nextCredit = toCreditValue(value);
+    setCustomCredit(nextCredit);
+    onCreditChange(nextCredit);
   };
 
   return (
-    <Modal open={open} onOpenChange={handleClose}>
+    <Modal open={open} onOpenChange={handleOpenChange}>
       <Modal.Content className={cn('flex w-480 flex-col justify-between', isDirectCredit ? 'h-548' : 'h-484')}>
         <div className="flex flex-col gap-32">
           <Modal.Header title="과목 추가" className="text-title-sb-24 flex-1" />
@@ -144,19 +133,24 @@ export const AddCourseModal = ({ open, onOpenChange, onSubmit }: AddCourseModalP
             <TextField
               ref={inputRef}
               value={courseName}
-              onChange={handleCourseNameChange}
-              onBlur={handleCourseNameBlur}
+              onChange={onCourseNameChange}
+              onBlur={onCourseNameBlur}
               onKeyDown={handleCourseNameKeyDown}
               placeholder="과목명을 입력해 주세요"
-              errorMessage={showError ? '* 일치하는 과목명이 없습니다. 다시 확인해 주세요.' : undefined}
+              errorMessage={courseNameErrorMessage}
             />
             <div className="flex w-full flex-col gap-16">
-              <Select options={CREDIT_OPTIONS} value={credit} onChange={handleCreditChange} placeholder="학점" />
+              <Select
+                options={CREDIT_OPTIONS}
+                value={isDirectCredit ? DIRECT_INPUT_CREDIT : credit}
+                onChange={handleCreditChange}
+                placeholder="학점"
+              />
               {isDirectCredit && (
                 <div className="flex h-48 w-full items-center rounded-lg border border-gray-200 bg-white px-16 py-12">
                   <input
                     value={customCredit}
-                    onChange={(e) => handleCustomCreditChange(e.target.value)}
+                    onChange={(event) => handleCustomCreditChange(event.target.value)}
                     placeholder="0"
                     inputMode="decimal"
                     style={{ width: `${Math.max(customCredit.length, 1)}ch` }}
@@ -166,8 +160,8 @@ export const AddCourseModal = ({ open, onOpenChange, onSubmit }: AddCourseModalP
                 </div>
               )}
             </div>
-            <Select options={AREA_OPTIONS} value={area} onChange={setArea} placeholder="이수 영역" />
-            <Select options={SEMESTER_OPTIONS} value={semester} onChange={setSemester} placeholder="수강학기" />
+            <Select options={AREA_OPTIONS} value={area} onChange={onAreaChange} placeholder="이수 영역" />
+            <Select options={SEMESTER_OPTIONS} value={semester} onChange={onSemesterChange} placeholder="수강학기" />
           </div>
         </div>
         <Modal.Footer>
@@ -176,7 +170,7 @@ export const AddCourseModal = ({ open, onOpenChange, onSubmit }: AddCourseModalP
             size="lg"
             mode="primary_solid"
             disabled={!canSubmit}
-            onClick={handleSubmit}
+            onClick={onSubmit}
             className="w-full justify-center"
           />
         </Modal.Footer>
