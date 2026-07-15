@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@shared/components/button/button';
+import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { useDepartmentOptions } from '@shared/hooks/use-department-options';
 import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
 import { useStudentProfile } from '@shared/hooks/use-student-profile';
@@ -23,6 +24,7 @@ export const AnalysisResultView = () => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isCourseInfoValid, setIsCourseInfoValid] = useState(true);
+  const [isEditNoticeModalOpen, setIsEditNoticeModalOpen] = useState(false);
   const courseInfoTableRef = useRef<CourseInfoTableRef>(null);
   const { data: studentProfile } = useStudentProfile();
   const { data: studentCourses } = useStudentCourses();
@@ -38,6 +40,10 @@ export const AnalysisResultView = () => {
 
   const handleEditToggleClick = () => {
     if (!isEditing) {
+      if (!isCourseInfoValid) {
+        setIsEditNoticeModalOpen(true);
+        return;
+      }
       setIsEditing(true);
       return;
     }
@@ -49,6 +55,11 @@ export const AnalysisResultView = () => {
       { courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses) },
       { onSuccess: () => setIsEditing(false) },
     );
+  };
+
+  const handleEditNoticeConfirm = () => {
+    setIsEditNoticeModalOpen(false);
+    setIsEditing(true);
   };
 
   const handleCourseInfoValidityChange = useCallback((isValid: boolean) => {
@@ -156,6 +167,15 @@ export const AnalysisResultView = () => {
           />
         </div>
       </div>
+
+      <ConfirmModal
+        open={isEditNoticeModalOpen}
+        onOpenChange={setIsEditNoticeModalOpen}
+        type="notice"
+        title="수정이 필요한 정보가 있어요"
+        description="빨간색으로 표시된 항목을 확인 후 수정해 주세요."
+        onConfirm={handleEditNoticeConfirm}
+      />
     </div>
   );
 };

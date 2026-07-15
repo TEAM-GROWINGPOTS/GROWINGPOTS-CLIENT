@@ -29,7 +29,6 @@ const CONFIRM_MODAL_DEFAULTS: Record<ConfirmModalTypes, { iconName?: string; con
     confirmLabel: '저장',
   },
   notice: {
-    iconName: 'ic_alert_triangle_black',
     confirmLabel: '확인',
   },
   logout: {
