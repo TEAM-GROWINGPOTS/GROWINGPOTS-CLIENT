@@ -58,6 +58,8 @@ export const FILTER_TAB_LABELS = FILTER_TABS.map(({ label }) => label);
 
 const CAMPUS_OPTIONS: FilterOption[] = [{ value: '국제캠퍼스', label: '국제캠퍼스' }];
 
+const COLLEGE_NONE_OPTION: FilterOption = { value: '__none__', label: '선택 안함' };
+
 const AREA_OPTIONS: FilterOption[] = [
   { value: 'MAJOR_REQUIRED', label: '전공필수' },
   { value: 'MAJOR_BASIC', label: '전공기초' },
@@ -129,17 +131,21 @@ const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFo
     (next: CourseFilterValues[K]) =>
       setValues((prev) => ({ ...prev, [key]: next }));
 
-  const collegeOptions: FilterOption[] = [...new Set(departments.map(({ college }) => college))].map((college) => ({
-    value: college,
-    label: college,
-  }));
+  const collegeOptions: FilterOption[] = [
+    ...[...new Set(departments.map(({ college }) => college))].map((college) => ({
+      value: college,
+      label: college,
+    })),
+    COLLEGE_NONE_OPTION,
+  ];
 
   const departmentOptions: FilterOption[] = departments
     .filter(({ college }) => college === values.collegeName)
     .map(({ departmentId, name }) => ({ value: String(departmentId), label: name }));
 
   const handleCollegeChange = (next: string) => {
-    setValues((prev) => ({ ...prev, collegeName: next, departmentId: '' }));
+    const collegeName = next === COLLEGE_NONE_OPTION.value ? '' : next;
+    setValues((prev) => ({ ...prev, collegeName, departmentId: '' }));
   };
 
   return (
