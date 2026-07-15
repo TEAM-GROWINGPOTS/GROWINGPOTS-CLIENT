@@ -10,6 +10,7 @@ export const useUpdateStudentCourses = () => {
     mutationFn: updateStudentCourses,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY.STUDENTS.ME_COURSES() });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY.GRADUATION.ALL });
     },
   });
 };
