@@ -323,11 +323,8 @@ export const RoadmapView = () => {
 
   // 졸업 요건은 학기/폴더가 바뀔 때마다 저장 응답으로 다시 계산돼 오므로(useSavePlanner의 onSuccess가
   // GRADUATION 쿼리 캐시를 갱신), 배지와 로띠 모두 그래프에서 직접 합산한 학점이 아니라 이 API 값의
-  // 학점 요건 충족 여부(요건 - 이수)를 그대로 기준으로 삼는다. 아코디언의 배지 로직과 동일한 기준이다.
-  const creditShortfall = graduationData
-    ? graduationData.summary.totalCredits.required - graduationData.summary.totalCredits.current
-    : null;
-  const showCelebration = creditShortfall !== null && creditShortfall <= 0 && !isCelebrationDismissed;
+  // curriculumSatisfied를 그대로 기준으로 삼는다. 아코디언의 배지 로직과 동일한 기준이다.
+  const showCelebration = !!graduationData?.curriculumSatisfied && !isCelebrationDismissed;
 
   // 즉시 unmount하지 않고 opacity 전환이 끝난 뒤 dismiss 상태로 확정한다.
   const dismissCelebration = useCallback(() => {
