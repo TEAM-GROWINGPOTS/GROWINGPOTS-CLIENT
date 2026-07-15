@@ -9,6 +9,7 @@ interface TableRowProps {
   course: CourseInfo;
   columns: readonly Column[];
   isEditing: boolean;
+  isInvalid: boolean;
   isSelected: boolean;
   openCellKey: string | null;
   onOpenCellKeyChange: (key: string | null) => void;
@@ -22,6 +23,7 @@ export const TableRow = ({
   course,
   columns,
   isEditing,
+  isInvalid,
   isSelected,
   openCellKey,
   onOpenCellKeyChange,
@@ -48,7 +50,13 @@ export const TableRow = ({
         {isEditing && column.type === 'select' ? (
           <TableCellSelect
             options={column.options ?? []}
-            value={course[column.key]}
+            value={
+              column.key === 'department'
+                ? (course.departmentId?.toString() ?? '')
+                : column.key === 'area'
+                  ? (course.areaId?.toString() ?? '')
+                  : course[column.key]
+            }
             onChange={
               column.key === 'department'
                 ? onDepartmentChange(course.id)
@@ -65,6 +73,7 @@ export const TableRow = ({
             value={course[column.key]}
             onChange={onCellChange(course.id, column.key)}
             suffix={column.suffix}
+            className={!isEditing && column.key === 'courseName' && isInvalid ? 'text-red-20' : undefined}
           />
         )}
       </td>

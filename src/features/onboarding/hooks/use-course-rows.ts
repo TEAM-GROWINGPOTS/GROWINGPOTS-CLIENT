@@ -1,5 +1,6 @@
 import type { Division } from '@features/onboarding/types/course';
 import type { Column } from '@features/onboarding/types/course-info-table';
+import { isCourseRowInvalid } from '@features/onboarding/utils/is-course-row-invalid';
 import type { DepartmentResponse } from '@shared/apis/types/onboarding-options';
 import type { AddCourseValues } from '@shared/components/modal/add-course-modal';
 import { useEffect, useState } from 'react';
@@ -51,11 +52,11 @@ export const useCourseRows = ({
   }
 
   const isAllSelected = rows.length > 0 && selectedIds.size === rows.length;
-  const hasEmptyValue = rows.some((row) => row.courseName.trim() === '' || row.credit.trim() === '');
+  const hasInvalidRow = rows.some(isCourseRowInvalid);
 
   useEffect(() => {
-    onValidityChange?.(!hasEmptyValue);
-  }, [hasEmptyValue, onValidityChange]);
+    onValidityChange?.(!hasInvalidRow);
+  }, [hasInvalidRow, onValidityChange]);
 
   const handleCellChange = (id: string, key: Column['key']) => (value: string) => {
     const nextValue = key === 'credit' ? toCreditValue(value) : value;
@@ -63,17 +64,23 @@ export const useCourseRows = ({
   };
 
   const handleDepartmentChange = (id: string) => (value: string) => {
-    const department = departments.find(({ name }) => name === value);
+    const department = departments.find(({ departmentId }) => `${departmentId}` === value);
     setRows((prev) =>
       prev.map((row) =>
-        row.id === id ? { ...row, department: value, departmentId: department?.departmentId ?? null } : row,
+        row.id === id
+          ? { ...row, department: department?.name ?? '해당없음', departmentId: department?.departmentId ?? null }
+          : row,
       ),
     );
   };
 
   const handleAreaChange = (id: string) => (value: string) => {
-    const division = divisions.find(({ name }) => name === value);
-    setRows((prev) => prev.map((row) => (row.id === id ? { ...row, area: value, areaId: division?.id ?? null } : row)));
+    const division = divisions.find(({ id: divisionId }) => `${divisionId}` === value);
+    setRows((prev) =>
+      prev.map((row) =>
+        row.id === id ? { ...row, area: division?.name ?? '해당없음', areaId: division?.id ?? null } : row,
+      ),
+    );
   };
 
   const handleSelectAllClick = () => {
@@ -122,7 +129,7 @@ export const useCourseRows = ({
     rows,
     selectedIds,
     isAllSelected,
-    hasEmptyValue,
+    hasInvalidRow,
     openCellKey,
     setOpenCellKey,
     handleCellChange,

@@ -4,6 +4,7 @@ import { useCollapsibleHeight } from '@features/onboarding/hooks/use-collapsible
 import { useCourseRows } from '@features/onboarding/hooks/use-course-rows';
 import type { Division } from '@features/onboarding/types/course';
 import { getCourseInfoColumns } from '@features/onboarding/utils/get-course-info-columns';
+import { isCourseRowInvalid } from '@features/onboarding/utils/is-course-row-invalid';
 import type { DepartmentResponse } from '@shared/apis/types/onboarding-options';
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
@@ -49,6 +50,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
       rows,
       selectedIds,
       isAllSelected,
+      hasInvalidRow,
       openCellKey,
       setOpenCellKey,
       handleCellChange,
@@ -67,15 +69,15 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
 
     useImperativeHandle(ref, () => ({ getCourses: () => rows }), [rows]);
 
-    const departmentOptions = [...departments.map(({ name }) => name).reverse(), '해당없음'].map((label) => ({
-      value: label,
-      label,
-    }));
+    const departmentOptions = [
+      ...departments.map(({ departmentId, name }) => ({ value: `${departmentId}`, label: name })).reverse(),
+      { value: '', label: '해당없음' },
+    ];
 
-    const areaOptions = [...divisions.map(({ name }) => name).reverse(), '해당없음'].map((label) => ({
-      value: label,
-      label,
-    }));
+    const areaOptions = [
+      ...divisions.map(({ id, name }) => ({ value: `${id}`, label: name })).reverse(),
+      { value: '', label: '해당없음' },
+    ];
 
     const columns = getCourseInfoColumns(departmentOptions, areaOptions);
 
@@ -93,9 +95,16 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
     };
 
     return (
-      <section className="flex flex-col gap-18 rounded-lg bg-white px-24 py-20">
+      <section className="flex flex-col gap-18">
         <div className="flex h-32 w-full items-center justify-between">
-          <p className="text-body-sb-16 text-gray-600">과목정보</p>
+          <div className="flex items-center gap-8">
+            <p className="text-body-sb-16 text-gray-600">과목정보</p>
+            {hasInvalidRow && (
+              <p className="text-body-r-14 text-red-20">
+                * 확인이 필요한 정보가 있어요. 빨간색으로 표시된 항목을 수정해 주세요.
+              </p>
+            )}
+          </div>
           {isEditing && (
             <div className="flex items-center gap-12">
               <Button label="과목추가" mode="secondary_outline" size="sm" onClick={handleAddClick} />
@@ -137,6 +146,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
                     course={course}
                     columns={columns}
                     isEditing={isEditing}
+                    isInvalid={isCourseRowInvalid(course)}
                     isSelected={selectedIds.has(course.id)}
                     openCellKey={openCellKey}
                     onOpenCellKeyChange={setOpenCellKey}

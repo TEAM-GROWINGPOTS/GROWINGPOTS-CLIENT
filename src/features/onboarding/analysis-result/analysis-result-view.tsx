@@ -113,7 +113,7 @@ export const AnalysisResultView = () => {
         </div>
       </div>
 
-      <div className="mt-20 w-full">
+      <section className="mt-20 w-full rounded-lg bg-white px-24 py-20">
         {studentCourses && (
           <CourseInfoTable
             ref={courseInfoTableRef}
@@ -125,7 +125,7 @@ export const AnalysisResultView = () => {
             onDeleteRows={handleDeleteRows}
           />
         )}
-      </div>
+      </section>
 
       <div className="mt-20 flex justify-center">
         <div className="flex w-416 flex-col gap-8">
@@ -142,7 +142,7 @@ export const AnalysisResultView = () => {
             mode="primary_solid"
             size="lg"
             className="w-full justify-center"
-            disabled={isEditing || isSaving}
+            disabled={isEditing || isSaving || !isCourseInfoValid}
             onClick={handleConfirmClick}
           />
         </div>
