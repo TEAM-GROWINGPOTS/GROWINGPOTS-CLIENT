@@ -44,6 +44,7 @@ export const kyClient = ky.create({
         if (response.status === 401 && !isRefreshing) {
           isRefreshing = true;
           let succeeded = false;
+          let authFailed = false;
 
           for (let attempt = 0; attempt < MAX_REISSUE_ATTEMPTS; attempt++) {
             try {
@@ -51,7 +52,10 @@ export const kyClient = ky.create({
               succeeded = true;
               break;
             } catch (error) {
-              if (isHTTPError(error)) break;
+              if (isHTTPError(error) && error.response.status < 500) {
+                authFailed = true;
+                break;
+              }
             }
           }
 
@@ -61,8 +65,10 @@ export const kyClient = ky.create({
             return fetch(request.clone());
           }
 
-          const redirectTo = encodeURIComponent(window.location.pathname + window.location.search);
-          window.location.href = `/api/auth/logout?redirect=${redirectTo}`;
+          if (authFailed) {
+            const redirectTo = encodeURIComponent(window.location.pathname + window.location.search);
+            window.location.href = `/api/auth/logout?redirect=${redirectTo}`;
+          }
         }
       },
     ],
