@@ -41,7 +41,7 @@ export const GraduationStatusAccordion = ({ className, data }: GraduationStatusA
 
   if (!data || !data.sections) return null;
 
-  const { summary, graduatable, sections } = data;
+  const { summary, curriculumSatisfied, sections } = data;
   const { majors, ge, others } = sections;
   const { totalCredits } = summary;
 
@@ -82,8 +82,6 @@ export const GraduationStatusAccordion = ({ className, data }: GraduationStatusA
 
   const toPercent = (current: number) => calculatePercentage(current, totalCredits.required);
 
-  const shortfallCredit = Math.max(totalCredits.required - totalCredits.current, 0);
-
   const handleChipKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
       e.preventDefault();
@@ -112,7 +110,7 @@ export const GraduationStatusAccordion = ({ className, data }: GraduationStatusA
           <Accordion.Trigger className="group flex w-full cursor-pointer items-center justify-between">
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-4">
-                <p className="text-title-sb-18 text-gray-800">졸업 요건 충족 현황</p>
+                <p className="text-title-sb-18 text-gray-800">졸업 학점 충족 현황</p>
                 <Tooltip
                   trigger={
                     <span className="-ml-6 pl-6" onClick={(e) => e.stopPropagation()}>
@@ -124,12 +122,14 @@ export const GraduationStatusAccordion = ({ className, data }: GraduationStatusA
                   size="md"
                 />
               </div>
-              {graduatable ? (
+              {curriculumSatisfied ? (
                 <Badge size="xsmall" color="lime01">
-                  졸업 요건 충족
+                  충족
                 </Badge>
               ) : (
-                <Badge size="xsmall" color="red">{`${shortfallCredit}학점 부족`}</Badge>
+                <Badge size="xsmall" color="red">
+                  미충족
+                </Badge>
               )}
             </div>
             <Icon
@@ -160,16 +160,16 @@ export const GraduationStatusAccordion = ({ className, data }: GraduationStatusA
                 >
                   <div className="absolute inset-y-0 left-0 flex h-full w-full">
                     <div
-                      className="bg-blue-10 animate-progress-fill h-full origin-left"
-                      style={{ width: `${toPercent(otherCredit)}%` }}
+                      className="animate-progress-fill h-full origin-left bg-lime-400"
+                      style={{ width: `${toPercent(majorCredit)}%` }}
                     />
                     <div
                       className="bg-purple-10 animate-progress-fill h-full origin-left"
                       style={{ width: `${toPercent(generalCredit)}%`, animationDelay: '600ms' }}
                     />
                     <div
-                      className="animate-progress-fill h-full origin-left bg-lime-400"
-                      style={{ width: `${toPercent(majorCredit)}%`, animationDelay: '1200ms' }}
+                      className="bg-blue-10 animate-progress-fill h-full origin-left"
+                      style={{ width: `${toPercent(otherCredit)}%`, animationDelay: '1200ms' }}
                     />
                   </div>
                 </div>
