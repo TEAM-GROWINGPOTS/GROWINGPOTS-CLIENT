@@ -1,12 +1,9 @@
-import { ToastItem } from '@shared/components/toast/toast-item';
+import { toast } from '@shared/components/toast';
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 import { isHTTPError } from 'ky';
-import { toast as sonnerToast } from 'sonner';
 
 const handleGlobalError = () => {
-  sonnerToast.custom(() => <ToastItem variant="negative" message="요청에 실패했어요." />, {
-    id: 'global-query-error',
-  });
+  toast.negative('요청에 실패했어요.', { id: 'global-query-error' });
 };
 
 export const createQueryClient = () =>

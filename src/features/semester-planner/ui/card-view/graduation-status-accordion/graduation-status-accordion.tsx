@@ -160,16 +160,16 @@ export const GraduationStatusAccordion = ({ className, data }: GraduationStatusA
                 >
                   <div className="absolute inset-y-0 left-0 flex h-full w-full">
                     <div
-                      className="bg-blue-10 animate-progress-fill h-full origin-left"
-                      style={{ width: `${toPercent(otherCredit)}%` }}
+                      className="animate-progress-fill h-full origin-left bg-lime-400"
+                      style={{ width: `${toPercent(majorCredit)}%` }}
                     />
                     <div
                       className="bg-purple-10 animate-progress-fill h-full origin-left"
                       style={{ width: `${toPercent(generalCredit)}%`, animationDelay: '600ms' }}
                     />
                     <div
-                      className="animate-progress-fill h-full origin-left bg-lime-400"
-                      style={{ width: `${toPercent(majorCredit)}%`, animationDelay: '1200ms' }}
+                      className="bg-blue-10 animate-progress-fill h-full origin-left"
+                      style={{ width: `${toPercent(otherCredit)}%`, animationDelay: '1200ms' }}
                     />
                   </div>
                 </div>

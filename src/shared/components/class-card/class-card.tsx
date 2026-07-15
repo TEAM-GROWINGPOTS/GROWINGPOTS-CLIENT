@@ -47,6 +47,7 @@ interface ClassCardProps extends Omit<ComponentPropsWithoutRef<'article'>, 'chil
   department?: string;
   title: string;
   tags: string[];
+  note?: string;
   isEnglish?: boolean;
   isSw?: boolean;
   type?: ClassCardType;
@@ -57,6 +58,7 @@ export const ClassCard = ({
   department,
   title,
   tags,
+  note: customNote,
   isEnglish = false,
   isSw = false,
   type = 'default',
@@ -64,7 +66,7 @@ export const ClassCard = ({
   className,
   ...props
 }: ClassCardProps) => {
-  const note = getNote(isEnglish, isSw);
+  const note = customNote ?? getNote(isEnglish, isSw);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [isTitleTruncated, setIsTitleTruncated] = useState(false);
 

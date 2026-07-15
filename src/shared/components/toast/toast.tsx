@@ -3,8 +3,8 @@ import { toast as sonnerToast } from 'sonner';
 
 import { ToastItem, ToastVariant } from './toast-item';
 
-const show = (variant: ToastVariant) => (message: string) =>
-  sonnerToast.custom(() => <ToastItem variant={variant} message={message} />);
+const show = (variant: ToastVariant) => (message: string, options?: { id?: string }) =>
+  sonnerToast.custom(() => <ToastItem variant={variant} message={message} />, options);
 
 export const toast = {
   information: (message: string, icon?: ReactNode) =>
