@@ -101,6 +101,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const [addSemesterButtonTop, setAddSemesterButtonTop] = useState<number | null>(null);
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
   const boardRef = useRef<HTMLElement>(null);
+  const pendingScrollTermRef = useRef<{ yearLevel: number; semesterLabel: string } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -150,6 +151,21 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     window.addEventListener('resize', updateScrollability);
     return () => window.removeEventListener('resize', updateScrollability);
   }, [gridTerms, updateScrollability]);
+
+  useEffect(() => {
+    const pendingTerm = pendingScrollTermRef.current;
+    if (!pendingTerm) return;
+    pendingScrollTermRef.current = null;
+    const termIndex = gridTerms.findIndex(
+      ({ yearLevel, semesterLabel }) =>
+        yearLevel === pendingTerm.yearLevel && semesterLabel === pendingTerm.semesterLabel,
+    );
+    if (termIndex === -1) return;
+    boardRef.current?.scrollTo({
+      left: Math.max(termIndex * CARD_SCROLL_STEP - CARD_GAP_CENTER_OFFSET, 0),
+      behavior: 'smooth',
+    });
+  }, [gridTerms]);
 
   const handleSidebarTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
     if (event.target !== event.currentTarget || event.propertyName !== 'width') return;
@@ -219,6 +235,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
       toast.negative('이미 추가된 학기예요.');
       return;
     }
+    pendingScrollTermRef.current = { yearLevel, semesterLabel };
     setIsAddSemesterOpen(false);
     toast.success(`${yearLevel}학년 ${semesterLabel}가 추가되었어요.`);
   };
