@@ -18,6 +18,7 @@ import { useBoardEdgeScroll } from '@features/semester-planner/ui/card-view/dnd/
 import { useCardViewDnd } from '@features/semester-planner/ui/card-view/dnd/use-card-view-dnd';
 import { GraduationStatusAccordion } from '@features/semester-planner/ui/card-view/graduation-status-accordion/graduation-status-accordion';
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
+import { PrerequisiteModal } from '@features/semester-planner/ui/card-view/modals/prerequisite-modal';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
 import {
   clearPendingFocusTerm,
@@ -75,7 +76,15 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     renameFolder,
     deleteFolder,
   } = usePlannerTerms();
-  const { activeCourse, overTermId, isLibraryDrag, isDropRejected, contextProps } = useCardViewDnd({
+  const {
+    activeCourse,
+    overTermId,
+    isLibraryDrag,
+    isDropRejected,
+    prerequisiteModal,
+    setPrerequisiteModal,
+    contextProps,
+  } = useCardViewDnd({
     plannedTerms,
     snapshot,
     restoreSnapshot,
@@ -447,6 +456,18 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
         canSubmit={canSubmitAddCourse}
         onSubmit={handleAddCourseSubmit}
       />
+      {prerequisiteModal && (
+        <PrerequisiteModal
+          open
+          onOpenChange={(open) => {
+            if (!open) setPrerequisiteModal(null);
+          }}
+          type={prerequisiteModal.type}
+          courseName={prerequisiteModal.courseName}
+          prerequisiteName={prerequisiteModal.prerequisiteName}
+          onConfirm={prerequisiteModal.onConfirm}
+        />
+      )}
       <CourseFilterModal
         open={filterTab !== null}
         onOpenChange={(open) => {
