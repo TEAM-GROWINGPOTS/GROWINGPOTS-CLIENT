@@ -74,21 +74,19 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
       handleDeleteConfirm,
     } = useCourseRows({ courses, isEditing, departments, divisions, onValidityChange, onDeleteRows });
 
-    const { wrapperRef, isCollapsed, canToggle, collapsedHeight, expanded, handleToggleClick } = useCollapsibleHeight(
-      isEditing,
-      rows.length,
-    );
+    const { wrapperRef, isCollapsed, canToggle, collapsedHeight, naturalHeight, expanded, handleToggleClick } =
+      useCollapsibleHeight(isEditing, rows.length);
 
     useImperativeHandle(ref, () => ({ getCourses: () => rows }), [rows]);
 
     const departmentOptions = [
       ...departments.map(({ departmentId, name }) => ({ value: `${departmentId}`, label: name })).reverse(),
-      { value: '', label: '해당없음' },
+      { value: '', label: NONE_OPTION_LABEL },
     ];
 
     const areaOptions = [
       ...divisions.map(({ id, name }) => ({ value: `${id}`, label: name })).reverse(),
-      { value: '', label: '해당없음' },
+      { value: '', label: NONE_OPTION_LABEL },
     ];
 
     const trimmedAddCourseName = addCourseName.trim();
@@ -188,7 +186,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
           <div
             ref={wrapperRef}
             className={cn('w-full transition-[max-height] duration-300 ease-in-out', isCollapsed && 'overflow-hidden')}
-            style={{ maxHeight: isCollapsed ? collapsedHeight : 10000 }}
+            style={{ maxHeight: isCollapsed ? collapsedHeight : (naturalHeight ?? 10000) }}
           >
             <table className="w-full table-fixed border-separate [border-spacing:0_4px]">
               <caption className="sr-only">과목 정보</caption>

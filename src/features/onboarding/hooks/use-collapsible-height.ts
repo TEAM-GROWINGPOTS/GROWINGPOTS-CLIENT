@@ -9,6 +9,7 @@ export const useCollapsibleHeight = (isEditing: boolean, rowsLength: number) => 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const restOfPageHeightRef = useRef<number | undefined>(undefined);
   const [collapsedHeight, setCollapsedHeight] = useState<number>();
+  const [naturalHeight, setNaturalHeight] = useState<number>();
 
   if (isEditing !== prevIsEditing) {
     setPrevIsEditing(isEditing);
@@ -19,12 +20,15 @@ export const useCollapsibleHeight = (isEditing: boolean, rowsLength: number) => 
   const isCollapsed = canToggle && !expanded;
 
   useLayoutEffect(() => {
-    if (!isCollapsed) return;
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
 
-    const updateCollapsedHeight = () => {
+    const updateHeights = () => {
       const naturalHeight = wrapper.scrollHeight;
+      setNaturalHeight(naturalHeight);
+
+      if (!isCollapsed) return;
+
       const appliedHeight = wrapper.getBoundingClientRect().height;
       const bodyHeight = document.body.scrollHeight;
 
@@ -44,15 +48,15 @@ export const useCollapsibleHeight = (isEditing: boolean, rowsLength: number) => 
       setCollapsedHeight(Math.max(minVisibleHeight, Math.min(naturalHeight, availableHeight)));
     };
 
-    updateCollapsedHeight();
-    window.addEventListener('resize', updateCollapsedHeight);
+    updateHeights();
+    window.addEventListener('resize', updateHeights);
 
-    return () => window.removeEventListener('resize', updateCollapsedHeight);
+    return () => window.removeEventListener('resize', updateHeights);
   }, [isCollapsed, rowsLength]);
 
   const handleToggleClick = () => {
     setExpanded((prev) => !prev);
   };
 
-  return { wrapperRef, isCollapsed, canToggle, collapsedHeight, expanded, handleToggleClick };
+  return { wrapperRef, isCollapsed, canToggle, collapsedHeight, naturalHeight, expanded, handleToggleClick };
 };
