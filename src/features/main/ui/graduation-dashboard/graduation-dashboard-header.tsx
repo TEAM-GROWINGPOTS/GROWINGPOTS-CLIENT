@@ -47,7 +47,8 @@ const getBadgeImageSrc = (certType: CertType, result: GraduationCert['result']) 
   return image.complete;
 };
 
-const getBadgeTooltipContent = (certType: CertType, result: GraduationCert['result'], gpa: number) => {
+const getBadgeTooltipContent = (certType: CertType, result: GraduationCert['result'], currentGpa: number) => {
+  const gpa = Math.trunc((currentGpa + Number.EPSILON) * 100) / 100;
   const label = badgeLabels[certType];
 
   if (certType === 'GPA') return `평점 ${gpa.toFixed(2)}/1.7`;

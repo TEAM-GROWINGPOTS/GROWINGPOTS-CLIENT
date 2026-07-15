@@ -8,8 +8,10 @@ export const useUpdateStudentCourses = () => {
 
   return useMutation({
     mutationFn: updateStudentCourses,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY.STUDENTS.ME_COURSES() });
-    },
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY.STUDENTS.ME_COURSES() }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY.GRADUATION.ALL }),
+      ]),
   });
 };
