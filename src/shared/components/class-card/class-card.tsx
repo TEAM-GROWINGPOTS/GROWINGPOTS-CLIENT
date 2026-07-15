@@ -1,7 +1,6 @@
 'use client';
 
 import { Badge, Tooltip } from '@shared/components';
-import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { cva } from 'class-variance-authority';
 import { type ComponentPropsWithoutRef, useLayoutEffect, useRef, useState } from 'react';
@@ -50,12 +49,9 @@ interface ClassCardProps extends Omit<ComponentPropsWithoutRef<'article'>, 'chil
   tags: string[];
   isEnglish?: boolean;
   isSw?: boolean;
-  retakeDisplay?: 'BADGE' | 'DIMMED';
   type?: ClassCardType;
   size?: ClassCardSize;
 }
-
-const RETAKE_DIMMED_TOOLTIP = '이 과목은 다른 학기에 재수강으로 등록되어 있어요.';
 
 export const ClassCard = ({
   department,
@@ -63,7 +59,6 @@ export const ClassCard = ({
   tags,
   isEnglish = false,
   isSw = false,
-  retakeDisplay,
   type = 'default',
   size = 'default',
   className,
@@ -71,7 +66,6 @@ export const ClassCard = ({
 }: ClassCardProps) => {
   const note = getNote(isEnglish, isSw);
   const visibleTags = tags.filter(Boolean);
-  const isRetakeDimmed = retakeDisplay === 'DIMMED';
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [isTitleTruncated, setIsTitleTruncated] = useState(false);
 
@@ -80,23 +74,20 @@ export const ClassCard = ({
     if (el) setIsTitleTruncated(el.scrollWidth > el.clientWidth);
   }, [title]);
 
-  const card = (
-    <article className={cn(classCardVariants({ type, size }), isRetakeDimmed && 'relative', className)} {...props}>
+  return (
+    <article className={cn(classCardVariants({ type, size }), className)} {...props}>
       {department && !isSw && <span className="text-caption-m-10 mb-2 text-gray-400">{department}</span>}
-      <div className="flex w-full items-center gap-4">
-        {retakeDisplay === 'BADGE' && <Icon name="ic_retry" size={18} className="shrink-0" />}
-        <Tooltip
-          content={title}
-          variant="bottom-start"
-          disabled={!isTitleTruncated}
-          trigger={
-            <h3 ref={titleRef} className="text-body-sb-16 min-w-0 flex-1 cursor-default truncate text-gray-900">
-              {title}
-              {type === 'disabled' && <span className="sr-only">(비활성)</span>}
-            </h3>
-          }
-        />
-      </div>
+      <Tooltip
+        content={title}
+        variant="bottom-start"
+        disabled={!isTitleTruncated}
+        trigger={
+          <h3 ref={titleRef} className="text-body-sb-16 w-full cursor-default truncate text-gray-900">
+            {title}
+            {type === 'disabled' && <span className="sr-only">(비활성)</span>}
+          </h3>
+        }
+      />
       {note && <span className="text-caption-m-10 text-red-20">{note}</span>}
       {visibleTags.length > 0 && (
         <div className={cn('flex flex-wrap items-center gap-4', size === 'max' ? 'mt-auto pt-12' : 'mt-12')}>
@@ -119,13 +110,7 @@ export const ClassCard = ({
           })}
         </div>
       )}
-      {(type === 'disabled' || isRetakeDimmed) && <div className="bg-white-50 absolute inset-0 rounded-[inherit]" />}
+      {type === 'disabled' && <div className="bg-white-50 absolute inset-0 rounded-[inherit]" />}
     </article>
   );
-
-  if (isRetakeDimmed) {
-    return <Tooltip content={RETAKE_DIMMED_TOOLTIP} variant="top-start" size="md" trigger={card} />;
-  }
-
-  return card;
 };
