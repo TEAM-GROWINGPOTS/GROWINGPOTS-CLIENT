@@ -9,10 +9,13 @@ const TERMS_IN_YEAR_ORDER = ['1학기', '여름학기', '2학기', '겨울학기
 
 const DEFAULT_YEARS_TO_SHOW = 8;
 
-export const formatTakenSemester = (takenYear: number, semester: string) =>
-  `${takenYear}-${TERM_SHORT_LABELS[semester] ?? semester}`;
+export const formatTakenSemester = (takenYear: number | null, semester: string | null) => {
+  if (takenYear === null || semester === null) return '';
+  return `${takenYear}-${TERM_SHORT_LABELS[semester] ?? semester}`;
+};
 
-export const getTakenSemesterValue = (takenYear: number, semester: string) => `${takenYear}::${semester}`;
+export const getTakenSemesterValue = (takenYear: number | null, semester: string | null) =>
+  takenYear === null || semester === null ? '' : `${takenYear}::${semester}`;
 
 export const getTakenSemesterOptions = (admissionYear?: number, includeYears: number[] = []) => {
   const currentYear = new Date().getFullYear();

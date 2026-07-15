@@ -23,7 +23,7 @@ const variantStyles: Record<RequirementVariant, RequirementVariantStyle> = {
     label: 'text-gray-50',
     value: 'text-gray-50',
     total: 'text-gray-400',
-    checkIconName: 'ic_check_circle_lime',
+    checkIconName: 'ic_check_circle',
   },
   highlight: {
     card: 'bg-lime-500',

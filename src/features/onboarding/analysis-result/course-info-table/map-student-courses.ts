@@ -31,7 +31,7 @@ export const mapCourseInfoToPutStudentCourses = (
       departmentId: row.departmentId,
       credit: Number(row.credit),
       appliedDivisionId: row.areaId,
-      takenYear: row.takenYear,
+      takenYear: row.takenYear ?? new Date().getFullYear(),
       takenSemester: semesterOption?.code ?? 'FIRST',
     };
   });

@@ -28,8 +28,8 @@ export interface CourseInfo {
   department: string;
   departmentId: number | null;
   credit: string;
-  takenYear: number;
-  semester: string;
+  takenYear: number | null;
+  semester: string | null;
   area: string;
   areaId: number | null;
 }
@@ -95,7 +95,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
 
     const semesterOptions = getTakenSemesterOptions(
       admissionYear,
-      rows.map(({ takenYear }) => takenYear),
+      rows.flatMap(({ takenYear }) => (takenYear === null ? [] : [takenYear])),
     );
 
     const trimmedAddCourseName = addCourseName.trim();

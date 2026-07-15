@@ -7,8 +7,8 @@ export interface StudentCourse {
   credit: number;
   appliedDivisionName: string | null;
   appliedDivisionId: number | null;
-  takenYear: number;
-  takenSemester: string;
+  takenYear: number | null;
+  takenSemester: string | null;
 }
 
 export interface Division {
