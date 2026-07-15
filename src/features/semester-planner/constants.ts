@@ -14,17 +14,7 @@ const SEMESTER_LABEL_BY_NUMBER: Record<number, string> = {
   4: '겨울학기',
 };
 
-const SEMESTER_SORT_ORDER: Record<number, number> = {
-  1: 0,
-  3: 1,
-  2: 2,
-  4: 3,
-};
-
 export const getSemesterLabel = (semester: number): string => SEMESTER_LABEL_BY_NUMBER[semester] ?? `${semester}학기`;
 
 export const getSemesterLabelByCode = (code: string): string | undefined =>
   SEMESTER_LABEL_BY_NUMBER[Number.parseInt(code, 10)];
-
-export const compareSemesters = (a: number, b: number): number =>
-  (SEMESTER_SORT_ORDER[a] ?? a) - (SEMESTER_SORT_ORDER[b] ?? b);

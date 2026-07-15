@@ -1,4 +1,4 @@
-import { compareSemesters, getSemesterLabel } from '@features/semester-planner/constants';
+import { getSemesterLabel } from '@features/semester-planner/constants';
 import type {
   CompletedTermResponse,
   OpenedSemester,
@@ -97,14 +97,11 @@ const toPlannedTerm = (term: PlannedTermResponse): PlannerTerm => {
   };
 };
 
-export const sortPlannerTerms = (terms: PlannerTerm[]): PlannerTerm[] =>
-  [...terms].sort((a, b) => a.yearLevel - b.yearLevel || compareSemesters(a.semester, b.semester));
-
 export const mapCompletedTerms = (completedTerms: PlannerResponse['completedTerms']): PlannerTerm[] =>
-  sortPlannerTerms(completedTerms.map(toCompletedTerm));
+  completedTerms.map(toCompletedTerm);
 
 export const mapPlannedTerms = (plannedTerms: PlannerResponse['plannedTerms']): PlannerTerm[] =>
-  sortPlannerTerms(plannedTerms.map(toPlannedTerm));
+  plannedTerms.map(toPlannedTerm);
 
 export const toPlannerSaveRequest = (plannedTerms: PlannerTerm[]): PlannerSaveRequest => ({
   plannerSimulationId: null,

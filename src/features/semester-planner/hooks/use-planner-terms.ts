@@ -11,7 +11,6 @@ import type {
 import {
   mapCompletedTerms,
   mapPlannedTerms,
-  sortPlannerTerms,
   sortSemesterCourses,
   toPlannerSaveRequest,
 } from '@features/semester-planner/utils/map-planner';
@@ -128,10 +127,7 @@ export const usePlannerTerms = () => {
   const waitForSave = () => lastSavePromiseRef.current;
 
   const completedTerms = useMemo(() => (planner ? mapCompletedTerms(planner.completedTerms) : []), [planner]);
-  const gridTerms = useMemo(
-    () => sortPlannerTerms([...completedTerms, ...plannedTerms]),
-    [completedTerms, plannedTerms],
-  );
+  const gridTerms = useMemo(() => [...completedTerms, ...plannedTerms], [completedTerms, plannedTerms]);
 
   const snapshot = () => {
     snapshotRef.current = plannedTerms;
@@ -175,7 +171,7 @@ export const usePlannerTerms = () => {
 
     createdIdSeqRef.current += 1;
     const folderId = `folder-new-${createdIdSeqRef.current}`;
-    const next = sortPlannerTerms([
+    const next = [
       ...plannedTerms,
       {
         id: `term-new-${createdIdSeqRef.current}`,
@@ -186,7 +182,7 @@ export const usePlannerTerms = () => {
         selectedFolderId: folderId,
         folders: [{ id: folderId, name: `${yearLevel}학년 ${semesterLabel}(1)`, courses: [] }],
       },
-    ]);
+    ];
     commitPlannedTerms(next);
     return true;
   };
