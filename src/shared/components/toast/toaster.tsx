@@ -8,6 +8,7 @@ export const Toaster = () => (
     visibleToasts={1}
     toastOptions={{
       unstyled: true,
+      style: { width: 'fit-content' },
       classNames: {
         toast: 'min-w-380 font-sans',
       },

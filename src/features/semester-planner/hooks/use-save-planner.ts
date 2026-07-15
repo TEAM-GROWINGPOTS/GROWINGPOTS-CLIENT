@@ -24,6 +24,9 @@ export const useSavePlanner = ({ onSaveError }: UseSavePlannerInput = {}) => {
   return useMutation({
     mutationFn: savePlanner,
     onSuccess: (data) => {
+      if (data?.hasDuplicateCourse) {
+        toast.notice('재수강 과목이에요. 기존 이수 학점은 제외되고 현재 학기에 반영돼요.');
+      }
       if (data?.graduation) {
         queryClient.setQueryData(QUERY_KEY.GRADUATION.STATUS({ source: 'PLANNED' }), data.graduation);
         return;

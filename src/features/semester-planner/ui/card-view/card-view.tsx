@@ -256,9 +256,9 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   };
 
   const handleAddFolder = (termId: string) => {
-    const term = addFolder(termId);
-    if (!term) return;
-    toast.success(`${term.yearLevel}학년 ${term.semesterLabel} 폴더가 생성되었어요.`);
+    const folder = addFolder(termId);
+    if (!folder) return;
+    toast.success(`'${folder.name}' 폴더가 생성되었어요.`);
   };
 
   const handleAddSemester = (year: string, semester: string) => {
@@ -332,7 +332,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
                     isDropTarget={overTermId === term.id}
                     onDeleteTerm={() => {
                       removeTerm(term.id);
-                      toast.success(`${term.yearLevel}학년 ${term.semesterLabel} 폴더가 삭제되었어요.`);
+                      toast.success(`${term.yearLevel}학년 ${term.semesterLabel}가 삭제되었어요.`);
                     }}
                     onAddFolder={() => handleAddFolder(term.id)}
                     onSelectFolder={(folderId) => selectFolder(term.id, folderId)}
@@ -340,7 +340,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
                     onDeleteFolder={(folderId) => {
                       const folderName = term.folders.find(({ id }) => id === folderId)?.name ?? '';
                       deleteFolder(term.id, folderId);
-                      toast.success(`${folderName} 폴더가 삭제되었어요.`);
+                      toast.success(`'${folderName}' 폴더가 삭제되었어요.`);
                     }}
                   />
                 ) : (
