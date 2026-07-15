@@ -15,17 +15,21 @@ const getRequirementCourseKey = ({ studentCourseId, departmentName, name }: Requ
   return studentCourseId ?? `${departmentName}-${name}`;
 };
 
-const getRequirementCourseTags = (
-  { area, credit, divisionName, semester }: RequirementCourse,
-  requirementName: string,
-) => {
+const getRequirementCourseTags = ({ credit, divisionName, semester }: RequirementCourse, requirementName: string) => {
   const tags = {
-    area: area ?? (divisionName || requirementName),
+    division: divisionName || requirementName,
     credit: `${credit}학점`,
     semester,
   };
 
-  return [tags.area, tags.credit, tags.semester].filter((tag): tag is string => Boolean(tag));
+  return [tags.division, tags.credit, tags.semester].filter((tag): tag is string => Boolean(tag));
+};
+
+const getRequirementCourseNote = ({ area, divisionCode }: RequirementCourse) => {
+  if (divisionCode !== 'DISTRIBUTED_GE' || !area) return undefined;
+  if (typeof area === 'string') return `*${area}`;
+
+  return `*${area.name}`;
 };
 
 export const RequirementClassList = ({
@@ -44,6 +48,7 @@ export const RequirementClassList = ({
             department={course.departmentName}
             title={course.name}
             tags={getRequirementCourseTags(course, requirementName)}
+            note={getRequirementCourseNote(course)}
             isEnglish={course.isEnglish}
             isSw={course.isSw}
             size="max"
