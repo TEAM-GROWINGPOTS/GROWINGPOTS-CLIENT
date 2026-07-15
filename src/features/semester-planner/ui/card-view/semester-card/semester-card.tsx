@@ -1,5 +1,6 @@
 'use client';
 
+import { getSemesterLabel } from '@features/semester-planner/constants';
 import type { SemesterCardStatus, SemesterCourse, SemesterFolder } from '@features/semester-planner/types/planner';
 import { FolderItemMenu } from '@features/semester-planner/ui/card-view/folder-item-menu/folder-item-menu';
 import { FolderList } from '@features/semester-planner/ui/card-view/folder-list/folder-list';
@@ -123,7 +124,7 @@ export const SemesterCard = ({
   const totalCredit = courses.reduce((sum, { credit }) => sum + credit, 0);
   const isPlanned = status === 'planned';
   const statusIcon = STATUS_ICON[status];
-  const termLabel = `${yearLevel}학년 ${semesterLabel ?? `${semester}학기`}`;
+  const termLabel = `${yearLevel}학년 ${semesterLabel ?? getSemesterLabel(semester)}`;
   const isLastFolder = (folders?.length ?? 0) <= 1;
 
   return (

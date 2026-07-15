@@ -1,6 +1,7 @@
 'use client';
 
 import { DndContext, DragOverlay } from '@dnd-kit/core';
+import { getSemesterLabelByCode } from '@features/semester-planner/constants';
 import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
 import { AddCourseSidebar } from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar';
 import {
@@ -33,11 +34,6 @@ import { cn } from '@shared/utils/cn';
 import { useRouter } from 'next/navigation';
 import { type TransitionEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-
-const SEMESTER_LABEL_MAP: Record<string, string> = {
-  '1': '1학기',
-  '2': '2학기',
-};
 
 const CARD_SCROLL_STEP = 282; // 학기 카드 너비 258 + gap 24
 const CARD_GAP_CENTER_OFFSET = 12; // 카드 앞 gap 24의 중앙에 오도록 남기는 여백
@@ -226,7 +222,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   };
 
   const handleAddSemester = (year: string, semester: string) => {
-    const semesterLabel = SEMESTER_LABEL_MAP[semester];
+    const semesterLabel = getSemesterLabelByCode(semester);
     if (!semesterLabel) return;
     const yearLevel = Number.parseInt(year, 10);
 

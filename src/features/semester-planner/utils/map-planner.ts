@@ -1,3 +1,4 @@
+import { compareSemesters, getSemesterLabel } from '@features/semester-planner/constants';
 import type {
   CompletedTermResponse,
   OpenedSemester,
@@ -65,7 +66,7 @@ const toCompletedTerm = (term: CompletedTermResponse): PlannerTerm => {
     id: `completed-${term.yearLevel}-${term.semester}`,
     yearLevel: term.yearLevel,
     semester: term.semester,
-    semesterLabel: `${term.semester}학기`,
+    semesterLabel: getSemesterLabel(term.semester),
     status: term.status === 'IN_PROGRESS' ? 'current' : 'completed',
     selectedFolderId: folderId,
     folders: [
@@ -89,7 +90,7 @@ const toPlannedTerm = (term: PlannedTermResponse): PlannerTerm => {
     id: String(term.plannerTermId),
     yearLevel: term.yearLevel,
     semester: term.semester,
-    semesterLabel: `${term.semester}학기`,
+    semesterLabel: getSemesterLabel(term.semester),
     status: 'planned',
     selectedFolderId: selectedVersion ? String(selectedVersion.plannerTermVersionId) : undefined,
     folders: orderedVersions.map(toPlannerFolder),
@@ -97,7 +98,7 @@ const toPlannedTerm = (term: PlannedTermResponse): PlannerTerm => {
 };
 
 export const sortPlannerTerms = (terms: PlannerTerm[]): PlannerTerm[] =>
-  [...terms].sort((a, b) => a.yearLevel - b.yearLevel || a.semester - b.semester);
+  [...terms].sort((a, b) => a.yearLevel - b.yearLevel || compareSemesters(a.semester, b.semester));
 
 export const mapCompletedTerms = (completedTerms: PlannerResponse['completedTerms']): PlannerTerm[] =>
   sortPlannerTerms(completedTerms.map(toCompletedTerm));

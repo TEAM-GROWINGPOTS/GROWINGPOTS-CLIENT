@@ -1,3 +1,4 @@
+import { getSemesterLabel } from '@features/semester-planner/constants';
 import type { PlannerFolder, PlannerTerm } from '@features/semester-planner/types/planner';
 import type { PlannerNodeData, SemesterEdgeData } from '@features/semester-planner/types/planner-graph';
 import type { Edge, Node } from '@xyflow/react';
@@ -5,7 +6,7 @@ import type { Edge, Node } from '@xyflow/react';
 const COL_GAP = 370;
 
 function toTermLabel(yearLevel: number, semester: number): string {
-  return `${yearLevel}학년 ${semester}학기`;
+  return `${yearLevel}학년 ${getSemesterLabel(semester)}`;
 }
 
 const getFolderCredit = (folder: PlannerFolder): number => folder.courses.reduce((sum, { credit }) => sum + credit, 0);

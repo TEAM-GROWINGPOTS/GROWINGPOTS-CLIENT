@@ -1,5 +1,6 @@
 'use client';
 
+import { SEMESTER_OPTIONS } from '@features/semester-planner/constants';
 import { Button } from '@shared/components/button/button';
 import { Modal } from '@shared/components/modal/modal';
 import { Select } from '@shared/components/select/select';
@@ -14,11 +15,6 @@ const YEAR_OPTIONS = [
   { value: '6', label: '6학년' },
   { value: '7', label: '7학년' },
   { value: '8', label: '8학년' },
-];
-
-const SEMESTER_OPTIONS = [
-  { value: '1', label: '1학기' },
-  { value: '2', label: '2학기' },
 ];
 
 interface AddSemesterModalProps {
@@ -50,7 +46,7 @@ export const AddSemesterModal = ({ open, onOpenChange, onSubmit }: AddSemesterMo
           <div className="flex h-240 w-416 items-start gap-10">
             <Select options={YEAR_OPTIONS} value={year} onChange={setYear} placeholder="학년" className="flex-1" />
             <Select
-              options={SEMESTER_OPTIONS}
+              options={[...SEMESTER_OPTIONS]}
               value={semester}
               onChange={setSemester}
               placeholder="학기"
