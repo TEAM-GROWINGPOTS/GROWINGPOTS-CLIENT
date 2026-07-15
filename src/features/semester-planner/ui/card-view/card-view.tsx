@@ -15,10 +15,12 @@ import {
 import { DroppableTerm } from '@features/semester-planner/ui/card-view/dnd/droppable-term';
 import { LibraryCourse } from '@features/semester-planner/ui/card-view/dnd/library-course';
 import { TrashDropZone } from '@features/semester-planner/ui/card-view/dnd/trash-drop-zone';
+import { useBoardEdgeScroll } from '@features/semester-planner/ui/card-view/dnd/use-board-edge-scroll';
 import { useCardViewDnd } from '@features/semester-planner/ui/card-view/dnd/use-card-view-dnd';
 import { GraduationStatusAccordion } from '@features/semester-planner/ui/card-view/graduation-status-accordion/graduation-status-accordion';
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
+import { clearPendingFocusTerm, peekPendingFocusTerm } from '@features/semester-planner/utils/pending-focus-term';
 import { parseApiError } from '@shared/apis/parse-api-error';
 import { CourseSearchItemResponse } from '@shared/apis/types/course-search';
 import { toast, Toaster } from '@shared/components';
@@ -36,6 +38,7 @@ import { useRouter } from 'next/navigation';
 import { type TransitionEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+const CARD_WIDTH = 258;
 const CARD_SCROLL_STEP = 282; // 학기 카드 너비 258 + gap 24
 const CARD_GAP_CENTER_OFFSET = 12; // 카드 앞 gap 24의 중앙에 오도록 남기는 여백
 const CARD_BOUNDARY_TOLERANCE = 2;
@@ -96,6 +99,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const [addSemesterButtonTop, setAddSemesterButtonTop] = useState<number | null>(null);
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
   const boardRef = useRef<HTMLElement>(null);
+  const scrollWrapperRef = useRef<HTMLDivElement>(null);
+  const edgeScroll = useBoardEdgeScroll(boardRef, scrollWrapperRef);
   const pendingScrollTermRef = useRef<{ yearLevel: number; semesterLabel: string } | null>(null);
   const [scrollToCourse, setScrollToCourse] = useState<{ termId: string; courseId: string; key: number } | null>(null);
   const router = useRouter();
@@ -164,16 +169,19 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   }, [gridTerms, updateScrollability]);
 
   useEffect(() => {
-    const pendingTerm = pendingScrollTermRef.current;
+    const pendingTerm = peekPendingFocusTerm();
     if (!pendingTerm) return;
-    pendingScrollTermRef.current = null;
     const termIndex = gridTerms.findIndex(
       ({ yearLevel, semesterLabel }) =>
         yearLevel === pendingTerm.yearLevel && semesterLabel === pendingTerm.semesterLabel,
     );
     if (termIndex === -1) return;
-    boardRef.current?.scrollTo({
-      left: Math.max(termIndex * CARD_SCROLL_STEP - CARD_GAP_CENTER_OFFSET, 0),
+    const board = boardRef.current;
+    if (!board) return;
+    clearPendingFocusTerm();
+    const cardCenter = termIndex * CARD_SCROLL_STEP + CARD_WIDTH / 2;
+    board.scrollTo({
+      left: Math.max(cardCenter - board.clientWidth / 2, 0),
       behavior: 'smooth',
     });
   }, [gridTerms]);
@@ -277,7 +285,23 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   if (isPlannerError) return null;
 
   return (
-    <DndContext id="card-view-dnd" {...contextProps}>
+    <DndContext
+      id="card-view-dnd"
+      {...contextProps}
+      autoScroll={false}
+      onDragStart={(event) => {
+        edgeScroll.handleDragStart(event);
+        contextProps.onDragStart(event);
+      }}
+      onDragEnd={(event) => {
+        edgeScroll.stopScroll();
+        contextProps.onDragEnd(event);
+      }}
+      onDragCancel={() => {
+        edgeScroll.stopScroll();
+        contextProps.onDragCancel();
+      }}
+    >
       {/* pt-[100px]: PlannerView가 겹쳐 그리는 ViewModeToggle(top-40, 노드뷰와 동일 위치)과 헤더가 겹치지 않도록 여유를 둔다. */}
       <div className="flex h-full min-w-0 flex-col px-48 pt-[100px] pb-24">
         <header className="flex items-center justify-between">
@@ -290,7 +314,10 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
           />
         </header>
 
-        <div className="mt-20 flex min-h-0 flex-1 [scrollbar-width:none] flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden">
+        <div
+          ref={scrollWrapperRef}
+          className="mt-20 flex min-h-0 flex-1 [scrollbar-width:none] flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden"
+        >
           <GraduationStatusAccordion className="shrink-0" data={graduationData} />
 
           <div className="relative mt-24 min-h-360 flex-1">
@@ -320,8 +347,9 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
                     onSelectFolder={(folderId) => selectFolder(term.id, folderId)}
                     onRenameFolder={(folderId, name) => renameFolder(term.id, folderId, name)}
                     onDeleteFolder={(folderId) => {
+                      const folderName = term.folders.find(({ id }) => id === folderId)?.name ?? '';
                       deleteFolder(term.id, folderId);
-                      toast.success(`${term.yearLevel}학년 ${term.semesterLabel} 폴더가 삭제되었어요.`);
+                      toast.success(`${folderName} 폴더가 삭제되었어요.`);
                     }}
                   />
                 ) : (

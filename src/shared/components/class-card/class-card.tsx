@@ -66,7 +66,8 @@ export const ClassCard = ({
   className,
   ...props
 }: ClassCardProps) => {
-  const note = customNote ?? getNote(isEnglish, isSw);
+  const note = getNote(isEnglish, isSw);
+  const visibleTags = tags.filter(Boolean);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [isTitleTruncated, setIsTitleTruncated] = useState(false);
 
@@ -90,9 +91,9 @@ export const ClassCard = ({
         }
       />
       {note && <span className="text-caption-m-10 text-red-20">{note}</span>}
-      {tags.length > 0 && (
+      {visibleTags.length > 0 && (
         <div className={cn('flex flex-wrap items-center gap-4', size === 'max' ? 'mt-auto pt-12' : 'mt-12')}>
-          {tags.map((tag, index) => {
+          {visibleTags.map((tag, index) => {
             const shouldTruncate = index === 0;
             return (
               <Badge
