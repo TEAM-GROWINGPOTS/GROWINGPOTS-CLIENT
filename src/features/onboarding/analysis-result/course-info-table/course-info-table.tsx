@@ -4,12 +4,16 @@ import { useCollapsibleHeight } from '@features/onboarding/hooks/use-collapsible
 import { useCourseRows } from '@features/onboarding/hooks/use-course-rows';
 import type { Division } from '@features/onboarding/types/course';
 import { getCourseInfoColumns } from '@features/onboarding/utils/get-course-info-columns';
+import { getCourses } from '@shared/apis/get-courses';
+import { QUERY_KEY } from '@shared/apis/query-key';
 import type { DepartmentResponse } from '@shared/apis/types/onboarding-options';
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
 import { AddCourseModal } from '@shared/components/modal/add-course-modal';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
+import { useDebouncedValue } from '@shared/hooks/use-debounced-value';
 import { cn } from '@shared/utils/cn';
+import { useQuery } from '@tanstack/react-query';
 import { forwardRef, useImperativeHandle, useState } from 'react';
 
 import { TableHeader } from './table-header/table-header';
@@ -40,10 +44,18 @@ export interface CourseInfoTableRef {
   getCourses: () => CourseInfo[];
 }
 
+const COURSE_NAME_MATCH_SIZE = 50;
+const NONE_OPTION_LABEL = '해당없음';
+
 export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTableProps>(
   ({ courses, departments, divisions, isEditing = false, onValidityChange, onDeleteRows }, ref) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [addCourseName, setAddCourseName] = useState('');
+    const [addCourseCredit, setAddCourseCredit] = useState('');
+    const [addCourseArea, setAddCourseArea] = useState('');
+    const [addCourseSemester, setAddCourseSemester] = useState('');
+    const [addCourseShowError, setAddCourseShowError] = useState(false);
 
     const {
       rows,
@@ -67,24 +79,77 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
 
     useImperativeHandle(ref, () => ({ getCourses: () => rows }), [rows]);
 
-    const departmentOptions = [...departments.map(({ name }) => name).reverse(), '해당없음'].map((label) => ({
+    const trimmedAddCourseName = addCourseName.trim();
+    const debouncedAddCourseName = useDebouncedValue(trimmedAddCourseName);
+    const { data: searchedCourses = [], isFetching: isSearchingCourses } = useQuery({
+      queryKey: QUERY_KEY.COURSES.SEARCH({ keyword: debouncedAddCourseName, size: COURSE_NAME_MATCH_SIZE }),
+      queryFn: () => getCourses({ keyword: debouncedAddCourseName, size: COURSE_NAME_MATCH_SIZE }),
+      select: (data) => data.courses,
+      enabled: debouncedAddCourseName !== '',
+    });
+    const matchedCourse = searchedCourses.find((course) => course.name === trimmedAddCourseName);
+    const isAddCourseNameValid = matchedCourse !== undefined;
+    const isCourseSearchSettled = debouncedAddCourseName === trimmedAddCourseName && !isSearchingCourses;
+    const courseNameErrorMessage =
+      addCourseShowError && trimmedAddCourseName !== '' && isCourseSearchSettled && !isAddCourseNameValid
+        ? '* 일치하는 과목명이 없습니다. 다시 확인해 주세요.'
+        : undefined;
+    const canSubmitAddCourse =
+      isAddCourseNameValid && addCourseCredit !== '' && addCourseArea !== '' && addCourseSemester !== '';
+
+    const departmentOptions = [...departments.map(({ name }) => name).reverse(), NONE_OPTION_LABEL].map((label) => ({
       value: label,
       label,
     }));
 
-    const areaOptions = [...divisions.map(({ name }) => name).reverse(), '해당없음'].map((label) => ({
+    const areaOptions = [...divisions.map(({ name }) => name).reverse(), NONE_OPTION_LABEL].map((label) => ({
       value: label,
       label,
     }));
 
     const columns = getCourseInfoColumns(departmentOptions, areaOptions);
 
-    const handleDeleteClick = () => {
-      setIsDeleteModalOpen(true);
+    const resetAddCourseForm = () => {
+      setAddCourseName('');
+      setAddCourseCredit('');
+      setAddCourseArea('');
+      setAddCourseSemester('');
+      setAddCourseShowError(false);
+    };
+
+    const handleAddModalOpenChange = (nextOpen: boolean) => {
+      setIsAddModalOpen(nextOpen);
+      if (!nextOpen) resetAddCourseForm();
     };
 
     const handleAddClick = () => {
       setIsAddModalOpen(true);
+    };
+
+    const handleAddCourseNameChange = (value: string) => {
+      setAddCourseName(value);
+      setAddCourseShowError(false);
+    };
+
+    const handleAddCourseNameBlur = () => {
+      setAddCourseShowError(trimmedAddCourseName !== '');
+    };
+
+    const handleAddCourseConfirm = () => {
+      if (!canSubmitAddCourse || !matchedCourse) return;
+
+      handleAddCourseSubmit({
+        courseId: matchedCourse.courseId,
+        courseName: trimmedAddCourseName,
+        credit: addCourseCredit,
+        area: addCourseArea,
+        semester: addCourseSemester,
+      });
+      handleAddModalOpenChange(false);
+    };
+
+    const handleDeleteClick = () => {
+      setIsDeleteModalOpen(true);
     };
 
     const handleDeleteConfirmClick = () => {
@@ -167,7 +232,22 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
           description="삭제한 과목은 복구할 수 없어요."
           onConfirm={handleDeleteConfirmClick}
         />
-        <AddCourseModal open={isAddModalOpen} onOpenChange={setIsAddModalOpen} onSubmit={handleAddCourseSubmit} />
+        <AddCourseModal
+          open={isAddModalOpen}
+          onOpenChange={handleAddModalOpenChange}
+          courseName={addCourseName}
+          onCourseNameChange={handleAddCourseNameChange}
+          onCourseNameBlur={handleAddCourseNameBlur}
+          courseNameErrorMessage={courseNameErrorMessage}
+          credit={addCourseCredit}
+          onCreditChange={setAddCourseCredit}
+          area={addCourseArea}
+          onAreaChange={setAddCourseArea}
+          semester={addCourseSemester}
+          onSemesterChange={setAddCourseSemester}
+          canSubmit={canSubmitAddCourse}
+          onSubmit={handleAddCourseConfirm}
+        />
       </section>
     );
   },

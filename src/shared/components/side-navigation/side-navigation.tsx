@@ -1,8 +1,7 @@
 'use client';
 
-import { Modal } from '@shared/components';
-import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
+import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { NavItem } from '@shared/components/nav-item/nav-item';
 import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
@@ -23,7 +22,7 @@ interface SideNavigationProps {
 
 const FALLBACK_ACADEMIC_INFO: SideNavigationAcademicInfoItem[] = [
   { label: '학교', value: '' },
-  { label: '소속학부', value: '' },
+  { label: '소속학과', value: '' },
   { label: '학번', value: '' },
   { label: '학년', value: '' },
 ];
@@ -50,11 +49,12 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
   const router = useRouter();
   const pathname = usePathname();
   const { data: studentProfile } = useStudentProfile();
-
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const isCollapsed = useSideNavigationStore((state) => state.isCollapsed);
   const isInitialized = useSideNavigationStore((state) => state.isInitialized);
+  const initializeCollapsed = useSideNavigationStore((state) => state.initializeCollapsed);
+  const toggleSidebar = useSideNavigationStore((state) => state.toggleSidebar);
   const isSidebarCollapsed = isInitialized ? isCollapsed : initialIsCollapsed;
 
   const resolvedAcademicInfo =
@@ -62,16 +62,13 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
     (studentProfile
       ? [
           { label: '학교', value: studentProfile.schoolName },
-          { label: '소속학부', value: studentProfile.departmentName },
+          { label: '소속학과', value: studentProfile.departmentName },
           { label: '학번', value: studentProfile.studentNo },
           { label: '학년', value: `${studentProfile.gradeLevel}학년 ${studentProfile.semester}학기` },
         ]
       : FALLBACK_ACADEMIC_INFO);
 
   const gradeIconSrc = GRADE_ICON_BY_YEAR[studentProfile?.gradeLevel ?? 1] ?? GRADE_ICON_BY_YEAR[1];
-
-  const initializeCollapsed = useSideNavigationStore((state) => state.initializeCollapsed);
-  const toggleSidebar = useSideNavigationStore((state) => state.toggleSidebar);
 
   useEffect(() => {
     initializeCollapsed(initialIsCollapsed);
@@ -85,8 +82,12 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
     toggleSidebar();
   };
 
-  const handleReuploadClick = () => {
-    router.push('/onboarding?step=pdf');
+  const handleAnalysisResultClick = () => {
+    router.push('/analysis-result');
+  };
+
+  const handleLogoutClick = () => {
+    setIsLogoutModalOpen(true);
   };
 
   const handleLogoutConfirm = () => {
@@ -110,7 +111,7 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
                 isSidebarCollapsed ? 'pointer-events-none opacity-0' : 'opacity-100',
               )}
             >
-              <img src="/images/logo.svg" alt="Growing Pots" width={119} height={20} />
+              <Image src="/images/logo.svg" alt="Growing Pots" width={119} height={20} />
             </div>
 
             <button
@@ -120,7 +121,7 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
               className="absolute right-24 flex h-24 w-24 cursor-pointer items-center justify-center rounded-lg transition-all duration-300 ease-in-out"
               onClick={handleToggleClick}
             >
-              <Icon name={'ic_left_panel'} size={20} className="text-gray-500" />
+              <Icon name="ic_left_panel" size={20} className="text-gray-500" />
             </button>
           </header>
 
@@ -151,7 +152,7 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
             <div className="flex flex-col gap-8 overflow-hidden">
               <button
                 type="button"
-                onClick={handleReuploadClick}
+                onClick={handleAnalysisResultClick}
                 className="flex cursor-pointer items-center justify-center gap-4 rounded bg-gray-800 px-12 py-6"
               >
                 <span className="text-body-m-14 text-gray-300">졸업사정관리표</span>
@@ -184,10 +185,10 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
                   {studentProfile?.name ?? ''}
                 </p>
                 <button
-                  onClick={() => setIsLogoutModalOpen(true)}
                   type="button"
                   aria-label="로그아웃"
                   className="flex shrink-0 cursor-pointer"
+                  onClick={handleLogoutClick}
                 >
                   <Icon name="ic_logout" size={24} className="text-gray-500" />
                 </button>
@@ -197,21 +198,13 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
         </footer>
       </aside>
 
-      <Modal open={isLogoutModalOpen} onOpenChange={setIsLogoutModalOpen}>
-        <Modal.Content className="flex w-440 flex-col items-center gap-40">
-          <Modal.Title className="text-title-sb-18 w-full text-center">정말 로그아웃 하시겠어요?</Modal.Title>
-          <Modal.Footer className="w-full">
-            <Button
-              label="취소"
-              mode="secondary_solid"
-              size="lg"
-              className="flex-1 justify-center"
-              onClick={() => setIsLogoutModalOpen(false)}
-            />
-            <Button label="확인" size="lg" className="flex-1 justify-center" onClick={handleLogoutConfirm} />
-          </Modal.Footer>
-        </Modal.Content>
-      </Modal>
+      <ConfirmModal
+        open={isLogoutModalOpen}
+        onOpenChange={setIsLogoutModalOpen}
+        type="logout"
+        title="정말 로그아웃 하시겠어요?"
+        onConfirm={handleLogoutConfirm}
+      />
     </>
   );
 };
