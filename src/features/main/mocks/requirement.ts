@@ -8,6 +8,7 @@ export const requirementData: GraduationResponse = {
     enrollmentStatus: '재학',
   },
   graduatable: false,
+  curriculumSatisfied: false,
   conditions: null,
   graduationRequired: null,
   sections: {

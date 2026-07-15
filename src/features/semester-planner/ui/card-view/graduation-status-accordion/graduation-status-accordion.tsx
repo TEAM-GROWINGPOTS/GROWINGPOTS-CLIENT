@@ -45,7 +45,7 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
 
   if (!data || !data.sections) return null;
 
-  const { summary, graduatable, sections } = data;
+  const { summary, curriculumSatisfied, sections } = data;
   const { majors, ge, others } = sections;
   const { totalCredits } = summary;
 
@@ -85,8 +85,6 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
   const otherCredit = others.conditions.reduce((sum, { current }) => sum + current, 0);
 
   const toPercent = (current: number) => calculatePercentage(current, totalCredits.required);
-
-  const shortfallCredit = Math.max(totalCredits.required - totalCredits.current, 0);
 
   const handleChipKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
@@ -128,12 +126,14 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
                   size="md"
                 />
               </div>
-              {graduatable ? (
+              {curriculumSatisfied ? (
                 <Badge size="xsmall" color="lime01">
-                  졸업 요건 충족
+                  충족
                 </Badge>
               ) : (
-                <Badge size="xsmall" color="red">{`${shortfallCredit}학점 부족`}</Badge>
+                <Badge size="xsmall" color="red">
+                  미충족
+                </Badge>
               )}
             </div>
             <Icon

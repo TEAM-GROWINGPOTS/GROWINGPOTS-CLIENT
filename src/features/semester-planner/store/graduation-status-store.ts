@@ -13,6 +13,7 @@ const MOCK_DATA: GraduationResponse = {
     enrollmentStatus: '재학',
   },
   graduatable: false,
+  curriculumSatisfied: false,
   conditions: null,
   graduationRequired: null,
   sections: {
