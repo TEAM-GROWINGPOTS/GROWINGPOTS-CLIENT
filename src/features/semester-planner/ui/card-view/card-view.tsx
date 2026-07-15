@@ -258,76 +258,81 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
           />
         </header>
 
-        <GraduationStatusAccordion className="mt-20" data={graduationData} />
+        <div className="mt-20 flex min-h-0 flex-1 [scrollbar-width:none] flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden">
+          <GraduationStatusAccordion className="shrink-0" data={graduationData} />
 
-        <div className="relative mt-24 min-h-0 flex-1">
-          <section
-            ref={boardRef}
-            onScroll={updateScrollability}
-            className="flex h-full [scrollbar-width:none] items-start gap-24 overflow-x-auto pb-20 [&::-webkit-scrollbar]:hidden"
-          >
-            {gridTerms.map((term, index) => {
-              const cardRef = index === gridTerms.length - 1 ? handleLastCardRef : undefined;
-              return term.status === 'planned' ? (
-                <DroppableTerm
-                  key={term.id}
-                  term={term}
-                  cardRef={cardRef}
-                  isDropTarget={overTermId === term.id}
-                  onDeleteTerm={() => {
-                    removeTerm(term.id);
-                    toast.success(`${term.yearLevel}학년 ${term.semesterLabel} 폴더가 삭제되었어요.`);
-                  }}
-                  onAddFolder={() => handleAddFolder(term.id)}
-                  onSelectFolder={(folderId) => selectFolder(term.id, folderId)}
-                  onRenameFolder={(folderId, name) => renameFolder(term.id, folderId, name)}
-                  onDeleteFolder={(folderId) => {
-                    deleteFolder(term.id, folderId);
-                    toast.success(`${term.yearLevel}학년 ${term.semesterLabel} 폴더가 삭제되었어요.`);
-                  }}
-                />
-              ) : (
-                <SemesterCard
-                  key={term.id}
-                  ref={cardRef}
-                  className="max-h-full"
-                  yearLevel={term.yearLevel}
-                  semester={term.semester}
-                  semesterLabel={term.semesterLabel}
-                  status={term.status}
-                  folderName={getFolderName(term)}
-                  courses={getSelectedCourses(term)}
-                />
-              );
-            })}
-            <IconButton
-              icon="ic_plus"
-              aria-label="학기 추가"
-              size="medium"
-              className={cn('shrink-0', addSemesterButtonTop === null ? 'self-center' : '-translate-y-1/2 self-start')}
-              style={addSemesterButtonTop === null ? undefined : { marginTop: addSemesterButtonTop }}
-              onClick={() => setIsAddSemesterOpen(true)}
-            />
-          </section>
-          {canScrollLeft && (
-            <IconButton
-              icon="ic_chevron_left"
-              aria-label="이전 학기 보기"
-              size="medium"
-              className="absolute top-1/2 left-0 -translate-y-1/2"
-              onClick={handleScrollLeftClick}
-            />
-          )}
-          {canScrollRight && (
-            <IconButton
-              icon="ic_chevron_right"
-              aria-label="다음 학기 보기"
-              size="medium"
-              className="absolute top-1/2 right-0 -translate-y-1/2"
-              onClick={handleScrollRightClick}
-            />
-          )}
-          {activeCourse && !isLibraryDrag && <TrashDropZone />}
+          <div className="relative mt-24 min-h-360 flex-1">
+            <section
+              ref={boardRef}
+              onScroll={updateScrollability}
+              className="flex h-full [scrollbar-width:none] items-start gap-24 overflow-x-auto pb-20 [&::-webkit-scrollbar]:hidden"
+            >
+              {gridTerms.map((term, index) => {
+                const cardRef = index === gridTerms.length - 1 ? handleLastCardRef : undefined;
+                return term.status === 'planned' ? (
+                  <DroppableTerm
+                    key={term.id}
+                    term={term}
+                    cardRef={cardRef}
+                    isDropTarget={overTermId === term.id}
+                    onDeleteTerm={() => {
+                      removeTerm(term.id);
+                      toast.success(`${term.yearLevel}학년 ${term.semesterLabel} 폴더가 삭제되었어요.`);
+                    }}
+                    onAddFolder={() => handleAddFolder(term.id)}
+                    onSelectFolder={(folderId) => selectFolder(term.id, folderId)}
+                    onRenameFolder={(folderId, name) => renameFolder(term.id, folderId, name)}
+                    onDeleteFolder={(folderId) => {
+                      deleteFolder(term.id, folderId);
+                      toast.success(`${term.yearLevel}학년 ${term.semesterLabel} 폴더가 삭제되었어요.`);
+                    }}
+                  />
+                ) : (
+                  <SemesterCard
+                    key={term.id}
+                    ref={cardRef}
+                    className="max-h-full"
+                    yearLevel={term.yearLevel}
+                    semester={term.semester}
+                    semesterLabel={term.semesterLabel}
+                    status={term.status}
+                    folderName={getFolderName(term)}
+                    courses={getSelectedCourses(term)}
+                  />
+                );
+              })}
+              <IconButton
+                icon="ic_plus"
+                aria-label="학기 추가"
+                size="medium"
+                className={cn(
+                  'shrink-0',
+                  addSemesterButtonTop === null ? 'self-center' : '-translate-y-1/2 self-start',
+                )}
+                style={addSemesterButtonTop === null ? undefined : { marginTop: addSemesterButtonTop }}
+                onClick={() => setIsAddSemesterOpen(true)}
+              />
+            </section>
+            {canScrollLeft && (
+              <IconButton
+                icon="ic_chevron_left"
+                aria-label="이전 학기 보기"
+                size="medium"
+                className="absolute top-1/2 left-0 -translate-y-1/2"
+                onClick={handleScrollLeftClick}
+              />
+            )}
+            {canScrollRight && (
+              <IconButton
+                icon="ic_chevron_right"
+                aria-label="다음 학기 보기"
+                size="medium"
+                className="absolute top-1/2 right-0 -translate-y-1/2"
+                onClick={handleScrollRightClick}
+              />
+            )}
+            {activeCourse && !isLibraryDrag && <TrashDropZone />}
+          </div>
         </div>
       </div>
 
