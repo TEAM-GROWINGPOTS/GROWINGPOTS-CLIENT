@@ -14,6 +14,7 @@ import {
 import { DroppableTerm } from '@features/semester-planner/ui/card-view/dnd/droppable-term';
 import { LibraryCourse } from '@features/semester-planner/ui/card-view/dnd/library-course';
 import { TrashDropZone } from '@features/semester-planner/ui/card-view/dnd/trash-drop-zone';
+import { useBoardEdgeScroll } from '@features/semester-planner/ui/card-view/dnd/use-board-edge-scroll';
 import { useCardViewDnd } from '@features/semester-planner/ui/card-view/dnd/use-card-view-dnd';
 import { GraduationStatusAccordion } from '@features/semester-planner/ui/card-view/graduation-status-accordion/graduation-status-accordion';
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
@@ -101,6 +102,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const [addSemesterButtonTop, setAddSemesterButtonTop] = useState<number | null>(null);
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
   const boardRef = useRef<HTMLElement>(null);
+  const edgeScroll = useBoardEdgeScroll(boardRef);
   const pendingScrollTermRef = useRef<{ yearLevel: number; semesterLabel: string } | null>(null);
   const router = useRouter();
 
@@ -245,7 +247,23 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   if (isPlannerError) return null;
 
   return (
-    <DndContext id="card-view-dnd" {...contextProps}>
+    <DndContext
+      id="card-view-dnd"
+      {...contextProps}
+      autoScroll={{ canScroll: (element) => element !== boardRef.current }}
+      onDragStart={(event) => {
+        edgeScroll.handleDragStart(event);
+        contextProps.onDragStart(event);
+      }}
+      onDragEnd={(event) => {
+        edgeScroll.stopScroll();
+        contextProps.onDragEnd(event);
+      }}
+      onDragCancel={() => {
+        edgeScroll.stopScroll();
+        contextProps.onDragCancel();
+      }}
+    >
       {/* pt-[100px]: PlannerView가 겹쳐 그리는 ViewModeToggle(top-40, 노드뷰와 동일 위치)과 헤더가 겹치지 않도록 여유를 둔다. */}
       <div className="flex h-full min-w-0 flex-col px-48 pt-[100px] pb-24">
         <header className="flex items-center justify-between">
