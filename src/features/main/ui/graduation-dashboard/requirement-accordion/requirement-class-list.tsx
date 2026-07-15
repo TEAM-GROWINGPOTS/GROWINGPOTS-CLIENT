@@ -27,7 +27,6 @@ const getRequirementCourseTags = ({ credit, divisionName, semester }: Requiremen
 
 const getRequirementCourseNote = ({ area, divisionCode }: RequirementCourse) => {
   if (divisionCode !== 'DISTRIBUTED_GE' || !area) return undefined;
-  if (typeof area === 'string') return `*${area}`;
 
   return `*${area.name}`;
 };
