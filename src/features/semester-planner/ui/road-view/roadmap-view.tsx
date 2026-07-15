@@ -590,7 +590,7 @@ export const RoadmapView = () => {
   const handleDeleteFolder = useCallback(
     (termId: string, folderId: string, folderName: string) => {
       const { isTermRemoved, promotedFolderId } = deleteFolder(termId, folderId);
-      toast.success(`${folderName} 폴더가 삭제되었어요.`);
+      toast.success(`'${folderName}' 폴더가 삭제되었어요.`);
 
       // 학기 자체가 사라지는 경우(컬럼 재배치 필요)는 buildPlannerGraph가 다시 지은 그래프를 신뢰한다.
       if (isTermRemoved) {
@@ -725,7 +725,7 @@ export const RoadmapView = () => {
                 className="-mt-32 h-400 w-400"
               />
               {/* 로띠 애니메이션 자체에 하단 여백이 많아 인접 배치만으로는 텍스트와 멀어 보여 음수 마진으로 당긴다. */}
-              <p className="text-title-sb-24 animate-text-rise -mt-48 text-gray-700">졸업 요건을 충족했어요!</p>
+              <p className="text-title-sb-24 animate-text-rise -mt-48 text-gray-700">졸업 학점 요건을 충족했어요!</p>
             </div>
           )}
         </div>
