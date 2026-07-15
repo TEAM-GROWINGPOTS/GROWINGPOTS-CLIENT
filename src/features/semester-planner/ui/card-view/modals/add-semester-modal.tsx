@@ -18,7 +18,9 @@ const YEAR_OPTIONS = [
 
 const SEMESTER_OPTIONS = [
   { value: '1', label: '1학기' },
+  { value: '3', label: '여름학기' },
   { value: '2', label: '2학기' },
+  { value: '4', label: '겨울학기' },
 ];
 
 interface AddSemesterModalProps {
