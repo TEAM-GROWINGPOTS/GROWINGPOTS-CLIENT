@@ -1,5 +1,6 @@
 'use client';
 
+import { getLatestCompletedOrCurrentTerm, isPastPlannerTerm } from '@features/semester-planner/constants';
 import { usePlanner } from '@features/semester-planner/hooks/use-planner';
 import { useSavePlanner } from '@features/semester-planner/hooks/use-save-planner';
 import type {
@@ -64,6 +65,8 @@ interface AddTermInput {
   semester: number;
   semesterLabel: string;
 }
+
+export type AddTermResult = 'added' | 'duplicate' | 'past';
 
 export interface DeleteFolderResult {
   /** 삭제된 폴더가 그 학기의 마지막 폴더여서, 학기(컬럼) 자체가 통째로 사라졌는지 */
@@ -163,11 +166,16 @@ export const usePlannerTerms = () => {
     commitPlannedTerms(next);
   };
 
-  const addTerm = ({ yearLevel, semester, semesterLabel }: AddTermInput): boolean => {
+  const addTerm = ({ yearLevel, semester, semesterLabel }: AddTermInput): AddTermResult => {
     const isDuplicate = [...completedTerms, ...plannedTerms].some(
       (term) => term.yearLevel === yearLevel && term.semesterLabel === semesterLabel,
     );
-    if (isDuplicate) return false;
+    if (isDuplicate) return 'duplicate';
+
+    const latestCompletedOrCurrentTerm = getLatestCompletedOrCurrentTerm(completedTerms);
+    if (latestCompletedOrCurrentTerm && isPastPlannerTerm({ yearLevel, semester }, latestCompletedOrCurrentTerm)) {
+      return 'past';
+    }
 
     createdIdSeqRef.current += 1;
     const folderId = `folder-new-${createdIdSeqRef.current}`;
@@ -184,7 +192,7 @@ export const usePlannerTerms = () => {
       },
     ];
     commitPlannedTerms(next);
-    return true;
+    return 'added';
   };
 
   const removeTerm = (termId: string) => {

@@ -637,9 +637,13 @@ export const RoadmapView = () => {
       if (!semesterLabel) return;
       const yearLevel = Number.parseInt(year, 10);
 
-      const added = addTerm({ yearLevel, semester: Number(semester), semesterLabel });
-      if (!added) {
+      const result = addTerm({ yearLevel, semester: Number(semester), semesterLabel });
+      if (result === 'duplicate') {
         toast.negative('이미 추가된 학기예요.');
+        return;
+      }
+      if (result === 'past') {
+        toast.negative('지난 학기는 추가할 수 없어요.');
         return;
       }
       setIsAddSemesterModalOpen(false);
