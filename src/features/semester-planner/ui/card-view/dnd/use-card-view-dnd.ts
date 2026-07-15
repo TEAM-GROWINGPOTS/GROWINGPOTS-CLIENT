@@ -8,6 +8,7 @@ import {
   pointerWithin,
   type UniqueIdentifier,
 } from '@dnd-kit/core';
+import { checkPrerequisite } from '@features/semester-planner/apis/check-prerequisite';
 import { getSelectedCourses } from '@features/semester-planner/hooks/use-planner-terms';
 import type { PlannerTerm, SemesterCourse } from '@features/semester-planner/types/planner';
 import { detectCoverageCollision, DWELL_MS } from '@features/semester-planner/ui/card-view/dnd/collision';
@@ -44,6 +45,12 @@ export const useCardViewDnd = ({
   const [overTermId, setOverTermId] = useState<string | null>(null);
   const [isLibraryDrag, setIsLibraryDrag] = useState(false);
   const [isDropRejected, setIsDropRejected] = useState(false);
+  const [prerequisiteModal, setPrerequisiteModal] = useState<{
+    type: 'REQUIRED' | 'RECOMMENDED';
+    courseName: string;
+    prerequisiteName: string;
+    onConfirm: () => void;
+  } | null>(null);
   const copyCountRef = useRef(0);
   const lastOverIdRef = useRef<string | null>(null);
   const dwellRef = useRef<{ container: string; timer: ReturnType<typeof setTimeout> } | null>(null);
@@ -134,7 +141,7 @@ export const useCardViewDnd = ({
     dwellRef.current = { container: overContainer, timer };
   };
 
-  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+  const handleDragEnd = async ({ active, over }: DragEndEvent) => {
     clearDwell();
     lastOverIdRef.current = null;
     setActiveCourse(null);
@@ -169,8 +176,32 @@ export const useCardViewDnd = ({
     if (activeContainer === LIBRARY_ID) {
       const course = active.data.current?.course as SemesterCourse | undefined;
       if (!course) return;
+
       copyCountRef.current += 1;
       const copy = { ...course, id: `${course.id.replace(LIBRARY_PREFIX, 'course-')}-copy-${copyCountRef.current}` };
+      const termId = overContainer;
+
+      try {
+        const result = await checkPrerequisite([course.courseId]);
+        const missing = result.results[0]?.missingPrerequisites ?? [];
+
+        if (missing.length === 0) {
+          insertCourse(termId, copy);
+          return;
+        }
+
+        const hasRequired = missing.some((p) => p.type === 'REQUIRED');
+        const firstMissing = missing.find((p) => p.type === (hasRequired ? 'REQUIRED' : 'RECOMMENDED'))!;
+
+        setPrerequisiteModal({
+          type: hasRequired ? 'REQUIRED' : 'RECOMMENDED',
+          courseName: course.name,
+          prerequisiteName: firstMissing.name,
+          onConfirm: hasRequired ? () => {} : () => insertCourse(termId, copy),
+        });
+      } catch {
+        insertCourse(termId, copy);
+      }
       insertCourse(overContainer, copy);
       onCourseInserted?.(overContainer, copy.id);
       return;
@@ -186,6 +217,8 @@ export const useCardViewDnd = ({
     overTermId,
     isLibraryDrag,
     isDropRejected,
+    prerequisiteModal,
+    setPrerequisiteModal,
     contextProps: {
       collisionDetection,
       onDragStart: handleDragStart,

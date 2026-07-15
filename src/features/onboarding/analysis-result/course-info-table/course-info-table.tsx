@@ -4,6 +4,7 @@ import { useCollapsibleHeight } from '@features/onboarding/hooks/use-collapsible
 import { useCourseRows } from '@features/onboarding/hooks/use-course-rows';
 import type { Division } from '@features/onboarding/types/course';
 import { getCourseInfoColumns } from '@features/onboarding/utils/get-course-info-columns';
+import { isCourseRowInvalid } from '@features/onboarding/utils/is-course-row-invalid';
 import { getCourses } from '@shared/apis/get-courses';
 import { QUERY_KEY } from '@shared/apis/query-key';
 import type { DepartmentResponse } from '@shared/apis/types/onboarding-options';
@@ -13,6 +14,7 @@ import { AddCourseModal } from '@shared/components/modal/add-course-modal';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { useDebouncedValue } from '@shared/hooks/use-debounced-value';
 import { cn } from '@shared/utils/cn';
+import { getTakenSemesterOptions, parseTakenSemesterValue } from '@shared/utils/taken-semester-format';
 import { useQuery } from '@tanstack/react-query';
 import { forwardRef, useImperativeHandle, useState } from 'react';
 
@@ -26,7 +28,8 @@ export interface CourseInfo {
   department: string;
   departmentId: number | null;
   credit: string;
-  semester: string;
+  takenYear: number | null;
+  semester: string | null;
   area: string;
   areaId: number | null;
 }
@@ -35,6 +38,7 @@ interface CourseInfoTableProps {
   courses: CourseInfo[];
   departments: DepartmentResponse[];
   divisions: Division[];
+  admissionYear?: number;
   isEditing?: boolean;
   onValidityChange?: (isValid: boolean) => void;
   onDeleteRows?: (remainingCourses: CourseInfo[]) => void;
@@ -48,7 +52,7 @@ const COURSE_NAME_MATCH_SIZE = 50;
 const NONE_OPTION_LABEL = '해당없음';
 
 export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTableProps>(
-  ({ courses, departments, divisions, isEditing = false, onValidityChange, onDeleteRows }, ref) => {
+  ({ courses, departments, divisions, admissionYear, isEditing = false, onValidityChange, onDeleteRows }, ref) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [addCourseName, setAddCourseName] = useState('');
@@ -61,23 +65,38 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
       rows,
       selectedIds,
       isAllSelected,
+      hasInvalidRow,
       openCellKey,
       setOpenCellKey,
       handleCellChange,
       handleDepartmentChange,
       handleAreaChange,
+      handleSemesterChange,
       handleSelectAllClick,
       handleRowSelectClick,
       handleAddCourseSubmit,
       handleDeleteConfirm,
     } = useCourseRows({ courses, isEditing, departments, divisions, onValidityChange, onDeleteRows });
 
-    const { wrapperRef, isCollapsed, canToggle, collapsedHeight, expanded, handleToggleClick } = useCollapsibleHeight(
-      isEditing,
-      rows.length,
-    );
+    const { wrapperRef, isCollapsed, canToggle, collapsedHeight, naturalHeight, expanded, handleToggleClick } =
+      useCollapsibleHeight(isEditing, rows.length);
 
     useImperativeHandle(ref, () => ({ getCourses: () => rows }), [rows]);
+
+    const departmentOptions = [
+      ...departments.map(({ departmentId, name }) => ({ value: `${departmentId}`, label: name })).reverse(),
+      { value: '', label: NONE_OPTION_LABEL },
+    ];
+
+    const areaOptions = [
+      ...divisions.map(({ id, name }) => ({ value: `${id}`, label: name })).reverse(),
+      { value: '', label: NONE_OPTION_LABEL },
+    ];
+
+    const semesterOptions = getTakenSemesterOptions(
+      admissionYear,
+      rows.flatMap(({ takenYear }) => (takenYear === null ? [] : [takenYear])),
+    );
 
     const trimmedAddCourseName = addCourseName.trim();
     const debouncedAddCourseName = useDebouncedValue(trimmedAddCourseName);
@@ -97,17 +116,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
     const canSubmitAddCourse =
       isAddCourseNameValid && addCourseCredit !== '' && addCourseArea !== '' && addCourseSemester !== '';
 
-    const departmentOptions = [...departments.map(({ name }) => name).reverse(), NONE_OPTION_LABEL].map((label) => ({
-      value: label,
-      label,
-    }));
-
-    const areaOptions = [...divisions.map(({ name }) => name).reverse(), NONE_OPTION_LABEL].map((label) => ({
-      value: label,
-      label,
-    }));
-
-    const columns = getCourseInfoColumns(departmentOptions, areaOptions);
+    const columns = getCourseInfoColumns(departmentOptions, areaOptions, semesterOptions);
 
     const resetAddCourseForm = () => {
       setAddCourseName('');
@@ -136,14 +145,16 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
     };
 
     const handleAddCourseConfirm = () => {
-      if (!canSubmitAddCourse || !matchedCourse) return;
+      const parsedSemester = parseTakenSemesterValue(addCourseSemester);
+      if (!canSubmitAddCourse || !matchedCourse || !parsedSemester) return;
 
       handleAddCourseSubmit({
         courseId: matchedCourse.courseId,
         courseName: trimmedAddCourseName,
-        credit: addCourseCredit,
+        credit: addCourseCredit.endsWith('.') ? addCourseCredit.slice(0, -1) : addCourseCredit,
         area: addCourseArea,
-        semester: addCourseSemester,
+        takenYear: parsedSemester.takenYear,
+        semester: parsedSemester.semester,
       });
       handleAddModalOpenChange(false);
     };
@@ -158,9 +169,16 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
     };
 
     return (
-      <section className="flex flex-col gap-18 rounded-lg bg-white px-24 py-20">
+      <section className="flex flex-col gap-18">
         <div className="flex h-32 w-full items-center justify-between">
-          <p className="text-body-sb-16 text-gray-600">과목정보</p>
+          <div className="flex items-center gap-8">
+            <p className="text-body-sb-16 text-gray-600">과목정보</p>
+            {hasInvalidRow && (
+              <p className="text-body-r-14 text-red-20">
+                * 확인이 필요한 정보가 있어요. 빨간색으로 표시된 항목을 수정해 주세요.
+              </p>
+            )}
+          </div>
           {isEditing && (
             <div className="flex items-center gap-12">
               <Button label="과목추가" mode="secondary_outline" size="sm" onClick={handleAddClick} />
@@ -179,7 +197,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
           <div
             ref={wrapperRef}
             className={cn('w-full transition-[max-height] duration-300 ease-in-out', isCollapsed && 'overflow-hidden')}
-            style={{ maxHeight: isCollapsed ? collapsedHeight : 10000 }}
+            style={{ maxHeight: isCollapsed ? collapsedHeight : (naturalHeight ?? 10000) }}
           >
             <table className="w-full table-fixed border-separate [border-spacing:0_4px]">
               <caption className="sr-only">과목 정보</caption>
@@ -202,6 +220,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
                     course={course}
                     columns={columns}
                     isEditing={isEditing}
+                    isInvalid={isCourseRowInvalid(course)}
                     isSelected={selectedIds.has(course.id)}
                     openCellKey={openCellKey}
                     onOpenCellKeyChange={setOpenCellKey}
@@ -209,6 +228,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
                     onCellChange={handleCellChange}
                     onDepartmentChange={handleDepartmentChange}
                     onAreaChange={handleAreaChange}
+                    onSemesterChange={handleSemesterChange}
                   />
                 ))}
               </tbody>
@@ -245,6 +265,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
           onAreaChange={setAddCourseArea}
           semester={addCourseSemester}
           onSemesterChange={setAddCourseSemester}
+          admissionYear={admissionYear}
           canSubmit={canSubmitAddCourse}
           onSubmit={handleAddCourseConfirm}
         />

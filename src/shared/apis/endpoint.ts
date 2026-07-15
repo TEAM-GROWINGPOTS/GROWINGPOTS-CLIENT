@@ -1,4 +1,7 @@
 export const ENDPOINT = {
+  AUTH: {
+    COMPLETE_ONBOARDING: '/api/auth/complete-onboarding',
+  },
   DIAGNOSIS: {
     UPLOAD: '/api/v1/diagnosis/upload',
   },
@@ -10,6 +13,7 @@ export const ENDPOINT = {
   },
   PLANNER: {
     ROOT: '/api/v1/planner',
+    PREREQUISITE_CHECK: '/api/v1/planner/prerequisite-check',
   },
   GRADUATION: {
     STATUS: '/api/v1/students/me/graduation',

@@ -4,6 +4,7 @@ import { Button } from '@shared/components/button/button';
 import { Select } from '@shared/components/select/select';
 import { TextField } from '@shared/components/text-field/text-field';
 import { cn } from '@shared/utils/cn';
+import { getTakenSemesterOptions } from '@shared/utils/taken-semester-format';
 import { type KeyboardEvent, useRef, useState } from 'react';
 
 import { Modal } from './modal';
@@ -20,6 +21,7 @@ export interface AddCourseValues {
   courseName: string;
   credit: string;
   area: string;
+  takenYear: number;
   semester: string;
 }
 
@@ -66,6 +68,7 @@ interface AddCourseModalProps {
   onAreaChange: (value: string) => void;
   semester: string;
   onSemesterChange: (value: string) => void;
+  admissionYear?: number;
   canSubmit: boolean;
   onSubmit: () => void;
 }
@@ -83,6 +86,7 @@ export const AddCourseModal = ({
   onAreaChange,
   semester,
   onSemesterChange,
+  admissionYear,
   canSubmit,
   onSubmit,
 }: AddCourseModalProps) => {
@@ -161,7 +165,12 @@ export const AddCourseModal = ({
               )}
             </div>
             <Select options={AREA_OPTIONS} value={area} onChange={onAreaChange} placeholder="이수 영역" />
-            <Select options={SEMESTER_OPTIONS} value={semester} onChange={onSemesterChange} placeholder="수강학기" />
+            <Select
+              options={getTakenSemesterOptions(admissionYear)}
+              value={semester}
+              onChange={onSemesterChange}
+              placeholder="이수학기"
+            />
           </div>
         </div>
         <Modal.Footer>
