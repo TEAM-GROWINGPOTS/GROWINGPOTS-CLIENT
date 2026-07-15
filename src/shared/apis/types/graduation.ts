@@ -71,6 +71,7 @@ export interface GraduationCert {
 export interface GraduationResponse {
   summary: GraduationSummary;
   graduatable: boolean;
+  curriculumSatisfied: boolean;
   conditions: GraduationCondition[] | null;
   graduationRequired: GraduationRequired | null;
   sections: AllSections | null;

@@ -99,7 +99,7 @@ export const mapGraduationResponseToCards = ({
     },
     {
       label: '졸업 평점',
-      value: `${summary.gpa.current}`,
+      value: summary.gpa.current.toFixed(2),
       variant: toVariant('non-credit', summary.gpa.min === null || summary.gpa.current >= summary.gpa.min),
     },
     getMajorCard('ENGLISH_COURSE', '영어'),

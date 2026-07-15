@@ -1,6 +1,5 @@
 'use client';
 
-import { request } from '@shared/apis/request';
 import { Button } from '@shared/components/button/button';
 import { useDepartmentOptions } from '@shared/hooks/use-department-options';
 import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
@@ -64,26 +63,16 @@ export const AnalysisResultView = () => {
     router.push('/onboarding?step=pdf');
   };
 
-  const completeOnboarding = async () => {
-    await request.post<{ success: boolean }>('/api/auth/complete-onboarding');
-  };
-
-  const handleConfirmClick = async () => {
+  const handleConfirmClick = () => {
     const rows = courseInfoTableRef.current?.getCourses();
     if (!rows || !studentCourses) {
-      await completeOnboarding();
       router.push('/graduation-dashboard');
       return;
     }
 
     updateStudentCourses(
       { courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses) },
-      {
-        onSuccess: async () => {
-          await completeOnboarding();
-          router.push('/graduation-dashboard');
-        },
-      },
+      { onSuccess: () => router.push('/graduation-dashboard') },
     );
   };
 
