@@ -149,7 +149,14 @@ export const Select = (props: SelectProps) => {
         ) : (
           <span className="truncate">{triggerLabel}</span>
         )}
-        <Icon name="ic_chevron_down" size={20} className="pointer-events-none shrink-0 text-gray-600" />
+        <Icon
+          name="ic_chevron_down"
+          size={20}
+          className={cn(
+            'pointer-events-none shrink-0 text-gray-600 transition-transform duration-200',
+            isOpen && 'rotate-180',
+          )}
+        />
       </button>
 
       {isOpen && (
