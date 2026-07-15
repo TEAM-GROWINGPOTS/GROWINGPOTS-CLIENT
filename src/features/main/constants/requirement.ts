@@ -10,6 +10,10 @@ export const ALL_TAB_VALUE = 'ALL';
 export const GE_TAB_VALUE = 'GE';
 export const OTHERS_TAB_VALUE = 'OTHERS';
 
+export const REQUIREMENT_DISPLAY_NAMES: Record<string, string> = {
+  GENERAL_ELECTIVE: '일반선택',
+};
+
 export const SEMESTER_LABELS: Record<RequirementSemester, string> = {
   FIRST: '1학기',
   SECOND: '2학기',
@@ -34,10 +38,10 @@ export const getRequirementInfoContent = (code: string, admissionYear?: number) 
 
   if (code === 'DISTRIBUTED_GE') {
     if (admissionYear !== undefined && admissionYear < 2024) {
-      return '23학번까지는 영역 제한 없이 12학점 이상만 이수하면 통과예요.';
+      return '23학번까지는 영역 제한 없이 12학점 이상만 이수하면 통과예요';
     }
 
-    return '5개의 영역 중 3개 영역을 선택해 9학점 이상의 이수가 필요해요.';
+    return '5개의 영역 중 3개 영역을 선택해 9학점 이상의 이수가 필요해요';
   }
 
   return INFORMATION_CONTENTS[code];
