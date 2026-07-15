@@ -1,6 +1,7 @@
 import type { Division } from '@features/onboarding/types/course';
 import type { Column } from '@features/onboarding/types/course-info-table';
 import { isCourseRowInvalid } from '@features/onboarding/utils/is-course-row-invalid';
+import { parseTakenSemesterValue } from '@features/onboarding/utils/taken-semester-format';
 import type { DepartmentResponse } from '@shared/apis/types/onboarding-options';
 import type { AddCourseValues } from '@shared/components/modal/add-course-modal';
 import { useEffect, useState } from 'react';
@@ -83,6 +84,15 @@ export const useCourseRows = ({
     );
   };
 
+  const handleSemesterChange = (id: string) => (value: string) => {
+    const parsed = parseTakenSemesterValue(value);
+    if (!parsed) return;
+
+    setRows((prev) =>
+      prev.map((row) => (row.id === id ? { ...row, takenYear: parsed.takenYear, semester: parsed.semester } : row)),
+    );
+  };
+
   const handleSelectAllClick = () => {
     setSelectedIds(isAllSelected ? new Set() : new Set(rows.map((row) => row.id)));
   };
@@ -110,6 +120,7 @@ export const useCourseRows = ({
         department: '해당없음',
         departmentId: null,
         credit,
+        takenYear: new Date().getFullYear(),
         semester,
         area,
         areaId: division?.id ?? null,
@@ -135,6 +146,7 @@ export const useCourseRows = ({
     handleCellChange,
     handleDepartmentChange,
     handleAreaChange,
+    handleSemesterChange,
     handleSelectAllClick,
     handleRowSelectClick,
     handleAddCourseSubmit,

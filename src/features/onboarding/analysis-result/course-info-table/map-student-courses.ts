@@ -10,6 +10,7 @@ export const mapStudentCoursesToCourseInfo = (courses: StudentCourse[]): CourseI
     department: course.departmentName ?? '해당없음',
     departmentId: course.departmentId,
     credit: `${course.credit}`,
+    takenYear: course.takenYear,
     semester: course.takenSemester,
     area: course.appliedDivisionName ?? '해당없음',
     areaId: course.appliedDivisionId,
@@ -30,7 +31,7 @@ export const mapCourseInfoToPutStudentCourses = (
       departmentId: row.departmentId,
       credit: Number(row.credit),
       appliedDivisionId: row.areaId,
-      takenYear: original?.takenYear ?? new Date().getFullYear(),
+      takenYear: row.takenYear,
       takenSemester: semesterOption?.code ?? 'FIRST',
     };
   });

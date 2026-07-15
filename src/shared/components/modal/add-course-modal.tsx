@@ -161,7 +161,7 @@ export const AddCourseModal = ({
               )}
             </div>
             <Select options={AREA_OPTIONS} value={area} onChange={onAreaChange} placeholder="이수 영역" />
-            <Select options={SEMESTER_OPTIONS} value={semester} onChange={onSemesterChange} placeholder="수강학기" />
+            <Select options={SEMESTER_OPTIONS} value={semester} onChange={onSemesterChange} placeholder="이수학기" />
           </div>
         </div>
         <Modal.Footer>

@@ -5,6 +5,7 @@ import { useCourseRows } from '@features/onboarding/hooks/use-course-rows';
 import type { Division } from '@features/onboarding/types/course';
 import { getCourseInfoColumns } from '@features/onboarding/utils/get-course-info-columns';
 import { isCourseRowInvalid } from '@features/onboarding/utils/is-course-row-invalid';
+import { getTakenSemesterOptions } from '@features/onboarding/utils/taken-semester-format';
 import { getCourses } from '@shared/apis/get-courses';
 import { QUERY_KEY } from '@shared/apis/query-key';
 import type { DepartmentResponse } from '@shared/apis/types/onboarding-options';
@@ -27,6 +28,7 @@ export interface CourseInfo {
   department: string;
   departmentId: number | null;
   credit: string;
+  takenYear: number;
   semester: string;
   area: string;
   areaId: number | null;
@@ -68,6 +70,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
       handleCellChange,
       handleDepartmentChange,
       handleAreaChange,
+      handleSemesterChange,
       handleSelectAllClick,
       handleRowSelectClick,
       handleAddCourseSubmit,
@@ -89,6 +92,8 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
       { value: '', label: NONE_OPTION_LABEL },
     ];
 
+    const semesterOptions = getTakenSemesterOptions(rows.map(({ takenYear }) => takenYear));
+
     const trimmedAddCourseName = addCourseName.trim();
     const debouncedAddCourseName = useDebouncedValue(trimmedAddCourseName);
     const { data: searchedCourses = [], isFetching: isSearchingCourses } = useQuery({
@@ -107,7 +112,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
     const canSubmitAddCourse =
       isAddCourseNameValid && addCourseCredit !== '' && addCourseArea !== '' && addCourseSemester !== '';
 
-    const columns = getCourseInfoColumns(departmentOptions, areaOptions);
+    const columns = getCourseInfoColumns(departmentOptions, areaOptions, semesterOptions);
 
     const resetAddCourseForm = () => {
       setAddCourseName('');
@@ -217,6 +222,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
                     onCellChange={handleCellChange}
                     onDepartmentChange={handleDepartmentChange}
                     onAreaChange={handleAreaChange}
+                    onSemesterChange={handleSemesterChange}
                   />
                 ))}
               </tbody>
