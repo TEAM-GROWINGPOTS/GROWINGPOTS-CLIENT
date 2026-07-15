@@ -98,9 +98,13 @@ export const NodeCard = (props: NodeCardProps) => {
           <Accordion.Content className="overflow-hidden">
             <div className="mt-12 h-px bg-gray-100" />
             <div className="mt-12 flex flex-col gap-8">
-              {courses.map((course) => (
-                <CourseItem key={course.id} course={course} />
-              ))}
+              {courses.length > 0 ? (
+                courses.map((course) => <CourseItem key={course.id} course={course} />)
+              ) : (
+                <div className="flex h-44 items-center justify-center rounded-md border border-dashed border-gray-300">
+                  <span className="text-body-m-14 text-gray-400">과목 없음</span>
+                </div>
+              )}
             </div>
           </Accordion.Content>
         </Accordion.Item>
