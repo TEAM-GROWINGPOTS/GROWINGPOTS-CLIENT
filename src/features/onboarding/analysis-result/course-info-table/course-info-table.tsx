@@ -5,7 +5,6 @@ import { useCourseRows } from '@features/onboarding/hooks/use-course-rows';
 import type { Division } from '@features/onboarding/types/course';
 import { getCourseInfoColumns } from '@features/onboarding/utils/get-course-info-columns';
 import { isCourseRowInvalid } from '@features/onboarding/utils/is-course-row-invalid';
-import { getTakenSemesterOptions } from '@features/onboarding/utils/taken-semester-format';
 import { getCourses } from '@shared/apis/get-courses';
 import { QUERY_KEY } from '@shared/apis/query-key';
 import type { DepartmentResponse } from '@shared/apis/types/onboarding-options';
@@ -15,6 +14,7 @@ import { AddCourseModal } from '@shared/components/modal/add-course-modal';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { useDebouncedValue } from '@shared/hooks/use-debounced-value';
 import { cn } from '@shared/utils/cn';
+import { getTakenSemesterOptions, parseTakenSemesterValue } from '@shared/utils/taken-semester-format';
 import { useQuery } from '@tanstack/react-query';
 import { forwardRef, useImperativeHandle, useState } from 'react';
 
@@ -38,6 +38,7 @@ interface CourseInfoTableProps {
   courses: CourseInfo[];
   departments: DepartmentResponse[];
   divisions: Division[];
+  admissionYear?: number;
   isEditing?: boolean;
   onValidityChange?: (isValid: boolean) => void;
   onDeleteRows?: (remainingCourses: CourseInfo[]) => void;
@@ -51,7 +52,7 @@ const COURSE_NAME_MATCH_SIZE = 50;
 const NONE_OPTION_LABEL = '해당없음';
 
 export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTableProps>(
-  ({ courses, departments, divisions, isEditing = false, onValidityChange, onDeleteRows }, ref) => {
+  ({ courses, departments, divisions, admissionYear, isEditing = false, onValidityChange, onDeleteRows }, ref) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [addCourseName, setAddCourseName] = useState('');
@@ -92,7 +93,10 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
       { value: '', label: NONE_OPTION_LABEL },
     ];
 
-    const semesterOptions = getTakenSemesterOptions(rows.map(({ takenYear }) => takenYear));
+    const semesterOptions = getTakenSemesterOptions(
+      admissionYear,
+      rows.map(({ takenYear }) => takenYear),
+    );
 
     const trimmedAddCourseName = addCourseName.trim();
     const debouncedAddCourseName = useDebouncedValue(trimmedAddCourseName);
@@ -141,14 +145,16 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
     };
 
     const handleAddCourseConfirm = () => {
-      if (!canSubmitAddCourse || !matchedCourse) return;
+      const parsedSemester = parseTakenSemesterValue(addCourseSemester);
+      if (!canSubmitAddCourse || !matchedCourse || !parsedSemester) return;
 
       handleAddCourseSubmit({
         courseId: matchedCourse.courseId,
         courseName: trimmedAddCourseName,
-        credit: addCourseCredit,
+        credit: addCourseCredit.endsWith('.') ? addCourseCredit.slice(0, -1) : addCourseCredit,
         area: addCourseArea,
-        semester: addCourseSemester,
+        takenYear: parsedSemester.takenYear,
+        semester: parsedSemester.semester,
       });
       handleAddModalOpenChange(false);
     };
@@ -259,6 +265,7 @@ export const CourseInfoTable = forwardRef<CourseInfoTableRef, CourseInfoTablePro
           onAreaChange={setAddCourseArea}
           semester={addCourseSemester}
           onSemesterChange={setAddCourseSemester}
+          admissionYear={admissionYear}
           canSubmit={canSubmitAddCourse}
           onSubmit={handleAddCourseConfirm}
         />

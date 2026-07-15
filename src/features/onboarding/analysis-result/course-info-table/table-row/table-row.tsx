@@ -1,6 +1,6 @@
 import type { Column } from '@features/onboarding/types/course-info-table';
-import { formatTakenSemester, getTakenSemesterValue } from '@features/onboarding/utils/taken-semester-format';
 import Icon from '@shared/components/icon/icon';
+import { formatTakenSemester, getTakenSemesterValue } from '@shared/utils/taken-semester-format';
 
 import type { CourseInfo } from '../course-info-table';
 import { TableCellEdit } from '../table-cell/table-cell-edit';

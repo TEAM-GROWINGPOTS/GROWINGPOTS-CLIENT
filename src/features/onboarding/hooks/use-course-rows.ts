@@ -1,9 +1,9 @@
 import type { Division } from '@features/onboarding/types/course';
 import type { Column } from '@features/onboarding/types/course-info-table';
 import { isCourseRowInvalid } from '@features/onboarding/utils/is-course-row-invalid';
-import { parseTakenSemesterValue } from '@features/onboarding/utils/taken-semester-format';
 import type { DepartmentResponse } from '@shared/apis/types/onboarding-options';
 import type { AddCourseValues } from '@shared/components/modal/add-course-modal';
+import { parseTakenSemesterValue } from '@shared/utils/taken-semester-format';
 import { useEffect, useState } from 'react';
 
 import { CourseInfo } from '../analysis-result/course-info-table/course-info-table';
@@ -109,7 +109,7 @@ export const useCourseRows = ({
     });
   };
 
-  const handleAddCourseSubmit = ({ courseId, courseName, credit, area, semester }: AddCourseValues) => {
+  const handleAddCourseSubmit = ({ courseId, courseName, credit, area, takenYear, semester }: AddCourseValues) => {
     const division = divisions.find(({ name }) => name === area);
 
     setRows((prev) => [
@@ -120,7 +120,7 @@ export const useCourseRows = ({
         department: '해당없음',
         departmentId: null,
         credit,
-        takenYear: new Date().getFullYear(),
+        takenYear,
         semester,
         area,
         areaId: division?.id ?? null,

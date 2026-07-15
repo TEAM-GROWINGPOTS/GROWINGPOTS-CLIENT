@@ -120,6 +120,7 @@ export const AnalysisResultView = () => {
             courses={courses}
             departments={departments}
             divisions={studentCourses.availableDivisions}
+            admissionYear={studentProfile?.admissionYear}
             isEditing={isEditing}
             onValidityChange={handleCourseInfoValidityChange}
             onDeleteRows={handleDeleteRows}
