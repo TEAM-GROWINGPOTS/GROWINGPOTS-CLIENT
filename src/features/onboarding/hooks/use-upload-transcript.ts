@@ -8,9 +8,10 @@ export const useUploadTranscript = () => {
 
   return useMutation({
     mutationFn: uploadTranscript,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY.STUDENTS.ME_COURSES() });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY.GRADUATION.ALL });
-    },
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY.STUDENTS.ME_COURSES() }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY.GRADUATION.ALL }),
+      ]),
   });
 };
