@@ -31,7 +31,7 @@ const toLibrarySemesterCourse = ({
 export const LibraryCourse = ({ course }: { course: CourseSearchItemResponse }) => {
   const semesterCourse = toLibrarySemesterCourse(course);
   const { id, departmentName, name, tags, isEnglish, isSw } = semesterCourse;
-  const { attributes, listeners, setNodeRef } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id,
     data: { course: semesterCourse },
   });
@@ -44,6 +44,7 @@ export const LibraryCourse = ({ course }: { course: CourseSearchItemResponse }) 
         tags={tags}
         isEnglish={isEnglish}
         isSw={isSw}
+        type={isDragging ? 'disabled' : 'default'}
         className="cursor-grab border border-gray-100"
       />
     </div>

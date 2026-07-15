@@ -1,3 +1,5 @@
+import type { GraduationResponse } from '@shared/apis/types/graduation';
+
 export type OpenedSemester = 'FIRST' | 'SECOND' | 'BOTH';
 
 export interface PlannerCourseBaseResponse {
@@ -77,6 +79,11 @@ export interface PlannerSaveTerm {
 export interface PlannerSaveRequest {
   plannerSimulationId: number | null;
   terms: PlannerSaveTerm[];
+}
+
+export interface PlannerSaveResponse {
+  graduation: GraduationResponse;
+  hasDuplicateCourse: boolean;
 }
 
 export type SemesterCardStatus = 'completed' | 'current' | 'planned';
