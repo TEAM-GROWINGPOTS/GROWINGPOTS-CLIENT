@@ -8,9 +8,10 @@ import { Badge, ClassCard } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { cn } from '@shared/utils/cn';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, type Ref, useEffect, useRef, useState } from 'react';
 
 interface SemesterCardProps {
+  ref?: Ref<HTMLElement>;
   yearLevel: number;
   semester: number;
   semesterLabel?: string;
@@ -47,6 +48,7 @@ const STATUS_ICON: Record<SemesterCardStatus, string | null> = {
 };
 
 export const SemesterCard = ({
+  ref,
   yearLevel,
   semester,
   semesterLabel,
@@ -67,6 +69,7 @@ export const SemesterCard = ({
   const [isFolderListOpen, setIsFolderListOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<FolderTarget | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<FolderTarget | null>(null);
+  const [isTermDeleteOpen, setIsTermDeleteOpen] = useState(false);
   const folderListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -112,6 +115,11 @@ export const SemesterCard = ({
     setDeleteTarget(null);
   };
 
+  const handleConfirmDeleteTerm = () => {
+    onDeleteTerm?.();
+    setIsTermDeleteOpen(false);
+  };
+
   const totalCredit = courses.reduce((sum, { credit }) => sum + credit, 0);
   const isPlanned = status === 'planned';
   const statusIcon = STATUS_ICON[status];
@@ -119,7 +127,10 @@ export const SemesterCard = ({
   const isLastFolder = (folders?.length ?? 0) <= 1;
 
   return (
-    <section className={cn('flex max-h-screen w-258 shrink-0 flex-col self-start rounded-xl bg-gray-800', className)}>
+    <section
+      ref={ref}
+      className={cn('flex max-h-screen w-258 shrink-0 flex-col self-start rounded-xl bg-gray-800', className)}
+    >
       <header className="flex items-center justify-between px-12 pt-12">
         <div className="flex flex-row gap-8">
           {statusIcon && <Icon name={statusIcon} size={20} />}
@@ -130,7 +141,7 @@ export const SemesterCard = ({
         </div>
         {isPlanned && (
           <div className="[&_button]:visible [&>div>button>svg]:text-gray-300">
-            <FolderItemMenu iconSize={20} onDelete={() => onDeleteTerm?.()} />
+            <FolderItemMenu iconSize={20} onDelete={() => setIsTermDeleteOpen(true)} />
           </div>
         )}
       </header>
@@ -170,7 +181,7 @@ export const SemesterCard = ({
         <div className="my-8 border-b border-gray-200" />
         <div className="relative flex min-h-0 flex-col">
           {courses.length > 0 ? (
-            <ul className="flex min-h-0 flex-col gap-8 overflow-y-auto">
+            <ul className="flex min-h-0 [scrollbar-width:none] flex-col gap-8 overflow-y-auto [&::-webkit-scrollbar]:hidden">
               {courses.map((course) => {
                 const { id, departmentName, name, tags, isEnglish, isSw } = course;
                 return (
@@ -226,6 +237,14 @@ export const SemesterCard = ({
             : '삭제한 폴더는 복구할 수 없어요.'
         }
         onConfirm={handleConfirmDeleteFolder}
+      />
+      <ConfirmModal
+        open={isTermDeleteOpen}
+        onOpenChange={setIsTermDeleteOpen}
+        type="delete"
+        title={`${termLabel}를 삭제할까요?`}
+        description="삭제한 학기는 복구할 수 없어요."
+        onConfirm={handleConfirmDeleteTerm}
       />
     </section>
   );

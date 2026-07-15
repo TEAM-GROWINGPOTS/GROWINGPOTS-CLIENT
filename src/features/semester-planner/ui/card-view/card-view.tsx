@@ -39,6 +39,10 @@ const SEMESTER_LABEL_MAP: Record<string, string> = {
   '2': '2학기',
 };
 
+const CARD_SCROLL_STEP = 282; // 학기 카드 너비 258 + gap 24
+const CARD_GAP_CENTER_OFFSET = 12; // 카드 앞 gap 24의 중앙에 오도록 남기는 여백
+const CARD_BOUNDARY_TOLERANCE = 2;
+
 interface CardViewProps {
   sidebarSlot: HTMLDivElement | null;
 }
@@ -93,8 +97,11 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   );
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [lastCardElement, setLastCardElement] = useState<HTMLElement | null>(null);
+  const [addSemesterButtonTop, setAddSemesterButtonTop] = useState<number | null>(null);
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
   const boardRef = useRef<HTMLElement>(null);
+  const pendingScrollTermRef = useRef<{ yearLevel: number; semesterLabel: string } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -120,6 +127,18 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     parseApiError(courseSearchError).then((parsed) => toast.negative(parsed?.message ?? '과목 검색에 실패했어요.'));
   }, [isCourseSearchError, courseSearchError]);
 
+  const handleLastCardRef = useCallback((node: HTMLElement | null) => {
+    setLastCardElement(node);
+    setAddSemesterButtonTop(node ? node.offsetHeight / 2 : null);
+  }, []);
+
+  useEffect(() => {
+    if (!lastCardElement) return;
+    const observer = new ResizeObserver(() => setAddSemesterButtonTop(lastCardElement.offsetHeight / 2));
+    observer.observe(lastCardElement);
+    return () => observer.disconnect();
+  }, [lastCardElement]);
+
   const updateScrollability = useCallback(() => {
     const board = boardRef.current;
     if (!board) return;
@@ -133,6 +152,21 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     return () => window.removeEventListener('resize', updateScrollability);
   }, [gridTerms, updateScrollability]);
 
+  useEffect(() => {
+    const pendingTerm = pendingScrollTermRef.current;
+    if (!pendingTerm) return;
+    pendingScrollTermRef.current = null;
+    const termIndex = gridTerms.findIndex(
+      ({ yearLevel, semesterLabel }) =>
+        yearLevel === pendingTerm.yearLevel && semesterLabel === pendingTerm.semesterLabel,
+    );
+    if (termIndex === -1) return;
+    boardRef.current?.scrollTo({
+      left: Math.max(termIndex * CARD_SCROLL_STEP - CARD_GAP_CENTER_OFFSET, 0),
+      behavior: 'smooth',
+    });
+  }, [gridTerms]);
+
   const handleSidebarTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
     if (event.target !== event.currentTarget || event.propertyName !== 'width') return;
     updateScrollability();
@@ -142,11 +176,25 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   };
 
   const handleScrollLeftClick = () => {
-    boardRef.current?.scrollBy({ left: -282, behavior: 'smooth' });
+    const board = boardRef.current;
+    if (!board) return;
+    const prevCardIndex =
+      Math.ceil((board.scrollLeft + CARD_GAP_CENTER_OFFSET - CARD_BOUNDARY_TOLERANCE) / CARD_SCROLL_STEP) - 1;
+    board.scrollTo({
+      left: Math.max(prevCardIndex * CARD_SCROLL_STEP - CARD_GAP_CENTER_OFFSET, 0),
+      behavior: 'smooth',
+    });
   };
 
   const handleScrollRightClick = () => {
-    boardRef.current?.scrollBy({ left: 282, behavior: 'smooth' });
+    const board = boardRef.current;
+    if (!board) return;
+    const nextCardIndex =
+      Math.floor((board.scrollLeft + CARD_GAP_CENTER_OFFSET + CARD_BOUNDARY_TOLERANCE) / CARD_SCROLL_STEP) + 1;
+    board.scrollTo({
+      left: nextCardIndex * CARD_SCROLL_STEP - CARD_GAP_CENTER_OFFSET,
+      behavior: 'smooth',
+    });
   };
 
   const handleFilterClick = (label: string) => {
@@ -162,7 +210,11 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     console.log('직접추가 클릭 — 과목 직접추가 모달 연결 예정');
   };
 
-  const handleOpenSidebar = () => {
+  const handleToggleSidebar = () => {
+    if (isSidebarOpen) {
+      setIsSidebarOpen(false);
+      return;
+    }
     setIsSidebarOpen(true);
     closeSideNavigation();
   };
@@ -183,7 +235,9 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
       toast.negative('이미 추가된 학기예요.');
       return;
     }
+    pendingScrollTermRef.current = { yearLevel, semesterLabel };
     setIsAddSemesterOpen(false);
+    toast.success(`${yearLevel}학년 ${semesterLabel}가 추가되었어요.`);
   };
 
   if (isPlannerLoading) return null;
@@ -192,78 +246,93 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
 
   return (
     <DndContext id="card-view-dnd" {...contextProps}>
-      {/* pt-80: PlannerView가 겹쳐 그리는 ViewModeToggle(top-40, 노드뷰와 동일 위치)과 헤더가 겹치지 않도록 여유를 둔다. */}
-      <div className="flex h-full min-w-0 flex-col px-40 pt-80 pb-40">
+      {/* pt-[100px]: PlannerView가 겹쳐 그리는 ViewModeToggle(top-40, 노드뷰와 동일 위치)과 헤더가 겹치지 않도록 여유를 둔다. */}
+      <div className="flex h-full min-w-0 flex-col px-48 pt-[100px] pb-24">
         <header className="flex items-center justify-between">
           <h1 className="text-title-sb-24 text-gray-900">학기 플래너</h1>
           <Button
             label="과목추가"
             mode="primary_solid"
             icon={<Icon name="ic_plus" size={16} />}
-            onClick={handleOpenSidebar}
+            onClick={handleToggleSidebar}
           />
         </header>
 
-        <GraduationStatusAccordion className="mt-20" data={graduationData} />
+        <div className="mt-20 flex min-h-0 flex-1 [scrollbar-width:none] flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden">
+          <GraduationStatusAccordion className="shrink-0" data={graduationData} />
 
-        <div className="relative mt-24 min-h-0 flex-1">
-          <section
-            ref={boardRef}
-            onScroll={updateScrollability}
-            className="flex h-full items-start gap-24 overflow-x-auto pb-20"
-          >
-            {gridTerms.map((term) =>
-              term.status === 'planned' ? (
-                <DroppableTerm
-                  key={term.id}
-                  term={term}
-                  isDropTarget={overTermId === term.id}
-                  onDeleteTerm={() => removeTerm(term.id)}
-                  onAddFolder={() => handleAddFolder(term.id)}
-                  onSelectFolder={(folderId) => selectFolder(term.id, folderId)}
-                  onRenameFolder={(folderId, name) => renameFolder(term.id, folderId, name)}
-                  onDeleteFolder={(folderId) => deleteFolder(term.id, folderId)}
-                />
-              ) : (
-                <SemesterCard
-                  key={term.id}
-                  className="max-h-full"
-                  yearLevel={term.yearLevel}
-                  semester={term.semester}
-                  semesterLabel={term.semesterLabel}
-                  status={term.status}
-                  folderName={getFolderName(term)}
-                  courses={getSelectedCourses(term)}
-                />
-              ),
+          <div className="relative mt-24 min-h-360 flex-1">
+            <section
+              ref={boardRef}
+              onScroll={updateScrollability}
+              className="flex h-full [scrollbar-width:none] items-start gap-24 overflow-x-auto pb-20 [&::-webkit-scrollbar]:hidden"
+            >
+              {gridTerms.map((term, index) => {
+                const cardRef = index === gridTerms.length - 1 ? handleLastCardRef : undefined;
+                return term.status === 'planned' ? (
+                  <DroppableTerm
+                    key={term.id}
+                    term={term}
+                    cardRef={cardRef}
+                    isDropTarget={overTermId === term.id}
+                    onDeleteTerm={() => {
+                      removeTerm(term.id);
+                      toast.success(`${term.yearLevel}학년 ${term.semesterLabel} 폴더가 삭제되었어요.`);
+                    }}
+                    onAddFolder={() => handleAddFolder(term.id)}
+                    onSelectFolder={(folderId) => selectFolder(term.id, folderId)}
+                    onRenameFolder={(folderId, name) => renameFolder(term.id, folderId, name)}
+                    onDeleteFolder={(folderId) => {
+                      deleteFolder(term.id, folderId);
+                      toast.success(`${term.yearLevel}학년 ${term.semesterLabel} 폴더가 삭제되었어요.`);
+                    }}
+                  />
+                ) : (
+                  <SemesterCard
+                    key={term.id}
+                    ref={cardRef}
+                    className="max-h-full"
+                    yearLevel={term.yearLevel}
+                    semester={term.semester}
+                    semesterLabel={term.semesterLabel}
+                    status={term.status}
+                    folderName={getFolderName(term)}
+                    courses={getSelectedCourses(term)}
+                  />
+                );
+              })}
+              <IconButton
+                icon="ic_plus"
+                aria-label="학기 추가"
+                size="medium"
+                className={cn(
+                  'shrink-0',
+                  addSemesterButtonTop === null ? 'self-center' : '-translate-y-1/2 self-start',
+                )}
+                style={addSemesterButtonTop === null ? undefined : { marginTop: addSemesterButtonTop }}
+                onClick={() => setIsAddSemesterOpen(true)}
+              />
+            </section>
+            {canScrollLeft && (
+              <IconButton
+                icon="ic_chevron_left"
+                aria-label="이전 학기 보기"
+                size="medium"
+                className="absolute top-1/2 left-0 -translate-y-1/2"
+                onClick={handleScrollLeftClick}
+              />
             )}
-            <IconButton
-              icon="ic_plus"
-              aria-label="학기 추가"
-              size="medium"
-              className="shrink-0 self-center"
-              onClick={() => setIsAddSemesterOpen(true)}
-            />
-          </section>
-          {canScrollLeft && (
-            <IconButton
-              icon="ic_chevron_left"
-              aria-label="이전 학기 보기"
-              size="medium"
-              className="absolute top-1/2 left-0 -translate-y-1/2"
-              onClick={handleScrollLeftClick}
-            />
-          )}
-          {canScrollRight && (
-            <IconButton
-              icon="ic_chevron_right"
-              aria-label="다음 학기 보기"
-              size="medium"
-              className="absolute top-1/2 right-0 -translate-y-1/2"
-              onClick={handleScrollRightClick}
-            />
-          )}
-          {activeCourse && !isLibraryDrag && <TrashDropZone />}
+            {canScrollRight && (
+              <IconButton
+                icon="ic_chevron_right"
+                aria-label="다음 학기 보기"
+                size="medium"
+                className="absolute top-1/2 right-0 -translate-y-1/2"
+                onClick={handleScrollRightClick}
+              />
+            )}
+            {activeCourse && !isLibraryDrag && <TrashDropZone />}
+          </div>
         </div>
       </div>
 
@@ -302,7 +371,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
             tags={activeCourse.tags}
             isEnglish={activeCourse.isEnglish}
             isSw={activeCourse.isSw}
-            className="shadow-small w-242 border border-gray-100"
+            className="shadow-small w-242 scale-105 border border-gray-100 opacity-85"
           />
         )}
       </DragOverlay>

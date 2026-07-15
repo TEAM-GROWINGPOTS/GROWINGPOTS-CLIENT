@@ -36,7 +36,7 @@ const FILTER_TABS: { value: CourseFilterTabKeyTypes; label: string; fields: (key
   { value: 'grade', label: '학년', fields: ['year'] },
   { value: 'semester', label: '개설학기', fields: ['semester'] },
   { value: 'credit', label: '학점', fields: ['credits'] },
-  { value: 'extra', label: '기타 필수', fields: ['otherRequired'] },
+  { value: 'extra', label: 'SW/영어', fields: ['otherRequired'] },
 ];
 
 const isTabSelected = (fields: (keyof CourseFilterValues)[], filters: CourseFilterValues): boolean =>
@@ -215,7 +215,7 @@ const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFo
             options={OTHER_REQUIRED_OPTIONS}
             value={values.otherRequired}
             onChange={(next) => setFieldValue('otherRequired')(next as OtherRequired[])}
-            placeholder="기타 필수"
+            placeholder="SW/영어"
           />
         )}
       </section>

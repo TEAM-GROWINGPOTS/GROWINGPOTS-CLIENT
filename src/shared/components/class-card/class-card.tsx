@@ -1,12 +1,14 @@
-import { Badge } from '@shared/components';
+'use client';
+
+import { Badge, Tooltip } from '@shared/components';
 import { cn } from '@shared/utils/cn';
 import { cva } from 'class-variance-authority';
-import type { ComponentPropsWithoutRef } from 'react';
+import { type ComponentPropsWithoutRef, useLayoutEffect, useRef, useState } from 'react';
 
 export type ClassCardType = 'default' | 'disabled';
 export type ClassCardSize = 'default' | 'max';
 
-const classCardVariants = cva('flex w-auto flex-col items-start rounded-sm bg-white px-16 py-12', {
+const classCardVariants = cva('flex w-auto flex-col items-start rounded-sm bg-white p-14', {
   variants: {
     type: {
       default: '',
@@ -63,28 +65,48 @@ export const ClassCard = ({
   ...props
 }: ClassCardProps) => {
   const note = getNote(isEnglish, isSw);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const [isTitleTruncated, setIsTitleTruncated] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = titleRef.current;
+    if (el) setIsTitleTruncated(el.scrollWidth > el.clientWidth);
+  }, [title]);
 
   return (
     <article className={cn(classCardVariants({ type, size }), className)} {...props}>
       {department && !isSw && <span className="text-caption-m-10 mb-2 text-gray-400">{department}</span>}
-      <h3 className="text-body-sb-16 w-full truncate text-gray-900" title={title}>
-        {title}
-        {type === 'disabled' && <span className="sr-only">(비활성)</span>}
-      </h3>
+      <Tooltip
+        content={title}
+        variant="bottom-start"
+        disabled={!isTitleTruncated}
+        trigger={
+          <h3 ref={titleRef} className="text-body-sb-16 w-full cursor-default truncate text-gray-900">
+            {title}
+            {type === 'disabled' && <span className="sr-only">(비활성)</span>}
+          </h3>
+        }
+      />
       {note && <span className="text-caption-m-10 text-red-20">{note}</span>}
       {tags.length > 0 && (
         <div className={cn('flex flex-wrap items-center gap-4', size === 'max' ? 'mt-auto pt-12' : 'mt-12')}>
-          {tags.map((tag, index) => (
-            <Badge
-              key={`${tag}-${index}`}
-              size="xsmall"
-              variant="primary"
-              color={index === 0 ? getTagColor(tag) : 'gray'}
-              className={index === 0 ? 'max-w-70' : undefined}
-            >
-              {index === 0 ? <span className="truncate">{tag}</span> : tag}
-            </Badge>
-          ))}
+          {tags.map((tag, index) => {
+            const shouldTruncate = index === 0;
+            return (
+              <Badge
+                key={`${tag}-${index}`}
+                size="xsmall"
+                variant="primary"
+                color={shouldTruncate ? getTagColor(tag) : 'gray'}
+                truncate={shouldTruncate}
+                tooltipOnTruncate={shouldTruncate}
+                tooltipContent={tag}
+                className={cn('cursor-default', shouldTruncate && 'max-w-70')}
+              >
+                {tag}
+              </Badge>
+            );
+          })}
         </div>
       )}
       {type === 'disabled' && <div className="bg-white-50 absolute inset-0 rounded-[inherit]" />}
