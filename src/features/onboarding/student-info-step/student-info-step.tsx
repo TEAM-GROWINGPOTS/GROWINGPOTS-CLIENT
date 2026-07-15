@@ -31,7 +31,10 @@ export const StudentInfoStep = () => {
     label: `${year}년(${String(year).slice(-2)}학번)`,
   }));
 
-  const departments = scopedOptions?.departments ?? [];
+  const departments = (scopedOptions?.departments ?? []).filter(
+    ({ college: departmentCollege, name }) =>
+      !departmentCollege.includes('후마니타스칼리지') && !name.includes('후마니타스칼리지'),
+  );
 
   const collegeOptions = [...new Set(departments.map(({ college: departmentCollege }) => departmentCollege))].map(
     (departmentCollege) => ({
