@@ -16,6 +16,7 @@ import {
   SemesterEdgeData,
 } from '@features/semester-planner/types/planner-graph';
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
+import { setPendingFocusTerm } from '@features/semester-planner/utils/pending-focus-term';
 import { parseApiError } from '@shared/apis/parse-api-error';
 import { toast } from '@shared/components';
 import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
@@ -648,6 +649,7 @@ export const RoadmapView = () => {
         return;
       }
       setIsAddSemesterModalOpen(false);
+      setPendingFocusTerm({ yearLevel, semesterLabel });
       // addFolder와 같은 이유로, 저장이 끝난 뒤에 카드뷰로 전환한다.
       waitForSave().then(() => setViewMode('card'));
     },

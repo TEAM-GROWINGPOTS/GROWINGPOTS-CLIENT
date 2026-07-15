@@ -18,7 +18,7 @@ export const TrashDropZone = () => {
         icon="ic_trash"
         aria-label="여기로 드래그하여 삭제"
         size="large"
-        className={cn('transition-transform duration-150', isOver && 'scale-125')}
+        className={cn('origin-bottom transition-transform duration-150', isOver && 'scale-125')}
       />
     </div>
   );
