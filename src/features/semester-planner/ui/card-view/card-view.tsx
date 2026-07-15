@@ -39,6 +39,10 @@ const SEMESTER_LABEL_MAP: Record<string, string> = {
   '2': '2학기',
 };
 
+const CARD_SCROLL_STEP = 282; // 학기 카드 너비 258 + gap 24
+const CARD_GAP_CENTER_OFFSET = 12; // 카드 앞 gap 24의 중앙에 오도록 남기는 여백
+const CARD_BOUNDARY_TOLERANCE = 2;
+
 interface CardViewProps {
   sidebarSlot: HTMLDivElement | null;
 }
@@ -156,11 +160,25 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   };
 
   const handleScrollLeftClick = () => {
-    boardRef.current?.scrollBy({ left: -282, behavior: 'smooth' });
+    const board = boardRef.current;
+    if (!board) return;
+    const prevCardIndex =
+      Math.ceil((board.scrollLeft + CARD_GAP_CENTER_OFFSET - CARD_BOUNDARY_TOLERANCE) / CARD_SCROLL_STEP) - 1;
+    board.scrollTo({
+      left: Math.max(prevCardIndex * CARD_SCROLL_STEP - CARD_GAP_CENTER_OFFSET, 0),
+      behavior: 'smooth',
+    });
   };
 
   const handleScrollRightClick = () => {
-    boardRef.current?.scrollBy({ left: 282, behavior: 'smooth' });
+    const board = boardRef.current;
+    if (!board) return;
+    const nextCardIndex =
+      Math.floor((board.scrollLeft + CARD_GAP_CENTER_OFFSET + CARD_BOUNDARY_TOLERANCE) / CARD_SCROLL_STEP) + 1;
+    board.scrollTo({
+      left: nextCardIndex * CARD_SCROLL_STEP - CARD_GAP_CENTER_OFFSET,
+      behavior: 'smooth',
+    });
   };
 
   const handleFilterClick = (label: string) => {
