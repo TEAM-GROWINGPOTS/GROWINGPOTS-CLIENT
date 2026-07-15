@@ -102,7 +102,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const [addSemesterButtonTop, setAddSemesterButtonTop] = useState<number | null>(null);
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
   const boardRef = useRef<HTMLElement>(null);
-  const edgeScroll = useBoardEdgeScroll(boardRef);
+  const scrollWrapperRef = useRef<HTMLDivElement>(null);
+  const edgeScroll = useBoardEdgeScroll(boardRef, scrollWrapperRef);
   const pendingScrollTermRef = useRef<{ yearLevel: number; semesterLabel: string } | null>(null);
   const router = useRouter();
 
@@ -250,7 +251,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     <DndContext
       id="card-view-dnd"
       {...contextProps}
-      autoScroll={{ canScroll: (element) => element !== boardRef.current }}
+      autoScroll={false}
       onDragStart={(event) => {
         edgeScroll.handleDragStart(event);
         contextProps.onDragStart(event);
@@ -276,7 +277,10 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
           />
         </header>
 
-        <div className="mt-20 flex min-h-0 flex-1 [scrollbar-width:none] flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden">
+        <div
+          ref={scrollWrapperRef}
+          className="mt-20 flex min-h-0 flex-1 [scrollbar-width:none] flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden"
+        >
           <GraduationStatusAccordion className="shrink-0" data={graduationData} />
 
           <div className="relative mt-24 min-h-360 flex-1">
