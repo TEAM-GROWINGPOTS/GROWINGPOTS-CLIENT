@@ -64,15 +64,6 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     renameFolder,
     deleteFolder,
   } = usePlannerTerms();
-  const { activeCourse, overTermId, isLibraryDrag, isDropRejected, contextProps } = useCardViewDnd({
-    plannedTerms,
-    snapshot,
-    restoreSnapshot,
-    previewCourseMove,
-    dropCourseToTerm,
-    insertCourse,
-    removeCourse,
-  });
   const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
@@ -106,7 +97,23 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const closeSideNavigation = useSideNavigationStore((state) => state.closeSidebar);
   const boardRef = useRef<HTMLElement>(null);
   const pendingScrollTermRef = useRef<{ yearLevel: number; semesterLabel: string } | null>(null);
+  const [scrollToCourse, setScrollToCourse] = useState<{ termId: string; courseId: string; key: number } | null>(null);
   const router = useRouter();
+
+  const handleCourseInserted = useCallback((termId: string, courseId: string) => {
+    setScrollToCourse({ termId, courseId, key: Date.now() });
+  }, []);
+
+  const { activeCourse, overTermId, isLibraryDrag, isDropRejected, contextProps } = useCardViewDnd({
+    plannedTerms,
+    snapshot,
+    restoreSnapshot,
+    previewCourseMove,
+    dropCourseToTerm,
+    insertCourse,
+    removeCourse,
+    onCourseInserted: handleCourseInserted,
+  });
 
   useEffect(() => {
     if (!isPlannerError) return;
@@ -295,6 +302,11 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
                     key={term.id}
                     term={term}
                     cardRef={cardRef}
+                    scrollToCourse={
+                      scrollToCourse?.termId === term.id
+                        ? { courseId: scrollToCourse.courseId, key: scrollToCourse.key }
+                        : undefined
+                    }
                     isDropTarget={overTermId === term.id}
                     onDeleteTerm={() => {
                       removeTerm(term.id);

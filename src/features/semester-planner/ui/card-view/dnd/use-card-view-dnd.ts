@@ -27,6 +27,7 @@ interface UseCardViewDndInput {
   dropCourseToTerm: (activeId: string, targetTermId: string) => void;
   insertCourse: (termId: string, course: SemesterCourse) => void;
   removeCourse: (courseId: string) => void;
+  onCourseInserted?: (termId: string, courseId: string) => void;
 }
 
 export const useCardViewDnd = ({
@@ -37,6 +38,7 @@ export const useCardViewDnd = ({
   dropCourseToTerm,
   insertCourse,
   removeCourse,
+  onCourseInserted,
 }: UseCardViewDndInput) => {
   const [activeCourse, setActiveCourse] = useState<SemesterCourse | null>(null);
   const [overTermId, setOverTermId] = useState<string | null>(null);
@@ -170,6 +172,7 @@ export const useCardViewDnd = ({
       copyCountRef.current += 1;
       const copy = { ...course, id: `${course.id.replace(LIBRARY_PREFIX, 'course-')}-copy-${copyCountRef.current}` };
       insertCourse(overContainer, copy);
+      onCourseInserted?.(overContainer, copy.id);
       return;
     }
 

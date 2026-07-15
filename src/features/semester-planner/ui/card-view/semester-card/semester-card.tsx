@@ -24,6 +24,7 @@ interface SemesterCardProps {
   isDropTarget?: boolean;
   renderCourse?: (course: SemesterCourse) => ReactNode;
   className?: string;
+  scrollToCourse?: { courseId: string; key: number };
   onDeleteTerm?: () => void;
   onAddFolder?: () => void;
   onSelectFolder?: (folderId: string) => void;
@@ -61,6 +62,7 @@ export const SemesterCard = ({
   isDropTarget = false,
   renderCourse,
   className,
+  scrollToCourse,
   onDeleteTerm,
   onAddFolder,
   onSelectFolder,
@@ -72,6 +74,27 @@ export const SemesterCard = ({
   const [deleteTarget, setDeleteTarget] = useState<FolderTarget | null>(null);
   const [isTermDeleteOpen, setIsTermDeleteOpen] = useState(false);
   const folderListRef = useRef<HTMLDivElement>(null);
+  const courseListRef = useRef<HTMLUListElement>(null);
+
+  const scrollTargetCourseId = scrollToCourse?.courseId;
+  const scrollTargetKey = scrollToCourse?.key;
+
+  useEffect(() => {
+    if (!scrollTargetCourseId || scrollTargetKey === undefined) return;
+
+    const frame = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const list = courseListRef.current;
+        const item = list?.querySelector(`[data-course-id="${scrollTargetCourseId}"]`) as HTMLElement | null;
+        if (!list || !item) return;
+
+        const scrollTop = list.scrollTop + item.getBoundingClientRect().top - list.getBoundingClientRect().top;
+        list.scrollTo({ top: scrollTop, behavior: 'smooth' });
+      });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [scrollTargetCourseId, scrollTargetKey]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -182,11 +205,11 @@ export const SemesterCard = ({
         <div className="my-8 border-b border-gray-200" />
         <div className="relative flex min-h-0 flex-col">
           {courses.length > 0 ? (
-            <ul className="flex min-h-0 [scrollbar-width:none] flex-col gap-8 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+            <ul ref={courseListRef} className="flex min-h-0 flex-col gap-8 overflow-y-auto scroll-smooth">
               {courses.map((course) => {
                 const { id, departmentName, name, tags, isEnglish, isSw } = course;
                 return (
-                  <li key={id}>
+                  <li key={id} data-course-id={id}>
                     {renderCourse ? (
                       renderCourse(course)
                     ) : (
