@@ -48,12 +48,7 @@ export const RequirementHeader = ({ item, hasInfo = false, infoContent }: Requir
               size="sm"
               content={infoContent}
               trigger={
-                <span
-                  aria-label={`${displayName} 안내 보기`}
-                  className="mr-8 flex size-20 shrink-0 items-center justify-center"
-                  role="button"
-                  onClick={(event) => event.stopPropagation()}
-                >
+                <span className="mr-8 flex size-20 shrink-0 items-center justify-center">
                   <Icon name="ic_information_outline" size={20} className="text-gray-300" />
                 </span>
               }
