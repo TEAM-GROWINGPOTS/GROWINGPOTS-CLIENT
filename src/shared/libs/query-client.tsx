@@ -1,5 +1,6 @@
 import { ToastItem } from '@shared/components/toast/toast-item';
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
+import { isHTTPError } from 'ky';
 import { toast as sonnerToast } from 'sonner';
 
 const handleGlobalError = () => {
@@ -19,7 +20,10 @@ export const createQueryClient = () =>
     defaultOptions: {
       queries: {
         staleTime: 1000 * 60 * 5,
-        retry: 1,
+        retry: (failureCount, error) => {
+          if (isHTTPError(error) && error.response.status >= 400) return false;
+          return failureCount < 1;
+        },
         refetchOnWindowFocus: false,
         refetchOnReconnect: true,
       },
