@@ -23,9 +23,9 @@ export const useSavePlanner = ({ onSaveError }: UseSavePlannerInput = {}) => {
 
   return useMutation({
     mutationFn: savePlanner,
-    onSuccess: (graduation) => {
-      if (graduation) {
-        queryClient.setQueryData(QUERY_KEY.GRADUATION.STATUS({ source: 'PLANNED' }), graduation);
+    onSuccess: (data) => {
+      if (data?.graduation) {
+        queryClient.setQueryData(QUERY_KEY.GRADUATION.STATUS({ source: 'PLANNED' }), data.graduation);
         return;
       }
       queryClient.invalidateQueries({ queryKey: QUERY_KEY.GRADUATION.ALL });
