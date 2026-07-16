@@ -52,10 +52,11 @@ const CARD_GAP_CENTER_OFFSET = 12; // 카드 앞 gap 24의 중앙에 오도록 �
 const CARD_BOUNDARY_TOLERANCE = 2;
 
 interface CardViewProps {
+  planner: ReturnType<typeof usePlannerTerms>;
   sidebarSlot: HTMLDivElement | null;
 }
 
-export const CardView = ({ sidebarSlot }: CardViewProps) => {
+export const CardView = ({ planner, sidebarSlot }: CardViewProps) => {
   const {
     isLoading: isPlannerLoading,
     isError: isPlannerError,
@@ -76,7 +77,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     selectFolder,
     renameFolder,
     deleteFolder,
-  } = usePlannerTerms();
+  } = planner;
   const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
   const { data: studentProfile } = useStudentProfile();
   const admissionYear = studentProfile?.admissionYear;

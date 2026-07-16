@@ -1,5 +1,6 @@
 'use client';
 
+import { usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
 import { useViewMode } from '@features/semester-planner/hooks/use-view-mode';
 import { ViewModeToggle } from '@features/semester-planner/view-mode-toggle/view-mode-toggle';
 import { useState } from 'react';
@@ -10,6 +11,10 @@ import { RoadmapView } from './road-view';
 export const PlannerView = () => {
   const { viewMode } = useViewMode();
   const [sidebarSlot, setSidebarSlot] = useState<HTMLDivElement | null>(null);
+  // 카드뷰/로드맵뷰가 각자 이 훅을 부르면 뷰를 전환할 때마다 마운트되는 쪽이 plannedTerms를 처음부터
+  // 다시 시드해야 해서, 방금 다른 뷰에서 저장한 내용을 다시 GET으로 받아와야 했다. 여기서 한 번만 불러
+  // 두 뷰가 같은 인스턴스를 공유하게 하면 전환 시 재조회가 필요 없어진다.
+  const planner = usePlannerTerms();
 
   return (
     <div className="flex h-full bg-gray-100">
@@ -24,7 +29,11 @@ export const PlannerView = () => {
           </div>
         </div>
         <div className="min-h-0 flex-1">
-          {viewMode === 'roadmap' ? <RoadmapView /> : <CardView sidebarSlot={sidebarSlot} />}
+          {viewMode === 'roadmap' ? (
+            <RoadmapView planner={planner} />
+          ) : (
+            <CardView planner={planner} sidebarSlot={sidebarSlot} />
+          )}
         </div>
       </div>
       <div ref={setSidebarSlot} className="h-full shrink-0" />

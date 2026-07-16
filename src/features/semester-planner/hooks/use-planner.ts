@@ -8,5 +8,4 @@ export const usePlanner = () =>
   useQuery({
     queryKey: QUERY_KEY.PLANNER.ALL,
     queryFn: getPlanner,
-    refetchOnMount: 'always',
   });

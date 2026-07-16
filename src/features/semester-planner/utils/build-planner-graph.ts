@@ -9,7 +9,7 @@ function toTermLabel(yearLevel: number, semester: number): string {
   return `${yearLevel}학년 ${getSemesterLabel(semester)}`;
 }
 
-const getFolderCredit = (folder: PlannerFolder): number => folder.courses.reduce((sum, { credit }) => sum + credit, 0);
+const getFolderCredit = (folder: PlannerFolder): number => folder.totalCredit;
 
 export interface PlannerGraph {
   nodes: Node<PlannerNodeData>[];

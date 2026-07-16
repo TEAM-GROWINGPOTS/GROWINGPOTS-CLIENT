@@ -214,7 +214,11 @@ const nodeTypes = {
 
 const edgeTypes = { semesterEdge: SemesterEdge };
 
-export const RoadmapView = () => {
+interface RoadmapViewProps {
+  planner: ReturnType<typeof usePlannerTerms>;
+}
+
+export const RoadmapView = ({ planner }: RoadmapViewProps) => {
   const { setViewMode } = useViewMode();
   const router = useRouter();
   const {
@@ -229,7 +233,7 @@ export const RoadmapView = () => {
     selectFolders,
     reorderFolders,
     waitForSave,
-  } = usePlannerTerms();
+  } = planner;
   const { nodes: initialNodes, edges: initialEdges, completedIds } = usePlannerGraph(completedTerms, plannedTerms);
   const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
 
@@ -625,9 +629,8 @@ export const RoadmapView = () => {
         const added = addFolder(termId, { select: true });
         const term = plannedTerms.find(({ id }) => id === termId);
         if (added && term) setPendingFocusTerm({ yearLevel: term.yearLevel, semesterLabel: term.semesterLabel });
-        // 카드뷰로 전환하면 usePlannerTerms가 새로 마운트되어 서버 GET으로 다시 시드된다. 저장 PUT이
-        // 끝나기 전에 전환하면 그 GET이 추가 전 상태를 받아와 화면에 반영이 늦어 보이므로, 저장이
-        // 끝난 뒤에 전환한다.
+        // usePlannerTerms 인스턴스를 카드뷰와 공유하고 refetchOnMount도 없앤 뒤로는 뷰 전환 자체가
+        // 재조회를 유발하지 않지만, 저장(PUT)이 채 끝나기도 전에 화면을 옮기는 걸 막기 위해 여전히 기다린다.
         waitForSave().then(() => setViewMode('card'));
       }
     },
