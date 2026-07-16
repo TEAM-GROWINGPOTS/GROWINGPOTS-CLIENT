@@ -109,6 +109,7 @@ export interface SemesterFolder {
 
 export interface PlannerFolder extends SemesterFolder {
   courses: SemesterCourse[];
+  totalCredit: number;
 }
 
 export interface PlannerTerm {

@@ -14,8 +14,10 @@ import type {
   SemesterCourse,
 } from '@features/semester-planner/types/planner';
 import {
+  isSamePlannerComposition,
   mapCompletedTerms,
   mapPlannedTerms,
+  mergeServerTotalCredits,
   sortSemesterCourses,
   toPlannerSaveRequest,
 } from '@features/semester-planner/utils/map-planner';
@@ -24,6 +26,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 export const getSelectedCourses = (term: PlannerTerm): SemesterCourse[] =>
   sortSemesterCourses(term.folders.find(({ id }) => id === term.selectedFolderId)?.courses ?? []);
+
+export const getSelectedTotalCredit = (term: PlannerTerm): number =>
+  term.folders.find(({ id }) => id === term.selectedFolderId)?.totalCredit ?? 0;
 
 export const getFolderName = ({ yearLevel, semesterLabel, selectedFolderId, folders }: PlannerTerm): string => {
   const selectedFolder = folders.find(({ id }) => id === selectedFolderId);
@@ -104,6 +109,7 @@ export const usePlannerTerms = () => {
   const snapshotRef = useRef<PlannerTerm[] | null>(null);
   const createdIdSeqRef = useRef(0);
   const isSeededRef = useRef(false);
+  const saveSeqRef = useRef(0);
 
   const setPlannedTerms = (terms: PlannerTerm[]) => {
     setPlannedState((prev) => ({ ...prev, terms }));
@@ -138,19 +144,31 @@ export const usePlannerTerms = () => {
   // 다른 액션에서도 true일 수 있어 여기서 무조건 확인하면 안 된다.
   const commitPlannedTerms = (next: PlannerTerm[], options?: { notifyDuplicateCourse?: boolean }) => {
     setPlannedTerms(next);
+    const saveSeq = ++saveSeqRef.current;
     const savePromise = requestSavePlanner(toPlannerSaveRequest(next));
-    if (options?.notifyDuplicateCourse) {
-      savePromise
-        .then((data) => {
-          if (data?.hasDuplicateCourse) {
-            toast.notice('재수강 과목이에요. 기존 이수 학점은 제외되고 현재 학기에 반영돼요.');
-            // 재수강 과목은 기존 이수 학점 제외 등 총 학점 계산이 서버에서만 정확히 되므로,
-            // 낙관적 업데이트로는 반영이 안 된다 — 이 경우에만 GET으로 다시 채운다.
-            reseedPlannedTerms(null);
-          }
-        })
-        .catch(() => {});
-    }
+    savePromise
+      .then(async (data) => {
+        if (options?.notifyDuplicateCourse && data?.hasDuplicateCourse) {
+          toast.notice('재수강 과목이에요. 기존 이수 학점은 제외되고 현재 학기에 반영돼요.');
+        }
+        // 폴더 totalCredit 등 서버 계산값을 화면에 반영하기 위해 저장 성공마다 재조회한다.
+        // 재조회가 도착하기 전에 새 편집(새 저장)이 시작됐으면, 낡은 응답으로 최신 로컬 상태를 덮지 않는다.
+        if (saveSeq !== saveSeqRef.current) return;
+        const { data: latestPlanner } = await refetchPlanner();
+        if (saveSeq !== saveSeqRef.current) return;
+        if (!latestPlanner) return;
+        // 응답 구성이 저장본과 같으면(정상 경로) 서버 계산값만 끼워 넣고,
+        // 다르면(외부 변경·서버 변형) 서버를 진실로 삼아 전체 재시드한다.
+        if (isSamePlannerComposition(next, latestPlanner.plannedTerms)) {
+          setPlannedState((prev) => ({
+            ...prev,
+            terms: mergeServerTotalCredits(prev.terms, latestPlanner.plannedTerms),
+          }));
+        } else {
+          setPlannedTerms(mapPlannedTerms(latestPlanner.plannedTerms));
+        }
+      })
+      .catch(() => {});
     lastSavePromiseRef.current = savePromise.catch(() => {});
   };
 
@@ -213,7 +231,7 @@ export const usePlannerTerms = () => {
       semesterLabel,
       status: 'planned',
       selectedFolderId: folderId,
-      folders: [{ id: folderId, name: `${yearLevel}학년 ${semesterLabel}(1)`, courses: [] }],
+      folders: [{ id: folderId, name: `${yearLevel}학년 ${semesterLabel}(1)`, courses: [], totalCredit: 0 }],
     };
     commitPlannedTerms(insertPlannedTerm(plannedTerms, newTerm));
     return 'added';
@@ -231,6 +249,7 @@ export const usePlannerTerms = () => {
       id: `folder-new-${createdIdSeqRef.current}`,
       name: `${term.yearLevel}학년 ${term.semesterLabel}(${getNextFolderSeq(term)})`,
       courses: [],
+      totalCredit: 0,
     };
     const next = plannedTerms.map((prevTerm) =>
       prevTerm.id === termId

@@ -1,7 +1,11 @@
 'use client';
 
 import { useDroppable } from '@dnd-kit/core';
-import { getFolderName, getSelectedCourses } from '@features/semester-planner/hooks/use-planner-terms';
+import {
+  getFolderName,
+  getSelectedCourses,
+  getSelectedTotalCredit,
+} from '@features/semester-planner/hooks/use-planner-terms';
 import type { PlannerTerm } from '@features/semester-planner/types/planner';
 import { DraggableCourse } from '@features/semester-planner/ui/card-view/dnd/draggable-course';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
@@ -44,6 +48,7 @@ export const DroppableTerm = ({
         semesterLabel={semesterLabel}
         status={status}
         folderName={getFolderName(term)}
+        totalCredit={getSelectedTotalCredit(term)}
         courses={getSelectedCourses(term)}
         folders={folders}
         selectedFolderId={selectedFolderId}

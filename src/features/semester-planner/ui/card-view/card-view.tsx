@@ -2,7 +2,12 @@
 
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { getSemesterLabelByCode } from '@features/semester-planner/constants';
-import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
+import {
+  getFolderName,
+  getSelectedCourses,
+  getSelectedTotalCredit,
+  usePlannerTerms,
+} from '@features/semester-planner/hooks/use-planner-terms';
 import { AddCourseSidebar } from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar';
 import {
   CourseFilterModal,
@@ -377,6 +382,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
                     semesterLabel={term.semesterLabel}
                     status={term.status}
                     folderName={getFolderName(term)}
+                    totalCredit={getSelectedTotalCredit(term)}
                     courses={getSelectedCourses(term)}
                   />
                 );
