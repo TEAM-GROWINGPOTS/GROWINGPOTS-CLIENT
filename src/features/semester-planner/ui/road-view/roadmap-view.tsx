@@ -294,7 +294,9 @@ export const RoadmapView = () => {
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
-  // 노드 높이 변화(아코디언 열기/닫기) 감지 → 같은 열 y 재배치
+  // 노드 높이 변화(아코디언 열기/닫기) 감지 → 같은 열 y 재배치.
+  // 노드 개수가 바뀐 경우(컬럼 삭제 등)도 감지해야 한다 — 살아남은 노드들의 개별 높이는 그대로여도
+  // "+" 버튼이 참조하는 마지막 컬럼 자체가 바뀌었을 수 있어, 높이 값만 비교해선 재계산이 누락된다.
   const measuredHeightsRef = useRef<Map<string, number>>(new Map());
   useEffect(() => {
     let changed = false;
@@ -305,6 +307,7 @@ export const RoadmapView = () => {
       next.set(node.id, h);
       if (measuredHeightsRef.current.get(node.id) !== h) changed = true;
     }
+    if (next.size !== measuredHeightsRef.current.size) changed = true;
     if (!changed) return;
     measuredHeightsRef.current = next;
     setNodes(recomputeColumnPositions);
@@ -324,11 +327,8 @@ export const RoadmapView = () => {
 
   // 졸업 요건은 학기/폴더가 바뀔 때마다 저장 응답으로 다시 계산돼 오므로(useSavePlanner의 onSuccess가
   // GRADUATION 쿼리 캐시를 갱신), 배지와 로띠 모두 그래프에서 직접 합산한 학점이 아니라 이 API 값의
-  // 학점 요건 충족 여부(요건 - 이수)를 그대로 기준으로 삼는다. 아코디언의 배지 로직과 동일한 기준이다.
-  const creditShortfall = graduationData
-    ? graduationData.summary.totalCredits.required - graduationData.summary.totalCredits.current
-    : null;
-  const showCelebration = creditShortfall !== null && creditShortfall <= 0 && !isCelebrationDismissed;
+  // curriculumSatisfied를 그대로 기준으로 삼는다. 아코디언의 배지 로직과 동일한 기준이다.
+  const showCelebration = !!graduationData?.curriculumSatisfied && !isCelebrationDismissed;
 
   // 즉시 unmount하지 않고 opacity 전환이 끝난 뒤 dismiss 상태로 확정한다.
   const dismissCelebration = useCallback(() => {
@@ -591,7 +591,7 @@ export const RoadmapView = () => {
   const handleDeleteFolder = useCallback(
     (termId: string, folderId: string, folderName: string) => {
       const { isTermRemoved, promotedFolderId } = deleteFolder(termId, folderId);
-      toast.success(`${folderName} 폴더가 삭제되었어요.`);
+      toast.success(`'${folderName}' 폴더가 삭제되었어요.`);
 
       // 학기 자체가 사라지는 경우(컬럼 재배치 필요)는 buildPlannerGraph가 다시 지은 그래프를 신뢰한다.
       if (isTermRemoved) {
@@ -727,7 +727,7 @@ export const RoadmapView = () => {
                 className="-mt-32 h-400 w-400"
               />
               {/* 로띠 애니메이션 자체에 하단 여백이 많아 인접 배치만으로는 텍스트와 멀어 보여 음수 마진으로 당긴다. */}
-              <p className="text-title-sb-24 animate-text-rise -mt-48 text-gray-700">졸업 요건을 충족했어요!</p>
+              <p className="text-title-sb-24 animate-text-rise -mt-48 text-gray-700">졸업 학점 요건을 충족했어요!</p>
             </div>
           )}
         </div>

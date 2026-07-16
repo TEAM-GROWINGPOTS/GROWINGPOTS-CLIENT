@@ -195,7 +195,7 @@ export const usePlannerTerms = () => {
     commitPlannedTerms(plannedTerms.filter(({ id }) => id !== termId));
   };
 
-  const addFolder = (termId: string): PlannerTerm | null => {
+  const addFolder = (termId: string): PlannerFolder | null => {
     const term = plannedTerms.find(({ id }) => id === termId);
     if (!term) return null;
     createdIdSeqRef.current += 1;
@@ -208,7 +208,7 @@ export const usePlannerTerms = () => {
       prevTerm.id === termId ? { ...prevTerm, folders: [...prevTerm.folders, newFolder] } : prevTerm,
     );
     commitPlannedTerms(next);
-    return term;
+    return newFolder;
   };
 
   // 노드뷰의 엣지 연결 하나가 두 학기의 활성 폴더를 동시에 바꿀 수 있어, 한 번의 커밋으로 묶어 반영한다.
