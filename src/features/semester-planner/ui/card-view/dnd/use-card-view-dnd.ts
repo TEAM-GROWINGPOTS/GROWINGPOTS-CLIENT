@@ -185,8 +185,9 @@ export const useCardViewDnd = ({
         onCourseInserted?.(termId, copy.id);
       };
 
+      const numericTermId = Number(termId);
       try {
-        const result = await checkPrerequisite([course.courseId]);
+        const result = await checkPrerequisite([course.courseId], isNaN(numericTermId) ? undefined : numericTermId);
         const missing = result.results[0]?.missingPrerequisites ?? [];
 
         if (missing.length === 0) {
