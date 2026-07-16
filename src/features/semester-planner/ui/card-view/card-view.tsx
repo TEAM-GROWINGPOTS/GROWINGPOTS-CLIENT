@@ -22,7 +22,7 @@ import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals
 import { CardViewGuideModal } from '@features/semester-planner/ui/card-view/modals/card-view-guide-modal';
 import { PrerequisiteModal } from '@features/semester-planner/ui/card-view/modals/prerequisite-modal';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
-import { hasSeenGuide } from '@features/semester-planner/utils/has-seen-guide';
+import { isGuideSeen, markGuideSeen } from '@features/semester-planner/utils/guide-seen';
 import { clearPendingFocusTerm, peekPendingFocusTerm } from '@features/semester-planner/utils/pending-focus-term';
 import { parseApiError } from '@shared/apis/parse-api-error';
 import { CourseSearchItemResponse } from '@shared/apis/types/course-search';
@@ -83,11 +83,16 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
 
   if (studentProfileId !== undefined && studentProfileId !== checkedGuideProfileId) {
     setCheckedGuideProfileId(studentProfileId);
-    if (!hasSeenGuide(`${CARD_VIEW_GUIDE_SEEN_KEY}:${studentProfileId}`)) {
+    if (!isGuideSeen(`${CARD_VIEW_GUIDE_SEEN_KEY}:${studentProfileId}`)) {
       setGuideConfirmLabel('시작하기');
       setIsGuideOpen(true);
     }
   }
+
+  useEffect(() => {
+    if (studentProfileId === undefined) return;
+    markGuideSeen(`${CARD_VIEW_GUIDE_SEEN_KEY}:${studentProfileId}`);
+  }, [studentProfileId]);
   const [isAddCourseModalOpen, setIsAddCourseModalOpen] = useState(false);
   const [addCourseName, setAddCourseName] = useState('');
   const [addCourseCredit, setAddCourseCredit] = useState('');

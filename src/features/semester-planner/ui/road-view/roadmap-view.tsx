@@ -17,7 +17,7 @@ import {
 } from '@features/semester-planner/types/planner-graph';
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
 import { RoadmapGuideModal } from '@features/semester-planner/ui/road-view/modals/roadmap-guide-modal';
-import { hasSeenGuide } from '@features/semester-planner/utils/has-seen-guide';
+import { isGuideSeen, markGuideSeen } from '@features/semester-planner/utils/guide-seen';
 import { setPendingFocusTerm } from '@features/semester-planner/utils/pending-focus-term';
 import { parseApiError } from '@shared/apis/parse-api-error';
 import { toast } from '@shared/components';
@@ -250,11 +250,16 @@ export const RoadmapView = () => {
 
   if (studentProfileId !== undefined && studentProfileId !== checkedGuideProfileId) {
     setCheckedGuideProfileId(studentProfileId);
-    if (!hasSeenGuide(`${ROADMAP_GUIDE_SEEN_KEY}:${studentProfileId}`)) {
+    if (!isGuideSeen(`${ROADMAP_GUIDE_SEEN_KEY}:${studentProfileId}`)) {
       setGuideConfirmLabel('시작하기');
       setIsGuideOpen(true);
     }
   }
+
+  useEffect(() => {
+    if (studentProfileId === undefined) return;
+    markGuideSeen(`${ROADMAP_GUIDE_SEEN_KEY}:${studentProfileId}`);
+  }, [studentProfileId]);
   const [isCelebrationDismissed, setIsCelebrationDismissed] = useState(false);
   const [isCelebrationLeaving, setIsCelebrationLeaving] = useState(false);
 
