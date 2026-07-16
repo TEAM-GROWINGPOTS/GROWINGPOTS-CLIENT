@@ -66,7 +66,7 @@ export const ClassCard = ({
   className,
   ...props
 }: ClassCardProps) => {
-  const note = getNote(isEnglish, isSw);
+  const note = customNote ?? getNote(isEnglish, isSw);
   const visibleTags = tags.filter(Boolean);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [isTitleTruncated, setIsTitleTruncated] = useState(false);

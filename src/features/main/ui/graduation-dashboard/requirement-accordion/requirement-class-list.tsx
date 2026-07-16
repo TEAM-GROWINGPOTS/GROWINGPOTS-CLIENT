@@ -7,6 +7,7 @@ interface RequirementClassListProps {
   courses: RequirementCourse[];
   className?: string;
   showTakenState?: boolean;
+  admissionYear?: number;
 }
 
 export const isTakenCourse = ({ taken }: RequirementCourse) => taken;
@@ -25,8 +26,10 @@ const getRequirementCourseTags = ({ credit, divisionName, semester }: Requiremen
   return [tags.division, tags.credit, tags.semester].filter((tag): tag is string => Boolean(tag));
 };
 
-const getRequirementCourseNote = ({ area, divisionCode }: RequirementCourse) => {
-  if (divisionCode !== 'DISTRIBUTED_GE' || !area) return undefined;
+const getRequirementCourseNote = ({ area, divisionCode }: RequirementCourse, admissionYear?: number) => {
+  if (divisionCode !== 'DISTRIBUTED_GE' || !area || admissionYear === undefined || admissionYear < 2024) {
+    return undefined;
+  }
 
   return `*${area.name}`;
 };
@@ -36,6 +39,7 @@ export const RequirementClassList = ({
   courses,
   className,
   showTakenState = false,
+  admissionYear,
 }: RequirementClassListProps) => {
   if (courses.length === 0) return null;
 
@@ -47,7 +51,7 @@ export const RequirementClassList = ({
             department={course.departmentName}
             title={course.name}
             tags={getRequirementCourseTags(course, requirementName)}
-            note={getRequirementCourseNote(course)}
+            note={getRequirementCourseNote(course, admissionYear)}
             isEnglish={course.isEnglish}
             isSw={course.isSw}
             size="max"
