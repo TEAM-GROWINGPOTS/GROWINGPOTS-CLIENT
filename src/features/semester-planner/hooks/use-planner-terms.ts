@@ -132,6 +132,9 @@ export const usePlannerTerms = () => {
         .then((data) => {
           if (data?.hasDuplicateCourse) {
             toast.notice('재수강 과목이에요. 기존 이수 학점은 제외되고 현재 학기에 반영돼요.');
+            // 재수강 과목은 기존 이수 학점 제외 등 총 학점 계산이 서버에서만 정확히 되므로,
+            // 낙관적 업데이트로는 반영이 안 된다 — 이 경우에만 GET으로 다시 채운다.
+            reseedPlannedTerms(null);
           }
         })
         .catch(() => {});
