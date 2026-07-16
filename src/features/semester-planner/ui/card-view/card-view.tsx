@@ -181,8 +181,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     const pendingTerm = pendingScrollTermRef.current || peekPendingFocusTerm();
     if (!pendingTerm) return;
     const termIndex = gridTerms.findIndex(
-      ({ yearLevel, semesterLabel }) =>
-        yearLevel === pendingTerm.yearLevel && semesterLabel === pendingTerm.semesterLabel,
+      ({ status, yearLevel, semesterLabel }) =>
+        status === 'planned' && yearLevel === pendingTerm.yearLevel && semesterLabel === pendingTerm.semesterLabel,
     );
     if (termIndex === -1) return;
     const board = boardRef.current;

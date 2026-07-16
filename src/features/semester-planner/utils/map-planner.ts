@@ -59,11 +59,11 @@ const toPlannerFolder = (version: PlannerVersionResponse): PlannerFolder => ({
     .map((course): SemesterCourse => ({ id: String(course.plannerVersionItemId), ...toCourseBase(course) })),
 });
 
-const toCompletedTerm = (term: CompletedTermResponse): PlannerTerm => {
-  const folderId = String(term.plannerTermVersionId);
+const toCompletedTerm = (term: CompletedTermResponse, index: number): PlannerTerm => {
+  const folderId = `completed-folder-${index}`;
 
   return {
-    id: `completed-${term.yearLevel}-${term.semester}`,
+    id: `completed-${index}-${term.yearLevel}-${term.semester}`,
     yearLevel: term.yearLevel,
     semester: term.semester,
     semesterLabel: getSemesterLabel(term.semester),
