@@ -622,14 +622,16 @@ export const RoadmapView = () => {
       if (node.type === 'addVersionNode') {
         const { termId, versionCount } = node.data as Partial<AddVersionNodeData>;
         if (!termId || (versionCount ?? 0) >= MAX_FOLDERS_PER_TERM) return;
-        addFolder(termId);
+        const added = addFolder(termId, { select: true });
+        const term = plannedTerms.find(({ id }) => id === termId);
+        if (added && term) setPendingFocusTerm({ yearLevel: term.yearLevel, semesterLabel: term.semesterLabel });
         // 카드뷰로 전환하면 usePlannerTerms가 새로 마운트되어 서버 GET으로 다시 시드된다. 저장 PUT이
         // 끝나기 전에 전환하면 그 GET이 추가 전 상태를 받아와 화면에 반영이 늦어 보이므로, 저장이
         // 끝난 뒤에 전환한다.
         waitForSave().then(() => setViewMode('card'));
       }
     },
-    [setViewMode, addFolder, waitForSave],
+    [setViewMode, addFolder, plannedTerms, waitForSave],
   );
 
   const handleAddSemesterSubmit = useCallback(

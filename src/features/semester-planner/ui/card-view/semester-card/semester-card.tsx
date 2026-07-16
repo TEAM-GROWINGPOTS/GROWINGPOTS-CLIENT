@@ -19,6 +19,7 @@ interface SemesterCardProps {
   semesterLabel?: string;
   status: SemesterCardStatus;
   folderName: string;
+  totalCredit: number;
   courses: SemesterCourse[];
   folders?: SemesterFolder[];
   selectedFolderId?: string;
@@ -58,6 +59,7 @@ export const SemesterCard = ({
   semesterLabel,
   status,
   folderName,
+  totalCredit,
   courses,
   folders,
   selectedFolderId,
@@ -147,7 +149,6 @@ export const SemesterCard = ({
     setIsTermDeleteOpen(false);
   };
 
-  const totalCredit = courses.reduce((sum, { credit }) => sum + credit, 0);
   const isPlanned = status === 'planned';
   const statusIcon = STATUS_ICON[status];
   const termLabel = `${yearLevel}학년 ${semesterLabel ?? getSemesterLabel(semester)}`;
