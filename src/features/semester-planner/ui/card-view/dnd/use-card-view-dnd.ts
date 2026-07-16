@@ -180,13 +180,17 @@ export const useCardViewDnd = ({
       copyCountRef.current += 1;
       const copy = { ...course, id: `${course.id.replace(LIBRARY_PREFIX, 'course-')}-copy-${copyCountRef.current}` };
       const termId = overContainer;
+      const insertAndScroll = () => {
+        insertCourse(termId, copy);
+        onCourseInserted?.(termId, copy.id);
+      };
 
       try {
         const result = await checkPrerequisite([course.courseId]);
         const missing = result.results[0]?.missingPrerequisites ?? [];
 
         if (missing.length === 0) {
-          insertCourse(termId, copy);
+          insertAndScroll();
           return;
         }
 
@@ -197,13 +201,11 @@ export const useCardViewDnd = ({
           type: hasRequired ? 'REQUIRED' : 'RECOMMENDED',
           courseName: course.name,
           prerequisiteName: firstMissing.name,
-          onConfirm: hasRequired ? () => {} : () => insertCourse(termId, copy),
+          onConfirm: hasRequired ? () => {} : insertAndScroll,
         });
       } catch {
-        insertCourse(termId, copy);
+        insertAndScroll();
       }
-      insertCourse(overContainer, copy);
-      onCourseInserted?.(overContainer, copy.id);
       return;
     }
 

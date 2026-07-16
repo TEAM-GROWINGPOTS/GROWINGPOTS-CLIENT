@@ -68,15 +68,6 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     renameFolder,
     deleteFolder,
   } = usePlannerTerms();
-  const { isLibraryDrag, isDropRejected, prerequisiteModal, setPrerequisiteModal, contextProps } = useCardViewDnd({
-    plannedTerms,
-    snapshot,
-    restoreSnapshot,
-    previewCourseMove,
-    dropCourseToTerm,
-    insertCourse,
-    removeCourse,
-  });
   const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
@@ -119,7 +110,15 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     setScrollToCourse({ termId, courseId, key: Date.now() });
   }, []);
 
-  const { activeCourse, overTermId } = useCardViewDnd({
+  const {
+    activeCourse,
+    overTermId,
+    isLibraryDrag,
+    isDropRejected,
+    prerequisiteModal,
+    setPrerequisiteModal,
+    contextProps,
+  } = useCardViewDnd({
     plannedTerms,
     snapshot,
     restoreSnapshot,
