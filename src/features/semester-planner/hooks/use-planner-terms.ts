@@ -19,6 +19,7 @@ import {
   sortSemesterCourses,
   toPlannerSaveRequest,
 } from '@features/semester-planner/utils/map-planner';
+import { toast } from '@shared/components';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 export const getSelectedCourses = (term: PlannerTerm): SemesterCourse[] =>
@@ -132,9 +133,25 @@ export const usePlannerTerms = () => {
     setPlannedTerms(next);
   };
 
-  const commitPlannedTerms = (next: PlannerTerm[]) => {
+  // 과목 카드를 새로 추가하는 액션(insertCourse)만 재수강 안내 토스트를 띄운다.
+  // hasDuplicateCourse는 저장 시점의 전체 상태를 기준으로 내려오는 값이라, 폴더/학기 추가·삭제 등
+  // 다른 액션에서도 true일 수 있어 여기서 무조건 확인하면 안 된다.
+  const commitPlannedTerms = (next: PlannerTerm[], options?: { notifyDuplicateCourse?: boolean }) => {
     setPlannedTerms(next);
-    lastSavePromiseRef.current = requestSavePlanner(toPlannerSaveRequest(next)).catch(() => {});
+    const savePromise = requestSavePlanner(toPlannerSaveRequest(next));
+    if (options?.notifyDuplicateCourse) {
+      savePromise
+        .then((data) => {
+          if (data?.hasDuplicateCourse) {
+            toast.notice('재수강 과목이에요. 기존 이수 학점은 제외되고 현재 학기에 반영돼요.');
+            // 재수강 과목은 기존 이수 학점 제외 등 총 학점 계산이 서버에서만 정확히 되므로,
+            // 낙관적 업데이트로는 반영이 안 된다 — 이 경우에만 GET으로 다시 채운다.
+            reseedPlannedTerms(null);
+          }
+        })
+        .catch(() => {});
+    }
+    lastSavePromiseRef.current = savePromise.catch(() => {});
   };
 
   const waitForSave = () => lastSavePromiseRef.current;
@@ -164,7 +181,7 @@ export const usePlannerTerms = () => {
     const next = plannedTerms.map((term) =>
       term.id !== termId ? term : updateSelectedCourses(term, (courses) => [...courses, course]),
     );
-    commitPlannedTerms(next);
+    commitPlannedTerms(next, { notifyDuplicateCourse: true });
   };
 
   const removeCourse = (courseId: string) => {
