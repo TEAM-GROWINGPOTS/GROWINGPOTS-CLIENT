@@ -223,7 +223,7 @@ export const usePlannerTerms = () => {
     commitPlannedTerms(plannedTerms.filter(({ id }) => id !== termId));
   };
 
-  const addFolder = (termId: string): PlannerFolder | null => {
+  const addFolder = (termId: string, options?: { select?: boolean }): PlannerFolder | null => {
     const term = plannedTerms.find(({ id }) => id === termId);
     if (!term) return null;
     createdIdSeqRef.current += 1;
@@ -233,7 +233,13 @@ export const usePlannerTerms = () => {
       courses: [],
     };
     const next = plannedTerms.map((prevTerm) =>
-      prevTerm.id === termId ? { ...prevTerm, folders: [...prevTerm.folders, newFolder] } : prevTerm,
+      prevTerm.id === termId
+        ? {
+            ...prevTerm,
+            folders: [...prevTerm.folders, newFolder],
+            selectedFolderId: options?.select ? newFolder.id : prevTerm.selectedFolderId,
+          }
+        : prevTerm,
     );
     commitPlannedTerms(next);
     return newFolder;
