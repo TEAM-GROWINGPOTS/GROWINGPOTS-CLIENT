@@ -14,6 +14,7 @@ export interface PlannerCourseBaseResponse {
   credit: number;
   isEnglish: boolean;
   isSw: boolean;
+  area?: CourseArea | null;
 }
 
 export interface PlannedCourseResponse extends PlannerCourseBaseResponse {
@@ -100,6 +101,7 @@ export interface SemesterCourse {
   divisionName: string;
   isEnglish?: boolean;
   isSw?: boolean;
+  area?: CourseArea | null;
 }
 
 export interface SemesterFolder {
@@ -119,4 +121,9 @@ export interface PlannerTerm {
   status: SemesterCardStatus;
   selectedFolderId?: string;
   folders: PlannerFolder[];
+}
+
+export interface CourseArea {
+  code: string;
+  name: string;
 }
