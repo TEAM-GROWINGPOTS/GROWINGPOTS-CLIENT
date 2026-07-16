@@ -17,6 +17,7 @@ import {
 } from '@features/semester-planner/types/planner-graph';
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
 import { RoadmapGuideModal } from '@features/semester-planner/ui/road-view/modals/roadmap-guide-modal';
+import { hasSeenGuide } from '@features/semester-planner/utils/has-seen-guide';
 import { setPendingFocusTerm } from '@features/semester-planner/utils/pending-focus-term';
 import { parseApiError } from '@shared/apis/parse-api-error';
 import { toast } from '@shared/components';
@@ -53,13 +54,6 @@ const ROW_GAP = 150;
 const ROW_MARGIN = 20; // 같은 열 카드 사이 여백
 const NODE_HEIGHT = 300;
 const ROADMAP_GUIDE_SEEN_KEY = 'roadmap-guide-seen';
-
-// localStorage에 없으면(=처음 방문) 즉시 seen 처리하고 false를 반환해, 최초 1회만 가이드가 자동으로 열리게 한다.
-const hasSeenGuide = (key: string): boolean => {
-  const seen = localStorage.getItem(key);
-  if (!seen) localStorage.setItem(key, 'true');
-  return !!seen;
-};
 
 // 같은 열 노드들을 실제 measured 높이 기준으로 y 재배치
 const recomputeColumnPositions = (nodes: Node<PlannerNodeData>[]): Node<PlannerNodeData>[] => {
@@ -254,8 +248,6 @@ export const RoadmapView = () => {
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [guideConfirmLabel, setGuideConfirmLabel] = useState('확인');
 
-  // studentProfileId가 (재)로그인 등으로 바뀔 때, 계정별 가이드 열람 여부를 판단해 최초 1회만 자동으로 연다.
-  // 렌더 도중 setState하는 이 패턴은 React가 공식적으로 허용하는 "prop 변화에 따른 state 조정" 방식이다.
   if (studentProfileId !== undefined && studentProfileId !== checkedGuideProfileId) {
     setCheckedGuideProfileId(studentProfileId);
     if (!hasSeenGuide(`${ROADMAP_GUIDE_SEEN_KEY}:${studentProfileId}`)) {

@@ -22,6 +22,7 @@ import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals
 import { CardViewGuideModal } from '@features/semester-planner/ui/card-view/modals/card-view-guide-modal';
 import { PrerequisiteModal } from '@features/semester-planner/ui/card-view/modals/prerequisite-modal';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
+import { hasSeenGuide } from '@features/semester-planner/utils/has-seen-guide';
 import { clearPendingFocusTerm, peekPendingFocusTerm } from '@features/semester-planner/utils/pending-focus-term';
 import { parseApiError } from '@shared/apis/parse-api-error';
 import { CourseSearchItemResponse } from '@shared/apis/types/course-search';
@@ -46,12 +47,6 @@ const CARD_SCROLL_STEP = 282; // 학기 카드 너비 258 + gap 24
 const CARD_GAP_CENTER_OFFSET = 12; // 카드 앞 gap 24의 중앙에 오도록 남기는 여백
 const CARD_BOUNDARY_TOLERANCE = 2;
 const CARD_VIEW_GUIDE_SEEN_KEY = 'card-view-guide-seen';
-
-const hasSeenGuide = (key: string): boolean => {
-  const seen = localStorage.getItem(key);
-  if (!seen) localStorage.setItem(key, 'true');
-  return !!seen;
-};
 
 interface CardViewProps {
   sidebarSlot: HTMLDivElement | null;
@@ -86,8 +81,6 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [guideConfirmLabel, setGuideConfirmLabel] = useState('확인');
 
-  // studentProfileId가 (재)로그인 등으로 바뀔 때, 계정별 가이드 열람 여부를 판단해 최초 1회만 자동으로 연다.
-  // 렌더 도중 setState하는 이 패턴은 React가 공식적으로 허용하는 "prop 변화에 따른 state 조정" 방식이다.
   if (studentProfileId !== undefined && studentProfileId !== checkedGuideProfileId) {
     setCheckedGuideProfileId(studentProfileId);
     if (!hasSeenGuide(`${CARD_VIEW_GUIDE_SEEN_KEY}:${studentProfileId}`)) {
