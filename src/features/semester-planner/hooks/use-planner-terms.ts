@@ -1,5 +1,6 @@
 'use client';
 
+import { checkPrerequisite } from '@features/semester-planner/apis/check-prerequisite';
 import {
   comparePlannerTerms,
   getLatestCompletedOrCurrentTerm,
@@ -104,6 +105,7 @@ export const usePlannerTerms = () => {
   const snapshotRef = useRef<PlannerTerm[] | null>(null);
   const createdIdSeqRef = useRef(0);
   const isSeededRef = useRef(false);
+  const isValidatingRef = useRef(false);
 
   const setPlannedTerms = (terms: PlannerTerm[]) => {
     setPlannedState((prev) => ({ ...prev, terms }));
@@ -155,6 +157,82 @@ export const usePlannerTerms = () => {
   };
 
   const waitForSave = () => lastSavePromiseRef.current;
+
+  // 저장 후 서버가 plannerTermId를 재할당하는 경우를 대비해, save 완료 후 refetch해서
+  // 현재 학기(staleTermId)에 대응하는 신선한 plannerTermId를 반환한다.
+  const resolveTermId = async (staleTermId: string): Promise<number | undefined> => {
+    await waitForSave();
+    const { data: latestPlanner } = await refetchPlanner();
+    if (!latestPlanner) return undefined;
+    const termInState = plannedTerms.find(({ id }) => id === staleTermId);
+    if (!termInState) return undefined;
+    const freshTerm = mapPlannedTerms(latestPlanner.plannedTerms).find(
+      (t) => t.yearLevel === termInState.yearLevel && t.semester === termInState.semester,
+    );
+    const parsed = Number(freshTerm?.id);
+    return isNaN(parsed) ? undefined : parsed;
+  };
+
+  const validateAndCleanPrerequisites = async (): Promise<{ courseName: string; prerequisiteName: string }[]> => {
+    if (isValidatingRef.current) return [];
+    isValidatingRef.current = true;
+    try {
+      await waitForSave();
+      const { data: latestPlanner } = await refetchPlanner();
+      if (!latestPlanner) return [];
+
+      const latestTerms = mapPlannedTerms(latestPlanner.plannedTerms);
+      const violations: { courseId: number; courseName: string; prerequisiteName: string; termId: string }[] = [];
+
+      await Promise.all(
+        latestTerms.map(async (term) => {
+          const courses = getSelectedCourses(term);
+          if (courses.length === 0) return;
+          const numericTermId = Number(term.id);
+          if (isNaN(numericTermId)) return;
+          try {
+            const result = await checkPrerequisite(
+              courses.map((c) => c.courseId),
+              numericTermId,
+            );
+            result.results.forEach((r) => {
+              const requiredMissing = r.missingPrerequisites.find((p) => p.type === 'REQUIRED');
+              if (!requiredMissing) return;
+              const course = courses.find((c) => c.courseId === r.courseId);
+              if (!course) return;
+              violations.push({
+                courseId: r.courseId,
+                courseName: course.name,
+                prerequisiteName: requiredMissing.name,
+                termId: term.id,
+              });
+            });
+          } catch {
+            // 학기별 검사 실패는 무시하고 나머지 학기 계속 검사
+          }
+        }),
+      );
+
+      if (violations.length === 0) return [];
+
+      const removalMap = new Map<string, Set<number>>();
+      for (const v of violations) {
+        if (!removalMap.has(v.termId)) removalMap.set(v.termId, new Set());
+        removalMap.get(v.termId)!.add(v.courseId);
+      }
+
+      const cleaned = latestTerms.map((term) => {
+        const toRemove = removalMap.get(term.id);
+        if (!toRemove) return term;
+        return updateSelectedCourses(term, (courses) => courses.filter((c) => !toRemove.has(c.courseId)));
+      });
+
+      commitPlannedTerms(cleaned);
+      return violations.map(({ courseName, prerequisiteName }) => ({ courseName, prerequisiteName }));
+    } finally {
+      isValidatingRef.current = false;
+    }
+  };
 
   const completedTerms = useMemo(() => (planner ? mapCompletedTerms(planner.completedTerms) : []), [planner]);
   const gridTerms = useMemo(() => [...completedTerms, ...plannedTerms], [completedTerms, plannedTerms]);
@@ -318,5 +396,7 @@ export const usePlannerTerms = () => {
     deleteFolder,
     reorderFolders,
     waitForSave,
+    resolveTermId,
+    validateAndCleanPrerequisites,
   };
 };
