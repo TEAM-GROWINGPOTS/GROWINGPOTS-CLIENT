@@ -20,6 +20,13 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  if (onboardingCompleted === 'true' && pathname === '/onboarding') {
+    const step = request.nextUrl.searchParams.get('step') ?? 'info';
+    if (step === 'info') {
+      return NextResponse.redirect(new URL('/graduation-dashboard', request.url));
+    }
+  }
+
   const ONBOARDING_ALLOWED_PATHS = ['/onboarding', '/analysis-result'];
   if (onboardingCompleted !== 'true' && !ONBOARDING_ALLOWED_PATHS.includes(pathname)) {
     return NextResponse.redirect(new URL('/onboarding', request.url));
