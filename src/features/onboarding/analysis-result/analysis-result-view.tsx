@@ -20,7 +20,11 @@ import { GraduationResult } from './graduation-result/graduation-result';
 import { mapGraduationResponseToCards } from './graduation-result/map-graduation-response';
 import { StudentInfo } from './student-info/student-info';
 
-export const AnalysisResultView = () => {
+interface AnalysisResultViewProps {
+  isOnboardingCompleted?: boolean;
+}
+
+export const AnalysisResultView = ({ isOnboardingCompleted = false }: AnalysisResultViewProps) => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isCourseInfoValid, setIsCourseInfoValid] = useState(true);
@@ -55,6 +59,10 @@ export const AnalysisResultView = () => {
       { courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses) },
       { onSuccess: () => setIsEditing(false) },
     );
+  };
+
+  const handleCancelClick = () => {
+    setIsEditing(false);
   };
 
   const handleEditNoticeConfirm = () => {
@@ -99,18 +107,33 @@ export const AnalysisResultView = () => {
     <div className="min-h-screen w-full bg-gray-50 px-120 pt-80 pb-40">
       <div className="mb-28 flex items-end justify-between">
         <div className="flex flex-col gap-4">
-          <h1 className="text-title-sb-24 text-gray-900">분석 결과를 확인이 필요해요</h1>
-          <p className="text-body-r-16 text-gray-500">
-            PDF에서 추출한 정보를 바탕으로 졸업 현황을 분석했어요. 업로드한 내용이 맞는지 확인해 주세요!
-          </p>
+          <h1 className="text-title-sb-24 text-gray-900">
+            {isOnboardingCompleted ? '졸업 현황 분석' : '분석 결과를 확인이 필요해요'}
+          </h1>
+          {!isOnboardingCompleted && (
+            <p className="text-body-r-16 text-gray-500">
+              PDF에서 추출한 정보를 바탕으로 졸업 현황을 분석했어요. 업로드한 내용이 맞는지 확인해 주세요!
+            </p>
+          )}
         </div>
-        <Button
-          label={isEditing ? '저장하기' : '편집하기'}
-          mode={isEditing ? 'primary_solid' : 'secondary_outline'}
-          size="sm"
-          disabled={isEditing && (!isCourseInfoValid || isSaving)}
-          onClick={handleEditToggleClick}
-        />
+        <div className="flex items-center gap-8">
+          {isEditing && (
+            <Button
+              label="취소하기"
+              mode="secondary_outline"
+              size="sm"
+              disabled={isSaving}
+              onClick={handleCancelClick}
+            />
+          )}
+          <Button
+            label={isEditing ? '저장하기' : '편집하기'}
+            mode={isEditing ? 'primary_solid' : 'secondary_outline'}
+            size="sm"
+            disabled={isEditing && (!isCourseInfoValid || isSaving)}
+            onClick={handleEditToggleClick}
+          />
+        </div>
       </div>
 
       <div className="flex h-231 w-full gap-20">
