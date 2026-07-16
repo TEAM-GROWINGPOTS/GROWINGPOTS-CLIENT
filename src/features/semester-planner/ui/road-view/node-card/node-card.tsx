@@ -53,7 +53,7 @@ export const NodeCard = (props: NodeCardProps) => {
   return (
     <div
       className={cn(
-        'group flex w-250 flex-col gap-12 self-start rounded-xl px-8 pt-16 pb-8',
+        'group flex w-270 flex-col gap-12 self-start rounded-xl px-8 pt-16 pb-8',
         isLime ? 'border border-lime-300 bg-lime-300' : 'bg-gray-50',
         className,
       )}
