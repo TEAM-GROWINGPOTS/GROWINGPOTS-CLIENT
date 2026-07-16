@@ -7,7 +7,7 @@ import {
   isPastPlannerTerm,
 } from '@features/semester-planner/constants';
 import { usePlanner } from '@features/semester-planner/hooks/use-planner';
-import { useSavePlanner } from '@features/semester-planner/hooks/use-save-planner';
+import { getServerPlannedTerms, useSavePlanner } from '@features/semester-planner/hooks/use-save-planner';
 import type {
   PlannedTermResponse,
   PlannerFolder,
@@ -22,6 +22,7 @@ import {
   sortSemesterCourses,
   toPlannerSaveRequest,
 } from '@features/semester-planner/utils/map-planner';
+import { parseApiError } from '@shared/apis/parse-api-error';
 import { toast } from '@shared/components';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -126,7 +127,7 @@ export const usePlannerTerms = () => {
     if (latestPlanner) setPlannedTerms(mapPlannedTerms(latestPlanner.plannedTerms));
   };
 
-  const { mutateAsync: requestSavePlanner } = useSavePlanner({ onSaveError: reseedPlannedTerms });
+  const { mutateAsync: requestSavePlanner } = useSavePlanner();
   // 마지막 저장 요청의 완료(성공/실패 무관) 시점. 저장 직후 다른 화면으로 전환해야 하는 흐름(노드뷰의
   // 학기/폴더 추가)에서, 전환된 화면이 새로 GET하기 전에 이 저장이 먼저 끝나도록 기다리는 용도다.
   const lastSavePromiseRef = useRef<Promise<unknown>>(Promise.resolve());
@@ -171,6 +172,15 @@ export const usePlannerTerms = () => {
         }
       })
       .catch(() => {});
+
+    savePromise.catch(async (error) => {
+      // 낡은 저장의 실패는 무시한다 — 이후 저장의 결과(성공 병합/실패 복구)가 최신 진실을 정착시킨다.
+      if (saveSeq !== saveSeqRef.current) return;
+      const parsed = await parseApiError(error);
+      toast.negative(parsed?.message ?? '플래너 저장에 실패했어요.');
+      reseedPlannedTerms(getServerPlannedTerms(parsed?.data));
+    });
+
     lastSavePromiseRef.current = savePromise.catch(() => {});
   };
 
