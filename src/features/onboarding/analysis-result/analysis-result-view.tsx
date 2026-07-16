@@ -105,7 +105,7 @@ export const AnalysisResultView = ({ isOnboardingCompleted = false }: AnalysisRe
 
   return (
     <div className="min-h-screen w-full bg-gray-50 px-120 pt-80 pb-40">
-      <div className="mb-28 flex items-end justify-between">
+      <div className="z-header sticky top-0 flex items-end justify-between bg-gray-50 pb-28">
         <div className="flex flex-col gap-4">
           <h1 className="text-title-sb-24 text-gray-900">
             {isOnboardingCompleted ? '졸업 현황 분석' : '분석 결과를 확인이 필요해요'}
