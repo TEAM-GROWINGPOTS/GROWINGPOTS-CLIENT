@@ -43,6 +43,12 @@ const getNote = (isEnglish: boolean, isSw: boolean) => {
   return undefined;
 };
 
+const getCombinedNote = (customNote: string | undefined, defaultNote: string | undefined) => {
+  if (!customNote) return defaultNote;
+  if (!defaultNote) return customNote;
+  return `${customNote} / ${defaultNote.replace(/^\*/, '')}`;
+};
+
 interface ClassCardProps extends Omit<ComponentPropsWithoutRef<'article'>, 'children'> {
   department?: string;
   title: string;
@@ -66,7 +72,7 @@ export const ClassCard = ({
   className,
   ...props
 }: ClassCardProps) => {
-  const note = customNote ?? getNote(isEnglish, isSw);
+  const note = getCombinedNote(customNote, getNote(isEnglish, isSw));
   const visibleTags = tags.filter(Boolean);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [isTitleTruncated, setIsTitleTruncated] = useState(false);
