@@ -2,9 +2,15 @@
 
 import { useDraggable } from '@dnd-kit/core';
 import type { SemesterCourse } from '@features/semester-planner/types/planner';
+import { getCourseNote } from '@features/semester-planner/utils/map-planner';
 import { ClassCard } from '@shared/components/class-card/class-card';
 
-export const DraggableCourse = ({ course }: { course: SemesterCourse }) => {
+interface DraggableCourseProps {
+  course: SemesterCourse;
+  admissionYear?: number;
+}
+
+export const DraggableCourse = ({ course, admissionYear }: DraggableCourseProps) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: course.id,
     data: { course },
@@ -19,6 +25,7 @@ export const DraggableCourse = ({ course }: { course: SemesterCourse }) => {
         tags={tags}
         isEnglish={isEnglish}
         isSw={isSw}
+        note={getCourseNote(course, admissionYear)}
         className="w-full cursor-grab border border-gray-100"
       />
     </div>

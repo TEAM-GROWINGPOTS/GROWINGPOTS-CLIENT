@@ -2,7 +2,12 @@
 
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { getSemesterLabelByCode } from '@features/semester-planner/constants';
-import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
+import {
+  getFolderName,
+  getSelectedCourses,
+  getSelectedTotalCredit,
+  usePlannerTerms,
+} from '@features/semester-planner/hooks/use-planner-terms';
 import { AddCourseSidebar } from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar';
 import {
   CourseFilterModal,
@@ -23,6 +28,7 @@ import { CardViewGuideModal } from '@features/semester-planner/ui/card-view/moda
 import { PrerequisiteModal } from '@features/semester-planner/ui/card-view/modals/prerequisite-modal';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
 import { isGuideSeen, markGuideSeen } from '@features/semester-planner/utils/guide-seen';
+import { getCourseNote } from '@features/semester-planner/utils/map-planner';
 import { clearPendingFocusTerm, peekPendingFocusTerm } from '@features/semester-planner/utils/pending-focus-term';
 import { parseApiError } from '@shared/apis/parse-api-error';
 import { CourseSearchItemResponse } from '@shared/apis/types/course-search';
@@ -65,6 +71,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     dropCourseToTerm,
     insertCourse,
     removeCourse,
+    resolveTermId,
+    validateAndCleanPrerequisites,
     addTerm,
     removeTerm,
     addFolder,
@@ -73,9 +81,11 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     deleteFolder,
   } = usePlannerTerms();
   const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
+  const { data: studentProfile } = useStudentProfile();
+  const admissionYear = studentProfile?.admissionYear;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
-  const { data: studentProfile } = useStudentProfile();
+
   const studentProfileId = studentProfile?.studentProfileId;
   const [checkedGuideProfileId, setCheckedGuideProfileId] = useState<number>();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -148,6 +158,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     dropCourseToTerm,
     insertCourse,
     removeCourse,
+    resolveTermId,
+    validateAndCleanPrerequisites,
     onCourseInserted: handleCourseInserted,
   });
 
@@ -203,8 +215,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     const pendingTerm = pendingScrollTermRef.current || peekPendingFocusTerm();
     if (!pendingTerm) return;
     const termIndex = gridTerms.findIndex(
-      ({ yearLevel, semesterLabel }) =>
-        yearLevel === pendingTerm.yearLevel && semesterLabel === pendingTerm.semesterLabel,
+      ({ status, yearLevel, semesterLabel }) =>
+        status === 'planned' && yearLevel === pendingTerm.yearLevel && semesterLabel === pendingTerm.semesterLabel,
     );
     if (termIndex === -1) return;
     const board = boardRef.current;
@@ -376,6 +388,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
                         : undefined
                     }
                     isDropTarget={overTermId === term.id}
+                    admissionYear={admissionYear}
                     onDeleteTerm={() => {
                       removeTerm(term.id);
                       toast.success(`${term.yearLevel}학년 ${term.semesterLabel}가 삭제되었어요.`);
@@ -399,7 +412,9 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
                     semesterLabel={term.semesterLabel}
                     status={term.status}
                     folderName={getFolderName(term)}
+                    totalCredit={getSelectedTotalCredit(term)}
                     courses={getSelectedCourses(term)}
+                    admissionYear={admissionYear}
                   />
                 );
               })}
@@ -468,8 +483,9 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
               onFilterClick={handleFilterClick}
               onClose={() => setIsSidebarOpen(false)}
               onDirectAdd={handleDirectAdd}
+              admissionYear={admissionYear}
               renderCourse={(course: CourseSearchItemResponse) => (
-                <LibraryCourse key={course.courseId} course={course} />
+                <LibraryCourse key={course.courseId} course={course} admissionYear={admissionYear} />
               )}
             />
           </div>,
@@ -482,6 +498,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
             department={activeCourse.departmentName}
             title={activeCourse.name}
             tags={activeCourse.tags}
+            note={getCourseNote(activeCourse, admissionYear)}
             isEnglish={activeCourse.isEnglish}
             isSw={activeCourse.isSw}
             className="shadow-small w-242 scale-105 border border-gray-100 opacity-85"

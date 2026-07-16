@@ -1,7 +1,11 @@
 'use client';
 
 import { useDroppable } from '@dnd-kit/core';
-import { getFolderName, getSelectedCourses } from '@features/semester-planner/hooks/use-planner-terms';
+import {
+  getFolderName,
+  getSelectedCourses,
+  getSelectedTotalCredit,
+} from '@features/semester-planner/hooks/use-planner-terms';
 import type { PlannerTerm } from '@features/semester-planner/types/planner';
 import { DraggableCourse } from '@features/semester-planner/ui/card-view/dnd/draggable-course';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
@@ -17,6 +21,7 @@ interface DroppableTermProps {
   onSelectFolder: (folderId: string) => void;
   onRenameFolder: (folderId: string, name: string) => void;
   onDeleteFolder: (folderId: string) => void;
+  admissionYear?: number;
 }
 
 export const DroppableTerm = ({
@@ -29,6 +34,7 @@ export const DroppableTerm = ({
   onSelectFolder,
   onRenameFolder,
   onDeleteFolder,
+  admissionYear,
 }: DroppableTermProps) => {
   const { setNodeRef } = useDroppable({ id: term.id });
   const { yearLevel, semester, semesterLabel, status, selectedFolderId, folders } = term;
@@ -44,11 +50,13 @@ export const DroppableTerm = ({
         semesterLabel={semesterLabel}
         status={status}
         folderName={getFolderName(term)}
+        totalCredit={getSelectedTotalCredit(term)}
         courses={getSelectedCourses(term)}
         folders={folders}
         selectedFolderId={selectedFolderId}
         isDropTarget={isDropTarget}
-        renderCourse={(course) => <DraggableCourse key={course.id} course={course} />}
+        admissionYear={admissionYear}
+        renderCourse={(course) => <DraggableCourse key={course.id} course={course} admissionYear={admissionYear} />}
         onDeleteTerm={onDeleteTerm}
         onAddFolder={onAddFolder}
         onSelectFolder={onSelectFolder}

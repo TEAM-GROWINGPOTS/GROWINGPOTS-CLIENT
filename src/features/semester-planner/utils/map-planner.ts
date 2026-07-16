@@ -24,6 +24,16 @@ export const getCourseTags = (divisionName: string, credit: number, openedSemest
   OPENED_SEMESTER_LABEL[openedSemester],
 ];
 
+export const getCourseNote = (
+  { area, divisionCategory }: Pick<SemesterCourse, 'area' | 'divisionCategory'>,
+  admissionYear?: number,
+) => {
+  if (!area || admissionYear === undefined || admissionYear < 2024) return undefined;
+  if (divisionCategory && divisionCategory !== 'DISTRIBUTED_GE') return undefined;
+
+  return `*${area.name}`;
+};
+
 const toCourseBase = (course: PlannerCourseBaseResponse) => ({
   courseId: course.courseId,
   departmentName: course.departmentName,
@@ -34,6 +44,7 @@ const toCourseBase = (course: PlannerCourseBaseResponse) => ({
   divisionName: course.divisionName,
   isEnglish: course.isEnglish,
   isSw: course.isSw,
+  area: course.area,
 });
 
 const DIVISION_ORDER = ['전공필수', '전공선택', '전공기초', '필수교과', '배분이수교과', '자유이수교과', '기타이수교과'];
@@ -54,16 +65,17 @@ export const sortSemesterCourses = (courses: SemesterCourse[]): SemesterCourse[]
 const toPlannerFolder = (version: PlannerVersionResponse): PlannerFolder => ({
   id: String(version.plannerTermVersionId),
   name: version.name,
+  totalCredit: version.totalCredit,
   courses: [...version.courses]
     .sort((a, b) => a.coursePositionOrder - b.coursePositionOrder)
     .map((course): SemesterCourse => ({ id: String(course.plannerVersionItemId), ...toCourseBase(course) })),
 });
 
-const toCompletedTerm = (term: CompletedTermResponse): PlannerTerm => {
-  const folderId = String(term.plannerTermVersionId);
+const toCompletedTerm = (term: CompletedTermResponse, index: number): PlannerTerm => {
+  const folderId = `completed-folder-${index}`;
 
   return {
-    id: `completed-${term.yearLevel}-${term.semester}`,
+    id: `completed-${index}-${term.yearLevel}-${term.semester}`,
     yearLevel: term.yearLevel,
     semester: term.semester,
     semesterLabel: getSemesterLabel(term.semester),
@@ -73,6 +85,7 @@ const toCompletedTerm = (term: CompletedTermResponse): PlannerTerm => {
       {
         id: folderId,
         name: term.name,
+        totalCredit: term.totalCredit,
         courses: term.courses.map((course): SemesterCourse => ({
           id: String(course.studentCourseId),
           ...toCourseBase(course),
@@ -99,6 +112,56 @@ const toPlannedTerm = (term: PlannedTermResponse): PlannerTerm => {
 
 export const mapCompletedTerms = (completedTerms: PlannerResponse['completedTerms']): PlannerTerm[] =>
   completedTerms.map(toCompletedTerm);
+
+const toLocalCompositionSignature = (terms: PlannerTerm[]): string =>
+  JSON.stringify(
+    [...terms]
+      .sort((a, b) => a.yearLevel - b.yearLevel || a.semester - b.semester)
+      .map((term) => ({
+        y: term.yearLevel,
+        s: term.semester,
+        sel: term.folders.findIndex(({ id }) => id === term.selectedFolderId),
+        folders: term.folders.map((folder) => ({ n: folder.name, c: folder.courses.map(({ courseId }) => courseId) })),
+      })),
+  );
+
+const toServerCompositionSignature = (serverTerms: PlannedTermResponse[]): string =>
+  JSON.stringify(
+    [...serverTerms]
+      .sort((a, b) => a.yearLevel - b.yearLevel || a.semester - b.semester)
+      .map((term) => {
+        const versions = [...term.versions].sort((a, b) => a.versionOrder - b.versionOrder);
+        return {
+          y: term.yearLevel,
+          s: term.semester,
+          sel: versions.findIndex(({ isSelected }) => isSelected),
+          folders: versions.map((version) => ({
+            n: version.name,
+            c: [...version.courses]
+              .sort((a, b) => a.coursePositionOrder - b.coursePositionOrder)
+              .map(({ courseId }) => courseId),
+          })),
+        };
+      }),
+  );
+
+export const isSamePlannerComposition = (terms: PlannerTerm[], serverTerms: PlannedTermResponse[]): boolean =>
+  toLocalCompositionSignature(terms) === toServerCompositionSignature(serverTerms);
+
+export const mergeServerTotalCredits = (terms: PlannerTerm[], serverTerms: PlannedTermResponse[]): PlannerTerm[] =>
+  terms.map((term) => {
+    const serverTerm = serverTerms.find((s) => s.yearLevel === term.yearLevel && s.semester === term.semester);
+    if (!serverTerm) return term;
+    const orderedVersions = [...serverTerm.versions].sort((a, b) => a.versionOrder - b.versionOrder);
+    return {
+      ...term,
+      folders: term.folders.map((folder, index) => {
+        const serverCredit = orderedVersions[index]?.totalCredit;
+        if (serverCredit === undefined || serverCredit === folder.totalCredit) return folder;
+        return { ...folder, totalCredit: serverCredit };
+      }),
+    };
+  });
 
 export const mapPlannedTerms = (plannedTerms: PlannerResponse['plannedTerms']): PlannerTerm[] =>
   plannedTerms.map(toPlannedTerm);

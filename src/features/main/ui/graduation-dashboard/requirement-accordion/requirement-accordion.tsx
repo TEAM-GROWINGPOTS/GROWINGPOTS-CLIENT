@@ -65,6 +65,7 @@ export const RequirementAccordion = ({
                 distAreaDescriptions={item.detail?.distAreaDescriptions}
                 courses={item.detail?.courses}
                 hasRequiredList={item.detail?.hasRequiredList}
+                admissionYear={admissionYear}
               />
             </Accordion.Content>
           </Accordion.Item>
