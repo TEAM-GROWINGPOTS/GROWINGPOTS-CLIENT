@@ -59,8 +59,11 @@ const toPlannerFolder = (version: PlannerVersionResponse): PlannerFolder => ({
     .map((course): SemesterCourse => ({ id: String(course.plannerVersionItemId), ...toCourseBase(course) })),
 });
 
-const toCompletedTerm = (term: CompletedTermResponse): PlannerTerm => {
-  const folderId = String(term.plannerTermVersionId);
+const toCompletedTerm = (term: CompletedTermResponse, index: number): PlannerTerm => {
+  // plannerTermVersionId만으로 폴더(노드)를 식별하면, 휴학 등으로 같은 학년/학기가 반복될 때
+  // 서버가 내려주는 versionId가 우연히 중복될 경우 노드뷰에서 같은 id의 노드가 서로 덮어써진다.
+  // 배열 인덱스를 함께 섞어 항상 유일한 id가 되도록 한다.
+  const folderId = `completed-${index}-${term.plannerTermVersionId}`;
 
   return {
     id: `completed-${term.yearLevel}-${term.semester}`,
@@ -98,7 +101,7 @@ const toPlannedTerm = (term: PlannedTermResponse): PlannerTerm => {
 };
 
 export const mapCompletedTerms = (completedTerms: PlannerResponse['completedTerms']): PlannerTerm[] =>
-  completedTerms.map(toCompletedTerm);
+  completedTerms.map((term, index) => toCompletedTerm(term, index));
 
 export const mapPlannedTerms = (plannedTerms: PlannerResponse['plannedTerms']): PlannerTerm[] =>
   plannedTerms.map(toPlannedTerm);
