@@ -10,6 +10,7 @@ import type { Ref } from 'react';
 interface DroppableTermProps {
   term: PlannerTerm;
   cardRef?: Ref<HTMLElement>;
+  scrollToCourse?: { courseId: string; key: number };
   isDropTarget: boolean;
   onDeleteTerm: () => void;
   onAddFolder: () => void;
@@ -21,6 +22,7 @@ interface DroppableTermProps {
 export const DroppableTerm = ({
   term,
   cardRef,
+  scrollToCourse,
   isDropTarget,
   onDeleteTerm,
   onAddFolder,
@@ -36,6 +38,7 @@ export const DroppableTerm = ({
       <SemesterCard
         ref={cardRef}
         className="max-h-full"
+        scrollToCourse={scrollToCourse}
         yearLevel={yearLevel}
         semester={semester}
         semesterLabel={semesterLabel}

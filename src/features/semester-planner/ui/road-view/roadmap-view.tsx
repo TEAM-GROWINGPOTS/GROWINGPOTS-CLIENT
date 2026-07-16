@@ -3,7 +3,7 @@
 import '@xyflow/react/dist/style.css';
 
 import graduation from '@features/semester-planner/assets/graduation.json';
-import { MAX_FOLDERS_PER_TERM } from '@features/semester-planner/constants';
+import { getSemesterLabelByCode, MAX_FOLDERS_PER_TERM } from '@features/semester-planner/constants';
 import { PlannerActionsContext } from '@features/semester-planner/contexts/planner-actions-context';
 import { ReachabilityContext } from '@features/semester-planner/contexts/reachability-context';
 import { usePlannerGraph } from '@features/semester-planner/hooks/use-planner-graph';
@@ -45,11 +45,6 @@ import { DropIndicatorLine } from './drop-indicator-line';
 import { RoadmapHeader } from './roadmap-header';
 import { SemesterEdge } from './semester-edge';
 import { SemesterNode } from './semester-node';
-
-const SEMESTER_LABEL_MAP: Record<string, string> = {
-  '1': '1학기',
-  '2': '2학기',
-};
 
 const ROW_GAP = 150;
 const ROW_MARGIN = 20; // 같은 열 카드 사이 여백
@@ -639,13 +634,17 @@ export const RoadmapView = () => {
 
   const handleAddSemesterSubmit = useCallback(
     (year: string, semester: string) => {
-      const semesterLabel = SEMESTER_LABEL_MAP[semester];
+      const semesterLabel = getSemesterLabelByCode(semester);
       if (!semesterLabel) return;
       const yearLevel = Number.parseInt(year, 10);
 
-      const added = addTerm({ yearLevel, semester: Number(semester), semesterLabel });
-      if (!added) {
+      const result = addTerm({ yearLevel, semester: Number(semester), semesterLabel });
+      if (result === 'duplicate') {
         toast.negative('이미 추가된 학기예요.');
+        return;
+      }
+      if (result === 'past') {
+        toast.negative('지난 학기는 추가할 수 없어요.');
         return;
       }
       setIsAddSemesterModalOpen(false);

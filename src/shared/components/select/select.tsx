@@ -10,6 +10,7 @@ import { SelectOptionItem } from './select-option';
 interface SelectOption {
   value: string;
   label: string;
+  badgeColor?: 'lime01' | 'lime02' | 'purple' | 'blue' | 'red' | 'darkRed' | 'gray';
 }
 
 type BaseProps = {
@@ -149,7 +150,14 @@ export const Select = (props: SelectProps) => {
         ) : (
           <span className="truncate">{triggerLabel}</span>
         )}
-        <Icon name="ic_chevron_down" size={20} className="pointer-events-none shrink-0 text-gray-600" />
+        <Icon
+          name="ic_chevron_down"
+          size={20}
+          className={cn(
+            'pointer-events-none shrink-0 text-gray-600 transition-transform duration-200',
+            isOpen && 'rotate-180',
+          )}
+        />
       </button>
 
       {isOpen && (

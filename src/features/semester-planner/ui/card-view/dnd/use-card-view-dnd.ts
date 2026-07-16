@@ -28,6 +28,7 @@ interface UseCardViewDndInput {
   dropCourseToTerm: (activeId: string, targetTermId: string) => void;
   insertCourse: (termId: string, course: SemesterCourse) => void;
   removeCourse: (courseId: string) => void;
+  onCourseInserted?: (termId: string, courseId: string) => void;
 }
 
 export const useCardViewDnd = ({
@@ -38,6 +39,7 @@ export const useCardViewDnd = ({
   dropCourseToTerm,
   insertCourse,
   removeCourse,
+  onCourseInserted,
 }: UseCardViewDndInput) => {
   const [activeCourse, setActiveCourse] = useState<SemesterCourse | null>(null);
   const [overTermId, setOverTermId] = useState<string | null>(null);
@@ -178,13 +180,17 @@ export const useCardViewDnd = ({
       copyCountRef.current += 1;
       const copy = { ...course, id: `${course.id.replace(LIBRARY_PREFIX, 'course-')}-copy-${copyCountRef.current}` };
       const termId = overContainer;
+      const insertAndScroll = () => {
+        insertCourse(termId, copy);
+        onCourseInserted?.(termId, copy.id);
+      };
 
       try {
         const result = await checkPrerequisite([course.courseId]);
         const missing = result.results[0]?.missingPrerequisites ?? [];
 
         if (missing.length === 0) {
-          insertCourse(termId, copy);
+          insertAndScroll();
           return;
         }
 
@@ -195,10 +201,10 @@ export const useCardViewDnd = ({
           type: hasRequired ? 'REQUIRED' : 'RECOMMENDED',
           courseName: course.name,
           prerequisiteName: firstMissing.name,
-          onConfirm: hasRequired ? () => {} : () => insertCourse(termId, copy),
+          onConfirm: hasRequired ? () => {} : insertAndScroll,
         });
       } catch {
-        insertCourse(termId, copy);
+        insertAndScroll();
       }
       return;
     }

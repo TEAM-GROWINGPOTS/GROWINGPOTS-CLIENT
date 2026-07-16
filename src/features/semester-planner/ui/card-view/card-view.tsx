@@ -1,6 +1,7 @@
 'use client';
 
 import { DndContext, DragOverlay } from '@dnd-kit/core';
+import { getSemesterLabelByCode } from '@features/semester-planner/constants';
 import { getFolderName, getSelectedCourses, usePlannerTerms } from '@features/semester-planner/hooks/use-planner-terms';
 import { AddCourseSidebar } from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar';
 import {
@@ -20,11 +21,7 @@ import { GraduationStatusAccordion } from '@features/semester-planner/ui/card-vi
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
 import { PrerequisiteModal } from '@features/semester-planner/ui/card-view/modals/prerequisite-modal';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
-import {
-  clearPendingFocusTerm,
-  peekPendingFocusTerm,
-  setPendingFocusTerm,
-} from '@features/semester-planner/utils/pending-focus-term';
+import { clearPendingFocusTerm, peekPendingFocusTerm } from '@features/semester-planner/utils/pending-focus-term';
 import { parseApiError } from '@shared/apis/parse-api-error';
 import { CourseSearchItemResponse } from '@shared/apis/types/course-search';
 import { toast, Toaster } from '@shared/components';
@@ -41,11 +38,6 @@ import { cn } from '@shared/utils/cn';
 import { useRouter } from 'next/navigation';
 import { type TransitionEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-
-const SEMESTER_LABEL_MAP: Record<string, string> = {
-  '1': '1학기',
-  '2': '2학기',
-};
 
 const CARD_WIDTH = 258;
 const CARD_SCROLL_STEP = 282; // 학기 카드 너비 258 + gap 24
@@ -76,23 +68,6 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     renameFolder,
     deleteFolder,
   } = usePlannerTerms();
-  const {
-    activeCourse,
-    overTermId,
-    isLibraryDrag,
-    isDropRejected,
-    prerequisiteModal,
-    setPrerequisiteModal,
-    contextProps,
-  } = useCardViewDnd({
-    plannedTerms,
-    snapshot,
-    restoreSnapshot,
-    previewCourseMove,
-    dropCourseToTerm,
-    insertCourse,
-    removeCourse,
-  });
   const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
@@ -127,7 +102,32 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const boardRef = useRef<HTMLElement>(null);
   const scrollWrapperRef = useRef<HTMLDivElement>(null);
   const edgeScroll = useBoardEdgeScroll(boardRef, scrollWrapperRef);
+  const pendingScrollTermRef = useRef<{ yearLevel: number; semesterLabel: string } | null>(null);
+  const [scrollToCourse, setScrollToCourse] = useState<{ termId: string; courseId: string; key: number } | null>(null);
   const router = useRouter();
+
+  const handleCourseInserted = useCallback((termId: string, courseId: string) => {
+    setScrollToCourse({ termId, courseId, key: Date.now() });
+  }, []);
+
+  const {
+    activeCourse,
+    overTermId,
+    isLibraryDrag,
+    isDropRejected,
+    prerequisiteModal,
+    setPrerequisiteModal,
+    contextProps,
+  } = useCardViewDnd({
+    plannedTerms,
+    snapshot,
+    restoreSnapshot,
+    previewCourseMove,
+    dropCourseToTerm,
+    insertCourse,
+    removeCourse,
+    onCourseInserted: handleCourseInserted,
+  });
 
   useEffect(() => {
     if (!isPlannerError) return;
@@ -178,7 +178,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   }, [gridTerms, updateScrollability]);
 
   useEffect(() => {
-    const pendingTerm = peekPendingFocusTerm();
+    const pendingTerm = pendingScrollTermRef.current || peekPendingFocusTerm();
     if (!pendingTerm) return;
     const termIndex = gridTerms.findIndex(
       ({ yearLevel, semesterLabel }) =>
@@ -187,7 +187,13 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     if (termIndex === -1) return;
     const board = boardRef.current;
     if (!board) return;
-    clearPendingFocusTerm();
+
+    if (pendingScrollTermRef.current) {
+      pendingScrollTermRef.current = null;
+    } else {
+      clearPendingFocusTerm();
+    }
+
     const cardCenter = termIndex * CARD_SCROLL_STEP + CARD_WIDTH / 2;
     board.scrollTo({
       left: Math.max(cardCenter - board.clientWidth / 2, 0),
@@ -271,16 +277,20 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   };
 
   const handleAddSemester = (year: string, semester: string) => {
-    const semesterLabel = SEMESTER_LABEL_MAP[semester];
+    const semesterLabel = getSemesterLabelByCode(semester);
     if (!semesterLabel) return;
     const yearLevel = Number.parseInt(year, 10);
 
-    const added = addTerm({ yearLevel, semester: Number(semester), semesterLabel });
-    if (!added) {
+    const result = addTerm({ yearLevel, semester: Number(semester), semesterLabel });
+    if (result === 'duplicate') {
       toast.negative('이미 추가된 학기예요.');
       return;
     }
-    setPendingFocusTerm({ yearLevel, semesterLabel });
+    if (result === 'past') {
+      toast.negative('지난 학기는 추가할 수 없어요.');
+      return;
+    }
+    pendingScrollTermRef.current = { yearLevel, semesterLabel };
     setIsAddSemesterOpen(false);
     toast.success(`${yearLevel}학년 ${semesterLabel}가 추가되었어요.`);
   };
@@ -338,6 +348,11 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
                     key={term.id}
                     term={term}
                     cardRef={cardRef}
+                    scrollToCourse={
+                      scrollToCourse?.termId === term.id
+                        ? { courseId: scrollToCourse.courseId, key: scrollToCourse.key }
+                        : undefined
+                    }
                     isDropTarget={overTermId === term.id}
                     onDeleteTerm={() => {
                       removeTerm(term.id);
