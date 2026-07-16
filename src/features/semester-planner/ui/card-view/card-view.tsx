@@ -61,6 +61,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     dropCourseToTerm,
     insertCourse,
     removeCourse,
+    resolveTermId,
+    validateAndCleanPrerequisites,
     addTerm,
     removeTerm,
     addFolder,
@@ -126,6 +128,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     dropCourseToTerm,
     insertCourse,
     removeCourse,
+    resolveTermId,
+    validateAndCleanPrerequisites,
     onCourseInserted: handleCourseInserted,
   });
 
