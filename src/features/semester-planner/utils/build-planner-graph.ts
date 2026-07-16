@@ -37,7 +37,7 @@ export function buildPlannerGraph(completedTerms: PlannerTerm[], plannedTerms: P
       type: 'semesterNode',
       position: { x: colX, y: 100 },
       data: {
-        // completed 폴더의 nodeId는 `completed-${index}-${plannerTermVersionId}` 형태라 그대로 Number 변환하면 NaN이 된다.
+        // completed 폴더의 nodeId는 `completed-folder-${index}` 형태라 그대로 Number 변환하면 NaN이 된다.
         plannerTermVersionId: Number(nodeId.split('-').at(-1)),
         locked: true,
         colIndex,

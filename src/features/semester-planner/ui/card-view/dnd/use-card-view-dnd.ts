@@ -28,6 +28,8 @@ interface UseCardViewDndInput {
   dropCourseToTerm: (activeId: string, targetTermId: string) => void;
   insertCourse: (termId: string, course: SemesterCourse) => void;
   removeCourse: (courseId: string) => void;
+  resolveTermId: (staleTermId: string) => Promise<number | undefined>;
+  validateAndCleanPrerequisites: () => Promise<{ courseName: string; prerequisiteName: string }[]>;
   onCourseInserted?: (termId: string, courseId: string) => void;
 }
 
@@ -39,6 +41,8 @@ export const useCardViewDnd = ({
   dropCourseToTerm,
   insertCourse,
   removeCourse,
+  resolveTermId,
+  validateAndCleanPrerequisites,
   onCourseInserted,
 }: UseCardViewDndInput) => {
   const [activeCourse, setActiveCourse] = useState<SemesterCourse | null>(null);
@@ -152,7 +156,18 @@ export const useCardViewDnd = ({
     const overContainer = overId ? findContainer(overId) : undefined;
 
     if (overContainer === TRASH_ID) {
-      if (activeContainer !== LIBRARY_ID) removeCourse(activeId);
+      if (activeContainer !== LIBRARY_ID) {
+        removeCourse(activeId);
+        const violations = await validateAndCleanPrerequisites();
+        if (violations.length > 0) {
+          setPrerequisiteModal({
+            type: 'REQUIRED',
+            courseName: violations[0].courseName,
+            prerequisiteName: violations[0].prerequisiteName,
+            onConfirm: () => {},
+          });
+        }
+      }
       return;
     }
 
@@ -185,8 +200,10 @@ export const useCardViewDnd = ({
         onCourseInserted?.(termId, copy.id);
       };
 
+      // 저장 후 서버가 plannerTermId를 재할당할 수 있으므로 신선한 ID를 가져온다
+      const freshTermId = await resolveTermId(termId);
       try {
-        const result = await checkPrerequisite([course.courseId]);
+        const result = await checkPrerequisite([course.courseId], freshTermId);
         const missing = result.results[0]?.missingPrerequisites ?? [];
 
         if (missing.length === 0) {
@@ -204,13 +221,22 @@ export const useCardViewDnd = ({
           onConfirm: hasRequired ? () => {} : insertAndScroll,
         });
       } catch {
-        insertAndScroll();
+        // 선이수 검사 자체가 실패하면 삽입하지 않는다
       }
       return;
     }
 
     if (activeContainer !== overContainer || hasPreviewMovedRef.current) {
       dropCourseToTerm(activeId, overContainer);
+      const violations = await validateAndCleanPrerequisites();
+      if (violations.length > 0) {
+        setPrerequisiteModal({
+          type: 'REQUIRED',
+          courseName: violations[0].courseName,
+          prerequisiteName: violations[0].prerequisiteName,
+          onConfirm: () => {},
+        });
+      }
     }
   };
 

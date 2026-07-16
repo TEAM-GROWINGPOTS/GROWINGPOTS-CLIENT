@@ -33,6 +33,7 @@ export interface CourseSearchItemResponse {
   credit: number;
   departmentName: string;
   defaultDivisionName: string;
+  area?: CourseArea | null;
   recommendedYearLow: number | null;
   recommendedYearHigh: number | null;
   openedSemester: OpenedSemester;
@@ -40,6 +41,11 @@ export interface CourseSearchItemResponse {
   isSw: boolean;
   alreadyCompleted: boolean;
   inPlanner: boolean;
+}
+
+export interface CourseArea {
+  code: string;
+  name: string;
 }
 
 export interface CoursePageResponse {

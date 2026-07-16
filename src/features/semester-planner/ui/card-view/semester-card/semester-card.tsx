@@ -5,6 +5,7 @@ import type { SemesterCardStatus, SemesterCourse, SemesterFolder } from '@featur
 import { FolderItemMenu } from '@features/semester-planner/ui/card-view/folder-item-menu/folder-item-menu';
 import { FolderList } from '@features/semester-planner/ui/card-view/folder-list/folder-list';
 import { FolderRenameModal } from '@features/semester-planner/ui/card-view/folder-rename-modal/folder-rename-modal';
+import { getCourseNote } from '@features/semester-planner/utils/map-planner';
 import { Badge, ClassCard } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
@@ -18,11 +19,13 @@ interface SemesterCardProps {
   semesterLabel?: string;
   status: SemesterCardStatus;
   folderName: string;
+  totalCredit: number;
   courses: SemesterCourse[];
   folders?: SemesterFolder[];
   selectedFolderId?: string;
   isDropTarget?: boolean;
   renderCourse?: (course: SemesterCourse) => ReactNode;
+  admissionYear?: number;
   className?: string;
   scrollToCourse?: { courseId: string; key: number };
   onDeleteTerm?: () => void;
@@ -56,11 +59,13 @@ export const SemesterCard = ({
   semesterLabel,
   status,
   folderName,
+  totalCredit,
   courses,
   folders,
   selectedFolderId,
   isDropTarget = false,
   renderCourse,
+  admissionYear,
   className,
   scrollToCourse,
   onDeleteTerm,
@@ -144,7 +149,6 @@ export const SemesterCard = ({
     setIsTermDeleteOpen(false);
   };
 
-  const totalCredit = courses.reduce((sum, { credit }) => sum + credit, 0);
   const isPlanned = status === 'planned';
   const statusIcon = STATUS_ICON[status];
   const termLabel = `${yearLevel}학년 ${semesterLabel ?? getSemesterLabel(semester)}`;
@@ -219,6 +223,7 @@ export const SemesterCard = ({
                         tags={tags}
                         isEnglish={isEnglish}
                         isSw={isSw}
+                        note={getCourseNote(course, admissionYear)}
                         className="w-full border border-gray-100"
                       />
                     )}
