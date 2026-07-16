@@ -46,7 +46,12 @@ export const GraduationDashboardSection = ({
           items={interactiveProgressGridItems}
           onSelectItem={({ scrollKey }) => onShortcutClick(scrollKey)}
         />
-        <RequirementAccordionList items={items} scrollTargetKey={scrollTargetKey} admissionYear={admissionYear} />
+        <RequirementAccordionList
+          key={selectedTab}
+          items={items}
+          scrollTargetKey={scrollTargetKey}
+          admissionYear={admissionYear}
+        />
       </div>
     </section>
   );
