@@ -73,6 +73,7 @@ export const TableRow = ({
             }
             isOpen={openCellKey === `${course.id}:${column.key}`}
             onOpenChange={(open) => onOpenCellKeyChange(open ? `${course.id}:${column.key}` : null)}
+            isInvalid={column.key === 'area' ? course.areaId === null : undefined}
           />
         ) : (
           <TableCellEdit
