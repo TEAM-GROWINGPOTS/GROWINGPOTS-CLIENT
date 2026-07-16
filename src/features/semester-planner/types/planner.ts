@@ -1,3 +1,4 @@
+import type { CourseArea } from '@shared/apis/types/course-search';
 import type { GraduationResponse } from '@shared/apis/types/graduation';
 
 export type OpenedSemester = 'FIRST' | 'SECOND' | 'BOTH';
@@ -121,9 +122,4 @@ export interface PlannerTerm {
   status: SemesterCardStatus;
   selectedFolderId?: string;
   folders: PlannerFolder[];
-}
-
-export interface CourseArea {
-  code: string;
-  name: string;
 }
