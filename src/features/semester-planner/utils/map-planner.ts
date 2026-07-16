@@ -24,6 +24,16 @@ export const getCourseTags = (divisionName: string, credit: number, openedSemest
   OPENED_SEMESTER_LABEL[openedSemester],
 ];
 
+export const getCourseNote = (
+  { area, divisionCategory }: Pick<SemesterCourse, 'area' | 'divisionCategory'>,
+  admissionYear?: number,
+) => {
+  if (!area || admissionYear === undefined || admissionYear < 2024) return undefined;
+  if (divisionCategory && divisionCategory !== 'DISTRIBUTED_GE') return undefined;
+
+  return `*${area.name}`;
+};
+
 const toCourseBase = (course: PlannerCourseBaseResponse) => ({
   courseId: course.courseId,
   departmentName: course.departmentName,
@@ -34,6 +44,7 @@ const toCourseBase = (course: PlannerCourseBaseResponse) => ({
   divisionName: course.divisionName,
   isEnglish: course.isEnglish,
   isSw: course.isSw,
+  area: course.area,
 });
 
 const DIVISION_ORDER = ['전공필수', '전공선택', '전공기초', '필수교과', '배분이수교과', '자유이수교과', '기타이수교과'];

@@ -21,6 +21,7 @@ interface DroppableTermProps {
   onSelectFolder: (folderId: string) => void;
   onRenameFolder: (folderId: string, name: string) => void;
   onDeleteFolder: (folderId: string) => void;
+  admissionYear?: number;
 }
 
 export const DroppableTerm = ({
@@ -33,6 +34,7 @@ export const DroppableTerm = ({
   onSelectFolder,
   onRenameFolder,
   onDeleteFolder,
+  admissionYear,
 }: DroppableTermProps) => {
   const { setNodeRef } = useDroppable({ id: term.id });
   const { yearLevel, semester, semesterLabel, status, selectedFolderId, folders } = term;
@@ -53,7 +55,8 @@ export const DroppableTerm = ({
         folders={folders}
         selectedFolderId={selectedFolderId}
         isDropTarget={isDropTarget}
-        renderCourse={(course) => <DraggableCourse key={course.id} course={course} />}
+        admissionYear={admissionYear}
+        renderCourse={(course) => <DraggableCourse key={course.id} course={course} admissionYear={admissionYear} />}
         onDeleteTerm={onDeleteTerm}
         onAddFolder={onAddFolder}
         onSelectFolder={onSelectFolder}

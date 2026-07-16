@@ -1,6 +1,7 @@
 @theme {
   --z-index-dropdown: 10;
-  --z-index-modal: 20;
-  --z-index-tooltip: 30;
-  --z-index-analysis-loading: 40;
+  --z-index-header: 20;
+  --z-index-modal: 30;
+  --z-index-tooltip: 40;
+  --z-index-analysis-loading: 50;
 }

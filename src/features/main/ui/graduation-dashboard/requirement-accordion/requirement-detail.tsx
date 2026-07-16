@@ -9,21 +9,29 @@ interface RequirementDetailProps {
   distAreaDescriptions?: string[];
   courses?: RequirementCourse[];
   hasRequiredList?: boolean;
+  admissionYear?: number;
 }
 
 interface ClassSectionProps {
   requirementName: string;
   title: string;
   courses: RequirementCourse[];
+  admissionYear?: number;
 }
 
-const ClassSection = ({ requirementName, title, courses }: ClassSectionProps) => {
+const ClassSection = ({ requirementName, title, courses, admissionYear }: ClassSectionProps) => {
   if (courses.length === 0) return null;
 
   return (
     <section className="mt-12">
       <h4 className="text-body-sb-14 text-gray-600">{title}</h4>
-      <RequirementClassList requirementName={requirementName} courses={courses} className="mt-4" showTakenState />
+      <RequirementClassList
+        requirementName={requirementName}
+        courses={courses}
+        className="mt-4"
+        showTakenState
+        admissionYear={admissionYear}
+      />
     </section>
   );
 };
@@ -35,6 +43,7 @@ export const RequirementDetail = ({
   distAreaDescriptions = [],
   courses,
   hasRequiredList = false,
+  admissionYear,
 }: RequirementDetailProps) => {
   const unmetDescription = unmetDescriptions.join(', ');
   const distAreaDescription = distAreaDescriptions.join(', ');
@@ -50,12 +59,27 @@ export const RequirementDetail = ({
       {unmetDescription && <p className="text-caption-r-12 text-dark-red-10 mt-12">*{unmetDescription}</p>}
       {distAreaDescription && <p className="text-caption-r-12 text-dark-red-10 mt-12">*{distAreaDescription}</p>}
       {courses && courses.length > 0 && !hasRequiredList && (
-        <RequirementClassList requirementName={requirementName} courses={courses} className="mt-12" />
+        <RequirementClassList
+          requirementName={requirementName}
+          courses={courses}
+          className="mt-12"
+          admissionYear={admissionYear}
+        />
       )}
       {hasRequiredList && (
         <>
-          <ClassSection requirementName={requirementName} title="이수 과목" courses={takenCourses} />
-          <ClassSection requirementName={requirementName} title="미이수 과목" courses={untakenCourses} />
+          <ClassSection
+            requirementName={requirementName}
+            title="이수 과목"
+            courses={takenCourses}
+            admissionYear={admissionYear}
+          />
+          <ClassSection
+            requirementName={requirementName}
+            title="미이수 과목"
+            courses={untakenCourses}
+            admissionYear={admissionYear}
+          />
         </>
       )}
     </>

@@ -26,6 +26,7 @@ import { GraduationStatusAccordion } from '@features/semester-planner/ui/card-vi
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
 import { PrerequisiteModal } from '@features/semester-planner/ui/card-view/modals/prerequisite-modal';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
+import { getCourseNote } from '@features/semester-planner/utils/map-planner';
 import { clearPendingFocusTerm, peekPendingFocusTerm } from '@features/semester-planner/utils/pending-focus-term';
 import { parseApiError } from '@shared/apis/parse-api-error';
 import { CourseSearchItemResponse } from '@shared/apis/types/course-search';
@@ -38,6 +39,7 @@ import { AddCourseModal } from '@shared/components/modal/add-course-modal';
 import { useCourseSearch } from '@shared/hooks/use-course-search';
 import { useDebouncedValue } from '@shared/hooks/use-debounced-value';
 import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
+import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
 import { useRouter } from 'next/navigation';
@@ -66,6 +68,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     dropCourseToTerm,
     insertCourse,
     removeCourse,
+    resolveTermId,
+    validateAndCleanPrerequisites,
     addTerm,
     removeTerm,
     addFolder,
@@ -74,6 +78,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     deleteFolder,
   } = usePlannerTerms();
   const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
+  const { data: studentProfile } = useStudentProfile();
+  const admissionYear = studentProfile?.admissionYear;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
   const [isAddCourseModalOpen, setIsAddCourseModalOpen] = useState(false);
@@ -131,6 +137,8 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     dropCourseToTerm,
     insertCourse,
     removeCourse,
+    resolveTermId,
+    validateAndCleanPrerequisites,
     onCourseInserted: handleCourseInserted,
   });
 
@@ -359,6 +367,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
                         : undefined
                     }
                     isDropTarget={overTermId === term.id}
+                    admissionYear={admissionYear}
                     onDeleteTerm={() => {
                       removeTerm(term.id);
                       toast.success(`${term.yearLevel}학년 ${term.semesterLabel}가 삭제되었어요.`);
@@ -384,6 +393,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
                     folderName={getFolderName(term)}
                     totalCredit={getSelectedTotalCredit(term)}
                     courses={getSelectedCourses(term)}
+                    admissionYear={admissionYear}
                   />
                 );
               })}
@@ -441,8 +451,9 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
               onFilterClick={handleFilterClick}
               onClose={() => setIsSidebarOpen(false)}
               onDirectAdd={handleDirectAdd}
+              admissionYear={admissionYear}
               renderCourse={(course: CourseSearchItemResponse) => (
-                <LibraryCourse key={course.courseId} course={course} />
+                <LibraryCourse key={course.courseId} course={course} admissionYear={admissionYear} />
               )}
             />
           </div>,
@@ -455,6 +466,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
             department={activeCourse.departmentName}
             title={activeCourse.name}
             tags={activeCourse.tags}
+            note={getCourseNote(activeCourse, admissionYear)}
             isEnglish={activeCourse.isEnglish}
             isSw={activeCourse.isSw}
             className="shadow-small w-242 scale-105 border border-gray-100 opacity-85"

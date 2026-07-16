@@ -5,6 +5,7 @@ import type { SemesterCardStatus, SemesterCourse, SemesterFolder } from '@featur
 import { FolderItemMenu } from '@features/semester-planner/ui/card-view/folder-item-menu/folder-item-menu';
 import { FolderList } from '@features/semester-planner/ui/card-view/folder-list/folder-list';
 import { FolderRenameModal } from '@features/semester-planner/ui/card-view/folder-rename-modal/folder-rename-modal';
+import { getCourseNote } from '@features/semester-planner/utils/map-planner';
 import { Badge, ClassCard } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
@@ -24,6 +25,7 @@ interface SemesterCardProps {
   selectedFolderId?: string;
   isDropTarget?: boolean;
   renderCourse?: (course: SemesterCourse) => ReactNode;
+  admissionYear?: number;
   className?: string;
   scrollToCourse?: { courseId: string; key: number };
   onDeleteTerm?: () => void;
@@ -63,6 +65,7 @@ export const SemesterCard = ({
   selectedFolderId,
   isDropTarget = false,
   renderCourse,
+  admissionYear,
   className,
   scrollToCourse,
   onDeleteTerm,
@@ -220,6 +223,7 @@ export const SemesterCard = ({
                         tags={tags}
                         isEnglish={isEnglish}
                         isSw={isSw}
+                        note={getCourseNote(course, admissionYear)}
                         className="w-full border border-gray-100"
                       />
                     )}

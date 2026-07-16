@@ -15,6 +15,7 @@ interface TableCellSelectProps {
   onChange: (value: string) => void;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  isInvalid?: boolean;
   className?: string;
 }
 
@@ -24,9 +25,10 @@ export const TableCellSelect = ({
   onChange,
   isOpen,
   onOpenChange,
+  isInvalid: isInvalidProp,
   className,
 }: TableCellSelectProps) => {
-  const isInvalid = !options.some((option) => option.value === value);
+  const isInvalid = isInvalidProp ?? !options.some((option) => option.value === value);
   const ref = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLLIElement | null)[]>([]);
   const listboxId = useId();
