@@ -1,3 +1,5 @@
+'use client';
+
 import { type DivisionCategoryBadgeColor, getDivisionCategoryBadgeColor } from '@features/semester-planner/constants';
 import type { OpenedSemester } from '@features/semester-planner/types/planner';
 import { parseApiError } from '@shared/apis/parse-api-error';
