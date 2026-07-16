@@ -10,6 +10,7 @@ import { SelectOptionItem } from './select-option';
 interface SelectOption {
   value: string;
   label: string;
+  badgeColor?: 'lime01' | 'lime02' | 'purple' | 'blue' | 'red' | 'darkRed' | 'gray';
 }
 
 type BaseProps = {

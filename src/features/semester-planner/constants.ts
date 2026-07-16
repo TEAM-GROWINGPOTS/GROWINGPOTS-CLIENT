@@ -48,3 +48,14 @@ export const getSemesterLabel = (semester: number): string => SEMESTER_LABEL_BY_
 
 export const getSemesterLabelByCode = (code: string): string | undefined =>
   SEMESTER_LABEL_BY_NUMBER[Number.parseInt(code, 10)];
+
+const MAJOR_DIVISION_CATEGORY_SET = new Set(['MAJOR_REQUIRED', 'MAJOR_ELECTIVE', 'MAJOR_BASIC']);
+const GENERAL_EDUCATION_DIVISION_CATEGORY_SET = new Set(['GENERAL', 'REQUIRED_GE', 'DISTRIBUTED_GE', 'FREE_GE']);
+
+export type DivisionCategoryBadgeColor = 'lime02' | 'purple' | 'blue';
+
+export const getDivisionCategoryBadgeColor = (divisionCategory: string): DivisionCategoryBadgeColor => {
+  if (MAJOR_DIVISION_CATEGORY_SET.has(divisionCategory)) return 'lime02';
+  if (GENERAL_EDUCATION_DIVISION_CATEGORY_SET.has(divisionCategory)) return 'purple';
+  return 'blue';
+};
