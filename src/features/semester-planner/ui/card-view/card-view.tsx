@@ -55,10 +55,11 @@ const CARD_BOUNDARY_TOLERANCE = 2;
 const CARD_VIEW_GUIDE_SEEN_KEY = 'card-view-guide-seen';
 
 interface CardViewProps {
+  planner: ReturnType<typeof usePlannerTerms>;
   sidebarSlot: HTMLDivElement | null;
 }
 
-export const CardView = ({ sidebarSlot }: CardViewProps) => {
+export const CardView = ({ planner, sidebarSlot }: CardViewProps) => {
   const {
     isLoading: isPlannerLoading,
     isError: isPlannerError,
@@ -79,7 +80,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
     selectFolder,
     renameFolder,
     deleteFolder,
-  } = usePlannerTerms();
+  } = planner;
   const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
   const { data: studentProfile } = useStudentProfile();
   const admissionYear = studentProfile?.admissionYear;

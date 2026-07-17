@@ -219,7 +219,11 @@ const nodeTypes = {
 
 const edgeTypes = { semesterEdge: SemesterEdge };
 
-export const RoadmapView = () => {
+interface RoadmapViewProps {
+  planner: ReturnType<typeof usePlannerTerms>;
+}
+
+export const RoadmapView = ({ planner }: RoadmapViewProps) => {
   const { setViewMode } = useViewMode();
   const router = useRouter();
   const {
@@ -234,7 +238,7 @@ export const RoadmapView = () => {
     selectFolders,
     reorderFolders,
     waitForSave,
-  } = usePlannerTerms();
+  } = planner;
   const { nodes: initialNodes, edges: initialEdges, completedIds } = usePlannerGraph(completedTerms, plannedTerms);
   const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
 
@@ -346,7 +350,10 @@ export const RoadmapView = () => {
   // 졸업 요건은 학기/폴더가 바뀔 때마다 저장 응답으로 다시 계산돼 오므로(useSavePlanner의 onSuccess가
   // GRADUATION 쿼리 캐시를 갱신), 배지와 로띠 모두 그래프에서 직접 합산한 학점이 아니라 이 API 값의
   // curriculumSatisfied를 그대로 기준으로 삼는다. 아코디언의 배지 로직과 동일한 기준이다.
-  const showCelebration = !!graduationData?.curriculumSatisfied && !isCelebrationDismissed;
+  // isGuideOpen 조건: 처음 방문해 이미 충족된 상태라면 가이드 모달이 열려있는 동안엔 로띠를 띄우지
+  // 않고, "시작하기"를 눌러 모달이 닫힌 뒤에 띄운다. 이미 가이드를 본 사용자는 모달이 아예 안 열리므로
+  // (isGuideOpen이 계속 false) 이 조건이 평소엔 아무 영향이 없다.
+  const showCelebration = !!graduationData?.curriculumSatisfied && !isCelebrationDismissed && !isGuideOpen;
 
   // 즉시 unmount하지 않고 opacity 전환이 끝난 뒤 dismiss 상태로 확정한다.
   const dismissCelebration = useCallback(() => {
@@ -648,9 +655,8 @@ export const RoadmapView = () => {
         const added = addFolder(termId, { select: true });
         const term = plannedTerms.find(({ id }) => id === termId);
         if (added && term) setPendingFocusTerm({ yearLevel: term.yearLevel, semesterLabel: term.semesterLabel });
-        // 카드뷰로 전환하면 usePlannerTerms가 새로 마운트되어 서버 GET으로 다시 시드된다. 저장 PUT이
-        // 끝나기 전에 전환하면 그 GET이 추가 전 상태를 받아와 화면에 반영이 늦어 보이므로, 저장이
-        // 끝난 뒤에 전환한다.
+        // usePlannerTerms 인스턴스를 카드뷰와 공유하고 refetchOnMount도 없앤 뒤로는 뷰 전환 자체가
+        // 재조회를 유발하지 않지만, 저장(PUT)이 채 끝나기도 전에 화면을 옮기는 걸 막기 위해 여전히 기다린다.
         waitForSave().then(() => setViewMode('card'));
       }
     },

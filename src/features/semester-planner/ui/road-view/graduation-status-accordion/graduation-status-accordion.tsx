@@ -54,7 +54,12 @@ export const GraduationStatusAccordion = ({ className, data }: GraduationStatusA
   }));
 
   return (
-    <Accordion.Root type="single" collapsible className={cn('w-306 rounded-xl bg-gray-800', className)}>
+    <Accordion.Root
+      type="single"
+      collapsible
+      defaultValue="graduation-status"
+      className={cn('w-306 rounded-xl bg-gray-800', className)}
+    >
       <Accordion.Item value="graduation-status">
         <Accordion.Header asChild>
           <h3>
