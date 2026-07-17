@@ -350,7 +350,10 @@ export const RoadmapView = ({ planner }: RoadmapViewProps) => {
   // 졸업 요건은 학기/폴더가 바뀔 때마다 저장 응답으로 다시 계산돼 오므로(useSavePlanner의 onSuccess가
   // GRADUATION 쿼리 캐시를 갱신), 배지와 로띠 모두 그래프에서 직접 합산한 학점이 아니라 이 API 값의
   // curriculumSatisfied를 그대로 기준으로 삼는다. 아코디언의 배지 로직과 동일한 기준이다.
-  const showCelebration = !!graduationData?.curriculumSatisfied && !isCelebrationDismissed;
+  // isGuideOpen 조건: 처음 방문해 이미 충족된 상태라면 가이드 모달이 열려있는 동안엔 로띠를 띄우지
+  // 않고, "시작하기"를 눌러 모달이 닫힌 뒤에 띄운다. 이미 가이드를 본 사용자는 모달이 아예 안 열리므로
+  // (isGuideOpen이 계속 false) 이 조건이 평소엔 아무 영향이 없다.
+  const showCelebration = !!graduationData?.curriculumSatisfied && !isCelebrationDismissed && !isGuideOpen;
 
   // 즉시 unmount하지 않고 opacity 전환이 끝난 뒤 dismiss 상태로 확정한다.
   const dismissCelebration = useCallback(() => {
