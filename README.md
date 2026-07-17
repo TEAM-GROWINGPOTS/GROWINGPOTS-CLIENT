@@ -17,32 +17,37 @@
 <table width="100%">
   <tr>  
     <td align="center" width="33.33%" style="padding:10px">
-      <img width="325" height="180" alt="윤하" src="https://github.com/user-attachments/assets/39e7be9e-59a2-42ca-9874-f4f77b451955" /><br/>
+      <img width="325" height="180" alt="최윤하" src="https://github.com/user-attachments/assets/cbba0962-b7ef-42aa-a28d-047df7d1b530" /><br/>
       <a href="https://github.com/twossu" target="_blank" rel="noopener noreferrer"><strong>최윤하</strong></a>
     </td> <td align="center" width="33.33%" style="padding:10px">
-      <img width="325" height="180" alt="예원" src="https://github.com/user-attachments/assets/113b8bb2-159b-4d48-8092-56cf42ff27d0" />
+      <img width="325" height="180" alt="노예원" src="https://github.com/user-attachments/assets/4e7df55d-7bb8-4822-98ca-a7821d4b8dcd" />
+
 <br/>
       <a href="https://github.com/nyewon" target="_blank" rel="noopener noreferrer"><strong>노예원</strong></a>  
     </td>
     <td align="center" width="33.33%" style="padding:10px">
-      <img width="325" height="180" alt="우찬" src="https://github.com/user-attachments/assets/1c111b93-121e-4e0f-86aa-742e39db75ca" />
+      <img width="325" height="180" alt="박우찬" src="https://github.com/user-attachments/assets/cc7be0af-c396-41c9-8cd0-8ee07bde4798" />
+
 <br/>
       <a href="https://github.com/pwc2002" target="_blank" rel="noopener noreferrer"><strong>박우찬</strong></a>
     </td>
   </tr>
   <tr> 
     <td align="center" width="33.33%" style="padding:10px">
-      <img width="325" height="180" alt="소희" src="https://github.com/user-attachments/assets/dae23f05-0a00-4e2d-9523-83b63d5080f6" />
+      <img width="325" height="180" alt="이소희" src="https://github.com/user-attachments/assets/d0844a6e-0d45-4547-910f-a603d447fe98" />
+
 <br/>
       <a href="https://github.com/ssolsh" target="_blank" rel="noopener noreferrer"><strong>이소희</strong></a>
     </td>
     <td align="center" width="33.33%" style="padding:10px">
-      <img width="325" height="180" alt="해니" src="https://github.com/user-attachments/assets/d584c7a7-b301-4e2f-b85d-0ff4cf2b4ee2" />
+      <img width="325" height="180" alt="이해니" src="https://github.com/user-attachments/assets/fcfdd77f-ed9b-4132-935d-66a0a249d083" />
+
 <br/>
       <a href="https://github.com/haeni82" target="_blank" rel="noopener noreferrer"><strong>이해니</strong></a>
     </td>
     <td align="center" width="33.33%" style="padding:10px">
-      <img width="325" height="180" alt="민재" src="https://github.com/user-attachments/assets/e554043a-b574-413c-9d81-1e32f68bb2e5" />
+      <img width="325" height="180" alt="지민재" src="https://github.com/user-attachments/assets/8d7a2c7c-7529-4608-ab4e-d4e80159fb37" />
+
 <br/>
       <a href="https://github.com/mimizae" target="_blank" rel="noopener noreferrer"><strong>지민재</strong></a>
     </td>
