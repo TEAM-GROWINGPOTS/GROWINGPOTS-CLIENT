@@ -24,8 +24,10 @@ import { useBoardEdgeScroll } from '@features/semester-planner/ui/card-view/dnd/
 import { useCardViewDnd } from '@features/semester-planner/ui/card-view/dnd/use-card-view-dnd';
 import { GraduationStatusAccordion } from '@features/semester-planner/ui/card-view/graduation-status-accordion/graduation-status-accordion';
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
+import { CardViewGuideModal } from '@features/semester-planner/ui/card-view/modals/card-view-guide-modal';
 import { PrerequisiteModal } from '@features/semester-planner/ui/card-view/modals/prerequisite-modal';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
+import { isGuideSeen, markGuideSeen } from '@features/semester-planner/utils/guide-seen';
 import { getCourseNote } from '@features/semester-planner/utils/map-planner';
 import { clearPendingFocusTerm, peekPendingFocusTerm } from '@features/semester-planner/utils/pending-focus-term';
 import { parseApiError } from '@shared/apis/parse-api-error';
@@ -50,6 +52,7 @@ const CARD_WIDTH = 258;
 const CARD_SCROLL_STEP = 282; // 학기 카드 너비 258 + gap 24
 const CARD_GAP_CENTER_OFFSET = 12; // 카드 앞 gap 24의 중앙에 오도록 남기는 여백
 const CARD_BOUNDARY_TOLERANCE = 2;
+const CARD_VIEW_GUIDE_SEEN_KEY = 'card-view-guide-seen';
 
 interface CardViewProps {
   sidebarSlot: HTMLDivElement | null;
@@ -82,6 +85,24 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
   const admissionYear = studentProfile?.admissionYear;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false);
+
+  const studentProfileId = studentProfile?.studentProfileId;
+  const [checkedGuideProfileId, setCheckedGuideProfileId] = useState<number>();
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [guideConfirmLabel, setGuideConfirmLabel] = useState('확인');
+
+  if (studentProfileId !== undefined && studentProfileId !== checkedGuideProfileId) {
+    setCheckedGuideProfileId(studentProfileId);
+    if (!isGuideSeen(`${CARD_VIEW_GUIDE_SEEN_KEY}:${studentProfileId}`)) {
+      setGuideConfirmLabel('시작하기');
+      setIsGuideOpen(true);
+    }
+  }
+
+  useEffect(() => {
+    if (studentProfileId === undefined) return;
+    markGuideSeen(`${CARD_VIEW_GUIDE_SEEN_KEY}:${studentProfileId}`);
+  }, [studentProfileId]);
   const [isAddCourseModalOpen, setIsAddCourseModalOpen] = useState(false);
   const [addCourseName, setAddCourseName] = useState('');
   const [addCourseCredit, setAddCourseCredit] = useState('');
@@ -432,6 +453,17 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
         </div>
       </div>
 
+      <IconButton
+        icon="ic_question"
+        aria-label="도움말"
+        size="medium"
+        className="shadow-small fixed right-24 bottom-24 z-10"
+        onClick={() => {
+          setGuideConfirmLabel('확인');
+          setIsGuideOpen(true);
+        }}
+      />
+
       {sidebarSlot &&
         createPortal(
           <div
@@ -475,6 +507,7 @@ export const CardView = ({ sidebarSlot }: CardViewProps) => {
       </DragOverlay>
 
       <AddSemesterModal open={isAddSemesterOpen} onOpenChange={setIsAddSemesterOpen} onSubmit={handleAddSemester} />
+      <CardViewGuideModal open={isGuideOpen} onOpenChange={setIsGuideOpen} confirmLabel={guideConfirmLabel} />
       <AddCourseModal
         open={isAddCourseModalOpen}
         onOpenChange={handleAddCourseModalOpenChange}

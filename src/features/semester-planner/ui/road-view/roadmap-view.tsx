@@ -16,10 +16,14 @@ import {
   SemesterEdgeData,
 } from '@features/semester-planner/types/planner-graph';
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
+import { RoadmapGuideModal } from '@features/semester-planner/ui/road-view/modals/roadmap-guide-modal';
+import { isGuideSeen, markGuideSeen } from '@features/semester-planner/utils/guide-seen';
 import { setPendingFocusTerm } from '@features/semester-planner/utils/pending-focus-term';
 import { parseApiError } from '@shared/apis/parse-api-error';
 import { toast } from '@shared/components';
+import { IconButton } from '@shared/components/icon-button/icon-button';
 import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
+import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { cn } from '@shared/utils/cn';
 import {
   Background,
@@ -49,6 +53,7 @@ import { SemesterNode } from './semester-node';
 const ROW_GAP = 150;
 const ROW_MARGIN = 20; // 같은 열 카드 사이 여백
 const NODE_HEIGHT = 300;
+const ROADMAP_GUIDE_SEEN_KEY = 'roadmap-guide-seen';
 
 // 같은 열 노드들을 실제 measured 높이 기준으로 y 재배치
 const recomputeColumnPositions = (nodes: Node<PlannerNodeData>[]): Node<PlannerNodeData>[] => {
@@ -237,6 +242,24 @@ export const RoadmapView = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge<SemesterEdgeData>>([]);
   const [dropIndicator, setDropIndicator] = useState<{ colX: number; y: number } | null>(null);
   const [isAddSemesterModalOpen, setIsAddSemesterModalOpen] = useState(false);
+  const { data: studentProfile } = useStudentProfile();
+  const studentProfileId = studentProfile?.studentProfileId;
+  const [checkedGuideProfileId, setCheckedGuideProfileId] = useState<number>();
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [guideConfirmLabel, setGuideConfirmLabel] = useState('확인');
+
+  if (studentProfileId !== undefined && studentProfileId !== checkedGuideProfileId) {
+    setCheckedGuideProfileId(studentProfileId);
+    if (!isGuideSeen(`${ROADMAP_GUIDE_SEEN_KEY}:${studentProfileId}`)) {
+      setGuideConfirmLabel('시작하기');
+      setIsGuideOpen(true);
+    }
+  }
+
+  useEffect(() => {
+    if (studentProfileId === undefined) return;
+    markGuideSeen(`${ROADMAP_GUIDE_SEEN_KEY}:${studentProfileId}`);
+  }, [studentProfileId]);
   const [isCelebrationDismissed, setIsCelebrationDismissed] = useState(false);
   const [isCelebrationLeaving, setIsCelebrationLeaving] = useState(false);
 
@@ -731,6 +754,17 @@ export const RoadmapView = () => {
               <p className="text-title-sb-24 animate-text-rise -mt-48 text-gray-700">졸업 학점 요건을 충족했어요!</p>
             </div>
           )}
+
+          <IconButton
+            icon="ic_question"
+            aria-label="도움말"
+            size="medium"
+            className="shadow-small absolute right-24 bottom-24 z-10"
+            onClick={() => {
+              setGuideConfirmLabel('확인');
+              setIsGuideOpen(true);
+            }}
+          />
         </div>
 
         <AddSemesterModal
@@ -738,6 +772,7 @@ export const RoadmapView = () => {
           onOpenChange={setIsAddSemesterModalOpen}
           onSubmit={handleAddSemesterSubmit}
         />
+        <RoadmapGuideModal open={isGuideOpen} onOpenChange={setIsGuideOpen} confirmLabel={guideConfirmLabel} />
       </ReachabilityContext.Provider>
     </PlannerActionsContext.Provider>
   );
