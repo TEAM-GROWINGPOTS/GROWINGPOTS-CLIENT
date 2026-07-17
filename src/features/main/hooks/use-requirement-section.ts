@@ -84,7 +84,7 @@ const getGraduationRequiredItem = (
 
   const item = {
     code: 'GRADUATION_REQUIRED',
-    name: '졸업 필수',
+    name: '졸업필수',
     current: section.graduationRequired.totalCredit,
     required: null,
     unit: 'CREDITS',

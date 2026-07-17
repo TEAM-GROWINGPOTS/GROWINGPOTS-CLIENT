@@ -57,7 +57,7 @@ export const GraduationStatusAccordion = ({ className, data }: GraduationStatusA
   );
 
   const tabs = [
-    ...(hasGraduationRequired ? ['졸업 필수'] : []),
+    ...(hasGraduationRequired ? ['졸업필수'] : []),
     ...majors.map(({ majorName }) => majorName),
     '교양',
     'SW/영어',
