@@ -6,8 +6,11 @@
 
 <div align="center">
 
-**대학 졸업까지의 모든 가능성을 한눈에, Growing Pots.
-복잡한 계산은 그로잉팟에게 맡기고, 확실한 졸업을 위한 선택에만 집중하세요!**
+
+**대학 졸업까지의 모든 가능성을 한눈에, Growing Pots.**
+<br/>
+**복잡한 계산은 그로잉팟에게 맡기고, 확실한 졸업을 위한 선택에만 집중하세요!**
+</div>
 
 <img width="100%" alt="3" src="https://github.com/user-attachments/assets/680590d3-4929-439b-8b95-4b3e550d262a" />
 
