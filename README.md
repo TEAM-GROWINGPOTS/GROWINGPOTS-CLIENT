@@ -1,5 +1,7 @@
+
 <div align="center">
-  <img src=".github/assets/logo.png" width="240"/>
+<img width="488" height="277" alt="img_logo1" src="https://github.com/user-attachments/assets/c96a0f2b-7d76-41da-94ce-dfa80bca4c4c" />
+
 </div>
 
 <div align="center">
@@ -15,28 +17,33 @@
 <table width="100%">
   <tr>  
     <td align="center" width="33.33%" style="padding:10px">
-      <img src=".github/assets/team/yunha.png" width="180"/><br/>
+      <img width="325" height="180" alt="윤하" src="https://github.com/user-attachments/assets/39e7be9e-59a2-42ca-9874-f4f77b451955" /><br/>
       <a href="https://github.com/twossu" target="_blank" rel="noopener noreferrer"><strong>최윤하</strong></a>
     </td> <td align="center" width="33.33%" style="padding:10px">
-      <img src=".github/assets/team/yewon.png" width="180"/><br/>
+      <img width="325" height="180" alt="예원" src="https://github.com/user-attachments/assets/113b8bb2-159b-4d48-8092-56cf42ff27d0" />
+<br/>
       <a href="https://github.com/nyewon" target="_blank" rel="noopener noreferrer"><strong>노예원</strong></a>  
     </td>
     <td align="center" width="33.33%" style="padding:10px">
-      <img src=".github/assets/team/woochan.png" width="180"/><br/>
+      <img width="325" height="180" alt="우찬" src="https://github.com/user-attachments/assets/1c111b93-121e-4e0f-86aa-742e39db75ca" />
+<br/>
       <a href="https://github.com/pwc2002" target="_blank" rel="noopener noreferrer"><strong>박우찬</strong></a>
     </td>
   </tr>
   <tr> 
     <td align="center" width="33.33%" style="padding:10px">
-      <img src=".github/assets/team/sohee.png" width="180"/><br/>
+      <img width="325" height="180" alt="소희" src="https://github.com/user-attachments/assets/dae23f05-0a00-4e2d-9523-83b63d5080f6" />
+<br/>
       <a href="https://github.com/ssolsh" target="_blank" rel="noopener noreferrer"><strong>이소희</strong></a>
     </td>
     <td align="center" width="33.33%" style="padding:10px">
-      <img src=".github/assets/team/haeni.png" width="180"/><br/>
+      <img width="325" height="180" alt="해니" src="https://github.com/user-attachments/assets/d584c7a7-b301-4e2f-b85d-0ff4cf2b4ee2" />
+<br/>
       <a href="https://github.com/haeni82" target="_blank" rel="noopener noreferrer"><strong>이해니</strong></a>
     </td>
     <td align="center" width="33.33%" style="padding:10px">
-      <img src=".github/assets/team/minjae.png" width="180"/><br/>
+      <img width="325" height="180" alt="민재" src="https://github.com/user-attachments/assets/e554043a-b574-413c-9d81-1e32f68bb2e5" />
+<br/>
       <a href="https://github.com/mimizae" target="_blank" rel="noopener noreferrer"><strong>지민재</strong></a>
     </td>
   </tr>
