@@ -1,57 +1,69 @@
-# 🥔 GROWINGPOTS
 
-**학점과 이수 요건에 치이는 대학생을 위한 비주얼 학사 플래너**
+<div align="center">
+<img width="488" height="277" alt="img_logo1" src="https://github.com/user-attachments/assets/c96a0f2b-7d76-41da-94ce-dfa80bca4c4c" />
 
-복잡한 학점 계산은 이제 그만!  
-졸업까지 남은 이수 영역과 학점을 한 화면에서 확인하고,  
-앞으로의 수강 계획까지 미리 시뮬레이션해볼 수 있어요.
+</div>
 
-### 🥔 무엇을 할 수 있나요?
+<div align="center">
 
-| 기능                    | 설명                                                     |
-| ----------------------- | -------------------------------------------------------- |
-| 🎯 이수 현황 대시보드   | 졸업까지 남은 이수 영역·학점 현황을 한 화면에서 확인해요 |
-| 🔮 수강 계획 시뮬레이션 | 앞으로 들을 과목을 미리 넣어보며 예상 학점을 계산해요    |
-| 📄 PDF 온보딩           | 성적표(PDF) 업로드만으로 이수 현황을 빠르게 불러와요     |
+**대학 졸업까지의 모든 가능성을 한눈에, Growing Pots.
+복잡한 계산은 그로잉팟에게 맡기고, 확실한 졸업을 위한 선택에만 집중하세요!**
 
----
+<img width="100%" alt="3" src="https://github.com/user-attachments/assets/680590d3-4929-439b-8b95-4b3e550d262a" />
+
+
+</div>
+
+
+<br/>
 
 ## TEAM-GROWINGPOTS-CLIENT
 
 <table width="100%">
   <tr>  
     <td align="center" width="33.33%" style="padding:10px">
-      <img src="https://github.com/twossu.png" width="180"/><br/>
+      <img width="325" height="180" alt="최윤하" src="https://github.com/user-attachments/assets/cbba0962-b7ef-42aa-a28d-047df7d1b530" /><br/>
       <a href="https://github.com/twossu" target="_blank" rel="noopener noreferrer"><strong>최윤하</strong></a>
     </td> <td align="center" width="33.33%" style="padding:10px">
-      <img src="https://github.com/nyewon.png" width="180"/><br/>
+      <img width="325" height="180" alt="노예원" src="https://github.com/user-attachments/assets/4e7df55d-7bb8-4822-98ca-a7821d4b8dcd" />
+
+<br/>
       <a href="https://github.com/nyewon" target="_blank" rel="noopener noreferrer"><strong>노예원</strong></a>  
     </td>
     <td align="center" width="33.33%" style="padding:10px">
-      <img src="https://github.com/pwc2002.png" width="180"/><br/>
+      <img width="325" height="180" alt="박우찬" src="https://github.com/user-attachments/assets/cc7be0af-c396-41c9-8cd0-8ee07bde4798" />
+
+<br/>
       <a href="https://github.com/pwc2002" target="_blank" rel="noopener noreferrer"><strong>박우찬</strong></a>
     </td>
   </tr>
   <tr> 
     <td align="center" width="33.33%" style="padding:10px">
-      <img src="https://github.com/ssolsh.png" width="180"/><br/>
+      <img width="325" height="180" alt="이소희" src="https://github.com/user-attachments/assets/d0844a6e-0d45-4547-910f-a603d447fe98" />
+
+<br/>
       <a href="https://github.com/ssolsh" target="_blank" rel="noopener noreferrer"><strong>이소희</strong></a>
     </td>
     <td align="center" width="33.33%" style="padding:10px">
-      <img src="https://github.com/haeni82.png" width="180"/><br/>
+      <img width="325" height="180" alt="이해니" src="https://github.com/user-attachments/assets/fcfdd77f-ed9b-4132-935d-66a0a249d083" />
+
+<br/>
       <a href="https://github.com/haeni82" target="_blank" rel="noopener noreferrer"><strong>이해니</strong></a>
     </td>
     <td align="center" width="33.33%" style="padding:10px">
-      <img src="https://github.com/mimizae.png" width="180"/><br/>
+      <img width="325" height="180" alt="지민재" src="https://github.com/user-attachments/assets/8d7a2c7c-7529-4608-ab4e-d4e80159fb37" />
+
+<br/>
       <a href="https://github.com/mimizae" target="_blank" rel="noopener noreferrer"><strong>지민재</strong></a>
     </td>
   </tr>
 </table>
 
----
+<br/>
 
 ## 💎 우리가 일하는 방식
 
+<div align="center">
 그로잉팟 팀은 4주라는 짧은 일정 안에서도 단순히 "돌아가는 서비스"를 넘어  
 진짜 성장을 만들어내기 위해 아래 원칙을 중심으로 협업해요.
 
@@ -77,13 +89,11 @@
   </tr>
 </table>
 
-<div align="center">
-
 질문하는 용기 · 공유하는 문화 · 문서화하는 습관, 그리고 코드보다 사람이 먼저인 태도로 함께해요
 
 </div>
 
----
+<br/>
 
 ## 🛠️ 기술 스택
 
@@ -151,7 +161,7 @@
 </td></tr>
 </table>
 
----
+<br/>
 
 ## 📁 폴더 구조
 
@@ -179,7 +189,7 @@ Next.js App Router + features/shared 2계층 구조를 기반으로 해요.
         └── utils/
 ```
 
----
+<br/>
 
 ## 🌿 GitHub 전략
 
@@ -206,7 +216,7 @@ refactor/api-module/#56
 docs/readme-update/#78
 ```
 
----
+<br/>
 
 ## 📝 PR & 커밋 컨벤션
 
@@ -231,7 +241,7 @@ init: ESLint flat config 세팅
 
 > 특수기호 사용 금지 · 기능별로 가능한 작게 커밋
 
----
+<br/>
 
 ## 🔍 코드 리뷰
 
@@ -255,7 +265,7 @@ init: ESLint flat config 세팅
 
 > PR이 올라오면 몰아서 한 번에가 아닌, 올라오는 즉시 분산 리뷰해요.
 
----
+<br/>
 
 ## 🗓️ 회의 & 일정 관리
 
@@ -266,7 +276,7 @@ init: ESLint flat config 세팅
 | **일정 관리**   | Figma에 팀원 개인 일정을 취합해 이를 고려한 스케줄을 조율해요 |
 | **이슈 관리**   | GitHub Issues로 관리해요                                      |
 
----
+<br/>
 
 ## 💻 코딩 컨벤션
 
