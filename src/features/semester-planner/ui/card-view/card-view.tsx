@@ -20,6 +20,7 @@ import {
 import { DroppableTerm } from '@features/semester-planner/ui/card-view/dnd/droppable-term';
 import { LibraryCourse } from '@features/semester-planner/ui/card-view/dnd/library-course';
 import { TrashDropZone } from '@features/semester-planner/ui/card-view/dnd/trash-drop-zone';
+import { useBoardDragScroll } from '@features/semester-planner/ui/card-view/dnd/use-board-drag-scroll';
 import { useBoardEdgeScroll } from '@features/semester-planner/ui/card-view/dnd/use-board-edge-scroll';
 import { useCardViewDnd } from '@features/semester-planner/ui/card-view/dnd/use-card-view-dnd';
 import { GraduationStatusAccordion } from '@features/semester-planner/ui/card-view/graduation-status-accordion/graduation-status-accordion';
@@ -135,6 +136,7 @@ export const CardView = ({ planner, sidebarSlot }: CardViewProps) => {
   const boardRef = useRef<HTMLElement>(null);
   const scrollWrapperRef = useRef<HTMLDivElement>(null);
   const edgeScroll = useBoardEdgeScroll(boardRef, scrollWrapperRef);
+  const dragScroll = useBoardDragScroll(boardRef);
   const pendingScrollTermRef = useRef<{ yearLevel: number; semesterLabel: string } | null>(null);
   const [scrollToCourse, setScrollToCourse] = useState<{ termId: string; courseId: string; key: number } | null>(null);
   const router = useRouter();
@@ -374,6 +376,11 @@ export const CardView = ({ planner, sidebarSlot }: CardViewProps) => {
             <section
               ref={boardRef}
               onScroll={updateScrollability}
+              onPointerDown={dragScroll.handlePointerDown}
+              onPointerMove={dragScroll.handlePointerMove}
+              onPointerUp={dragScroll.handlePointerEnd}
+              onPointerCancel={dragScroll.handlePointerEnd}
+              onLostPointerCapture={dragScroll.handlePointerEnd}
               className="flex h-full [scrollbar-width:none] items-start gap-24 overflow-x-auto pb-20 [&::-webkit-scrollbar]:hidden"
             >
               {gridTerms.map((term, index) => {
