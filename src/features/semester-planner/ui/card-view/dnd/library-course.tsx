@@ -3,7 +3,7 @@
 import { useDraggable } from '@dnd-kit/core';
 import type { SemesterCourse } from '@features/semester-planner/types/planner';
 import { LIBRARY_PREFIX } from '@features/semester-planner/ui/card-view/dnd/use-card-view-dnd';
-import { getCourseTags } from '@features/semester-planner/utils/map-planner';
+import { getCourseNote, getCourseTags } from '@features/semester-planner/utils/map-planner';
 import type { CourseSearchItemResponse } from '@shared/apis/types/course-search';
 import { ClassCard } from '@shared/components/class-card/class-card';
 
@@ -12,6 +12,7 @@ const toLibrarySemesterCourse = ({
   name,
   departmentName,
   defaultDivisionName,
+  area,
   credit,
   openedSemester,
   isEnglish,
@@ -26,12 +27,18 @@ const toLibrarySemesterCourse = ({
   divisionName: defaultDivisionName,
   isEnglish,
   isSw,
+  area,
 });
 
-export const LibraryCourse = ({ course }: { course: CourseSearchItemResponse }) => {
+interface LibraryCourseProps {
+  course: CourseSearchItemResponse;
+  admissionYear?: number;
+}
+
+export const LibraryCourse = ({ course, admissionYear }: LibraryCourseProps) => {
   const semesterCourse = toLibrarySemesterCourse(course);
   const { id, departmentName, name, tags, isEnglish, isSw } = semesterCourse;
-  const { attributes, listeners, setNodeRef } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id,
     data: { course: semesterCourse },
   });
@@ -44,6 +51,8 @@ export const LibraryCourse = ({ course }: { course: CourseSearchItemResponse }) 
         tags={tags}
         isEnglish={isEnglish}
         isSw={isSw}
+        note={getCourseNote(semesterCourse, admissionYear)}
+        type={isDragging ? 'disabled' : 'default'}
         className="cursor-grab border border-gray-100"
       />
     </div>

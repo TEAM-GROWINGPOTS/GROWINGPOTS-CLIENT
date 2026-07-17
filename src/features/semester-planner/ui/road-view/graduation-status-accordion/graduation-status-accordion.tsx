@@ -1,6 +1,5 @@
 'use client';
 
-import { useGraduationStatusStore } from '@features/semester-planner/store/graduation-status-store';
 import { getOtherRequiredConditions } from '@features/semester-planner/utils/graduation-conditions';
 import * as Accordion from '@radix-ui/react-accordion';
 import type { GraduationResponse, GraduationUnit } from '@shared/apis/types/graduation';
@@ -19,24 +18,19 @@ interface GraduationStatusAccordionProps {
   data?: GraduationResponse;
 }
 
-export const GraduationStatusAccordion = ({ className, data: dataProp }: GraduationStatusAccordionProps) => {
+export const GraduationStatusAccordion = ({ className, data }: GraduationStatusAccordionProps) => {
   const [selectedMajorIndex, setSelectedMajorIndex] = useState(0);
-
-  const storeData = useGraduationStatusStore((state) => state.data);
-  const data = dataProp ?? storeData;
 
   if (!data || !data.sections) return null;
 
-  const { summary, sections } = data;
+  const { summary, sections, curriculumSatisfied } = data;
   const { majors, ge, others } = sections;
 
   const hasMultipleMajors = majors.length > 1;
   const selectedMajor = majors[selectedMajorIndex];
 
-  // 비학점 요건(SW/영어 등)과 무관하게, 학점 요건만 충족하면 "요건 충족"으로 표시한다.
-  const shortfall = summary.totalCredits.required - summary.totalCredits.current;
-  const isCreditFulfilled = shortfall <= 0;
-  const badgeLabel = isCreditFulfilled ? '학점 요건 충족' : `${shortfall}학점 부족`;
+  // 비학점 요건(SW/영어 등)과 무관하게, 학점 요건 충족 여부는 API의 curriculumSatisfied를 그대로 기준으로 삼는다.
+  const badgeLabel = curriculumSatisfied ? '충족' : '미충족';
 
   const graduationRequiredItems =
     selectedMajor.graduationRequired?.hasGraduationRequired && selectedMajor.graduationRequired.items?.length
@@ -60,14 +54,19 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
   }));
 
   return (
-    <Accordion.Root type="single" collapsible className={cn('w-306 rounded-xl bg-gray-800', className)}>
+    <Accordion.Root
+      type="single"
+      collapsible
+      defaultValue="graduation-status"
+      className={cn('w-306 rounded-xl bg-gray-800', className)}
+    >
       <Accordion.Item value="graduation-status">
         <Accordion.Header asChild>
           <h3>
             <Accordion.Trigger className="group flex w-full cursor-pointer items-center justify-between px-24 py-24 transition-[padding-bottom] duration-200 data-[state=open]:pb-8">
               <div className="flex items-center gap-8">
                 <span className="text-title-sb-18 text-gray-100">졸업 학점 충족 현황</span>
-                <Badge size="xsmall" variant="primary" color={isCreditFulfilled ? 'lime01' : 'darkRed'}>
+                <Badge size="xsmall" variant="primary" color={curriculumSatisfied ? 'lime01' : 'darkRed'}>
                   {badgeLabel}
                 </Badge>
               </div>
@@ -95,7 +94,7 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
             <li className="flex items-center justify-between">
               <span className="text-body-m-16 text-gray-100">전체</span>
               <div className="flex items-end">
-                <span className={cn('text-body-sb-16', shortfall <= 0 ? 'text-lime-500' : 'text-gray-100')}>
+                <span className={cn('text-body-sb-16', curriculumSatisfied ? 'text-lime-500' : 'text-gray-100')}>
                   {summary.totalCredits.current}
                 </span>
                 <span className="text-body-r-16 text-gray-400">/{summary.totalCredits.required}학점</span>
@@ -151,11 +150,11 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
                 </div>
               </li>
             ))}
-            {otherRequiredConditions.map(({ code, current, required, unit }) => {
+            {otherRequiredConditions.map(({ code, name, current, required, unit }) => {
               const satisfied = required === null || current >= required;
               return (
                 <li key={code} className="flex items-center justify-between">
-                  <span className="text-body-m-16 text-gray-100">일반 선택</span>
+                  <span className="text-body-m-16 text-gray-100">{name}</span>
                   <div className="flex items-end">
                     <span className={cn('text-body-sb-16', satisfied ? 'text-lime-500' : 'text-gray-100')}>
                       {current}
@@ -172,9 +171,9 @@ export const GraduationStatusAccordion = ({ className, data: dataProp }: Graduat
                 </li>
               );
             })}
-            {otherConditions.map(({ code, name, current, required, unit, satisfied }) => (
+            {otherConditions.map(({ code, current, required, unit, satisfied }) => (
               <li key={code} className="flex items-center justify-between">
-                <span className="text-body-m-16 text-gray-100">{name}</span>
+                <span className="text-body-m-16 text-gray-100">일반 선택</span>
                 <div className="flex items-end">
                   <span className={cn('text-body-sb-16', satisfied ? 'text-lime-500' : 'text-gray-100')}>
                     {current}

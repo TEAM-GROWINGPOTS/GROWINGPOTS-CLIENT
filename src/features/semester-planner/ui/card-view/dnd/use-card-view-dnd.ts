@@ -8,6 +8,7 @@ import {
   pointerWithin,
   type UniqueIdentifier,
 } from '@dnd-kit/core';
+import { checkPrerequisite } from '@features/semester-planner/apis/check-prerequisite';
 import { getSelectedCourses } from '@features/semester-planner/hooks/use-planner-terms';
 import type { PlannerTerm, SemesterCourse } from '@features/semester-planner/types/planner';
 import { detectCoverageCollision, DWELL_MS } from '@features/semester-planner/ui/card-view/dnd/collision';
@@ -27,6 +28,9 @@ interface UseCardViewDndInput {
   dropCourseToTerm: (activeId: string, targetTermId: string) => void;
   insertCourse: (termId: string, course: SemesterCourse) => void;
   removeCourse: (courseId: string) => void;
+  resolveTermId: (staleTermId: string) => Promise<number | undefined>;
+  validateAndCleanPrerequisites: () => Promise<{ courseName: string; prerequisiteName: string }[]>;
+  onCourseInserted?: (termId: string, courseId: string) => void;
 }
 
 export const useCardViewDnd = ({
@@ -37,11 +41,20 @@ export const useCardViewDnd = ({
   dropCourseToTerm,
   insertCourse,
   removeCourse,
+  resolveTermId,
+  validateAndCleanPrerequisites,
+  onCourseInserted,
 }: UseCardViewDndInput) => {
   const [activeCourse, setActiveCourse] = useState<SemesterCourse | null>(null);
   const [overTermId, setOverTermId] = useState<string | null>(null);
   const [isLibraryDrag, setIsLibraryDrag] = useState(false);
   const [isDropRejected, setIsDropRejected] = useState(false);
+  const [prerequisiteModal, setPrerequisiteModal] = useState<{
+    type: 'REQUIRED' | 'RECOMMENDED';
+    courseName: string;
+    prerequisiteName: string;
+    onConfirm: () => void;
+  } | null>(null);
   const copyCountRef = useRef(0);
   const lastOverIdRef = useRef<string | null>(null);
   const dwellRef = useRef<{ container: string; timer: ReturnType<typeof setTimeout> } | null>(null);
@@ -132,7 +145,7 @@ export const useCardViewDnd = ({
     dwellRef.current = { container: overContainer, timer };
   };
 
-  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+  const handleDragEnd = async ({ active, over }: DragEndEvent) => {
     clearDwell();
     lastOverIdRef.current = null;
     setActiveCourse(null);
@@ -143,7 +156,18 @@ export const useCardViewDnd = ({
     const overContainer = overId ? findContainer(overId) : undefined;
 
     if (overContainer === TRASH_ID) {
-      if (activeContainer !== LIBRARY_ID) removeCourse(activeId);
+      if (activeContainer !== LIBRARY_ID) {
+        removeCourse(activeId);
+        const violations = await validateAndCleanPrerequisites();
+        if (violations.length > 0) {
+          setPrerequisiteModal({
+            type: 'REQUIRED',
+            courseName: violations[0].courseName,
+            prerequisiteName: violations[0].prerequisiteName,
+            onConfirm: () => {},
+          });
+        }
+      }
       return;
     }
 
@@ -167,14 +191,52 @@ export const useCardViewDnd = ({
     if (activeContainer === LIBRARY_ID) {
       const course = active.data.current?.course as SemesterCourse | undefined;
       if (!course) return;
+
       copyCountRef.current += 1;
       const copy = { ...course, id: `${course.id.replace(LIBRARY_PREFIX, 'course-')}-copy-${copyCountRef.current}` };
-      insertCourse(overContainer, copy);
+      const termId = overContainer;
+      const insertAndScroll = () => {
+        insertCourse(termId, copy);
+        onCourseInserted?.(termId, copy.id);
+      };
+
+      // 저장 후 서버가 plannerTermId를 재할당할 수 있으므로 신선한 ID를 가져온다
+      const freshTermId = await resolveTermId(termId);
+      try {
+        const result = await checkPrerequisite([course.courseId], freshTermId);
+        const missing = result.results[0]?.missingPrerequisites ?? [];
+
+        if (missing.length === 0) {
+          insertAndScroll();
+          return;
+        }
+
+        const hasRequired = missing.some((p) => p.type === 'REQUIRED');
+        const firstMissing = missing.find((p) => p.type === (hasRequired ? 'REQUIRED' : 'RECOMMENDED'))!;
+
+        setPrerequisiteModal({
+          type: hasRequired ? 'REQUIRED' : 'RECOMMENDED',
+          courseName: course.name,
+          prerequisiteName: firstMissing.name,
+          onConfirm: hasRequired ? () => {} : insertAndScroll,
+        });
+      } catch {
+        // 선이수 검사 자체가 실패하면 삽입하지 않는다
+      }
       return;
     }
 
     if (activeContainer !== overContainer || hasPreviewMovedRef.current) {
       dropCourseToTerm(activeId, overContainer);
+      const violations = await validateAndCleanPrerequisites();
+      if (violations.length > 0) {
+        setPrerequisiteModal({
+          type: 'REQUIRED',
+          courseName: violations[0].courseName,
+          prerequisiteName: violations[0].prerequisiteName,
+          onConfirm: () => {},
+        });
+      }
     }
   };
 
@@ -183,6 +245,8 @@ export const useCardViewDnd = ({
     overTermId,
     isLibraryDrag,
     isDropRejected,
+    prerequisiteModal,
+    setPrerequisiteModal,
     contextProps: {
       collisionDetection,
       onDragStart: handleDragStart,

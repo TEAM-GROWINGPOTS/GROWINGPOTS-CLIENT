@@ -9,6 +9,17 @@ const API_BASE_URL = (() => {
 
 const MAX_REISSUE_ATTEMPTS = 3;
 let isRefreshing = false;
+let pendingResolvers: Array<(succeeded: boolean) => void> = [];
+
+const waitForRefresh = () =>
+  new Promise<boolean>((resolve) => {
+    pendingResolvers.push(resolve);
+  });
+
+const flushPending = (succeeded: boolean) => {
+  pendingResolvers.forEach((resolve) => resolve(succeeded));
+  pendingResolvers = [];
+};
 
 export const kyClient = ky.create({
   baseUrl: API_BASE_URL,
@@ -21,7 +32,7 @@ export const kyClient = ky.create({
     shouldRetry: ({ error }) => {
       if (isHTTPError(error)) {
         const status = error.response.status;
-        if (status >= 400 && status < 500 && status !== 429) {
+        if ((status >= 400 && status < 500 && status !== 429) || status >= 500) {
           return false;
         }
       }
@@ -41,9 +52,16 @@ export const kyClient = ky.create({
           console.debug(`[API] ${response.status} ${response.url}`);
         }
 
-        if (response.status === 401 && !isRefreshing) {
+        if (response.status === 401) {
+          if (isRefreshing) {
+            const reissueSucceeded = await waitForRefresh();
+            if (reissueSucceeded) return fetch(request.clone());
+            return;
+          }
+
           isRefreshing = true;
           let succeeded = false;
+          let authFailed = false;
 
           for (let attempt = 0; attempt < MAX_REISSUE_ATTEMPTS; attempt++) {
             try {
@@ -51,18 +69,28 @@ export const kyClient = ky.create({
               succeeded = true;
               break;
             } catch (error) {
-              if (isHTTPError(error)) break;
+              if (isHTTPError(error) && error.response.status < 500) {
+                authFailed = true;
+                break;
+              }
             }
           }
 
           isRefreshing = false;
 
           if (succeeded) {
+            flushPending(true);
             return fetch(request.clone());
           }
 
-          const redirectTo = encodeURIComponent(window.location.pathname + window.location.search);
-          window.location.href = `/api/auth/logout?redirect=${redirectTo}`;
+          if (authFailed) {
+            flushPending(false);
+            const redirectTo = encodeURIComponent(window.location.pathname + window.location.search);
+            window.location.href = `/api/auth/logout?redirect=${redirectTo}`;
+            return;
+          }
+
+          flushPending(false);
         }
       },
     ],

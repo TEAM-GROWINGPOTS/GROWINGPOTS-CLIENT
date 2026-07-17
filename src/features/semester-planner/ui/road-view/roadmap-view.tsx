@@ -3,7 +3,7 @@
 import '@xyflow/react/dist/style.css';
 
 import graduation from '@features/semester-planner/assets/graduation.json';
-import { MAX_FOLDERS_PER_TERM } from '@features/semester-planner/constants';
+import { getSemesterLabelByCode, MAX_FOLDERS_PER_TERM } from '@features/semester-planner/constants';
 import { PlannerActionsContext } from '@features/semester-planner/contexts/planner-actions-context';
 import { ReachabilityContext } from '@features/semester-planner/contexts/reachability-context';
 import { usePlannerGraph } from '@features/semester-planner/hooks/use-planner-graph';
@@ -16,9 +16,14 @@ import {
   SemesterEdgeData,
 } from '@features/semester-planner/types/planner-graph';
 import { AddSemesterModal } from '@features/semester-planner/ui/card-view/modals/add-semester-modal';
+import { RoadmapGuideModal } from '@features/semester-planner/ui/road-view/modals/roadmap-guide-modal';
+import { isGuideSeen, markGuideSeen } from '@features/semester-planner/utils/guide-seen';
+import { setPendingFocusTerm } from '@features/semester-planner/utils/pending-focus-term';
 import { parseApiError } from '@shared/apis/parse-api-error';
 import { toast } from '@shared/components';
+import { IconButton } from '@shared/components/icon-button/icon-button';
 import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
+import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { cn } from '@shared/utils/cn';
 import {
   Background,
@@ -45,14 +50,10 @@ import { RoadmapHeader } from './roadmap-header';
 import { SemesterEdge } from './semester-edge';
 import { SemesterNode } from './semester-node';
 
-const SEMESTER_LABEL_MAP: Record<string, string> = {
-  '1': '1학기',
-  '2': '2학기',
-};
-
 const ROW_GAP = 150;
 const ROW_MARGIN = 20; // 같은 열 카드 사이 여백
 const NODE_HEIGHT = 300;
+const ROADMAP_GUIDE_SEEN_KEY = 'roadmap-guide-seen';
 
 // 같은 열 노드들을 실제 measured 높이 기준으로 y 재배치
 const recomputeColumnPositions = (nodes: Node<PlannerNodeData>[]): Node<PlannerNodeData>[] => {
@@ -218,7 +219,11 @@ const nodeTypes = {
 
 const edgeTypes = { semesterEdge: SemesterEdge };
 
-export const RoadmapView = () => {
+interface RoadmapViewProps {
+  planner: ReturnType<typeof usePlannerTerms>;
+}
+
+export const RoadmapView = ({ planner }: RoadmapViewProps) => {
   const { setViewMode } = useViewMode();
   const router = useRouter();
   const {
@@ -233,7 +238,7 @@ export const RoadmapView = () => {
     selectFolders,
     reorderFolders,
     waitForSave,
-  } = usePlannerTerms();
+  } = planner;
   const { nodes: initialNodes, edges: initialEdges, completedIds } = usePlannerGraph(completedTerms, plannedTerms);
   const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
 
@@ -241,6 +246,24 @@ export const RoadmapView = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge<SemesterEdgeData>>([]);
   const [dropIndicator, setDropIndicator] = useState<{ colX: number; y: number } | null>(null);
   const [isAddSemesterModalOpen, setIsAddSemesterModalOpen] = useState(false);
+  const { data: studentProfile } = useStudentProfile();
+  const studentProfileId = studentProfile?.studentProfileId;
+  const [checkedGuideProfileId, setCheckedGuideProfileId] = useState<number>();
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [guideConfirmLabel, setGuideConfirmLabel] = useState('확인');
+
+  if (studentProfileId !== undefined && studentProfileId !== checkedGuideProfileId) {
+    setCheckedGuideProfileId(studentProfileId);
+    if (!isGuideSeen(`${ROADMAP_GUIDE_SEEN_KEY}:${studentProfileId}`)) {
+      setGuideConfirmLabel('시작하기');
+      setIsGuideOpen(true);
+    }
+  }
+
+  useEffect(() => {
+    if (studentProfileId === undefined) return;
+    markGuideSeen(`${ROADMAP_GUIDE_SEEN_KEY}:${studentProfileId}`);
+  }, [studentProfileId]);
   const [isCelebrationDismissed, setIsCelebrationDismissed] = useState(false);
   const [isCelebrationLeaving, setIsCelebrationLeaving] = useState(false);
 
@@ -293,7 +316,9 @@ export const RoadmapView = () => {
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
-  // 노드 높이 변화(아코디언 열기/닫기) 감지 → 같은 열 y 재배치
+  // 노드 높이 변화(아코디언 열기/닫기) 감지 → 같은 열 y 재배치.
+  // 노드 개수가 바뀐 경우(컬럼 삭제 등)도 감지해야 한다 — 살아남은 노드들의 개별 높이는 그대로여도
+  // "+" 버튼이 참조하는 마지막 컬럼 자체가 바뀌었을 수 있어, 높이 값만 비교해선 재계산이 누락된다.
   const measuredHeightsRef = useRef<Map<string, number>>(new Map());
   useEffect(() => {
     let changed = false;
@@ -304,6 +329,7 @@ export const RoadmapView = () => {
       next.set(node.id, h);
       if (measuredHeightsRef.current.get(node.id) !== h) changed = true;
     }
+    if (next.size !== measuredHeightsRef.current.size) changed = true;
     if (!changed) return;
     measuredHeightsRef.current = next;
     setNodes(recomputeColumnPositions);
@@ -323,11 +349,11 @@ export const RoadmapView = () => {
 
   // 졸업 요건은 학기/폴더가 바뀔 때마다 저장 응답으로 다시 계산돼 오므로(useSavePlanner의 onSuccess가
   // GRADUATION 쿼리 캐시를 갱신), 배지와 로띠 모두 그래프에서 직접 합산한 학점이 아니라 이 API 값의
-  // 학점 요건 충족 여부(요건 - 이수)를 그대로 기준으로 삼는다. 아코디언의 배지 로직과 동일한 기준이다.
-  const creditShortfall = graduationData
-    ? graduationData.summary.totalCredits.required - graduationData.summary.totalCredits.current
-    : null;
-  const showCelebration = creditShortfall !== null && creditShortfall <= 0 && !isCelebrationDismissed;
+  // curriculumSatisfied를 그대로 기준으로 삼는다. 아코디언의 배지 로직과 동일한 기준이다.
+  // isGuideOpen 조건: 처음 방문해 이미 충족된 상태라면 가이드 모달이 열려있는 동안엔 로띠를 띄우지
+  // 않고, "시작하기"를 눌러 모달이 닫힌 뒤에 띄운다. 이미 가이드를 본 사용자는 모달이 아예 안 열리므로
+  // (isGuideOpen이 계속 false) 이 조건이 평소엔 아무 영향이 없다.
+  const showCelebration = !!graduationData?.curriculumSatisfied && !isCelebrationDismissed && !isGuideOpen;
 
   // 즉시 unmount하지 않고 opacity 전환이 끝난 뒤 dismiss 상태로 확정한다.
   const dismissCelebration = useCallback(() => {
@@ -590,7 +616,7 @@ export const RoadmapView = () => {
   const handleDeleteFolder = useCallback(
     (termId: string, folderId: string, folderName: string) => {
       const { isTermRemoved, promotedFolderId } = deleteFolder(termId, folderId);
-      toast.success(`${folderName} 폴더가 삭제되었어요.`);
+      toast.success(`'${folderName}' 폴더가 삭제되었어요.`);
 
       // 학기 자체가 사라지는 경우(컬럼 재배치 필요)는 buildPlannerGraph가 다시 지은 그래프를 신뢰한다.
       if (isTermRemoved) {
@@ -626,28 +652,34 @@ export const RoadmapView = () => {
       if (node.type === 'addVersionNode') {
         const { termId, versionCount } = node.data as Partial<AddVersionNodeData>;
         if (!termId || (versionCount ?? 0) >= MAX_FOLDERS_PER_TERM) return;
-        addFolder(termId);
-        // 카드뷰로 전환하면 usePlannerTerms가 새로 마운트되어 서버 GET으로 다시 시드된다. 저장 PUT이
-        // 끝나기 전에 전환하면 그 GET이 추가 전 상태를 받아와 화면에 반영이 늦어 보이므로, 저장이
-        // 끝난 뒤에 전환한다.
+        const added = addFolder(termId, { select: true });
+        const term = plannedTerms.find(({ id }) => id === termId);
+        if (added && term) setPendingFocusTerm({ yearLevel: term.yearLevel, semesterLabel: term.semesterLabel });
+        // usePlannerTerms 인스턴스를 카드뷰와 공유하고 refetchOnMount도 없앤 뒤로는 뷰 전환 자체가
+        // 재조회를 유발하지 않지만, 저장(PUT)이 채 끝나기도 전에 화면을 옮기는 걸 막기 위해 여전히 기다린다.
         waitForSave().then(() => setViewMode('card'));
       }
     },
-    [setViewMode, addFolder, waitForSave],
+    [setViewMode, addFolder, plannedTerms, waitForSave],
   );
 
   const handleAddSemesterSubmit = useCallback(
     (year: string, semester: string) => {
-      const semesterLabel = SEMESTER_LABEL_MAP[semester];
+      const semesterLabel = getSemesterLabelByCode(semester);
       if (!semesterLabel) return;
       const yearLevel = Number.parseInt(year, 10);
 
-      const added = addTerm({ yearLevel, semester: Number(semester), semesterLabel });
-      if (!added) {
+      const result = addTerm({ yearLevel, semester: Number(semester), semesterLabel });
+      if (result === 'duplicate') {
         toast.negative('이미 추가된 학기예요.');
         return;
       }
+      if (result === 'past') {
+        toast.negative('지난 학기는 추가할 수 없어요.');
+        return;
+      }
       setIsAddSemesterModalOpen(false);
+      setPendingFocusTerm({ yearLevel, semesterLabel });
       // addFolder와 같은 이유로, 저장이 끝난 뒤에 카드뷰로 전환한다.
       waitForSave().then(() => setViewMode('card'));
     },
@@ -725,9 +757,20 @@ export const RoadmapView = () => {
                 className="-mt-32 h-400 w-400"
               />
               {/* 로띠 애니메이션 자체에 하단 여백이 많아 인접 배치만으로는 텍스트와 멀어 보여 음수 마진으로 당긴다. */}
-              <p className="text-title-sb-24 animate-text-rise -mt-48 text-gray-700">졸업 요건을 충족했어요!</p>
+              <p className="text-title-sb-24 animate-text-rise -mt-48 text-gray-700">졸업 학점 요건을 충족했어요!</p>
             </div>
           )}
+
+          <IconButton
+            icon="ic_question"
+            aria-label="도움말"
+            size="medium"
+            className="shadow-small absolute right-24 bottom-24 z-10"
+            onClick={() => {
+              setGuideConfirmLabel('확인');
+              setIsGuideOpen(true);
+            }}
+          />
         </div>
 
         <AddSemesterModal
@@ -735,6 +778,7 @@ export const RoadmapView = () => {
           onOpenChange={setIsAddSemesterModalOpen}
           onSubmit={handleAddSemesterSubmit}
         />
+        <RoadmapGuideModal open={isGuideOpen} onOpenChange={setIsGuideOpen} confirmLabel={guideConfirmLabel} />
       </ReachabilityContext.Provider>
     </PlannerActionsContext.Provider>
   );

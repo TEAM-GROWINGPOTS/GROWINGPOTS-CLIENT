@@ -1,3 +1,4 @@
+import { getSemesterLabel } from '@features/semester-planner/constants';
 import type { PlannerFolder, PlannerTerm } from '@features/semester-planner/types/planner';
 import type { PlannerNodeData, SemesterEdgeData } from '@features/semester-planner/types/planner-graph';
 import type { Edge, Node } from '@xyflow/react';
@@ -5,10 +6,10 @@ import type { Edge, Node } from '@xyflow/react';
 const COL_GAP = 370;
 
 function toTermLabel(yearLevel: number, semester: number): string {
-  return `${yearLevel}학년 ${semester}학기`;
+  return `${yearLevel}학년 ${getSemesterLabel(semester)}`;
 }
 
-const getFolderCredit = (folder: PlannerFolder): number => folder.courses.reduce((sum, { credit }) => sum + credit, 0);
+const getFolderCredit = (folder: PlannerFolder): number => folder.totalCredit;
 
 export interface PlannerGraph {
   nodes: Node<PlannerNodeData>[];
@@ -36,7 +37,8 @@ export function buildPlannerGraph(completedTerms: PlannerTerm[], plannedTerms: P
       type: 'semesterNode',
       position: { x: colX, y: 100 },
       data: {
-        plannerTermVersionId: Number(nodeId),
+        // completed 폴더의 nodeId는 `completed-folder-${index}` 형태라 그대로 Number 변환하면 NaN이 된다.
+        plannerTermVersionId: Number(nodeId.split('-').at(-1)),
         locked: true,
         colIndex,
         colX,

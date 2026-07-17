@@ -1,5 +1,6 @@
 'use client';
 
+import { type DivisionCategoryBadgeColor, getDivisionCategoryBadgeColor } from '@features/semester-planner/constants';
 import type { OpenedSemester } from '@features/semester-planner/types/planner';
 import { parseApiError } from '@shared/apis/parse-api-error';
 import type { DivisionCategory, OtherRequired } from '@shared/apis/types/course-search';
@@ -27,6 +28,7 @@ export interface CourseFilterValues {
 interface FilterOption {
   value: string;
   label: string;
+  badgeColor?: DivisionCategoryBadgeColor;
 }
 
 const FILTER_TABS: { value: CourseFilterTabKeyTypes; label: string; fields: (keyof CourseFilterValues)[] }[] = [
@@ -36,7 +38,7 @@ const FILTER_TABS: { value: CourseFilterTabKeyTypes; label: string; fields: (key
   { value: 'grade', label: '학년', fields: ['year'] },
   { value: 'semester', label: '개설학기', fields: ['semester'] },
   { value: 'credit', label: '학점', fields: ['credits'] },
-  { value: 'extra', label: '기타 필수', fields: ['otherRequired'] },
+  { value: 'extra', label: 'SW/영어', fields: ['otherRequired'] },
 ];
 
 const isTabSelected = (fields: (keyof CourseFilterValues)[], filters: CourseFilterValues): boolean =>
@@ -58,7 +60,9 @@ export const FILTER_TAB_LABELS = FILTER_TABS.map(({ label }) => label);
 
 const CAMPUS_OPTIONS: FilterOption[] = [{ value: '국제캠퍼스', label: '국제캠퍼스' }];
 
-const AREA_OPTIONS: FilterOption[] = [
+const COLLEGE_NONE_OPTION: FilterOption = { value: '__none__', label: '선택 안함' };
+
+const AREA_OPTION_DEFS = [
   { value: 'MAJOR_REQUIRED', label: '전공필수' },
   { value: 'MAJOR_BASIC', label: '전공기초' },
   { value: 'MAJOR_ELECTIVE', label: '전공선택' },
@@ -66,7 +70,13 @@ const AREA_OPTIONS: FilterOption[] = [
   { value: 'DISTRIBUTED_GE', label: '배분이수교과' },
   { value: 'FREE_GE', label: '자유이수교과' },
   { value: 'CROSS_MAJOR', label: '타전공인정과목' },
-];
+] as const;
+
+const AREA_OPTIONS: FilterOption[] = AREA_OPTION_DEFS.map(({ value, label }) => ({
+  value,
+  label,
+  badgeColor: getDivisionCategoryBadgeColor(value),
+}));
 
 const GRADE_OPTIONS: FilterOption[] = [
   { value: '1', label: '1학년' },
@@ -129,17 +139,21 @@ const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFo
     (next: CourseFilterValues[K]) =>
       setValues((prev) => ({ ...prev, [key]: next }));
 
-  const collegeOptions: FilterOption[] = [...new Set(departments.map(({ college }) => college))].map((college) => ({
-    value: college,
-    label: college,
-  }));
+  const collegeOptions: FilterOption[] = [
+    ...[...new Set(departments.map(({ college }) => college))].map((college) => ({
+      value: college,
+      label: college,
+    })),
+    COLLEGE_NONE_OPTION,
+  ];
 
   const departmentOptions: FilterOption[] = departments
     .filter(({ college }) => college === values.collegeName)
     .map(({ departmentId, name }) => ({ value: String(departmentId), label: name }));
 
   const handleCollegeChange = (next: string) => {
-    setValues((prev) => ({ ...prev, collegeName: next, departmentId: '' }));
+    const collegeName = next === COLLEGE_NONE_OPTION.value ? '' : next;
+    setValues((prev) => ({ ...prev, collegeName, departmentId: '' }));
   };
 
   return (
@@ -215,7 +229,7 @@ const CourseFilterForm = ({ initialValues, initialTab, onApply }: CourseFilterFo
             options={OTHER_REQUIRED_OPTIONS}
             value={values.otherRequired}
             onChange={(next) => setFieldValue('otherRequired')(next as OtherRequired[])}
-            placeholder="기타 필수"
+            placeholder="SW/영어"
           />
         )}
       </section>

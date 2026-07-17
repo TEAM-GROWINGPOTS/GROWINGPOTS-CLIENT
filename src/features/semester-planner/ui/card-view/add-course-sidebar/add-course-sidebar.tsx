@@ -3,7 +3,7 @@
 import { FILTER_TAB_LABELS } from '@features/semester-planner/ui/card-view/course-filter-modal/course-filter-modal';
 import { DropDown } from '@features/semester-planner/ui/card-view/drop-down/drop-down';
 import { SearchField } from '@features/semester-planner/ui/card-view/search-field/search-field';
-import { getCourseTags } from '@features/semester-planner/utils/map-planner';
+import { getCourseNote, getCourseTags } from '@features/semester-planner/utils/map-planner';
 import type { CourseSearchItemResponse } from '@shared/apis/types/course-search';
 import { IconButton } from '@shared/components';
 import { Button } from '@shared/components/button/button';
@@ -22,6 +22,7 @@ interface AddCourseSidebarProps {
   onFilterClick?: (label: string) => void;
   onClose: () => void;
   onDirectAdd: () => void;
+  admissionYear?: number;
   renderCourse?: (course: CourseSearchItemResponse) => ReactNode;
 }
 
@@ -38,6 +39,7 @@ export const AddCourseSidebar = ({
   onFilterClick,
   onClose,
   onDirectAdd,
+  admissionYear,
   renderCourse,
 }: AddCourseSidebarProps) => {
   const [internalKeyword, setInternalKeyword] = useState('');
@@ -97,7 +99,7 @@ export const AddCourseSidebar = ({
   };
 
   return (
-    <aside className="flex h-full w-300 flex-col border-l border-gray-100 bg-gray-50 px-20 pt-48">
+    <aside className="flex h-full w-300 flex-col border-l border-gray-100 bg-gray-50 px-20 pt-48 pb-20">
       <header className="flex items-center justify-between">
         <h2 className="text-title-sb-20 text-gray-900">과목 추가</h2>
         <button type="button" aria-label="과목 추가 닫기" className="cursor-pointer" onClick={onClose}>
@@ -172,8 +174,17 @@ export const AddCourseSidebar = ({
             className="mt-8 flex [scrollbar-width:none] flex-col gap-12 overflow-y-auto [&::-webkit-scrollbar]:hidden"
           >
             {filteredCourses.map((course) => {
-              const { courseId, departmentName, name, defaultDivisionName, credit, openedSemester, isEnglish, isSw } =
-                course;
+              const {
+                courseId,
+                departmentName,
+                name,
+                defaultDivisionName,
+                credit,
+                openedSemester,
+                isEnglish,
+                isSw,
+                area,
+              } = course;
               return (
                 <li key={courseId}>
                   {renderCourse ? (
@@ -185,6 +196,7 @@ export const AddCourseSidebar = ({
                       tags={getCourseTags(defaultDivisionName, credit, openedSemester)}
                       isEnglish={isEnglish}
                       isSw={isSw}
+                      note={getCourseNote({ area, divisionCategory: undefined }, admissionYear)}
                       className="border border-gray-100"
                     />
                   )}

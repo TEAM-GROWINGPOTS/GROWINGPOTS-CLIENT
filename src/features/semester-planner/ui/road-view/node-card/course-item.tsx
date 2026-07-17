@@ -1,25 +1,10 @@
 'use client';
 
-import type { MajorDivisionCategoryTypes, NodeCardCourse } from '@features/semester-planner/types/planner-node';
+import { getDivisionCategoryBadgeColor } from '@features/semester-planner/constants';
+import type { NodeCardCourse } from '@features/semester-planner/types/planner-node';
 import { Badge, Tooltip } from '@shared/components';
 import { cn } from '@shared/utils/cn';
 import { useLayoutEffect, useRef, useState } from 'react';
-
-const MAJOR_DIVISION_CATEGORY_SET: Set<string> = new Set<MajorDivisionCategoryTypes>([
-  'MAJOR_REQUIRED',
-  'MAJOR_ELECTIVE',
-  'MAJOR_BASIC',
-]);
-
-// 교양 계열(GENERAL 및 하위 필수/배분이수/자유이수교과) → purple, 기타(GENERAL_ELECTIVE) → blue
-const GENERAL_EDUCATION_DIVISION_CATEGORY_SET = new Set(['GENERAL', 'REQUIRED_GE', 'DISTRIBUTED_GE', 'FREE_GE']);
-
-// 전공 → lime02, 교양 → purple, 그 외(기타) → blue
-const getDivisionBadgeColor = (divisionCategory: string): 'lime02' | 'purple' | 'blue' => {
-  if (MAJOR_DIVISION_CATEGORY_SET.has(divisionCategory)) return 'lime02';
-  if (GENERAL_EDUCATION_DIVISION_CATEGORY_SET.has(divisionCategory)) return 'purple';
-  return 'blue';
-};
 
 interface CourseItemProps {
   course: NodeCardCourse;
@@ -48,7 +33,7 @@ export const CourseItem = ({ course }: CourseItemProps) => {
         disabled={!isTruncated}
       />
       {course.divisionCategory && course.divisionName && (
-        <Badge size="xsmall" color={getDivisionBadgeColor(course.divisionCategory)} className="ml-8 shrink-0">
+        <Badge size="xsmall" color={getDivisionCategoryBadgeColor(course.divisionCategory)} className="ml-8 shrink-0">
           {course.divisionName}
         </Badge>
       )}

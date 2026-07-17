@@ -15,6 +15,7 @@ interface TableCellSelectProps {
   onChange: (value: string) => void;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  isInvalid?: boolean;
   className?: string;
 }
 
@@ -24,8 +25,10 @@ export const TableCellSelect = ({
   onChange,
   isOpen,
   onOpenChange,
+  isInvalid: isInvalidProp,
   className,
 }: TableCellSelectProps) => {
+  const isInvalid = isInvalidProp ?? !options.some((option) => option.value === value);
   const ref = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLLIElement | null)[]>([]);
   const listboxId = useId();
@@ -128,7 +131,10 @@ export const TableCellSelect = ({
         aria-haspopup="listbox"
         aria-controls={listboxId}
         aria-activedescendant={isOpen ? `${listboxId}-${activeIndex}` : undefined}
-        className="text-body-m-16 flex h-32 w-full cursor-pointer items-center justify-between rounded-sm border border-gray-100 bg-white px-8 text-gray-600 outline-none focus:border-transparent focus:ring-2 focus:ring-gray-600"
+        className={cn(
+          'text-body-m-16 flex h-32 w-full cursor-pointer items-center justify-between rounded-sm border bg-white px-8 text-gray-600 outline-hidden focus:border-transparent focus:ring-2 focus:ring-gray-600',
+          isInvalid ? 'border-red-20' : 'border-gray-100',
+        )}
       >
         <span className="min-w-0 truncate">{options.find((opt) => opt.value === value)?.label}</span>
         <Icon name="ic_chevron_down" size={16} className="shrink-0 text-gray-500" />
@@ -138,7 +144,8 @@ export const TableCellSelect = ({
         <ul
           id={listboxId}
           role="listbox"
-          className="z-dropdown absolute mt-4 flex max-h-171 w-full flex-col gap-9 overflow-y-auto rounded-sm border border-gray-100 bg-white p-8 shadow-[0px_4px_4px_rgba(0,0,0,0.04)]"
+          tabIndex={-1}
+          className="z-dropdown absolute mt-4 flex max-h-171 w-full flex-col gap-9 overflow-y-auto rounded-sm border border-gray-100 bg-white p-8 outline-hidden focus:border-transparent focus:ring-2 focus:ring-gray-600"
         >
           {options.map(({ value: optValue, label }, index) => (
             <li

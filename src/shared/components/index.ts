@@ -1,9 +1,10 @@
 export { Badge } from './badge/badge';
+export type { CarouselProps } from './carousel/carousel';
+export { Carousel } from './carousel/carousel';
 export { Chip } from './chip/chip';
 export { ClassCard } from './class-card/class-card';
 export type { IconButtonSize } from './icon-button/icon-button';
 export { IconButton } from './icon-button/icon-button';
-export type { AddCourseValues } from './modal/add-course-modal';
 export { AddCourseModal } from './modal/add-course-modal';
 export { ConfirmModal } from './modal/confirm-modal';
 export { Modal } from './modal/modal';

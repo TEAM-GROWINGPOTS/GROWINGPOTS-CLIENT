@@ -1,3 +1,6 @@
+import type { CourseArea } from '@shared/apis/types/course-search';
+import type { GraduationResponse } from '@shared/apis/types/graduation';
+
 export type OpenedSemester = 'FIRST' | 'SECOND' | 'BOTH';
 
 export interface PlannerCourseBaseResponse {
@@ -12,6 +15,7 @@ export interface PlannerCourseBaseResponse {
   credit: number;
   isEnglish: boolean;
   isSw: boolean;
+  area?: CourseArea | null;
 }
 
 export interface PlannedCourseResponse extends PlannerCourseBaseResponse {
@@ -79,6 +83,11 @@ export interface PlannerSaveRequest {
   terms: PlannerSaveTerm[];
 }
 
+export interface PlannerSaveResponse {
+  graduation: GraduationResponse;
+  hasDuplicateCourse: boolean;
+}
+
 export type SemesterCardStatus = 'completed' | 'current' | 'planned';
 
 export interface SemesterCourse {
@@ -93,6 +102,7 @@ export interface SemesterCourse {
   divisionName: string;
   isEnglish?: boolean;
   isSw?: boolean;
+  area?: CourseArea | null;
 }
 
 export interface SemesterFolder {
@@ -102,6 +112,7 @@ export interface SemesterFolder {
 
 export interface PlannerFolder extends SemesterFolder {
   courses: SemesterCourse[];
+  totalCredit: number;
 }
 
 export interface PlannerTerm {

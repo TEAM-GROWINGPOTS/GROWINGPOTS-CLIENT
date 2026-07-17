@@ -1,27 +1,33 @@
 'use client';
 
+import { getSemesterLabel } from '@features/semester-planner/constants';
 import type { SemesterCardStatus, SemesterCourse, SemesterFolder } from '@features/semester-planner/types/planner';
 import { FolderItemMenu } from '@features/semester-planner/ui/card-view/folder-item-menu/folder-item-menu';
 import { FolderList } from '@features/semester-planner/ui/card-view/folder-list/folder-list';
 import { FolderRenameModal } from '@features/semester-planner/ui/card-view/folder-rename-modal/folder-rename-modal';
+import { getCourseNote } from '@features/semester-planner/utils/map-planner';
 import { Badge, ClassCard } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { cn } from '@shared/utils/cn';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, type Ref, useEffect, useRef, useState } from 'react';
 
 interface SemesterCardProps {
+  ref?: Ref<HTMLElement>;
   yearLevel: number;
   semester: number;
   semesterLabel?: string;
   status: SemesterCardStatus;
   folderName: string;
+  totalCredit: number;
   courses: SemesterCourse[];
   folders?: SemesterFolder[];
   selectedFolderId?: string;
   isDropTarget?: boolean;
   renderCourse?: (course: SemesterCourse) => ReactNode;
+  admissionYear?: number;
   className?: string;
+  scrollToCourse?: { courseId: string; key: number };
   onDeleteTerm?: () => void;
   onAddFolder?: () => void;
   onSelectFolder?: (folderId: string) => void;
@@ -47,17 +53,21 @@ const STATUS_ICON: Record<SemesterCardStatus, string | null> = {
 };
 
 export const SemesterCard = ({
+  ref,
   yearLevel,
   semester,
   semesterLabel,
   status,
   folderName,
+  totalCredit,
   courses,
   folders,
   selectedFolderId,
   isDropTarget = false,
   renderCourse,
+  admissionYear,
   className,
+  scrollToCourse,
   onDeleteTerm,
   onAddFolder,
   onSelectFolder,
@@ -67,7 +77,29 @@ export const SemesterCard = ({
   const [isFolderListOpen, setIsFolderListOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<FolderTarget | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<FolderTarget | null>(null);
+  const [isTermDeleteOpen, setIsTermDeleteOpen] = useState(false);
   const folderListRef = useRef<HTMLDivElement>(null);
+  const courseListRef = useRef<HTMLUListElement>(null);
+
+  const scrollTargetCourseId = scrollToCourse?.courseId;
+  const scrollTargetKey = scrollToCourse?.key;
+
+  useEffect(() => {
+    if (!scrollTargetCourseId || scrollTargetKey === undefined) return;
+
+    const frame = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const list = courseListRef.current;
+        const item = list?.querySelector(`[data-course-id="${scrollTargetCourseId}"]`) as HTMLElement | null;
+        if (!list || !item) return;
+
+        const scrollTop = list.scrollTop + item.getBoundingClientRect().top - list.getBoundingClientRect().top;
+        list.scrollTo({ top: scrollTop, behavior: 'smooth' });
+      });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [scrollTargetCourseId, scrollTargetKey]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -112,14 +144,21 @@ export const SemesterCard = ({
     setDeleteTarget(null);
   };
 
-  const totalCredit = courses.reduce((sum, { credit }) => sum + credit, 0);
+  const handleConfirmDeleteTerm = () => {
+    onDeleteTerm?.();
+    setIsTermDeleteOpen(false);
+  };
+
   const isPlanned = status === 'planned';
   const statusIcon = STATUS_ICON[status];
-  const termLabel = `${yearLevel}학년 ${semesterLabel ?? `${semester}학기`}`;
+  const termLabel = `${yearLevel}학년 ${semesterLabel ?? getSemesterLabel(semester)}`;
   const isLastFolder = (folders?.length ?? 0) <= 1;
 
   return (
-    <section className={cn('flex max-h-screen w-258 shrink-0 flex-col self-start rounded-xl bg-gray-800', className)}>
+    <section
+      ref={ref}
+      className={cn('flex max-h-screen w-258 shrink-0 flex-col self-start rounded-xl bg-gray-800', className)}
+    >
       <header className="flex items-center justify-between px-12 pt-12">
         <div className="flex flex-row gap-8">
           {statusIcon && <Icon name={statusIcon} size={20} />}
@@ -130,7 +169,7 @@ export const SemesterCard = ({
         </div>
         {isPlanned && (
           <div className="[&_button]:visible [&>div>button>svg]:text-gray-300">
-            <FolderItemMenu iconSize={20} onDelete={() => onDeleteTerm?.()} />
+            <FolderItemMenu iconSize={20} onDelete={() => setIsTermDeleteOpen(true)} />
           </div>
         )}
       </header>
@@ -170,11 +209,11 @@ export const SemesterCard = ({
         <div className="my-8 border-b border-gray-200" />
         <div className="relative flex min-h-0 flex-col">
           {courses.length > 0 ? (
-            <ul className="flex min-h-0 flex-col gap-8 overflow-y-auto">
+            <ul ref={courseListRef} className="flex min-h-0 flex-col gap-8 overflow-y-auto scroll-smooth">
               {courses.map((course) => {
                 const { id, departmentName, name, tags, isEnglish, isSw } = course;
                 return (
-                  <li key={id}>
+                  <li key={id} data-course-id={id}>
                     {renderCourse ? (
                       renderCourse(course)
                     ) : (
@@ -184,6 +223,7 @@ export const SemesterCard = ({
                         tags={tags}
                         isEnglish={isEnglish}
                         isSw={isSw}
+                        note={getCourseNote(course, admissionYear)}
                         className="w-full border border-gray-100"
                       />
                     )}
@@ -226,6 +266,14 @@ export const SemesterCard = ({
             : '삭제한 폴더는 복구할 수 없어요.'
         }
         onConfirm={handleConfirmDeleteFolder}
+      />
+      <ConfirmModal
+        open={isTermDeleteOpen}
+        onOpenChange={setIsTermDeleteOpen}
+        type="delete"
+        title={`${termLabel}를 삭제할까요?`}
+        description="삭제한 학기는 복구할 수 없어요."
+        onConfirm={handleConfirmDeleteTerm}
       />
     </section>
   );

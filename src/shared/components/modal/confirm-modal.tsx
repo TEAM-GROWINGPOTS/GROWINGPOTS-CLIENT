@@ -2,11 +2,12 @@
 
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
+import { cn } from '@shared/utils/cn';
 import type { ReactNode } from 'react';
 
 import { Modal } from './modal';
 
-type ConfirmModalTypes = 'delete' | 'saveChanges' | 'notice';
+type ConfirmModalTypes = 'delete' | 'saveChanges' | 'notice' | 'logout';
 
 interface ConfirmModalProps {
   open: boolean;
@@ -18,7 +19,7 @@ interface ConfirmModalProps {
   onConfirm?: () => void;
 }
 
-const CONFIRM_MODAL_DEFAULTS: Record<ConfirmModalTypes, { iconName: string; confirmLabel: string }> = {
+const CONFIRM_MODAL_DEFAULTS: Record<ConfirmModalTypes, { iconName?: string; confirmLabel: string }> = {
   delete: {
     iconName: 'ic_trash',
     confirmLabel: '삭제',
@@ -28,7 +29,9 @@ const CONFIRM_MODAL_DEFAULTS: Record<ConfirmModalTypes, { iconName: string; conf
     confirmLabel: '저장',
   },
   notice: {
-    iconName: 'ic_alert_triangle_black',
+    confirmLabel: '확인',
+  },
+  logout: {
     confirmLabel: '확인',
   },
 };
@@ -47,8 +50,8 @@ export const ConfirmModal = ({
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <Modal.Content className="flex w-440 flex-col items-center">
-        <Icon name={iconName} size={40} className="mb-16" />
-        <Modal.Title className="text-title-sb-18 mb-8 text-center">{title}</Modal.Title>
+        {iconName && <Icon name={iconName} size={40} className="mb-16" />}
+        <Modal.Title className={cn('text-title-sb-18 text-center', description && 'mb-8')}>{title}</Modal.Title>
         {description && <Modal.Description className="text-center">{description}</Modal.Description>}
         <Modal.Footer className="mt-40 w-full">
           {type !== 'notice' && (

@@ -1,7 +1,13 @@
 'use client';
 
+import { checkPrerequisite } from '@features/semester-planner/apis/check-prerequisite';
+import {
+  comparePlannerTerms,
+  getLatestCompletedOrCurrentTerm,
+  isPastPlannerTerm,
+} from '@features/semester-planner/constants';
 import { usePlanner } from '@features/semester-planner/hooks/use-planner';
-import { useSavePlanner } from '@features/semester-planner/hooks/use-save-planner';
+import { getServerPlannedTerms, useSavePlanner } from '@features/semester-planner/hooks/use-save-planner';
 import type {
   PlannedTermResponse,
   PlannerFolder,
@@ -9,16 +15,22 @@ import type {
   SemesterCourse,
 } from '@features/semester-planner/types/planner';
 import {
+  isSamePlannerComposition,
   mapCompletedTerms,
   mapPlannedTerms,
-  sortPlannerTerms,
+  mergeServerTotalCredits,
   sortSemesterCourses,
   toPlannerSaveRequest,
 } from '@features/semester-planner/utils/map-planner';
+import { parseApiError } from '@shared/apis/parse-api-error';
+import { toast } from '@shared/components';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 export const getSelectedCourses = (term: PlannerTerm): SemesterCourse[] =>
   sortSemesterCourses(term.folders.find(({ id }) => id === term.selectedFolderId)?.courses ?? []);
+
+export const getSelectedTotalCredit = (term: PlannerTerm): number =>
+  term.folders.find(({ id }) => id === term.selectedFolderId)?.totalCredit ?? 0;
 
 export const getFolderName = ({ yearLevel, semesterLabel, selectedFolderId, folders }: PlannerTerm): string => {
   const selectedFolder = folders.find(({ id }) => id === selectedFolderId);
@@ -66,6 +78,14 @@ interface AddTermInput {
   semesterLabel: string;
 }
 
+export type AddTermResult = 'added' | 'duplicate' | 'past';
+
+const insertPlannedTerm = (terms: PlannerTerm[], newTerm: PlannerTerm): PlannerTerm[] => {
+  const insertIndex = terms.findIndex((term) => comparePlannerTerms(newTerm, term) < 0);
+  if (insertIndex === -1) return [...terms, newTerm];
+  return [...terms.slice(0, insertIndex), newTerm, ...terms.slice(insertIndex)];
+};
+
 export interface DeleteFolderResult {
   /** 삭제된 폴더가 그 학기의 마지막 폴더여서, 학기(컬럼) 자체가 통째로 사라졌는지 */
   isTermRemoved: boolean;
@@ -91,6 +111,8 @@ export const usePlannerTerms = () => {
   const snapshotRef = useRef<PlannerTerm[] | null>(null);
   const createdIdSeqRef = useRef(0);
   const isSeededRef = useRef(false);
+  const saveSeqRef = useRef(0);
+  const isValidatingRef = useRef(false);
 
   const setPlannedTerms = (terms: PlannerTerm[]) => {
     setPlannedState((prev) => ({ ...prev, terms }));
@@ -105,7 +127,7 @@ export const usePlannerTerms = () => {
     if (latestPlanner) setPlannedTerms(mapPlannedTerms(latestPlanner.plannedTerms));
   };
 
-  const { mutateAsync: requestSavePlanner } = useSavePlanner({ onSaveError: reseedPlannedTerms });
+  const { mutateAsync: requestSavePlanner } = useSavePlanner();
   // 마지막 저장 요청의 완료(성공/실패 무관) 시점. 저장 직후 다른 화면으로 전환해야 하는 흐름(노드뷰의
   // 학기/폴더 추가)에서, 전환된 화면이 새로 GET하기 전에 이 저장이 먼저 끝나도록 기다리는 용도다.
   const lastSavePromiseRef = useRef<Promise<unknown>>(Promise.resolve());
@@ -120,18 +142,128 @@ export const usePlannerTerms = () => {
     setPlannedTerms(next);
   };
 
-  const commitPlannedTerms = (next: PlannerTerm[]) => {
+  // 과목 카드를 새로 추가하는 액션(insertCourse)만 재수강 안내 토스트를 띄운다.
+  // hasDuplicateCourse는 저장 시점의 전체 상태를 기준으로 내려오는 값이라, 폴더/학기 추가·삭제 등
+  // 다른 액션에서도 true일 수 있어 여기서 무조건 확인하면 안 된다.
+  const commitPlannedTerms = (next: PlannerTerm[], options?: { notifyDuplicateCourse?: boolean }) => {
     setPlannedTerms(next);
-    lastSavePromiseRef.current = requestSavePlanner(toPlannerSaveRequest(next)).catch(() => {});
+    const saveSeq = ++saveSeqRef.current;
+    const savePromise = requestSavePlanner(toPlannerSaveRequest(next));
+    savePromise
+      .then(async (data) => {
+        if (options?.notifyDuplicateCourse && data?.hasDuplicateCourse) {
+          toast.notice('재수강 과목이에요. 기존 이수 학점은 제외되고 현재 학기에 반영돼요.');
+        }
+        // 폴더 totalCredit 등 서버 계산값을 화면에 반영하기 위해 저장 성공마다 재조회한다.
+        // 재조회가 도착하기 전에 새 편집(새 저장)이 시작됐으면, 낡은 응답으로 최신 로컬 상태를 덮지 않는다.
+        if (saveSeq !== saveSeqRef.current) return;
+        const { data: latestPlanner } = await refetchPlanner();
+        if (saveSeq !== saveSeqRef.current) return;
+        if (!latestPlanner) return;
+        // 응답 구성이 저장본과 같으면(정상 경로) 서버 계산값만 끼워 넣고,
+        // 다르면(외부 변경·서버 변형) 서버를 진실로 삼아 전체 재시드한다.
+        if (isSamePlannerComposition(next, latestPlanner.plannedTerms)) {
+          setPlannedState((prev) => ({
+            ...prev,
+            terms: mergeServerTotalCredits(prev.terms, latestPlanner.plannedTerms),
+          }));
+        } else {
+          setPlannedTerms(mapPlannedTerms(latestPlanner.plannedTerms));
+        }
+      })
+      .catch(() => {});
+
+    savePromise.catch(async (error) => {
+      // 낡은 저장의 실패는 무시한다 — 이후 저장의 결과(성공 병합/실패 복구)가 최신 진실을 정착시킨다.
+      if (saveSeq !== saveSeqRef.current) return;
+      const parsed = await parseApiError(error);
+      toast.negative(parsed?.message ?? '플래너 저장에 실패했어요.');
+      reseedPlannedTerms(getServerPlannedTerms(parsed?.data));
+    });
+
+    lastSavePromiseRef.current = savePromise.catch(() => {});
   };
 
   const waitForSave = () => lastSavePromiseRef.current;
 
+  // 저장 후 서버가 plannerTermId를 재할당하는 경우를 대비해, save 완료 후 refetch해서
+  // 현재 학기(staleTermId)에 대응하는 신선한 plannerTermId를 반환한다.
+  const resolveTermId = async (staleTermId: string): Promise<number | undefined> => {
+    await waitForSave();
+    const { data: latestPlanner } = await refetchPlanner();
+    if (!latestPlanner) return undefined;
+    const termInState = plannedTerms.find(({ id }) => id === staleTermId);
+    if (!termInState) return undefined;
+    const freshTerm = mapPlannedTerms(latestPlanner.plannedTerms).find(
+      (t) => t.yearLevel === termInState.yearLevel && t.semester === termInState.semester,
+    );
+    const parsed = Number(freshTerm?.id);
+    return isNaN(parsed) ? undefined : parsed;
+  };
+
+  const validateAndCleanPrerequisites = async (): Promise<{ courseName: string; prerequisiteName: string }[]> => {
+    if (isValidatingRef.current) return [];
+    isValidatingRef.current = true;
+    try {
+      await waitForSave();
+      const { data: latestPlanner } = await refetchPlanner();
+      if (!latestPlanner) return [];
+
+      const latestTerms = mapPlannedTerms(latestPlanner.plannedTerms);
+      const violations: { courseId: number; courseName: string; prerequisiteName: string; termId: string }[] = [];
+
+      await Promise.all(
+        latestTerms.map(async (term) => {
+          const courses = getSelectedCourses(term);
+          if (courses.length === 0) return;
+          const numericTermId = Number(term.id);
+          if (isNaN(numericTermId)) return;
+          try {
+            const result = await checkPrerequisite(
+              courses.map((c) => c.courseId),
+              numericTermId,
+            );
+            result.results.forEach((r) => {
+              const requiredMissing = r.missingPrerequisites.find((p) => p.type === 'REQUIRED');
+              if (!requiredMissing) return;
+              const course = courses.find((c) => c.courseId === r.courseId);
+              if (!course) return;
+              violations.push({
+                courseId: r.courseId,
+                courseName: course.name,
+                prerequisiteName: requiredMissing.name,
+                termId: term.id,
+              });
+            });
+          } catch {
+            // 학기별 검사 실패는 무시하고 나머지 학기 계속 검사
+          }
+        }),
+      );
+
+      if (violations.length === 0) return [];
+
+      const removalMap = new Map<string, Set<number>>();
+      for (const v of violations) {
+        if (!removalMap.has(v.termId)) removalMap.set(v.termId, new Set());
+        removalMap.get(v.termId)!.add(v.courseId);
+      }
+
+      const cleaned = latestTerms.map((term) => {
+        const toRemove = removalMap.get(term.id);
+        if (!toRemove) return term;
+        return updateSelectedCourses(term, (courses) => courses.filter((c) => !toRemove.has(c.courseId)));
+      });
+
+      commitPlannedTerms(cleaned);
+      return violations.map(({ courseName, prerequisiteName }) => ({ courseName, prerequisiteName }));
+    } finally {
+      isValidatingRef.current = false;
+    }
+  };
+
   const completedTerms = useMemo(() => (planner ? mapCompletedTerms(planner.completedTerms) : []), [planner]);
-  const gridTerms = useMemo(
-    () => sortPlannerTerms([...completedTerms, ...plannedTerms]),
-    [completedTerms, plannedTerms],
-  );
+  const gridTerms = useMemo(() => [...completedTerms, ...plannedTerms], [completedTerms, plannedTerms]);
 
   const snapshot = () => {
     snapshotRef.current = plannedTerms;
@@ -155,7 +287,7 @@ export const usePlannerTerms = () => {
     const next = plannedTerms.map((term) =>
       term.id !== termId ? term : updateSelectedCourses(term, (courses) => [...courses, course]),
     );
-    commitPlannedTerms(next);
+    commitPlannedTerms(next, { notifyDuplicateCourse: true });
   };
 
   const removeCourse = (courseId: string) => {
@@ -167,35 +299,37 @@ export const usePlannerTerms = () => {
     commitPlannedTerms(next);
   };
 
-  const addTerm = ({ yearLevel, semester, semesterLabel }: AddTermInput): boolean => {
+  const addTerm = ({ yearLevel, semester, semesterLabel }: AddTermInput): AddTermResult => {
     const isDuplicate = [...completedTerms, ...plannedTerms].some(
       (term) => term.yearLevel === yearLevel && term.semesterLabel === semesterLabel,
     );
-    if (isDuplicate) return false;
+    if (isDuplicate) return 'duplicate';
+
+    const latestCompletedOrCurrentTerm = getLatestCompletedOrCurrentTerm(completedTerms);
+    if (latestCompletedOrCurrentTerm && isPastPlannerTerm({ yearLevel, semester }, latestCompletedOrCurrentTerm)) {
+      return 'past';
+    }
 
     createdIdSeqRef.current += 1;
     const folderId = `folder-new-${createdIdSeqRef.current}`;
-    const next = sortPlannerTerms([
-      ...plannedTerms,
-      {
-        id: `term-new-${createdIdSeqRef.current}`,
-        yearLevel,
-        semester,
-        semesterLabel,
-        status: 'planned' as const,
-        selectedFolderId: folderId,
-        folders: [{ id: folderId, name: `${yearLevel}학년 ${semesterLabel}(1)`, courses: [] }],
-      },
-    ]);
-    commitPlannedTerms(next);
-    return true;
+    const newTerm: PlannerTerm = {
+      id: `term-new-${createdIdSeqRef.current}`,
+      yearLevel,
+      semester,
+      semesterLabel,
+      status: 'planned',
+      selectedFolderId: folderId,
+      folders: [{ id: folderId, name: `${yearLevel}학년 ${semesterLabel}(1)`, courses: [], totalCredit: 0 }],
+    };
+    commitPlannedTerms(insertPlannedTerm(plannedTerms, newTerm));
+    return 'added';
   };
 
   const removeTerm = (termId: string) => {
     commitPlannedTerms(plannedTerms.filter(({ id }) => id !== termId));
   };
 
-  const addFolder = (termId: string): PlannerTerm | null => {
+  const addFolder = (termId: string, options?: { select?: boolean }): PlannerFolder | null => {
     const term = plannedTerms.find(({ id }) => id === termId);
     if (!term) return null;
     createdIdSeqRef.current += 1;
@@ -203,12 +337,19 @@ export const usePlannerTerms = () => {
       id: `folder-new-${createdIdSeqRef.current}`,
       name: `${term.yearLevel}학년 ${term.semesterLabel}(${getNextFolderSeq(term)})`,
       courses: [],
+      totalCredit: 0,
     };
     const next = plannedTerms.map((prevTerm) =>
-      prevTerm.id === termId ? { ...prevTerm, folders: [...prevTerm.folders, newFolder] } : prevTerm,
+      prevTerm.id === termId
+        ? {
+            ...prevTerm,
+            folders: [...prevTerm.folders, newFolder],
+            selectedFolderId: options?.select ? newFolder.id : prevTerm.selectedFolderId,
+          }
+        : prevTerm,
     );
     commitPlannedTerms(next);
-    return term;
+    return newFolder;
   };
 
   // 노드뷰의 엣지 연결 하나가 두 학기의 활성 폴더를 동시에 바꿀 수 있어, 한 번의 커밋으로 묶어 반영한다.
@@ -290,5 +431,7 @@ export const usePlannerTerms = () => {
     deleteFolder,
     reorderFolders,
     waitForSave,
+    resolveTermId,
+    validateAndCleanPrerequisites,
   };
 };

@@ -7,6 +7,7 @@ interface RequirementClassListProps {
   courses: RequirementCourse[];
   className?: string;
   showTakenState?: boolean;
+  admissionYear?: number;
 }
 
 export const isTakenCourse = ({ taken }: RequirementCourse) => taken;
@@ -15,17 +16,22 @@ const getRequirementCourseKey = ({ studentCourseId, departmentName, name }: Requ
   return studentCourseId ?? `${departmentName}-${name}`;
 };
 
-const getRequirementCourseTags = (
-  { area, credit, divisionName, semester }: RequirementCourse,
-  requirementName: string,
-) => {
+const getRequirementCourseTags = ({ credit, divisionName, semester }: RequirementCourse, requirementName: string) => {
   const tags = {
-    area: area ?? (divisionName || requirementName),
+    division: divisionName || requirementName,
     credit: `${credit}학점`,
     semester,
   };
 
-  return [tags.area, tags.credit, tags.semester].filter((tag): tag is string => Boolean(tag));
+  return [tags.division, tags.credit, tags.semester].filter((tag): tag is string => Boolean(tag));
+};
+
+const getRequirementCourseNote = ({ area, divisionCode }: RequirementCourse, admissionYear?: number) => {
+  if (divisionCode !== 'DISTRIBUTED_GE' || !area || admissionYear === undefined || admissionYear < 2024) {
+    return undefined;
+  }
+
+  return `*${area.name}`;
 };
 
 export const RequirementClassList = ({
@@ -33,6 +39,7 @@ export const RequirementClassList = ({
   courses,
   className,
   showTakenState = false,
+  admissionYear,
 }: RequirementClassListProps) => {
   if (courses.length === 0) return null;
 
@@ -44,6 +51,7 @@ export const RequirementClassList = ({
             department={course.departmentName}
             title={course.name}
             tags={getRequirementCourseTags(course, requirementName)}
+            note={getRequirementCourseNote(course, admissionYear)}
             isEnglish={course.isEnglish}
             isSw={course.isSw}
             size="max"

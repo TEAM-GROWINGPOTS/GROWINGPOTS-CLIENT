@@ -8,16 +8,16 @@ import {
   getRequirementDetailCodes,
   getVisibleRequirementItems,
 } from '@features/main/utils/graduation-dashboard';
+import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { useMemo, useState } from 'react';
 
 import { useGraduationCoursesQueries } from './use-graduation-courses-query';
 import { useGraduationQuery } from './use-graduation-query';
 import { useRequirementSection } from './use-requirement-section';
-import { useStudentProfileQuery } from './use-student-profile-query';
 
 export const useGraduationDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(ALL_TAB_VALUE);
-  const studentProfileQuery = useStudentProfileQuery();
+  const studentProfileQuery = useStudentProfile();
   const graduationParams = useMemo(() => getGraduationParams(selectedTab), [selectedTab]);
   const allGraduationQuery = useGraduationQuery(ALL_GRADUATION_PARAMS);
   const selectedGraduationQuery = useGraduationQuery(graduationParams);
