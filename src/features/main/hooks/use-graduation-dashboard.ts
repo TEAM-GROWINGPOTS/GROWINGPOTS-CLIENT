@@ -1,4 +1,5 @@
 import { ALL_TAB_VALUE, GE_TAB_VALUE, OTHERS_TAB_VALUE } from '@features/main/constants/requirement';
+import type { RequirementScrollRequest } from '@features/main/types/requirement';
 import {
   ALL_GRADUATION_PARAMS,
   getGraduationCoursesParams,
@@ -9,7 +10,7 @@ import {
   getVisibleRequirementItems,
 } from '@features/main/utils/graduation-dashboard';
 import { useStudentProfile } from '@shared/hooks/use-student-profile';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { useGraduationCoursesQueries } from './use-graduation-courses-query';
 import { useGraduationQuery } from './use-graduation-query';
@@ -17,6 +18,17 @@ import { useRequirementSection } from './use-requirement-section';
 
 export const useGraduationDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(ALL_TAB_VALUE);
+  const [scrollRequests, setScrollRequests] = useState<Record<string, RequirementScrollRequest | null>>({});
+  const scrollRequest = scrollRequests[selectedTab] ?? null;
+  const handleScrollRequestChange = useCallback(
+    (targetKey: string | null) => {
+      setScrollRequests((previousRequests) => ({
+        ...previousRequests,
+        [selectedTab]: targetKey === null ? null : { targetKey },
+      }));
+    },
+    [selectedTab],
+  );
   const studentProfileQuery = useStudentProfile();
   const graduationParams = useMemo(() => getGraduationParams(selectedTab), [selectedTab]);
   const allGraduationQuery = useGraduationQuery(ALL_GRADUATION_PARAMS);
@@ -44,12 +56,7 @@ export const useGraduationDashboard = () => {
     data: allGraduationQuery.data ?? null,
     details: [],
   });
-  const {
-    shortcuts: selectedShortcuts,
-    items,
-    scrollTargetKey,
-    handleShortcutClick,
-  } = useRequirementSection({
+  const { shortcuts: selectedShortcuts, items } = useRequirementSection({
     data: selectedGraduationQuery.data ?? null,
     details: requirementDetailsQuery.data,
   });
@@ -71,11 +78,11 @@ export const useGraduationDashboard = () => {
     progressShortcuts,
     totalCredits: allGraduationQuery.data?.summary.totalCredits,
     items: visibleItems,
-    scrollTargetKey,
+    scrollRequest,
     admissionYear: studentProfileQuery.data?.admissionYear,
     certs: allGraduationQuery.data?.certs,
     gpa: allGraduationQuery.data?.summary.gpa.current,
     isError,
-    handleShortcutClick,
+    handleScrollRequestChange,
   };
 };

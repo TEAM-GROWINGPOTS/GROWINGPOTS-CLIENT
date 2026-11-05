@@ -14,6 +14,10 @@ export type RequirementCode =
 
 export type RequirementSemester = 'FIRST' | 'SECOND';
 
+export interface RequirementScrollRequest {
+  targetKey: string;
+}
+
 export interface RequirementAccordionItem extends GraduationCondition {
   majorName?: string | null;
   scrollKey?: string;

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRequirementAccordionScroll } from '@features/main/hooks/use-requirement-accordion-scroll';
+import type { RequirementScrollRequest } from '@features/main/types/requirement';
 import { cn } from '@shared/utils/cn';
 
 import { RequirementAccordion, type RequirementAccordionItem } from './requirement-accordion';
@@ -8,7 +9,8 @@ import { RequirementAccordion, type RequirementAccordionItem } from './requireme
 interface RequirementAccordionListProps {
   items: RequirementAccordionItem[];
   defaultValue?: string[];
-  scrollTargetKey?: string | null;
+  scrollRequest?: RequirementScrollRequest | null;
+  onScrollRequestChange?: (targetKey: string | null) => void;
   admissionYear?: number;
   className?: string;
 }
@@ -16,7 +18,8 @@ interface RequirementAccordionListProps {
 export const RequirementAccordionList = ({
   items,
   defaultValue,
-  scrollTargetKey,
+  scrollRequest,
+  onScrollRequestChange,
   admissionYear,
   className,
 }: RequirementAccordionListProps) => {
@@ -28,7 +31,7 @@ export const RequirementAccordionList = ({
     isAutoScrollSpaceAnimated,
     updateIsAtBottom,
     handleManualScrollStart,
-  } = useRequirementAccordionScroll({ items, scrollTargetKey });
+  } = useRequirementAccordionScroll({ items, scrollRequest, onScrollRequestChange });
 
   return (
     <div className={cn('relative', className)}>

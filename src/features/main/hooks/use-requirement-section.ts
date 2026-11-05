@@ -1,6 +1,6 @@
 import type { RequirementAccordionItem, RequirementDetail } from '@features/main/types/requirement';
 import type { GraduationCondition, GraduationResponse } from '@shared/apis/types/graduation';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import { useMergedRequirementItems } from './use-merged-requirement-items';
 
@@ -187,7 +187,6 @@ const getRequirementShortcuts = (items: RequirementAccordionItem[]) => {
 };
 
 export const useRequirementSection = ({ data, details }: UseRequirementSectionParams) => {
-  const [scrollTargetKey, setScrollTargetKey] = useState<string | null>(null);
   const selectedSectionOption = useMemo(() => getRequirementSectionOption(data), [data]);
   const rawItems = useMemo(
     () => (selectedSectionOption ? getRequirementItems(selectedSectionOption, details) : []),
@@ -200,17 +199,8 @@ export const useRequirementSection = ({ data, details }: UseRequirementSectionPa
   );
   const shortcuts = useMemo(() => getRequirementShortcuts(items), [items]);
 
-  const handleShortcutClick = (scrollKey?: string) => {
-    if (!scrollKey) return;
-
-    setScrollTargetKey(null);
-    requestAnimationFrame(() => setScrollTargetKey(scrollKey));
-  };
-
   return {
     shortcuts,
     items,
-    scrollTargetKey,
-    handleShortcutClick,
   };
 };
