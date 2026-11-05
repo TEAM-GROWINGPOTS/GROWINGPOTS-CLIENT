@@ -25,16 +25,26 @@
 
 ### 🛠️ Tech Stack
 
-| 영역            | 기술                                                 |
-| --------------- | ---------------------------------------------------- |
-| Framework       | Next.js 16 (App Router)                              |
-| Language        | TypeScript 5 (`strict: true`)                        |
-| UI              | React 19, Tailwind CSS 4, Pretendard                 |
-| State           | Zustand                                              |
-| Server state    | TanStack Query v5                                    |
-| HTTP            | ky (`@shared/apis/`)                                 |
-| Package manager | **pnpm** (`npm`/`yarn` 금지)                         |
-| Lint / Format   | ESLint 9, Prettier 3, Husky, commitlint, lint-staged |
+| 영역            | 기술                                                                     |
+| --------------- | ------------------------------------------------------------------------ |
+| Framework       | Next.js 16 (App Router)                                                  |
+| Language        | TypeScript 5 (`strict: true`)                                            |
+| UI              | React 19, Tailwind CSS 4, Pretendard                                     |
+| UI primitives   | Radix UI (Accordion, Dialog, Tooltip)                                    |
+| Styling         | class-variance-authority (variant), clsx + tailwind-merge (`cn`)         |
+| State           | Zustand 5 (`@shared/stores`)                                             |
+| Server state    | TanStack Query v5 (+ Devtools)                                           |
+| HTTP            | ky 2 (`@shared/apis/`)                                                   |
+| Drag & Drop     | dnd-kit (학기 플래너 카드뷰)                                             |
+| Graph           | React Flow `@xyflow/react` (학기 플래너 로드맵)                          |
+| Carousel        | Embla Carousel + Autoplay (`@shared/components/carousel`)                |
+| Toast           | sonner (`@shared/components/toast`)                                      |
+| Animation       | lottie-react                                                             |
+| Package manager | **pnpm 11** (`npm`/`yarn` 금지)                                          |
+| Lint / Format   | ESLint 9, Prettier 3 (+ tailwind plugin), Husky, commitlint, lint-staged |
+| CI / Deploy     | GitHub Actions (lint, build), Vercel                                     |
+
+정확한 버전은 `package.json`을 따른다.
 
 ### 📂 Folder Structure
 
