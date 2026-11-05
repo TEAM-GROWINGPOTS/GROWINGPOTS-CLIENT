@@ -2,6 +2,7 @@
 
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { registerRefreshHandler, setAccessToken } from '@shared/apis/auth-token';
+import { AUTH_REQUEST_CONTEXT, kyClient } from '@shared/apis/ky-client';
 import { createQueryClient } from '@shared/libs/query-client';
 import { useAuthStore } from '@shared/stores/auth-store';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -19,14 +20,10 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
 
     const restoreSession = async () => {
       try {
-        const res = await fetch('/api/v1/auth/reissue', {
-          method: 'POST',
-          credentials: 'include',
-        });
+        const { data } = await kyClient
+          .post('api/v1/auth/reissue', { context: AUTH_REQUEST_CONTEXT })
+          .json<{ data: { accessToken: string } }>();
 
-        if (!res.ok) throw new Error('reissue 실패');
-
-        const { data } = await res.json();
         if (!data?.accessToken) throw new Error('accessToken 없음');
 
         setAccessToken(data.accessToken);
@@ -47,12 +44,9 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
     };
 
     registerRefreshHandler(async () => {
-      const res = await fetch('/api/v1/auth/reissue', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error('reissue 실패');
-      const { data } = await res.json();
+      const { data } = await kyClient
+        .post('api/v1/auth/reissue', { context: AUTH_REQUEST_CONTEXT })
+        .json<{ data: { accessToken: string } }>();
       if (!data?.accessToken) throw new Error('accessToken 없음');
       setAccessToken(data.accessToken);
       return data.accessToken;

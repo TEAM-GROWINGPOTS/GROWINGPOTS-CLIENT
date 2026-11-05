@@ -1,3 +1,4 @@
+import { getAccessToken, refreshAccessToken } from '@shared/apis/auth-token';
 import ky, { isHTTPError } from 'ky';
 
 const API_BASE_URL = (() => {
@@ -7,19 +8,7 @@ const API_BASE_URL = (() => {
   return url;
 })();
 
-const MAX_REISSUE_ATTEMPTS = 3;
-let isRefreshing = false;
-let pendingResolvers: Array<(succeeded: boolean) => void> = [];
-
-const waitForRefresh = () =>
-  new Promise<boolean>((resolve) => {
-    pendingResolvers.push(resolve);
-  });
-
-const flushPending = (succeeded: boolean) => {
-  pendingResolvers.forEach((resolve) => resolve(succeeded));
-  pendingResolvers = [];
-};
+export const AUTH_REQUEST_CONTEXT = { skipAuth: true, skipAuthRefresh: true };
 
 export const kyClient = ky.create({
   baseUrl: API_BASE_URL,
@@ -41,56 +30,32 @@ export const kyClient = ky.create({
   },
   hooks: {
     beforeRequest: [
-      ({ request }) => {
+      ({ request, options }) => {
         request.headers.set('Accept', 'application/json');
+
+        if (options.context?.skipAuth) return;
+
+        const token = getAccessToken();
+        if (token) request.headers.set('Authorization', `Bearer ${token}`);
       },
     ],
 
     afterResponse: [
-      async ({ request, response }) => {
+      async ({ request, response, options }) => {
         if (process.env.NODE_ENV === 'development') {
           console.debug(`[API] ${response.status} ${response.url}`);
         }
 
-        if (response.status === 401) {
-          if (isRefreshing) {
-            const reissueSucceeded = await waitForRefresh();
-            if (reissueSucceeded) return fetch(request.clone());
-            return;
-          }
-
-          isRefreshing = true;
-          let succeeded = false;
-          let authFailed = false;
-
-          for (let attempt = 0; attempt < MAX_REISSUE_ATTEMPTS; attempt++) {
-            try {
-              await ky.post(`${API_BASE_URL}/api/v1/auth/reissue`, { credentials: 'include' });
-              succeeded = true;
-              break;
-            } catch (error) {
-              if (isHTTPError(error) && error.response.status < 500) {
-                authFailed = true;
-                break;
-              }
-            }
-          }
-
-          isRefreshing = false;
-
-          if (succeeded) {
-            flushPending(true);
-            return fetch(request.clone());
-          }
-
-          if (authFailed) {
-            flushPending(false);
+        if (response.status === 401 && !options.context?.skipAuthRefresh) {
+          try {
+            const newToken = await refreshAccessToken();
+            const cloned = request.clone();
+            cloned.headers.set('Authorization', `Bearer ${newToken}`);
+            return fetch(cloned);
+          } catch {
             const redirectTo = encodeURIComponent(window.location.pathname + window.location.search);
             window.location.href = `/api/auth/logout?redirect=${redirectTo}`;
-            return;
           }
-
-          flushPending(false);
         }
       },
     ],
