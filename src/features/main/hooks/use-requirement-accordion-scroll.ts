@@ -13,10 +13,9 @@ export const useRequirementAccordionScroll = ({
   onScrollRequestChange,
 }: UseRequirementAccordionScrollParams) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollSpaceRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [isAtBottom, setIsAtBottom] = useState(false);
-  const [hasAutoScrollSpace, setHasAutoScrollSpace] = useState(false);
-  const [isAutoScrollSpaceAnimated, setIsAutoScrollSpaceAnimated] = useState(false);
   const pendingFrameRef = useRef<number | null>(null);
   const isAutoScrollingRef = useRef(false);
   const hasScrollTarget = Boolean(
@@ -48,47 +47,49 @@ export const useRequirementAccordionScroll = ({
     const frameId = requestAnimationFrame(updateIsAtBottom);
 
     return () => cancelAnimationFrame(frameId);
-  }, [items, hasAutoScrollSpace, updateIsAtBottom]);
+  }, [items, updateIsAtBottom]);
 
   useEffect(() => {
     if (!scrollRequest || !hasScrollTarget) return;
 
     pendingFrameRef.current = requestAnimationFrame(() => {
-      setIsAutoScrollSpaceAnimated(false);
-      setHasAutoScrollSpace(true);
+      pendingFrameRef.current = null;
+      const { targetKey } = scrollRequest;
+      const container = scrollContainerRef.current;
+      const space = scrollSpaceRef.current;
+      const targetItem = itemRefs.current[targetKey];
+      if (!container || !space || !targetItem) return;
 
-      pendingFrameRef.current = requestAnimationFrame(() => {
-        pendingFrameRef.current = null;
-        const { targetKey } = scrollRequest;
-        const container = scrollContainerRef.current;
-        const targetItem = itemRefs.current[targetKey];
-        if (!container || !targetItem) return;
+      space.style.transitionProperty = 'none';
+      space.style.height = `${container.clientHeight}px`;
 
-        const containerRect = container.getBoundingClientRect();
-        const targetRect = targetItem.getBoundingClientRect();
-        const scrollTop = targetRect.top - containerRect.top + container.scrollTop;
+      const containerRect = container.getBoundingClientRect();
+      const targetRect = targetItem.getBoundingClientRect();
+      const scrollTop = targetRect.top - containerRect.top - container.clientTop + container.scrollTop;
 
-        isAutoScrollingRef.current = true;
-        container.scrollTo({ top: scrollTop, behavior: 'smooth' });
-      });
+      isAutoScrollingRef.current = true;
+      container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+      updateIsAtBottom();
     });
 
     return cancelAutoScroll;
-  }, [scrollRequest, hasScrollTarget, cancelAutoScroll]);
+  }, [scrollRequest, hasScrollTarget, cancelAutoScroll, updateIsAtBottom]);
 
   const handleManualScrollStart = useCallback(() => {
     cancelAutoScroll();
     onScrollRequestChange?.(null);
-    setIsAutoScrollSpaceAnimated(true);
-    setHasAutoScrollSpace(false);
+    const space = scrollSpaceRef.current;
+    if (space) {
+      space.style.transitionProperty = 'height';
+      space.style.height = '0px';
+    }
   }, [cancelAutoScroll, onScrollRequestChange]);
 
   return {
     scrollContainerRef,
+    scrollSpaceRef,
     itemRefs,
     isAtBottom,
-    hasAutoScrollSpace,
-    isAutoScrollSpaceAnimated,
     updateIsAtBottom,
     handleManualScrollStart,
   };

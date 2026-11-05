@@ -23,15 +23,8 @@ export const RequirementAccordionList = ({
   admissionYear,
   className,
 }: RequirementAccordionListProps) => {
-  const {
-    scrollContainerRef,
-    itemRefs,
-    isAtBottom,
-    hasAutoScrollSpace,
-    isAutoScrollSpaceAnimated,
-    updateIsAtBottom,
-    handleManualScrollStart,
-  } = useRequirementAccordionScroll({ items, scrollRequest, onScrollRequestChange });
+  const { scrollContainerRef, scrollSpaceRef, itemRefs, isAtBottom, updateIsAtBottom, handleManualScrollStart } =
+    useRequirementAccordionScroll({ items, scrollRequest, onScrollRequestChange });
 
   return (
     <div className={cn('relative', className)}>
@@ -50,11 +43,9 @@ export const RequirementAccordionList = ({
           className="max-w-none"
         />
         <div
-          className={cn(
-            'shrink-0 overflow-hidden',
-            isAutoScrollSpaceAnimated && 'transition-[height] duration-300 ease-out',
-            hasAutoScrollSpace ? 'h-[533px]' : 'h-0',
-          )}
+          ref={scrollSpaceRef}
+          className="h-0 shrink-0 overflow-hidden transition-[height] duration-300 ease-out"
+          onTransitionEnd={updateIsAtBottom}
         />
       </div>
       {!isAtBottom && (
