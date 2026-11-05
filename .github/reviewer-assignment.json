@@ -1,0 +1,12 @@
+{
+  "reviewerCount": 1,
+  "lookbackDays": 30,
+  "reviewers": [
+    { "login": "pwc2002", "enabled": true },
+    { "login": "nyewon", "enabled": true },
+    { "login": "mimizae", "enabled": true },
+    { "login": "haeni82", "enabled": true },
+    { "login": "ssolsh", "enabled": true },
+    { "login": "twossu", "enabled": true }
+  ]
+}
