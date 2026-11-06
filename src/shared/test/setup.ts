@@ -2,8 +2,9 @@ import '@testing-library/jest-dom/vitest';
 
 import { useAuthStore } from '@shared/stores/auth-store';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
+import { server } from '@shared/test/msw/server';
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 
 vi.mock('next/navigation', () => {
   const router = {
@@ -54,8 +55,14 @@ if (typeof window !== 'undefined') {
   Element.prototype.scrollIntoView = vi.fn();
 }
 
+beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
+
+afterAll(() => server.close());
+
 afterEach(() => {
   cleanup();
+  server.resetHandlers();
+  server.events.removeAllListeners();
   useAuthStore.setState(useAuthStore.getInitialState(), true);
   useSideNavigationStore.setState(useSideNavigationStore.getInitialState(), true);
 });
