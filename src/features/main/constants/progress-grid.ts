@@ -1,4 +1,15 @@
-import { GraduationProgressItem } from '@features/main/types/progress-grid';
+import type { RequirementCode } from '@features/main/types/requirement';
+
+export const PROGRESS_ITEM_ORDER = [
+  'MAJOR_BASIC',
+  'MAJOR_REQUIRED',
+  'MAJOR_ELECTIVE',
+  'REQUIRED_GE',
+  'DISTRIBUTED_GE',
+  'FREE_GE',
+  'SW_CERT_COURSE',
+  'ENGLISH_COURSE',
+] as const satisfies readonly RequirementCode[];
 
 export type ProgressLevel = 1 | 2 | 3;
 
@@ -47,21 +58,3 @@ export const CARD_LOGO_CONFIG: Partial<Record<string, CardLogoConfig>> = {
 export const LOGO_COLOR_BY_LEVEL: Partial<Record<ProgressLevel, string>> = {
   3: 'text-gray-600 transition-colors duration-300 ease-in-out group-hover:text-gray-700',
 };
-
-// TODO: 데이터 연동 후 제거 필요
-export const DEFAULT_ITEMS: GraduationProgressItem[] = [
-  { id: 'major-basic', title: '전공기초', current: 6, required: 10 },
-  {
-    id: 'major-required',
-    title: '전공필수',
-    current: 1,
-    required: 17,
-  },
-  { id: 'major-elective', title: '전공선택', current: 1, required: 42 },
-  { id: 'required-courses', title: '필수교과', current: 15, required: 17 },
-  { id: 'distribution-courses', title: '배분이수교과', current: 12, required: 12 },
-  { id: 'free-courses', title: '자유이수교과', current: 11, required: 3 },
-  { id: 'sw-certification', title: 'SW인증과목', current: 6, required: 6, isConditionCheckRequired: true },
-  { id: 'english-class', title: '영어 강의', current: 4, required: 3, unit: '과목' },
-  { id: 'total-credit', title: '총학점', current: 80, required: 120, isTotal: true },
-];

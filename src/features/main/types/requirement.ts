@@ -12,7 +12,9 @@ export type RequirementCode =
   | 'ENGLISH_COURSE'
   | 'SW_CERT_COURSE';
 
-export type RequirementSemester = 'FIRST' | 'SECOND';
+export interface RequirementScrollRequest {
+  targetKey: string;
+}
 
 export interface RequirementAccordionItem extends GraduationCondition {
   majorName?: string | null;

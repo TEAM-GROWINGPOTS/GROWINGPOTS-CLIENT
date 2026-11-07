@@ -3,6 +3,7 @@ import {
   CARD_LOGO_CONFIG,
   LEVEL_STYLES,
   LOGO_COLOR_BY_LEVEL,
+  PROGRESS_ITEM_ORDER,
   ProgressLevel,
 } from '@features/main/constants/progress-grid';
 import { REQUIREMENT_UNIT_LABELS } from '@features/main/constants/requirement';
@@ -22,17 +23,6 @@ const PROGRESS_ITEM_META: Record<string, Pick<GraduationProgressItem, 'id' | 'ti
   ENGLISH_COURSE: { id: 'english-class', title: '영어 강의' },
 };
 
-const PROGRESS_ITEM_ORDER = [
-  'MAJOR_BASIC',
-  'MAJOR_REQUIRED',
-  'MAJOR_ELECTIVE',
-  'REQUIRED_GE',
-  'DISTRIBUTED_GE',
-  'FREE_GE',
-  'SW_CERT_COURSE',
-  'ENGLISH_COURSE',
-] as const;
-
 const clampRatio = (value: number) => Math.max(0, Math.min(value, 1));
 
 const getCompletionRatio = (item: GraduationProgressItem) => {
@@ -46,8 +36,6 @@ export const getProgressLevel = (item: GraduationProgressItem): ProgressLevel =>
   if (ratio > 0.5) return 2;
   return 1;
 };
-
-export const isCompleted = (item: GraduationProgressItem) => getProgressLevel(item) === 3;
 
 export const getCardClass = (
   item: GraduationProgressItem,

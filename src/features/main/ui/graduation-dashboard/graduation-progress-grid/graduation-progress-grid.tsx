@@ -1,19 +1,17 @@
 'use client';
 
-import { DEFAULT_ITEMS } from '@features/main/constants/progress-grid';
 import { GraduationProgressGridProps, LegendDotProps } from '@features/main/types/progress-grid';
 import {
   getCardClass,
   getCardLogoDetails,
   getProgressLevel,
   getTotalShapeClasses,
-  isCompleted,
 } from '@features/main/utils/progress-grid';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 
 export const GraduationProgressGrid = ({
-  items = DEFAULT_ITEMS,
+  items,
   selectedItemId,
   onSelectItem,
   className,
@@ -77,9 +75,7 @@ export const GraduationProgressGrid = ({
                     {item.title}
                   </span>
                   {hasAlert && <Icon name="ic_alert_circle" size={20} aria-label={`${item.title} 조건 확인 필요`} />}
-                  {!hasAlert && isCompleted(item) && (
-                    <Icon name="ic_check_circle" size={20} aria-label={`${item.title} 충족`} />
-                  )}
+                  {!hasAlert && isDone && <Icon name="ic_check_circle" size={20} aria-label={`${item.title} 충족`} />}
                 </div>
                 {hasAlert && (
                   <p className="text-caption-r-12 text-dark-red-10 group-hover:text-red-20 transition-colors duration-300 ease-in-out">
