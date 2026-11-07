@@ -1,4 +1,3 @@
-import type { RequirementSemester } from '@features/main/types/requirement';
 import type { GraduationUnit } from '@shared/apis/types/graduation';
 
 export const CURRENT_ONLY_CODES = new Set<string>(['GRADUATION_REQUIRED', 'GENERAL_ELECTIVE']);
@@ -12,11 +11,6 @@ export const OTHERS_TAB_VALUE = 'OTHERS';
 
 export const REQUIREMENT_DISPLAY_NAMES: Record<string, string> = {
   GENERAL_ELECTIVE: '일반선택',
-};
-
-export const SEMESTER_LABELS: Record<RequirementSemester, string> = {
-  FIRST: '1학기',
-  SECOND: '2학기',
 };
 
 export const REQUIREMENT_UNIT_LABELS: Record<GraduationUnit, string> = {
