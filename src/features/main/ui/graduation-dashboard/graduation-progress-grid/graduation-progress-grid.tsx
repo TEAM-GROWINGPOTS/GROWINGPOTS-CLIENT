@@ -1,6 +1,5 @@
 'use client';
 
-import { DEFAULT_ITEMS } from '@features/main/constants/progress-grid';
 import { GraduationProgressGridProps, LegendDotProps } from '@features/main/types/progress-grid';
 import {
   getCardClass,
@@ -13,7 +12,7 @@ import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 
 export const GraduationProgressGrid = ({
-  items = DEFAULT_ITEMS,
+  items,
   selectedItemId,
   onSelectItem,
   className,
