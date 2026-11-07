@@ -47,8 +47,6 @@ export const getProgressLevel = (item: GraduationProgressItem): ProgressLevel =>
   return 1;
 };
 
-export const isCompleted = (item: GraduationProgressItem) => getProgressLevel(item) === 3;
-
 export const getCardClass = (
   item: GraduationProgressItem,
   level: ProgressLevel,

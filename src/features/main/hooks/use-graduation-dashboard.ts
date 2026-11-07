@@ -1,5 +1,5 @@
 import { ALL_TAB_VALUE, GE_TAB_VALUE, OTHERS_TAB_VALUE } from '@features/main/constants/requirement';
-import type { RequirementScrollRequest } from '@features/main/types/requirement';
+import type { RequirementDetail, RequirementScrollRequest } from '@features/main/types/requirement';
 import {
   ALL_GRADUATION_PARAMS,
   getGraduationCoursesParams,
@@ -15,6 +15,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { useGraduationCoursesQueries } from './use-graduation-courses-query';
 import { useGraduationQuery } from './use-graduation-query';
 import { useRequirementSection } from './use-requirement-section';
+
+const EMPTY_REQUIREMENT_DETAILS: RequirementDetail[] = [];
 
 export const useGraduationDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(ALL_TAB_VALUE);
@@ -54,7 +56,7 @@ export const useGraduationDashboard = () => {
   }, [studentProfileQuery.data]);
   const { shortcuts: allShortcuts } = useRequirementSection({
     data: allGraduationQuery.data ?? null,
-    details: [],
+    details: EMPTY_REQUIREMENT_DETAILS,
   });
   const { shortcuts: selectedShortcuts, items } = useRequirementSection({
     data: selectedGraduationQuery.data ?? null,
