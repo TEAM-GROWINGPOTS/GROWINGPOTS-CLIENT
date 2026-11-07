@@ -1,3 +1,16 @@
+import type { RequirementCode } from '@features/main/types/requirement';
+
+export const PROGRESS_ITEM_ORDER = [
+  'MAJOR_BASIC',
+  'MAJOR_REQUIRED',
+  'MAJOR_ELECTIVE',
+  'REQUIRED_GE',
+  'DISTRIBUTED_GE',
+  'FREE_GE',
+  'SW_CERT_COURSE',
+  'ENGLISH_COURSE',
+] as const satisfies readonly RequirementCode[];
+
 export type ProgressLevel = 1 | 2 | 3;
 
 export interface LevelStyle {

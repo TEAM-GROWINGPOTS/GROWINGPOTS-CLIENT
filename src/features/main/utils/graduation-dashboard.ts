@@ -1,20 +1,11 @@
 import type { GetGraduationParams } from '@features/main/apis/get-graduation';
+import { PROGRESS_ITEM_ORDER } from '@features/main/constants/progress-grid';
 import { ALL_TAB_VALUE, GE_TAB_VALUE, OTHERS_TAB_VALUE } from '@features/main/constants/requirement';
 import type { RequirementAccordionItem, RequirementCode } from '@features/main/types/requirement';
 import type { GraduationCondition, GraduationResponse } from '@shared/apis/types/graduation';
 
 const SOURCE = 'COMPLETED';
 const MAJOR_TAB_PREFIX = 'MAJOR:';
-const DASHBOARD_PROGRESS_CODES = [
-  'MAJOR_BASIC',
-  'MAJOR_REQUIRED',
-  'MAJOR_ELECTIVE',
-  'REQUIRED_GE',
-  'DISTRIBUTED_GE',
-  'FREE_GE',
-  'SW_CERT_COURSE',
-  'ENGLISH_COURSE',
-] as const satisfies readonly RequirementCode[];
 const MAJOR_TAB_PROGRESS_CODES = new Set<RequirementCode>(['MAJOR_BASIC', 'MAJOR_REQUIRED', 'MAJOR_ELECTIVE']);
 const ALL_ONLY_ACCORDION_CODES = new Set<RequirementCode>(['ENGLISH_COURSE', 'SW_CERT_COURSE']);
 
@@ -68,7 +59,7 @@ export const getProgressShortcuts = (
   const allShortcutMap = new Map(allShortcuts.map((item) => [item.code as RequirementCode, item]));
   const selectedShortcutMap = new Map(selectedShortcuts.map((item) => [item.code as RequirementCode, item]));
 
-  return DASHBOARD_PROGRESS_CODES.flatMap((code) => {
+  return PROGRESS_ITEM_ORDER.flatMap((code) => {
     const item =
       MAJOR_TAB_PROGRESS_CODES.has(code) && selectedShortcutMap.has(code)
         ? selectedShortcutMap.get(code)

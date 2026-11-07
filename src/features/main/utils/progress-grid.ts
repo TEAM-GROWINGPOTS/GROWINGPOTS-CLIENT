@@ -3,6 +3,7 @@ import {
   CARD_LOGO_CONFIG,
   LEVEL_STYLES,
   LOGO_COLOR_BY_LEVEL,
+  PROGRESS_ITEM_ORDER,
   ProgressLevel,
 } from '@features/main/constants/progress-grid';
 import { REQUIREMENT_UNIT_LABELS } from '@features/main/constants/requirement';
@@ -21,17 +22,6 @@ const PROGRESS_ITEM_META: Record<string, Pick<GraduationProgressItem, 'id' | 'ti
   SW_CERT_COURSE: { id: 'sw-certification', title: 'SW인증과목' },
   ENGLISH_COURSE: { id: 'english-class', title: '영어 강의' },
 };
-
-const PROGRESS_ITEM_ORDER = [
-  'MAJOR_BASIC',
-  'MAJOR_REQUIRED',
-  'MAJOR_ELECTIVE',
-  'REQUIRED_GE',
-  'DISTRIBUTED_GE',
-  'FREE_GE',
-  'SW_CERT_COURSE',
-  'ENGLISH_COURSE',
-] as const;
 
 const clampRatio = (value: number) => Math.max(0, Math.min(value, 1));
 
