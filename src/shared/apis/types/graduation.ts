@@ -57,7 +57,7 @@ export interface AllSections {
   others: GeSection;
 }
 
-export interface Summary {
+export interface GraduationSummary {
   totalCredits: { current: number; required: number };
   gpa: { current: number; min: number | null };
   enrollmentStatus: string;
@@ -69,7 +69,7 @@ export interface CertInfo {
 }
 
 export interface GraduationResponse {
-  summary: Summary;
+  summary: GraduationSummary;
   graduatable: boolean;
   curriculumSatisfied: boolean;
   conditions: ConditionInfo[] | null;
