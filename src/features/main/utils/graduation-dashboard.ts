@@ -1,7 +1,7 @@
 import { ALL_TAB_VALUE, GE_TAB_VALUE, OTHERS_TAB_VALUE } from '@features/main/constants/requirement';
 import type { RequirementAccordionItem, RequirementCode } from '@features/main/types/requirement';
 import type { GraduationQueryParams } from '@shared/apis/types/graduation';
-import type { GraduationCondition, GraduationResponse } from '@shared/apis/types/graduation';
+import type { ConditionInfo, GraduationResponse } from '@shared/apis/types/graduation';
 
 const SOURCE = 'COMPLETED';
 const MAJOR_TAB_PREFIX = 'MAJOR:';
@@ -86,7 +86,7 @@ export const getVisibleRequirementItems = (selectedTab: string, items: Requireme
   return items;
 };
 
-const getRequirementCodes = (conditions: GraduationCondition[] | null | undefined) => {
+const getRequirementCodes = (conditions: ConditionInfo[] | null | undefined) => {
   return conditions?.map(({ code }) => code as RequirementCode) ?? [];
 };
 

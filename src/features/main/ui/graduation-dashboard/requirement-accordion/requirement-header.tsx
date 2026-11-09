@@ -6,7 +6,7 @@ import {
   REQUIREMENT_UNIT_LABELS,
 } from '@features/main/constants/requirement';
 import * as Accordion from '@radix-ui/react-accordion';
-import type { GraduationCondition } from '@shared/apis/types/graduation';
+import type { ConditionInfo } from '@shared/apis/types/graduation';
 import { Badge, Tooltip } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
@@ -14,7 +14,7 @@ import { cn } from '@shared/utils/cn';
 import { ProgressBar } from './progress-bar';
 
 interface RequirementHeaderProps {
-  item: GraduationCondition & {
+  item: ConditionInfo & {
     majorName?: string | null;
   };
   hasInfo?: boolean;

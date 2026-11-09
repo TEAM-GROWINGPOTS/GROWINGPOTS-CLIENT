@@ -1,4 +1,4 @@
-import type { CertType, GraduationCert } from '@shared/apis/types/graduation';
+import type { CertInfo, CertType } from '@shared/apis/types/graduation';
 import { Tooltip } from '@shared/components';
 import { cn } from '@shared/utils/cn';
 import Image from 'next/image';
@@ -28,7 +28,7 @@ const badgeImages: Record<CertType, { complete: string; disabled?: string }> = {
   },
 };
 
-const badgeResultStyles: Record<GraduationCert['result'], string> = {
+const badgeResultStyles: Record<CertInfo['result'], string> = {
   PASS: '',
   FAIL: 'opacity-60',
   EXEMPT: '',
@@ -36,18 +36,18 @@ const badgeResultStyles: Record<GraduationCert['result'], string> = {
 };
 
 interface GraduationDashboardHeaderProps {
-  certs: GraduationCert[];
+  certs: CertInfo[];
   gpa: number;
 }
 
-const getBadgeImageSrc = (certType: CertType, result: GraduationCert['result']) => {
+const getBadgeImageSrc = (certType: CertType, result: CertInfo['result']) => {
   const image = badgeImages[certType];
 
   if (result === 'EXEMPT' || result === 'NONE') return image.disabled ?? image.complete;
   return image.complete;
 };
 
-const getBadgeTooltipContent = (certType: CertType, result: GraduationCert['result'], currentGpa: number) => {
+const getBadgeTooltipContent = (certType: CertType, result: CertInfo['result'], currentGpa: number) => {
   const gpa = Math.trunc((currentGpa + Number.EPSILON) * 100) / 100;
   const label = badgeLabels[certType];
 

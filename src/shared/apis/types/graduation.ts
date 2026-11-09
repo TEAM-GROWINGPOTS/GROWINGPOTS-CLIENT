@@ -11,7 +11,7 @@ export interface GraduationQueryParams {
   source?: GraduationSource;
 }
 
-export interface GraduationCondition {
+export interface ConditionInfo {
   code: string;
   name: string;
   current: number;
@@ -29,7 +29,7 @@ export interface RequirementProgress {
   satisfied: boolean;
 }
 
-export interface GraduationRequired {
+export interface GraduationRequiredSummary {
   hasGraduationRequired: boolean;
   satisfied: boolean;
   totalCredit: number;
@@ -40,14 +40,14 @@ export interface GraduationRequired {
 export interface MajorSection {
   majorName: string;
   majorType: MajorType;
-  conditions: GraduationCondition[];
-  graduationRequired: GraduationRequired | null;
+  conditions: ConditionInfo[];
+  graduationRequired: GraduationRequiredSummary | null;
 }
 
 export interface GeSection {
   majorName: null;
   majorType: null;
-  conditions: GraduationCondition[];
+  conditions: ConditionInfo[];
   graduationRequired: null;
 }
 
@@ -57,23 +57,23 @@ export interface AllSections {
   others: GeSection;
 }
 
-export interface GraduationSummary {
+export interface Summary {
   totalCredits: { current: number; required: number };
   gpa: { current: number; min: number | null };
   enrollmentStatus: string;
 }
 
-export interface GraduationCert {
+export interface CertInfo {
   certType: CertType;
   result: CertResult;
 }
 
 export interface GraduationResponse {
-  summary: GraduationSummary;
+  summary: Summary;
   graduatable: boolean;
   curriculumSatisfied: boolean;
-  conditions: GraduationCondition[] | null;
-  graduationRequired: GraduationRequired | null;
+  conditions: ConditionInfo[] | null;
+  graduationRequired: GraduationRequiredSummary | null;
   sections: AllSections | null;
-  certs: GraduationCert[];
+  certs: CertInfo[];
 }
