@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 export const useDepartmentOptions = () =>
   useQuery({
     queryKey: QUERY_KEY.ONBOARDING.OPTIONS(),
-    queryFn: getOnboardingOptions,
+    queryFn: () => getOnboardingOptions(),
     select: (data) => data.departments,
     staleTime: Infinity,
   });
