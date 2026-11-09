@@ -1,9 +1,8 @@
 'use client';
 
 import { type DivisionCategoryBadgeColor, getDivisionCategoryBadgeColor } from '@features/semester-planner/constants';
-import type { OpenedSemester } from '@features/semester-planner/types/planner';
 import { parseApiError } from '@shared/apis/parse-api-error';
-import type { DivisionCategory, OtherRequired } from '@shared/apis/types/course-search';
+import type { DivisionCategory, OpenedSemester, OtherRequired } from '@shared/apis/types/course-search';
 import { toast } from '@shared/components';
 import { Button } from '@shared/components/button/button';
 import { Modal } from '@shared/components/modal/modal';
