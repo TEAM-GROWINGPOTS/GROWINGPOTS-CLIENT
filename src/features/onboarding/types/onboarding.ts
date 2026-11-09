@@ -1,15 +1,15 @@
-export interface CreateStudentProfileRequest {
+export interface StudentProfileCreateRequest {
   schoolId: number;
   departmentId: number;
   admissionYear: number;
 }
 
-export interface StudentMajor {
+export interface MainMajorInfo {
   studentMajorId: number;
   departmentName: string;
 }
 
-export interface StudentProfile {
+export interface StudentProfileCreateResponse {
   studentProfileId: number;
-  mainMajor: StudentMajor;
+  mainMajor: MainMajorInfo;
 }

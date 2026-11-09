@@ -1,6 +1,6 @@
 import type { MajorType } from '@shared/apis/types/graduation';
 
-export interface StudentMajor {
+export interface MajorInfo {
   studentMajorId: number;
   majorType: MajorType;
   departmentName: string;
@@ -17,5 +17,5 @@ export interface StudentProfile {
   gradeLevel: number;
   semester: number;
   enrollmentStatus: string;
-  majors: StudentMajor[];
+  majors: MajorInfo[];
 }
