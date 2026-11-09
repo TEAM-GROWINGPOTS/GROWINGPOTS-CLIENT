@@ -1,11 +1,11 @@
-import type { GraduationMajorType } from '@features/main/apis/get-graduation';
 import type { RequirementCode, RequirementDetail } from '@features/main/types/requirement';
 import { ENDPOINT } from '@shared/apis/endpoint';
 import { request } from '@shared/apis/request';
 import type { ApiResponse } from '@shared/apis/type';
+import type { GraduationMajorFilter } from '@shared/apis/types/graduation';
 
 export interface GetGraduationCoursesParams {
-  majorType?: GraduationMajorType;
+  majorType?: GraduationMajorFilter;
   studentMajorId?: number;
 }
 
@@ -13,18 +13,9 @@ interface GetGraduationCoursesRequest extends GetGraduationCoursesParams {
   divisionCode: RequirementCode;
 }
 
-const getGraduationCoursesSearchParams = ({ majorType, studentMajorId }: GetGraduationCoursesParams) => {
-  const searchParams = new URLSearchParams();
-
-  if (majorType) searchParams.set('majorType', majorType);
-  if (studentMajorId !== undefined) searchParams.set('studentMajorId', String(studentMajorId));
-
-  return searchParams;
-};
-
 export const getGraduationCourses = async ({ divisionCode, ...params }: GetGraduationCoursesRequest) => {
   const response = await request.get<ApiResponse<RequirementDetail>>(ENDPOINT.GRADUATION.COURSES(divisionCode), {
-    searchParams: getGraduationCoursesSearchParams(params),
+    searchParams: params,
   });
 
   return response.data;
