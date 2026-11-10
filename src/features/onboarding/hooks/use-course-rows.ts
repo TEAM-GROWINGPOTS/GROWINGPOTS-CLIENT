@@ -1,12 +1,10 @@
 import type { Division } from '@features/onboarding/types/course';
-import type { Column } from '@features/onboarding/types/course-info-table';
+import type { Column, CourseInfo } from '@features/onboarding/types/course-info-table';
 import { isCourseRowInvalid } from '@features/onboarding/utils/is-course-row-invalid';
 import type { DepartmentInfo } from '@shared/apis/types/onboarding-options';
 import type { AddCourseValues } from '@shared/components/modal/add-course-modal';
 import { parseTakenSemesterValue } from '@shared/utils/taken-semester-format';
 import { useEffect, useState } from 'react';
-
-import { CourseInfo } from '../analysis-result/course-info-table/course-info-table';
 
 const toCreditValue = (value: string) => {
   const [integerPart = '', ...rest] = value.replace(/[^0-9.]/g, '').split('.');
@@ -59,38 +57,29 @@ export const useCourseRows = ({
     onValidityChange?.(!hasInvalidRow);
   }, [hasInvalidRow, onValidityChange]);
 
+  const updateRow = (id: string, patch: Partial<CourseInfo>) => {
+    setRows((prev) => prev.map((row) => (row.id === id ? { ...row, ...patch } : row)));
+  };
+
   const handleCellChange = (id: string, key: Column['key']) => (value: string) => {
-    const nextValue = key === 'credit' ? toCreditValue(value) : value;
-    setRows((prev) => prev.map((row) => (row.id === id ? { ...row, [key]: nextValue } : row)));
+    updateRow(id, { [key]: key === 'credit' ? toCreditValue(value) : value });
   };
 
   const handleDepartmentChange = (id: string) => (value: string) => {
     const department = departments.find(({ departmentId }) => `${departmentId}` === value);
-    setRows((prev) =>
-      prev.map((row) =>
-        row.id === id
-          ? { ...row, department: department?.name ?? '해당없음', departmentId: department?.departmentId ?? null }
-          : row,
-      ),
-    );
+    updateRow(id, { department: department?.name ?? '해당없음', departmentId: department?.departmentId ?? null });
   };
 
   const handleAreaChange = (id: string) => (value: string) => {
     const division = divisions.find(({ id: divisionId }) => `${divisionId}` === value);
-    setRows((prev) =>
-      prev.map((row) =>
-        row.id === id ? { ...row, area: division?.name ?? '해당없음', areaId: division?.id ?? null } : row,
-      ),
-    );
+    updateRow(id, { area: division?.name ?? '해당없음', areaId: division?.id ?? null });
   };
 
   const handleSemesterChange = (id: string) => (value: string) => {
     const parsed = parseTakenSemesterValue(value);
     if (!parsed) return;
 
-    setRows((prev) =>
-      prev.map((row) => (row.id === id ? { ...row, takenYear: parsed.takenYear, semester: parsed.semester } : row)),
-    );
+    updateRow(id, { takenYear: parsed.takenYear, semester: parsed.semester });
   };
 
   const handleSelectAllClick = () => {
