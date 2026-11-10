@@ -1,12 +1,10 @@
 import type { Division } from '@features/onboarding/types/course';
-import type { Column } from '@features/onboarding/types/course-info-table';
+import type { Column, CourseInfo } from '@features/onboarding/types/course-info-table';
 import { isCourseRowInvalid } from '@features/onboarding/utils/is-course-row-invalid';
 import type { DepartmentInfo } from '@shared/apis/types/onboarding-options';
 import type { AddCourseValues } from '@shared/components/modal/add-course-modal';
 import { parseTakenSemesterValue } from '@shared/utils/taken-semester-format';
 import { useEffect, useState } from 'react';
-
-import { CourseInfo } from '../analysis-result/course-info-table/course-info-table';
 
 const toCreditValue = (value: string) => {
   const [integerPart = '', ...rest] = value.replace(/[^0-9.]/g, '').split('.');
