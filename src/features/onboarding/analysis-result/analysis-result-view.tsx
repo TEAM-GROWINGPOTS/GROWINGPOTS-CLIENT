@@ -43,6 +43,12 @@ export const AnalysisResultView = ({ isOnboardingCompleted = false }: AnalysisRe
   );
   const requirementItems = graduation ? mapGraduationResponseToCards(graduation) : [];
 
+  const saveCourses = (rows: CourseInfo[], onSuccess?: () => void) => {
+    if (!studentCourses) return;
+
+    updateStudentCourses({ courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses) }, { onSuccess });
+  };
+
   const handleEditToggleClick = () => {
     if (!isEditing) {
       if (!isCourseInfoValid) {
@@ -54,12 +60,9 @@ export const AnalysisResultView = ({ isOnboardingCompleted = false }: AnalysisRe
     }
 
     const rows = courseInfoTableRef.current?.getCourses();
-    if (!rows || !studentCourses) return;
+    if (!rows) return;
 
-    updateStudentCourses(
-      { courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses) },
-      { onSuccess: () => setIsEditing(false) },
-    );
+    saveCourses(rows, () => setIsEditing(false));
   };
 
   const handleCancelClick = () => {
@@ -76,9 +79,7 @@ export const AnalysisResultView = ({ isOnboardingCompleted = false }: AnalysisRe
   }, []);
 
   const handleDeleteRows = (remainingCourses: CourseInfo[]) => {
-    if (!studentCourses) return;
-
-    updateStudentCourses({ courses: mapCourseInfoToPutStudentCourses(remainingCourses, studentCourses.courses) });
+    saveCourses(remainingCourses);
   };
 
   const handlePdfReuploadClick = () => {
@@ -93,15 +94,10 @@ export const AnalysisResultView = ({ isOnboardingCompleted = false }: AnalysisRe
       return;
     }
 
-    updateStudentCourses(
-      { courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses) },
-      {
-        onSuccess: async () => {
-          await completeOnboarding();
-          router.push('/graduation-dashboard');
-        },
-      },
-    );
+    saveCourses(rows, async () => {
+      await completeOnboarding();
+      router.push('/graduation-dashboard');
+    });
   };
 
   return (
