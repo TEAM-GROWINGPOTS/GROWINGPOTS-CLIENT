@@ -1,33 +1,15 @@
-export interface School {
-  schoolId: number;
-  name: string;
-}
-
-export interface Department {
-  departmentId: number;
-  schoolId: number;
-  college: string;
-  name: string;
-}
-
-export interface OnboardingOptions {
-  schools: School[];
-  departments: Department[];
-  admissionYears: number[];
-}
-
-export interface CreateStudentProfileRequest {
+export interface StudentProfileCreateRequest {
   schoolId: number;
   departmentId: number;
   admissionYear: number;
 }
 
-export interface StudentMajor {
+export interface MainMajorInfo {
   studentMajorId: number;
   departmentName: string;
 }
 
-export interface StudentProfile {
+export interface StudentProfileCreateResponse {
   studentProfileId: number;
-  mainMajor: StudentMajor;
+  mainMajor: MainMajorInfo;
 }

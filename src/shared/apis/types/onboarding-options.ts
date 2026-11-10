@@ -1,9 +1,9 @@
-export interface SchoolResponse {
+export interface SchoolInfo {
   schoolId: number;
   name: string;
 }
 
-export interface DepartmentResponse {
+export interface DepartmentInfo {
   departmentId: number;
   schoolId: number;
   college: string;
@@ -11,7 +11,7 @@ export interface DepartmentResponse {
 }
 
 export interface OnboardingOptionsResponse {
-  schools: SchoolResponse[];
-  departments: DepartmentResponse[];
+  schools: SchoolInfo[];
+  departments: DepartmentInfo[];
   admissionYears: number[];
 }

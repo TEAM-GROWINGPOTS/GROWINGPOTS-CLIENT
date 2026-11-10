@@ -1,7 +1,6 @@
 import { getSemesterLabel } from '@features/semester-planner/constants';
 import type {
   CompletedTermResponse,
-  OpenedSemester,
   PlannedTermResponse,
   PlannerCourseBaseResponse,
   PlannerFolder,
@@ -11,6 +10,7 @@ import type {
   PlannerVersionResponse,
   SemesterCourse,
 } from '@features/semester-planner/types/planner';
+import type { OpenedSemester } from '@shared/apis/types/course-search';
 
 const OPENED_SEMESTER_LABEL: Record<OpenedSemester, string> = {
   FIRST: '1학기',

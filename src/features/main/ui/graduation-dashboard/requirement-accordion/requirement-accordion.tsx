@@ -3,7 +3,7 @@
 import { getRequirementInfoContent, hasRequirementInfo, NOTICE_CODES } from '@features/main/constants/requirement';
 import type { RequirementAccordionItem } from '@features/main/types/requirement';
 import * as Accordion from '@radix-ui/react-accordion';
-import type { GraduationCondition } from '@shared/apis/types/graduation';
+import type { ConditionInfo } from '@shared/apis/types/graduation';
 import { cn } from '@shared/utils/cn';
 import type { RefObject } from 'react';
 
@@ -26,7 +26,7 @@ const getRequirementNotice = ({ code, notice }: RequirementAccordionItem) => {
   return notice;
 };
 
-const getRequirementAccordionValue = ({ code }: GraduationCondition, index: number) => {
+const getRequirementAccordionValue = ({ code }: ConditionInfo, index: number) => {
   return `${code}-${index}`;
 };
 
