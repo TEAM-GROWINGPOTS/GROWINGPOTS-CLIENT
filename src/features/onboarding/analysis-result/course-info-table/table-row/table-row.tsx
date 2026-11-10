@@ -1,5 +1,5 @@
 import type { Column } from '@features/onboarding/types/course-info-table';
-import Icon from '@shared/components/icon/icon';
+import { Checkbox } from '@shared/components/checkbox/checkbox';
 import { formatTakenSemester, getTakenSemesterValue } from '@shared/utils/taken-semester-format';
 
 import type { CourseInfo } from '../course-info-table';
@@ -38,14 +38,12 @@ export const TableRow = ({
   <tr>
     {isEditing && (
       <td className="px-8 py-4 align-middle">
-        <button
-          type="button"
+        <Checkbox
+          isChecked={isSelected}
+          ariaLabel={`${course.courseName} 선택`}
+          className="mx-auto"
           onClick={onRowSelectClick(course.id)}
-          aria-label={`${course.courseName} 선택`}
-          className="mx-auto flex size-20 items-center justify-center"
-        >
-          <Icon name={isSelected ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'} size={20} />
-        </button>
+        />
       </td>
     )}
     {columns.map((column) => (
