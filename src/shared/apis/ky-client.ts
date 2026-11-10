@@ -48,7 +48,12 @@ export const kyClient = ky.create({
 
         if (response.status === 401 && !options.context?.skipAuthRefresh) {
           try {
-            const newToken = await refreshAccessToken();
+            const currentToken = getAccessToken();
+            const requestToken = request.headers.get('Authorization')?.replace('Bearer ', '') ?? null;
+
+            // 요청에 쓴 토큰이 이미 갱신된 경우 → 현재 토큰으로 재시도 (reissue 불필요)
+            const newToken = requestToken !== currentToken && currentToken ? currentToken : await refreshAccessToken();
+
             const cloned = request.clone();
             cloned.headers.set('Authorization', `Bearer ${newToken}`);
             return fetch(cloned);
