@@ -10,7 +10,7 @@ import { Badge, ClassCard } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { cn } from '@shared/utils/cn';
-import { type ReactNode, type Ref, useEffect, useRef, useState } from 'react';
+import { memo, type ReactNode, type Ref, useEffect, useRef, useState } from 'react';
 
 interface SemesterCardProps {
   ref?: Ref<HTMLElement>;
@@ -52,7 +52,7 @@ const STATUS_ICON: Record<SemesterCardStatus, string | null> = {
   planned: null,
 };
 
-export const SemesterCard = ({
+const SemesterCardComponent = ({
   ref,
   yearLevel,
   semester,
@@ -241,40 +241,49 @@ export const SemesterCard = ({
           )}
         </div>
       </div>
-      <FolderRenameModal
-        open={renameTarget !== null}
-        onOpenChange={(open) => {
-          if (!open) setRenameTarget(null);
-        }}
-        initialName={renameTarget?.folderName ?? ''}
-        onSave={handleRenameFolderSave}
-      />
-      <ConfirmModal
-        open={deleteTarget !== null}
-        onOpenChange={(open) => {
-          if (!open) setDeleteTarget(null);
-        }}
-        type="delete"
-        title={
-          isLastFolder
-            ? `정말 '${deleteTarget?.folderName ?? ''}'을 삭제하시겠습니까?`
-            : `${termLabel}의 '${deleteTarget?.folderName ?? ''}'을 삭제할까요?`
-        }
-        description={
-          isLastFolder
-            ? `'${deleteTarget?.folderName ?? ''}'을 삭제하면 ${termLabel} 내 저장된 과목 정보가 모두 삭제되며 복구할 수 없습니다.`
-            : '삭제한 폴더는 복구할 수 없어요.'
-        }
-        onConfirm={handleConfirmDeleteFolder}
-      />
-      <ConfirmModal
-        open={isTermDeleteOpen}
-        onOpenChange={setIsTermDeleteOpen}
-        type="delete"
-        title={`${termLabel}를 삭제할까요?`}
-        description="삭제한 학기는 복구할 수 없어요."
-        onConfirm={handleConfirmDeleteTerm}
-      />
+      {/* 모달은 열려 있을 때만 마운트해, 닫힌 모달이 카드마다 상시 렌더되지 않게 한다. */}
+      {renameTarget && (
+        <FolderRenameModal
+          open
+          onOpenChange={(open) => {
+            if (!open) setRenameTarget(null);
+          }}
+          initialName={renameTarget.folderName}
+          onSave={handleRenameFolderSave}
+        />
+      )}
+      {deleteTarget && (
+        <ConfirmModal
+          open
+          onOpenChange={(open) => {
+            if (!open) setDeleteTarget(null);
+          }}
+          type="delete"
+          title={
+            isLastFolder
+              ? `정말 '${deleteTarget.folderName}'을 삭제하시겠습니까?`
+              : `${termLabel}의 '${deleteTarget.folderName}'을 삭제할까요?`
+          }
+          description={
+            isLastFolder
+              ? `'${deleteTarget.folderName}'을 삭제하면 ${termLabel} 내 저장된 과목 정보가 모두 삭제되며 복구할 수 없습니다.`
+              : '삭제한 폴더는 복구할 수 없어요.'
+          }
+          onConfirm={handleConfirmDeleteFolder}
+        />
+      )}
+      {isTermDeleteOpen && (
+        <ConfirmModal
+          open
+          onOpenChange={setIsTermDeleteOpen}
+          type="delete"
+          title={`${termLabel}를 삭제할까요?`}
+          description="삭제한 학기는 복구할 수 없어요."
+          onConfirm={handleConfirmDeleteTerm}
+        />
+      )}
     </section>
   );
 };
+
+export const SemesterCard = memo(SemesterCardComponent);
