@@ -8,17 +8,9 @@ import {
   getSelectedTotalCredit,
   usePlannerTerms,
 } from '@features/semester-planner/hooks/use-planner-terms';
-import { AddCourseSidebar } from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar';
-import {
-  CourseFilterModal,
-  type CourseFilterTabKeyTypes,
-  type CourseFilterValues,
-  getFilterTabByLabel,
-  getSelectedFilterLabels,
-  INITIAL_COURSE_FILTER_VALUES,
-} from '@features/semester-planner/ui/card-view/course-filter-modal/course-filter-modal';
+import type { PlannerTerm } from '@features/semester-planner/types/planner';
+import { AddCourseSidebarContainer } from '@features/semester-planner/ui/card-view/add-course-sidebar/add-course-sidebar-container';
 import { DroppableTerm } from '@features/semester-planner/ui/card-view/dnd/droppable-term';
-import { LibraryCourse } from '@features/semester-planner/ui/card-view/dnd/library-course';
 import { TrashDropZone } from '@features/semester-planner/ui/card-view/dnd/trash-drop-zone';
 import { useBoardDragScroll } from '@features/semester-planner/ui/card-view/dnd/use-board-drag-scroll';
 import { useBoardEdgeScroll } from '@features/semester-planner/ui/card-view/dnd/use-board-edge-scroll';
@@ -32,21 +24,17 @@ import { isGuideSeen, markGuideSeen } from '@features/semester-planner/utils/gui
 import { getCourseNote } from '@features/semester-planner/utils/map-planner';
 import { clearPendingFocusTerm, peekPendingFocusTerm } from '@features/semester-planner/utils/pending-focus-term';
 import { parseApiError } from '@shared/apis/parse-api-error';
-import { CourseSearchItemResponse } from '@shared/apis/types/course-search';
 import { toast, Toaster } from '@shared/components';
 import { Button } from '@shared/components/button/button';
 import { ClassCard } from '@shared/components/class-card/class-card';
 import Icon from '@shared/components/icon/icon';
 import { IconButton } from '@shared/components/icon-button/icon-button';
-import { AddCourseModal } from '@shared/components/modal/add-course-modal';
-import { useCourseSearch } from '@shared/hooks/use-course-search';
-import { useDebouncedValue } from '@shared/hooks/use-debounced-value';
 import { useGraduationStatus } from '@shared/hooks/use-graduation-status';
 import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { cn } from '@shared/utils/cn';
 import { useRouter } from 'next/navigation';
-import { type TransitionEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { type TransitionEvent, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 const CARD_WIDTH = 258;
@@ -76,11 +64,6 @@ export const CardView = ({ planner, sidebarSlot }: CardViewProps) => {
     resolveTermId,
     validateAndCleanPrerequisites,
     addTerm,
-    removeTerm,
-    addFolder,
-    selectFolder,
-    renameFolder,
-    deleteFolder,
   } = planner;
   const { data: graduationData, isError: isGraduationError, error: graduationError } = useGraduationStatus('PLANNED');
   const { data: studentProfile } = useStudentProfile();
@@ -105,29 +88,6 @@ export const CardView = ({ planner, sidebarSlot }: CardViewProps) => {
     if (studentProfileId === undefined) return;
     markGuideSeen(`${CARD_VIEW_GUIDE_SEEN_KEY}:${studentProfileId}`);
   }, [studentProfileId]);
-  const [isAddCourseModalOpen, setIsAddCourseModalOpen] = useState(false);
-  const [addCourseName, setAddCourseName] = useState('');
-  const [addCourseCredit, setAddCourseCredit] = useState('');
-  const [addCourseArea, setAddCourseArea] = useState('');
-  const [addCourseSemester, setAddCourseSemester] = useState('');
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [appliedFilters, setAppliedFilters] = useState<CourseFilterValues>();
-  const [filterTab, setFilterTab] = useState<CourseFilterTabKeyTypes | null>(null);
-  const debouncedKeyword = useDebouncedValue(searchKeyword.trim());
-  const {
-    data: libraryCourses = [],
-    isLoading: isCoursesLoading,
-    isError: isCourseSearchError,
-    error: courseSearchError,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-  } = useCourseSearch(
-    { keyword: debouncedKeyword || undefined, ...(appliedFilters ?? INITIAL_COURSE_FILTER_VALUES) },
-    { enabled: isSidebarOpen },
-  );
-  const canSubmitAddCourse =
-    addCourseName.trim() !== '' && addCourseCredit !== '' && addCourseArea !== '' && addCourseSemester !== '';
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [lastCardElement, setLastCardElement] = useState<HTMLElement | null>(null);
@@ -183,11 +143,6 @@ export const CardView = ({ planner, sidebarSlot }: CardViewProps) => {
       toast.negative(parsed?.message ?? '졸업 요건 현황을 불러오지 못했어요.'),
     );
   }, [isGraduationError, graduationError]);
-
-  useEffect(() => {
-    if (!isCourseSearchError) return;
-    parseApiError(courseSearchError).then((parsed) => toast.negative(parsed?.message ?? '과목 검색에 실패했어요.'));
-  }, [isCourseSearchError, courseSearchError]);
 
   const handleLastCardRef = useCallback((node: HTMLElement | null) => {
     setLastCardElement(node);
@@ -268,36 +223,6 @@ export const CardView = ({ planner, sidebarSlot }: CardViewProps) => {
     });
   };
 
-  const handleFilterClick = (label: string) => {
-    const tab = getFilterTabByLabel(label);
-    if (tab) setFilterTab(tab);
-  };
-
-  const handleLoadMoreCourses = () => {
-    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-  };
-
-  const handleDirectAdd = () => {
-    setIsAddCourseModalOpen(true);
-  };
-
-  const resetAddCourseForm = () => {
-    setAddCourseName('');
-    setAddCourseCredit('');
-    setAddCourseArea('');
-    setAddCourseSemester('');
-  };
-
-  const handleAddCourseModalOpenChange = (nextOpen: boolean) => {
-    setIsAddCourseModalOpen(nextOpen);
-    if (!nextOpen) resetAddCourseForm();
-  };
-
-  const handleAddCourseSubmit = () => {
-    if (!canSubmitAddCourse) return;
-    handleAddCourseModalOpenChange(false);
-  };
-
   const handleToggleSidebar = () => {
     if (isSidebarOpen) {
       setIsSidebarOpen(false);
@@ -307,11 +232,38 @@ export const CardView = ({ planner, sidebarSlot }: CardViewProps) => {
     closeSideNavigation();
   };
 
-  const handleAddFolder = (termId: string) => {
-    const folder = addFolder(termId);
+  // planner는 렌더마다 새 함수를 내려주므로, 최신 값을 ref로 읽는 고정 핸들러를 memo된 학기 카드에 넘긴다.
+  const plannerRef = useRef(planner);
+  useLayoutEffect(() => {
+    plannerRef.current = planner;
+  });
+
+  const handleDeleteTerm = useCallback(({ id, yearLevel, semesterLabel }: PlannerTerm) => {
+    plannerRef.current.removeTerm(id);
+    toast.success(`${yearLevel}학년 ${semesterLabel}가 삭제되었어요.`);
+  }, []);
+
+  const handleAddFolder = useCallback((termId: string) => {
+    const folder = plannerRef.current.addFolder(termId);
     if (!folder) return;
     toast.success(`'${folder.name}' 폴더가 생성되었어요.`);
-  };
+  }, []);
+
+  const handleSelectFolder = useCallback(
+    (termId: string, folderId: string) => plannerRef.current.selectFolder(termId, folderId),
+    [],
+  );
+
+  const handleRenameFolder = useCallback(
+    (termId: string, folderId: string, name: string) => plannerRef.current.renameFolder(termId, folderId, name),
+    [],
+  );
+
+  const handleDeleteFolder = useCallback(({ id: termId, folders }: PlannerTerm, folderId: string) => {
+    const folderName = folders.find(({ id }) => id === folderId)?.name ?? '';
+    plannerRef.current.deleteFolder(termId, folderId);
+    toast.success(`'${folderName}' 폴더가 삭제되었어요.`);
+  }, []);
 
   const handleAddSemester = (year: string, semester: string) => {
     const semesterLabel = getSemesterLabelByCode(semester);
@@ -390,25 +342,14 @@ export const CardView = ({ planner, sidebarSlot }: CardViewProps) => {
                     key={term.id}
                     term={term}
                     cardRef={cardRef}
-                    scrollToCourse={
-                      scrollToCourse?.termId === term.id
-                        ? { courseId: scrollToCourse.courseId, key: scrollToCourse.key }
-                        : undefined
-                    }
+                    scrollToCourse={scrollToCourse?.termId === term.id ? scrollToCourse : undefined}
                     isDropTarget={overTermId === term.id}
                     admissionYear={admissionYear}
-                    onDeleteTerm={() => {
-                      removeTerm(term.id);
-                      toast.success(`${term.yearLevel}학년 ${term.semesterLabel}가 삭제되었어요.`);
-                    }}
-                    onAddFolder={() => handleAddFolder(term.id)}
-                    onSelectFolder={(folderId) => selectFolder(term.id, folderId)}
-                    onRenameFolder={(folderId, name) => renameFolder(term.id, folderId, name)}
-                    onDeleteFolder={(folderId) => {
-                      const folderName = term.folders.find(({ id }) => id === folderId)?.name ?? '';
-                      deleteFolder(term.id, folderId);
-                      toast.success(`'${folderName}' 폴더가 삭제되었어요.`);
-                    }}
+                    onDeleteTerm={handleDeleteTerm}
+                    onAddFolder={handleAddFolder}
+                    onSelectFolder={handleSelectFolder}
+                    onRenameFolder={handleRenameFolder}
+                    onDeleteFolder={handleDeleteFolder}
                   />
                 ) : (
                   <SemesterCard
@@ -481,20 +422,10 @@ export const CardView = ({ planner, sidebarSlot }: CardViewProps) => {
               isSidebarOpen ? 'w-300' : 'w-0',
             )}
           >
-            <AddCourseSidebar
-              courses={libraryCourses}
-              keyword={searchKeyword}
-              onKeywordChange={setSearchKeyword}
-              isLoading={isCoursesLoading}
-              onLoadMore={handleLoadMoreCourses}
-              selectedFilterLabels={getSelectedFilterLabels(appliedFilters)}
-              onFilterClick={handleFilterClick}
+            <AddCourseSidebarContainer
+              isOpen={isSidebarOpen}
               onClose={() => setIsSidebarOpen(false)}
-              onDirectAdd={handleDirectAdd}
               admissionYear={admissionYear}
-              renderCourse={(course: CourseSearchItemResponse) => (
-                <LibraryCourse key={course.courseId} course={course} admissionYear={admissionYear} />
-              )}
             />
           </div>,
           sidebarSlot,
@@ -516,20 +447,6 @@ export const CardView = ({ planner, sidebarSlot }: CardViewProps) => {
 
       <AddSemesterModal open={isAddSemesterOpen} onOpenChange={setIsAddSemesterOpen} onSubmit={handleAddSemester} />
       <CardViewGuideModal open={isGuideOpen} onOpenChange={setIsGuideOpen} confirmLabel={guideConfirmLabel} />
-      <AddCourseModal
-        open={isAddCourseModalOpen}
-        onOpenChange={handleAddCourseModalOpenChange}
-        courseName={addCourseName}
-        onCourseNameChange={setAddCourseName}
-        credit={addCourseCredit}
-        onCreditChange={setAddCourseCredit}
-        area={addCourseArea}
-        onAreaChange={setAddCourseArea}
-        semester={addCourseSemester}
-        onSemesterChange={setAddCourseSemester}
-        canSubmit={canSubmitAddCourse}
-        onSubmit={handleAddCourseSubmit}
-      />
       {prerequisiteModal && (
         <PrerequisiteModal
           open
@@ -542,15 +459,6 @@ export const CardView = ({ planner, sidebarSlot }: CardViewProps) => {
           onConfirm={prerequisiteModal.onConfirm}
         />
       )}
-      <CourseFilterModal
-        open={filterTab !== null}
-        onOpenChange={(open) => {
-          if (!open) setFilterTab(null);
-        }}
-        initialTab={filterTab ?? undefined}
-        initialValues={appliedFilters}
-        onApply={setAppliedFilters}
-      />
       <Toaster />
     </DndContext>
   );

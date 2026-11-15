@@ -6,21 +6,21 @@ import {
   getSelectedCourses,
   getSelectedTotalCredit,
 } from '@features/semester-planner/hooks/use-planner-terms';
-import type { PlannerTerm } from '@features/semester-planner/types/planner';
+import type { PlannerTerm, SemesterCourse } from '@features/semester-planner/types/planner';
 import { DraggableCourse } from '@features/semester-planner/ui/card-view/dnd/draggable-course';
 import { SemesterCard } from '@features/semester-planner/ui/card-view/semester-card/semester-card';
-import type { Ref } from 'react';
+import { type Ref, useCallback } from 'react';
 
 interface DroppableTermProps {
   term: PlannerTerm;
   cardRef?: Ref<HTMLElement>;
   scrollToCourse?: { courseId: string; key: number };
   isDropTarget: boolean;
-  onDeleteTerm: () => void;
-  onAddFolder: () => void;
-  onSelectFolder: (folderId: string) => void;
-  onRenameFolder: (folderId: string, name: string) => void;
-  onDeleteFolder: (folderId: string) => void;
+  onDeleteTerm: (term: PlannerTerm) => void;
+  onAddFolder: (termId: string) => void;
+  onSelectFolder: (termId: string, folderId: string) => void;
+  onRenameFolder: (termId: string, folderId: string, name: string) => void;
+  onDeleteFolder: (term: PlannerTerm, folderId: string) => void;
   admissionYear?: number;
 }
 
@@ -37,7 +37,25 @@ export const DroppableTerm = ({
   admissionYear,
 }: DroppableTermProps) => {
   const { setNodeRef } = useDroppable({ id: term.id });
-  const { yearLevel, semester, semesterLabel, status, selectedFolderId, folders } = term;
+  const { id: termId, yearLevel, semester, semesterLabel, status, selectedFolderId, folders } = term;
+
+  // useDroppable은 드래그 상태가 바뀔 때마다 이 컴포넌트를 다시 렌더하므로, memo된 SemesterCard에는
+  // 참조가 유지되는 콜백만 넘겨 카드 본문까지 다시 그려지지 않게 한다.
+  const renderCourse = useCallback(
+    (course: SemesterCourse) => <DraggableCourse key={course.id} course={course} admissionYear={admissionYear} />,
+    [admissionYear],
+  );
+  const handleDeleteTerm = useCallback(() => onDeleteTerm(term), [onDeleteTerm, term]);
+  const handleAddFolder = useCallback(() => onAddFolder(termId), [onAddFolder, termId]);
+  const handleSelectFolder = useCallback(
+    (folderId: string) => onSelectFolder(termId, folderId),
+    [onSelectFolder, termId],
+  );
+  const handleRenameFolder = useCallback(
+    (folderId: string, name: string) => onRenameFolder(termId, folderId, name),
+    [onRenameFolder, termId],
+  );
+  const handleDeleteFolder = useCallback((folderId: string) => onDeleteFolder(term, folderId), [onDeleteFolder, term]);
 
   return (
     <div ref={setNodeRef} className="h-full">
@@ -56,12 +74,12 @@ export const DroppableTerm = ({
         selectedFolderId={selectedFolderId}
         isDropTarget={isDropTarget}
         admissionYear={admissionYear}
-        renderCourse={(course) => <DraggableCourse key={course.id} course={course} admissionYear={admissionYear} />}
-        onDeleteTerm={onDeleteTerm}
-        onAddFolder={onAddFolder}
-        onSelectFolder={onSelectFolder}
-        onRenameFolder={onRenameFolder}
-        onDeleteFolder={onDeleteFolder}
+        renderCourse={renderCourse}
+        onDeleteTerm={handleDeleteTerm}
+        onAddFolder={handleAddFolder}
+        onSelectFolder={handleSelectFolder}
+        onRenameFolder={handleRenameFolder}
+        onDeleteFolder={handleDeleteFolder}
       />
     </div>
   );
