@@ -6,6 +6,7 @@ import { LIBRARY_PREFIX } from '@features/semester-planner/ui/card-view/dnd/use-
 import { getCourseNote, getCourseTags } from '@features/semester-planner/utils/map-planner';
 import type { CourseSearchItemResponse } from '@shared/apis/types/course-search';
 import { ClassCard } from '@shared/components/class-card/class-card';
+import { memo, useMemo } from 'react';
 
 const toLibrarySemesterCourse = ({
   courseId,
@@ -35,8 +36,8 @@ interface LibraryCourseProps {
   admissionYear?: number;
 }
 
-export const LibraryCourse = ({ course, admissionYear }: LibraryCourseProps) => {
-  const semesterCourse = toLibrarySemesterCourse(course);
+const LibraryCourseComponent = ({ course, admissionYear }: LibraryCourseProps) => {
+  const semesterCourse = useMemo(() => toLibrarySemesterCourse(course), [course]);
   const { id, departmentName, name, tags, isEnglish, isSw } = semesterCourse;
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id,
@@ -58,3 +59,5 @@ export const LibraryCourse = ({ course, admissionYear }: LibraryCourseProps) => 
     </div>
   );
 };
+
+export const LibraryCourse = memo(LibraryCourseComponent);

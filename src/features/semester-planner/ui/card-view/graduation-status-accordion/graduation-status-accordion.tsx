@@ -6,7 +6,7 @@ import type { GraduationCondition, GraduationResponse, GraduationUnit } from '@s
 import { Badge, Chip, Tooltip } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
-import { Fragment, useRef, useState } from 'react';
+import { Fragment, memo, useRef, useState } from 'react';
 
 import { AccordionProgressBar } from './accordion-progress-bar';
 import { calculatePercentage } from './calculate-percentage';
@@ -34,7 +34,7 @@ interface GraduationStatusAccordionProps {
   data?: GraduationResponse;
 }
 
-export const GraduationStatusAccordion = ({ className, data }: GraduationStatusAccordionProps) => {
+const GraduationStatusAccordionComponent = ({ className, data }: GraduationStatusAccordionProps) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [isArrowNav, setIsArrowNav] = useState(false);
   const chipContainerRef = useRef<HTMLDivElement>(null);
@@ -247,3 +247,5 @@ const LegendItem = ({ dotClass, label, credit }: LegendItemProps) => (
     <span className="text-body-m-14 text-gray-700">{credit}학점</span>
   </div>
 );
+
+export const GraduationStatusAccordion = memo(GraduationStatusAccordionComponent);
