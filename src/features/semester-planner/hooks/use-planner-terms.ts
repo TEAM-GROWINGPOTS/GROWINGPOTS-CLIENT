@@ -26,8 +26,18 @@ import { parseApiError } from '@shared/apis/parse-api-error';
 import { toast } from '@shared/components';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-export const getSelectedCourses = (term: PlannerTerm): SemesterCourse[] =>
-  sortSemesterCourses(term.folders.find(({ id }) => id === term.selectedFolderId)?.courses ?? []);
+// term은 불변 객체라, 같은 term이면 같은 배열을 돌려줘 memo된 카드의 props 비교가 깨지지 않게 한다.
+const sortedSelectedCoursesByTerm = new WeakMap<PlannerTerm, SemesterCourse[]>();
+
+export const getSelectedCourses = (term: PlannerTerm): SemesterCourse[] => {
+  const cachedSelectedCourses = sortedSelectedCoursesByTerm.get(term);
+  if (cachedSelectedCourses) return cachedSelectedCourses;
+  const sortedSelectedCourses = sortSemesterCourses(
+    term.folders.find(({ id }) => id === term.selectedFolderId)?.courses ?? [],
+  );
+  sortedSelectedCoursesByTerm.set(term, sortedSelectedCourses);
+  return sortedSelectedCourses;
+};
 
 export const getSelectedTotalCredit = (term: PlannerTerm): number =>
   term.folders.find(({ id }) => id === term.selectedFolderId)?.totalCredit ?? 0;
@@ -115,7 +125,8 @@ export const usePlannerTerms = () => {
   const isValidatingRef = useRef(false);
 
   const setPlannedTerms = (terms: PlannerTerm[]) => {
-    setPlannedState((prev) => ({ ...prev, terms }));
+    // 같은 학기 목록이면 이전 state를 그대로 반환해 리렌더를 건너뛴다.
+    setPlannedState((prev) => (prev.terms === terms ? prev : { ...prev, terms }));
   };
 
   const reseedPlannedTerms = async (serverPlannedTerms: PlannedTermResponse[] | null) => {
@@ -163,10 +174,10 @@ export const usePlannerTerms = () => {
         // 응답 구성이 저장본과 같으면(정상 경로) 서버 계산값만 끼워 넣고,
         // 다르면(외부 변경·서버 변형) 서버를 진실로 삼아 전체 재시드한다.
         if (isSamePlannerComposition(next, latestPlanner.plannedTerms)) {
-          setPlannedState((prev) => ({
-            ...prev,
-            terms: mergeServerTotalCredits(prev.terms, latestPlanner.plannedTerms),
-          }));
+          setPlannedState((prev) => {
+            const creditMergedTerms = mergeServerTotalCredits(prev.terms, latestPlanner.plannedTerms);
+            return creditMergedTerms === prev.terms ? prev : { ...prev, terms: creditMergedTerms };
+          });
         } else {
           setPlannedTerms(mapPlannedTerms(latestPlanner.plannedTerms));
         }
@@ -262,7 +273,13 @@ export const usePlannerTerms = () => {
     }
   };
 
-  const completedTerms = useMemo(() => (planner ? mapCompletedTerms(planner.completedTerms) : []), [planner]);
+  // 저장 후 재조회로 planner 객체가 바뀌어도, 이수 학기 응답이 같으면 쿼리의 structural sharing으로
+  // completedTerms 참조가 유지되므로 이를 기준으로 메모한다.
+  const completedTermsResponse = planner?.completedTerms;
+  const completedTerms = useMemo(
+    () => (completedTermsResponse ? mapCompletedTerms(completedTermsResponse) : []),
+    [completedTermsResponse],
+  );
   const gridTerms = useMemo(() => [...completedTerms, ...plannedTerms], [completedTerms, plannedTerms]);
 
   const snapshot = () => {

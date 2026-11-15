@@ -151,20 +151,21 @@ const toServerCompositionSignature = (serverTerms: PlannedTermResponse[]): strin
 export const isSamePlannerComposition = (terms: PlannerTerm[], serverTerms: PlannedTermResponse[]): boolean =>
   toLocalCompositionSignature(terms) === toServerCompositionSignature(serverTerms);
 
-export const mergeServerTotalCredits = (terms: PlannerTerm[], serverTerms: PlannedTermResponse[]): PlannerTerm[] =>
-  terms.map((term) => {
+// 학점이 바뀐 학기만 새 객체로 만들고, 바뀐 게 없으면 입력 배열을 그대로 돌려줘 불필요한 리렌더를 막는다.
+export const mergeServerTotalCredits = (terms: PlannerTerm[], serverTerms: PlannedTermResponse[]): PlannerTerm[] => {
+  const creditMergedTerms = terms.map((term) => {
     const serverTerm = serverTerms.find((s) => s.yearLevel === term.yearLevel && s.semester === term.semester);
     if (!serverTerm) return term;
     const orderedVersions = [...serverTerm.versions].sort((a, b) => a.versionOrder - b.versionOrder);
-    return {
-      ...term,
-      folders: term.folders.map((folder, index) => {
-        const serverCredit = orderedVersions[index]?.totalCredit;
-        if (serverCredit === undefined || serverCredit === folder.totalCredit) return folder;
-        return { ...folder, totalCredit: serverCredit };
-      }),
-    };
+    const folders = term.folders.map((folder, index) => {
+      const serverCredit = orderedVersions[index]?.totalCredit;
+      if (serverCredit === undefined || serverCredit === folder.totalCredit) return folder;
+      return { ...folder, totalCredit: serverCredit };
+    });
+    return folders.every((folder, index) => folder === term.folders[index]) ? term : { ...term, folders };
   });
+  return creditMergedTerms.every((term, index) => term === terms[index]) ? terms : creditMergedTerms;
+};
 
 export const mapPlannedTerms = (plannedTerms: PlannerResponse['plannedTerms']): PlannerTerm[] =>
   plannedTerms.map(toPlannedTerm);
