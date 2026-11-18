@@ -24,10 +24,14 @@ export const useGraduationDashboard = () => {
   const scrollRequest = scrollRequests[selectedTab] ?? null;
   const handleScrollRequestChange = useCallback(
     (targetKey: string | null) => {
-      setScrollRequests((previousRequests) => ({
-        ...previousRequests,
-        [selectedTab]: targetKey === null ? null : { targetKey },
-      }));
+      setScrollRequests((previousRequests) => {
+        if (targetKey === null && !previousRequests[selectedTab]) return previousRequests;
+
+        return {
+          ...previousRequests,
+          [selectedTab]: targetKey === null ? null : { targetKey },
+        };
+      });
     },
     [selectedTab],
   );
