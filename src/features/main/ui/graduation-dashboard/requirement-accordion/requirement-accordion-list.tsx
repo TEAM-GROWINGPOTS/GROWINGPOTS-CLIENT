@@ -23,8 +23,15 @@ export const RequirementAccordionList = ({
   admissionYear,
   className,
 }: RequirementAccordionListProps) => {
-  const { scrollContainerRef, scrollSpaceRef, itemRefs, isAtBottom, updateIsAtBottom, handleManualScrollStart } =
-    useRequirementAccordionScroll({ items, scrollRequest, onScrollRequestChange });
+  const {
+    scrollContainerRef,
+    scrollSpaceRef,
+    itemRefs,
+    isAtBottom,
+    updateIsAtBottom,
+    handleScrollEnd,
+    handleManualScrollStart,
+  } = useRequirementAccordionScroll({ items, scrollRequest, onScrollRequestChange });
 
   return (
     <div className={cn('relative', className)}>
@@ -32,6 +39,7 @@ export const RequirementAccordionList = ({
         ref={scrollContainerRef}
         className="h-[533px] [scrollbar-width:none] overflow-y-auto [&::-webkit-scrollbar]:hidden"
         onScroll={updateIsAtBottom}
+        onScrollEnd={handleScrollEnd}
         onTouchMove={handleManualScrollStart}
         onWheel={handleManualScrollStart}
       >

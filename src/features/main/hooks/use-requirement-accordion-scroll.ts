@@ -75,6 +75,10 @@ export const useRequirementAccordionScroll = ({
     return cancelAutoScroll;
   }, [scrollRequest, hasScrollTarget, cancelAutoScroll, updateIsAtBottom]);
 
+  const handleScrollEnd = useCallback(() => {
+    isAutoScrollingRef.current = false;
+  }, []);
+
   const handleManualScrollStart = useCallback(() => {
     cancelAutoScroll();
     onScrollRequestChange?.(null);
@@ -91,6 +95,7 @@ export const useRequirementAccordionScroll = ({
     itemRefs,
     isAtBottom,
     updateIsAtBottom,
+    handleScrollEnd,
     handleManualScrollStart,
   };
 };
