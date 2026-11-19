@@ -144,8 +144,8 @@ ESLint + Prettier를 적용한다. import는 `simple-import-sort`로 정렬하�
 #### 🎨 스타일
 
 - Tailwind utility class를 우선 사용한다
-- 디자인 토큰은 `src/shared/styles/tokens/` (`colors.css`, `typography.css`)를 따른다
-- 전역 스타일 진입은 `src/shared/styles/globals.css`만 `@import`한다
+- 디자인 토큰은 `src/shared/styles/tokens/`의 `colors.css`, `typography.css`, `shadows.css`, `z-index.css`, `animations.css`를 따른다
+- 전역 스타일 진입은 `src/shared/styles/globals.css`만 `@import`한다. 토큰 파일을 추가하면 `globals.css`에 `@import`로 등록한다
 - SVG 아이콘은 `public/svgs/`에 추가한 뒤 `pnpm generate-sprite`를 실행하고, `<Icon name="..." />`로 사용한다
 
 ### 🌐 API / Data Fetching
@@ -192,12 +192,21 @@ export const getPlanner = async () => {
 
 ### 🌿 Git
 
+#### 🌱 Branch
+
+- 이슈는 템플릿(`[Feat]`, `[Fix]`, `[Refactor]`)으로 만들고, 작업 브랜치는 `develop`에서 만든다
+- 브랜치명은 `{type}/{작업-설명}/#{이슈번호}` 형식으로 쓴다 (예: `refactor/agents-md-update/#230`)
+- 작업 브랜치의 PR은 `develop`으로 올린다. `main`은 배포 브랜치이며 `develop` → `main` PR로만 반영한다
+- Vercel은 `main`(프로덕션)과 `develop`(dev)만 배포한다. 다른 브랜치는 빌드하지 않는다
+
 #### 💬 Commit
 
 사용자가 커밋을 요청했을 때만 작성한다. `git commit` / `git push`는 사용자 승인 후에만 실행한다.
 
 - `{type}: {subject}` 형식으로 작성한다
 - type은 소문자로 쓰고, 특수기호는 넣지 않으며, 기능별로 작게 쪼갠다
+- 허용 type: `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`, `perf`, `build`, `ci`, `hotfix`, `init`, `revert`
+- PR 제목은 대문자(`Docs:`)로 시작하지만 커밋 type은 소문자(`docs:`)다. 대문자로 쓰면 commitlint에서 막힌다
 - Husky commitlint 검사를 통과시킨다
 
 #### 🪝 Git hooks
@@ -211,12 +220,15 @@ export const getPlanner = async () => {
 
 - hook은 **staged 파일만** 검사한다. 전체 검증은 Workflow **5단계**에서 `pnpm lint` / `pnpm build`를 직접 실행한다.
 - `pnpm build`는 hook에 포함되지 않는다.
+- `*.{ts,tsx}` 없이 커밋하면 lint-staged가 `could not find any staged files`를 출력한다. 오류가 아니다.
 
 #### 📤 PR
 
 사용자가 PR 작성을 요청했을 때만 작성한다.
 
 - 제목은 `{Type}: {설명}` 형식으로 쓴다. Type은 대문자로 시작한다 (`Feat:`, `Fix:` …)
+- 허용 Type: `Init`, `Feat`, `Fix`, `Refactor`, `Chore`, `Docs`, `Style`, `Test`, `Perf`, `Design`. PR Title Check 워크플로가 검사한다
+- 라벨(타입·작성자)과 assignee는 GitHub Actions가 자동으로 붙인다
 - 본문은 `.github/pull_request_template.md` 형식에 맞춰 작성한다
 
 | 섹션         | 작성 기준                                                                                  |
@@ -224,6 +236,10 @@ export const getPlanner = async () => {
 | **Summary**  | 해당 브랜치 작업을 요약한다. 관련 Issue가 있으면 태그한다 (`> - #100`)                     |
 | **Tasks**    | 브랜치에서 수행한 작업을 목록으로 적는다. 세분화 할수록 좋다                               |
 | **Describe** | 수행한 작업을 설명한다. 맥락/의도/변경 이유를 포함하고, 자세히 그리고 이해가 쉽도록 적는다 |
+
+#### ⚙️ CI
+
+`develop`·`main` 대상 PR과 push마다 GitHub Actions가 `pnpm install --frozen-lockfile` → `pnpm lint` → `pnpm build`를 실행한다 (Node 22). 로컬 검증과 같은 명령이므로 PR 전에 직접 통과시킨다.
 
 ---
 
