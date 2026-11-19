@@ -86,7 +86,7 @@ public/svgs/                        # SVG 원본 → sprite 생성
 | `features/` | 도메인 단위로 격리한다. feature 간 직접 import는 하지 않는다                                                          |
 | `shared/`   | 2개 이상 feature에서 쓰는 코드만 둔다                                                                                 |
 
-**Path alias:** `@app/`*, `@features/*`, `@shared/*`를 사용한다. 상대 경로 `../../`는 쓰지 않는다.
+**Path alias:** `@app/*`, `@features/*`, `@shared/*`를 사용한다. 상대 경로 `../../`는 쓰지 않는다.
 
 ### ⌨️ Commands
 
@@ -250,7 +250,7 @@ Conventions에 없는 **판단/금지** 사항이다.
 ### ✅ Always
 
 - `pnpm`을 사용한다 (`npm`/`yarn`은 쓰지 않는다)
-- `@app/`*, `@features/*`, `@shared/*` alias를 사용한다
+- `@app/*`, `@features/*`, `@shared/*` alias를 사용한다
 - 변경 범위를 요청/task에 맞게 **최소화**한다
 - Workflow **5단계(검증)**를 실행한 뒤 완료를 보고한다
 
@@ -265,7 +265,7 @@ Conventions에 없는 **판단/금지** 사항이다.
 
 ### 🚫 Never
 
-- `.env`*를 생성/수정/커밋하거나 secret을 하드코딩한다
+- `.env*`를 생성/수정/커밋하거나 secret을 하드코딩한다
 - `package-lock.json`, `.next/`, `node_modules/`를 커밋한다
 - feature 간 cross-import를 하거나 `app/`에 비즈니스 로직을 넣는다
 - `app/api/` Route Handler 밖에서 `fetch`를 직접 호출한다 (request 래퍼를 우회한다)
@@ -279,7 +279,7 @@ Conventions에 없는 **판단/금지** 사항이다.
 
 ### 🏁 Definition of Done
 
-코드 변경이 포함된 작업은 완료 보고 전 아래를 모두 충족한다. Git hook 통과와 별개로 **전체** `pnpm lint` / `pnpm build`를 직접 실행한다.
+코드 변경이 포함된 작업은 완료 보고 전 아래를 모두 충족한다. Git hook 통과와 별개로 **전체** `pnpm lint` / `pnpm build`를 직접 실행한다. PR에서는 CI가 같은 검사를 다시 실행한다.
 
 - [ ] `pnpm lint` / `pnpm build`를 통과한다
 - [ ] **Conventions** (Naming / Code Style / API / Git)를 준수한다
@@ -288,4 +288,4 @@ Conventions에 없는 **판단/금지** 사항이다.
 **커밋/PR 요청 시** 추가로 충족한다.
 
 - [ ] 커밋 메시지 형식 및 Git hooks를 통과한다
-- [ ] PR 제출 시 제목/본문/라벨을 작성한다
+- [ ] PR 제출 시 제목/본문을 작성한다 (라벨·assignee는 GitHub Actions가 자동으로 붙인다)
