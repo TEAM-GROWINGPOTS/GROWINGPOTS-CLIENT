@@ -1,23 +1,16 @@
 'use client';
 
+import { useSessionRestore } from '@features/auth/hooks/use-session-restore';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { createQueryClient } from '@shared/libs/query-client';
-import { useAuthStore } from '@shared/stores/auth-store';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   const [queryClient] = useState(() => createQueryClient());
-  const setNickname = useAuthStore((state) => state.setNickname);
 
-  useEffect(() => {
-    const nickname = document.cookie
-      .split('; ')
-      .find((row) => row.startsWith('nickname='))
-      ?.split('=')[1];
-    if (nickname) setNickname(decodeURIComponent(nickname));
-  }, [setNickname]);
+  useSessionRestore();
 
   return (
     <QueryClientProvider client={queryClient}>
