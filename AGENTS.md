@@ -150,11 +150,45 @@ ESLint + Prettier를 적용한다. import는 `simple-import-sort`로 정렬하�
 
 ### 🌐 API / Data Fetching
 
-- `fetch`를 직접 쓰지 않고 `@shared/apis/request` 래퍼를 사용한다
+#### 호출 흐름
+
+```
+컴포넌트 → 훅(useQuery/useMutation) → API 함수 → request → kyClient → /api/v1/* (같은 origin) → next.config.ts rewrites → 백엔드
+```
+
+- 브라우저에서 `kyClient`의 baseUrl은 `window.location.origin`이다. `/api/v1/*` 요청은 `next.config.ts`의 rewrites가 백엔드로 전달한다
+- 서버 환경에서는 `NEXT_PUBLIC_API_BASE_URL`을 baseUrl로 쓴다
+
+#### 규칙
+
+- `fetch`를 직접 쓰지 않고 `@shared/apis/request` 래퍼(`get`/`post`/`put`/`patch`/`delete`)를 사용한다
 - ky 인스턴스는 `@shared/apis/ky-client`의 `kyClient`만 쓴다
-- 응답 타입은 `@shared/apis/type`의 `ApiResponse<T>` 패턴을 따른다
-- 서버 상태는 TanStack Query로 관리한다. `createQueryClient`는 `@shared/libs/query-client`, Provider는 `app/providers.tsx`에 둔다
-- env는 `NEXT_PUBLIC_API_BASE_URL`을 쓴다. `.env.local`은 수정 및 커밋하지 않는다
+- 경로는 `@shared/apis/endpoint`의 `ENDPOINT`에 `/api/v1/`부터 전체 경로로 추가해서 쓴다. 문자열 경로를 직접 쓰지 않는다
+- 쿼리 키는 `@shared/apis/query-key`의 `QUERY_KEY` 팩토리로 만든다
+- 응답 타입은 `@shared/apis/type`의 `SuccessResponse<T>`(본문 없으면 `EmptySuccessResponse`)를 쓰고, API 함수에서 `.data`를 꺼내 반환한다
+- API 함수와 훅은 feature의 `apis/`·`hooks/`에 두고, 2개 이상 feature에서 쓰면 `shared/apis/`·`shared/hooks/`로 옮긴다
+- 서버 상태는 TanStack Query로 관리한다. `createQueryClient`(`@shared/libs/query-client`)가 query/mutation 에러를 전역 토스트로 처리하고, Provider는 `app/providers.tsx`에 둔다
+- 에러 응답의 `code`/`message`가 필요하면 `@shared/apis/parse-api-error`의 `parseApiError`를 쓴다
+
+```ts
+export const getPlanner = async () => {
+  const response = await request.get<SuccessResponse<PlannerResponse>>(ENDPOINT.PLANNER.ROOT);
+
+  return response.data;
+};
+```
+
+#### 인증
+
+- Access Token은 JS 메모리(`@shared/apis/auth-token`)에, Refresh Token은 서버가 내려주는 HttpOnly 쿠키에 둔다
+- `kyClient`가 요청마다 `Authorization` 헤더를 붙이고, 401이면 토큰을 재발급해 다시 요청한다. 재발급도 실패하면 `/api/auth/logout`으로 보낸다. API 함수에서 토큰을 직접 다루지 않는다
+- 앱 시작 시 `useSessionRestore`(`app/providers.tsx`에서 호출)가 재발급으로 세션을 복구하고 `useAuthStore`의 인증 상태를 채운다
+
+#### Route Handler · env
+
+- `app/api/`의 Route Handler는 서버에서 실행되므로 `fetch`로 백엔드를 직접 호출한다. `fetch` 금지의 유일한 예외다
+- env: `NEXT_PUBLIC_API_BASE_URL`(서버 환경의 kyClient baseUrl), `API_BASE_URL`(Route Handler 전용), `NEXT_PUBLIC_KAKAO_CLIENT_ID`(카카오 로그인)
+- `.env.local`은 수정 및 커밋하지 않는다
 
 ### 🌿 Git
 
@@ -218,7 +252,7 @@ Conventions에 없는 **판단/금지** 사항이다.
 - `.env`*를 생성/수정/커밋하거나 secret을 하드코딩한다
 - `package-lock.json`, `.next/`, `node_modules/`를 커밋한다
 - feature 간 cross-import를 하거나 `app/`에 비즈니스 로직을 넣는다
-- `fetch`를 직접 호출한다 (request 래퍼를 우회한다)
+- `app/api/` Route Handler 밖에서 `fetch`를 직접 호출한다 (request 래퍼를 우회한다)
 - `--no-verify`로 git hook을 우회한다
 - 사용자 확인 없이 `git commit` / `git push` / force push를 한다
 - 요청 범위 밖 대규모 리팩터링을 한다
