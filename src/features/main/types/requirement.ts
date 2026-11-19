@@ -1,4 +1,4 @@
-import type { GraduationCondition, MajorType } from '@shared/apis/types/graduation';
+import type { ConditionInfo, MajorType } from '@shared/apis/types/graduation';
 
 export type RequirementCode =
   | 'GRADUATION_REQUIRED'
@@ -14,7 +14,7 @@ export type RequirementCode =
 
 export type RequirementSemester = 'FIRST' | 'SECOND';
 
-export interface RequirementAccordionItem extends GraduationCondition {
+export interface RequirementAccordionItem extends ConditionInfo {
   majorName?: string | null;
   scrollKey?: string;
   detail?: {

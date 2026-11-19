@@ -137,19 +137,7 @@ export const AnalysisResultView = ({ isOnboardingCompleted = false }: AnalysisRe
       </div>
 
       <div className="flex h-231 w-full gap-20">
-        <div className="flex-1">
-          {studentProfile && (
-            <StudentInfo
-              name={studentProfile.name}
-              enrollmentStatus={studentProfile.enrollmentStatus}
-              schoolName={studentProfile.schoolName}
-              departmentName={studentProfile.departmentName}
-              studentNo={studentProfile.studentNo}
-              gradeLevel={studentProfile.gradeLevel}
-              semester={studentProfile.semester}
-            />
-          )}
-        </div>
+        <div className="flex-1">{studentProfile && <StudentInfo profile={studentProfile} />}</div>
         <div className="flex-3">
           <GraduationResult items={requirementItems} />
         </div>

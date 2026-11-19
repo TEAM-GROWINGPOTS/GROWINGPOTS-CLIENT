@@ -2,7 +2,7 @@
 
 import { getOtherRequiredConditions } from '@features/semester-planner/utils/graduation-conditions';
 import * as Accordion from '@radix-ui/react-accordion';
-import type { GraduationCondition, GraduationResponse, GraduationUnit } from '@shared/apis/types/graduation';
+import type { ConditionInfo, GraduationResponse, GraduationUnit } from '@shared/apis/types/graduation';
 import { Badge, Chip, Tooltip } from '@shared/components';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
@@ -23,10 +23,10 @@ interface TabRow {
   unit: GraduationUnit;
 }
 
-const toTabRows = (conditions: GraduationCondition[]): TabRow[] =>
+const toTabRows = (conditions: ConditionInfo[]): TabRow[] =>
   conditions.map(({ code, name, current, required, unit }) => ({ key: code, name, current, required, unit }));
 
-const orderConditions = (conditions: GraduationCondition[], order: string[]): GraduationCondition[] =>
+const orderConditions = (conditions: ConditionInfo[], order: string[]): ConditionInfo[] =>
   order.flatMap((code) => conditions.filter((c) => c.code === code));
 
 interface GraduationStatusAccordionProps {

@@ -1,7 +1,7 @@
-import type { GetGraduationParams } from '@features/main/apis/get-graduation';
 import { ALL_TAB_VALUE, GE_TAB_VALUE, OTHERS_TAB_VALUE } from '@features/main/constants/requirement';
 import type { RequirementAccordionItem, RequirementCode } from '@features/main/types/requirement';
-import type { GraduationCondition, GraduationResponse } from '@shared/apis/types/graduation';
+import type { GraduationQueryParams } from '@shared/apis/types/graduation';
+import type { ConditionInfo, GraduationResponse } from '@shared/apis/types/graduation';
 
 const SOURCE = 'COMPLETED';
 const MAJOR_TAB_PREFIX = 'MAJOR:';
@@ -21,7 +21,7 @@ const ALL_ONLY_ACCORDION_CODES = new Set<RequirementCode>(['ENGLISH_COURSE', 'SW
 export const ALL_GRADUATION_PARAMS = {
   majorType: ALL_TAB_VALUE,
   source: SOURCE,
-} satisfies GetGraduationParams;
+} satisfies GraduationQueryParams;
 
 export const getMajorTabValue = (studentMajorId: number) => `${MAJOR_TAB_PREFIX}${studentMajorId}`;
 
@@ -31,7 +31,7 @@ const getStudentMajorIdFromTab = (tabValue: string) => {
   return Number(tabValue.replace(MAJOR_TAB_PREFIX, ''));
 };
 
-export const getGraduationParams = (selectedTab: string): GetGraduationParams => {
+export const getGraduationParams = (selectedTab: string): GraduationQueryParams => {
   const studentMajorId = getStudentMajorIdFromTab(selectedTab);
 
   if (studentMajorId !== undefined) {
@@ -51,7 +51,7 @@ export const getGraduationParams = (selectedTab: string): GetGraduationParams =>
   return ALL_GRADUATION_PARAMS;
 };
 
-export const getGraduationCoursesParams = ({ majorType, studentMajorId }: GetGraduationParams) => ({
+export const getGraduationCoursesParams = ({ majorType, studentMajorId }: GraduationQueryParams) => ({
   majorType,
   studentMajorId,
 });
@@ -86,7 +86,7 @@ export const getVisibleRequirementItems = (selectedTab: string, items: Requireme
   return items;
 };
 
-const getRequirementCodes = (conditions: GraduationCondition[] | null | undefined) => {
+const getRequirementCodes = (conditions: ConditionInfo[] | null | undefined) => {
   return conditions?.map(({ code }) => code as RequirementCode) ?? [];
 };
 

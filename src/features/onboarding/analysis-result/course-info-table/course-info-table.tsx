@@ -7,7 +7,7 @@ import { getCourseInfoColumns } from '@features/onboarding/utils/get-course-info
 import { isCourseRowInvalid } from '@features/onboarding/utils/is-course-row-invalid';
 import { getCourses } from '@shared/apis/get-courses';
 import { QUERY_KEY } from '@shared/apis/query-key';
-import type { DepartmentResponse } from '@shared/apis/types/onboarding-options';
+import type { DepartmentInfo } from '@shared/apis/types/onboarding-options';
 import { Button } from '@shared/components/button/button';
 import Icon from '@shared/components/icon/icon';
 import { AddCourseModal } from '@shared/components/modal/add-course-modal';
@@ -36,7 +36,7 @@ export interface CourseInfo {
 
 interface CourseInfoTableProps {
   courses: CourseInfo[];
-  departments: DepartmentResponse[];
+  departments: DepartmentInfo[];
   divisions: Division[];
   admissionYear?: number;
   isEditing?: boolean;

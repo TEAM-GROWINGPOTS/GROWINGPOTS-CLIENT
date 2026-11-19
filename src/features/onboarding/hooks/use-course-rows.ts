@@ -1,7 +1,7 @@
 import type { Division } from '@features/onboarding/types/course';
 import type { Column } from '@features/onboarding/types/course-info-table';
 import { isCourseRowInvalid } from '@features/onboarding/utils/is-course-row-invalid';
-import type { DepartmentResponse } from '@shared/apis/types/onboarding-options';
+import type { DepartmentInfo } from '@shared/apis/types/onboarding-options';
 import type { AddCourseValues } from '@shared/components/modal/add-course-modal';
 import { parseTakenSemesterValue } from '@shared/utils/taken-semester-format';
 import { useEffect, useState } from 'react';
@@ -21,7 +21,7 @@ const toCreditValue = (value: string) => {
 interface UseCourseRowsParams {
   courses: CourseInfo[];
   isEditing: boolean;
-  departments: DepartmentResponse[];
+  departments: DepartmentInfo[];
   divisions: Division[];
   onValidityChange?: (isValid: boolean) => void;
   onDeleteRows?: (remainingCourses: CourseInfo[]) => void;

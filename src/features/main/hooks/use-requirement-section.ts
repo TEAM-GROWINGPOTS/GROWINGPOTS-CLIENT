@@ -1,5 +1,5 @@
 import type { RequirementAccordionItem, RequirementDetail } from '@features/main/types/requirement';
-import type { GraduationCondition, GraduationResponse } from '@shared/apis/types/graduation';
+import type { ConditionInfo, GraduationResponse } from '@shared/apis/types/graduation';
 import { useMemo, useState } from 'react';
 
 import { useMergedRequirementItems } from './use-merged-requirement-items';
@@ -25,7 +25,7 @@ interface UseRequirementSectionParams {
 interface RequirementSectionSource {
   majorName: string | null;
   graduationRequired: GraduationResponse['graduationRequired'];
-  conditions: GraduationCondition[];
+  conditions: ConditionInfo[];
 }
 
 interface RequirementSectionOption {
@@ -52,7 +52,7 @@ const getRequirementDetail = (item: RequirementAccordionItem, details: Requireme
 };
 
 const getConditionItem = (
-  condition: GraduationCondition,
+  condition: ConditionInfo,
   details: RequirementDetail[],
   majorName?: string | null,
 ): RequirementAccordionItem => {
@@ -68,11 +68,7 @@ const getConditionItem = (
   };
 };
 
-const getConditionItems = (
-  conditions: GraduationCondition[],
-  details: RequirementDetail[],
-  majorName?: string | null,
-) => {
+const getConditionItems = (conditions: ConditionInfo[], details: RequirementDetail[], majorName?: string | null) => {
   return conditions.map((condition) => getConditionItem(condition, details, majorName));
 };
 

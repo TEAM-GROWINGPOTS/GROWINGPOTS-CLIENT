@@ -1,10 +1,10 @@
-import type { CertType, GraduationCondition, GraduationResponse } from '@shared/apis/types/graduation';
+import type { CertType, ConditionInfo, GraduationResponse } from '@shared/apis/types/graduation';
 
 import type { RequirementCardProps, RequirementVariant } from './requirement-card';
 
 type MetricGroup = 'credit' | 'non-credit';
 
-const unitSuffixes: Record<GraduationCondition['unit'], string> = {
+const unitSuffixes: Record<ConditionInfo['unit'], string> = {
   CREDITS: '학점',
   COURSES: '과목',
 };
@@ -21,8 +21,8 @@ const toVariant = (group: MetricGroup, satisfied: boolean): RequirementVariant =
   return group === 'credit' ? 'dark' : 'highlight';
 };
 
-const mergeConditionsByCode = (conditions: GraduationCondition[]) => {
-  const merged = new Map<string, GraduationCondition>();
+const mergeConditionsByCode = (conditions: ConditionInfo[]) => {
+  const merged = new Map<string, ConditionInfo>();
 
   conditions.forEach((condition) => {
     const existing = merged.get(condition.code);
@@ -46,7 +46,7 @@ const mergeConditionsByCode = (conditions: GraduationCondition[]) => {
   return merged;
 };
 
-const toConditionCard = (condition: GraduationCondition, label: string): RequirementCardProps => {
+const toConditionCard = (condition: ConditionInfo, label: string): RequirementCardProps => {
   const group: MetricGroup = condition.unit === 'CREDITS' ? 'credit' : 'non-credit';
 
   return {

@@ -1,7 +1,5 @@
-import type { CourseArea } from '@shared/apis/types/course-search';
+import type { CourseArea, OpenedSemester } from '@shared/apis/types/course-search';
 import type { GraduationResponse } from '@shared/apis/types/graduation';
-
-export type OpenedSemester = 'FIRST' | 'SECOND' | 'BOTH';
 
 export interface PlannerCourseBaseResponse {
   courseId: number;
