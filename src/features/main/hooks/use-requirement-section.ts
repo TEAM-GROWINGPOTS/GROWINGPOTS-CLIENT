@@ -1,6 +1,6 @@
 import type { RequirementAccordionItem, RequirementDetail } from '@features/main/types/requirement';
 import type { GraduationCondition, GraduationResponse } from '@shared/apis/types/graduation';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import { useMergedRequirementItems } from './use-merged-requirement-items';
 
@@ -26,13 +26,6 @@ interface RequirementSectionSource {
   majorName: string | null;
   graduationRequired: GraduationResponse['graduationRequired'];
   conditions: GraduationCondition[];
-}
-
-interface RequirementSectionOption {
-  value: string;
-  label: string;
-  sections: RequirementSectionSource[];
-  shouldSort?: boolean;
 }
 
 const getRequirementScrollKey = ({ code, majorName }: Pick<RequirementAccordionItem, 'code' | 'majorName'>) => {
@@ -68,16 +61,8 @@ const getConditionItem = (
   };
 };
 
-const getConditionItems = (
-  conditions: GraduationCondition[],
-  details: RequirementDetail[],
-  majorName?: string | null,
-) => {
-  return conditions.map((condition) => getConditionItem(condition, details, majorName));
-};
-
 const getGraduationRequiredItem = (
-  section: RequirementSectionOption['sections'][number],
+  section: RequirementSectionSource,
   details: RequirementDetail[],
 ): RequirementAccordionItem | null => {
   if (!section.graduationRequired) return null;
@@ -104,11 +89,11 @@ const getGraduationRequiredItem = (
 };
 
 const getSectionItems = (
-  section: RequirementSectionOption['sections'][number],
+  section: RequirementSectionSource,
   details: RequirementDetail[],
 ): RequirementAccordionItem[] => {
   const graduationRequiredItem = getGraduationRequiredItem(section, details);
-  const sectionItems = getConditionItems(section.conditions, details, section.majorName);
+  const sectionItems = section.conditions.map((condition) => getConditionItem(condition, details, section.majorName));
 
   return graduationRequiredItem ? [graduationRequiredItem, ...sectionItems] : sectionItems;
 };
@@ -127,35 +112,16 @@ const sortAllItemsByRequirementCode = (items: RequirementAccordionItem[]) => {
 };
 
 const getRequirementItems = (
-  { sections }: RequirementSectionOption,
+  data: GraduationResponse | null,
   details: RequirementDetail[],
 ): RequirementAccordionItem[] => {
+  if (!data) return [];
+
+  const sections: RequirementSectionSource[] = data.sections
+    ? [...data.sections.majors, data.sections.ge, data.sections.others]
+    : [{ majorName: null, graduationRequired: data.graduationRequired, conditions: data.conditions ?? [] }];
+
   return sections.flatMap((section) => getSectionItems(section, details));
-};
-
-const getRequirementSectionOption = (data: GraduationResponse | null): RequirementSectionOption | undefined => {
-  if (!data) return undefined;
-
-  if (!data.sections) {
-    return {
-      value: 'CURRENT',
-      label: '현재',
-      sections: [
-        {
-          majorName: null,
-          graduationRequired: data.graduationRequired,
-          conditions: data.conditions ?? [],
-        },
-      ],
-    };
-  }
-
-  return {
-    value: 'ALL',
-    label: '전체',
-    sections: [...data.sections.majors, data.sections.ge, data.sections.others],
-    shouldSort: true,
-  };
 };
 
 const getRequirementShortcuts = (items: RequirementAccordionItem[]) => {
@@ -187,30 +153,14 @@ const getRequirementShortcuts = (items: RequirementAccordionItem[]) => {
 };
 
 export const useRequirementSection = ({ data, details }: UseRequirementSectionParams) => {
-  const [scrollTargetKey, setScrollTargetKey] = useState<string | null>(null);
-  const selectedSectionOption = useMemo(() => getRequirementSectionOption(data), [data]);
-  const rawItems = useMemo(
-    () => (selectedSectionOption ? getRequirementItems(selectedSectionOption, details) : []),
-    [details, selectedSectionOption],
-  );
-  const mergedItems = useMergedRequirementItems(rawItems, Boolean(selectedSectionOption?.shouldSort));
+  const hasAllSections = Boolean(data?.sections);
+  const rawItems = useMemo(() => getRequirementItems(data, details), [data, details]);
+  const mergedItems = useMergedRequirementItems(rawItems, hasAllSections);
   const items = useMemo(
-    () => (selectedSectionOption?.shouldSort ? sortAllItemsByRequirementCode(mergedItems) : mergedItems),
-    [mergedItems, selectedSectionOption?.shouldSort],
+    () => (hasAllSections ? sortAllItemsByRequirementCode(mergedItems) : mergedItems),
+    [mergedItems, hasAllSections],
   );
   const shortcuts = useMemo(() => getRequirementShortcuts(items), [items]);
 
-  const handleShortcutClick = (scrollKey?: string) => {
-    if (!scrollKey) return;
-
-    setScrollTargetKey(null);
-    requestAnimationFrame(() => setScrollTargetKey(scrollKey));
-  };
-
-  return {
-    shortcuts,
-    items,
-    scrollTargetKey,
-    handleShortcutClick,
-  };
+  return { shortcuts, items };
 };

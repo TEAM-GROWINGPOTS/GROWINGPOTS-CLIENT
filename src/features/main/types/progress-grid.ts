@@ -13,7 +13,7 @@ export interface GraduationProgressItem {
 }
 
 export interface GraduationProgressGridProps {
-  items?: GraduationProgressItem[];
+  items: GraduationProgressItem[];
   selectedItemId?: string;
   onSelectItem?: (item: GraduationProgressItem) => void;
   className?: string;

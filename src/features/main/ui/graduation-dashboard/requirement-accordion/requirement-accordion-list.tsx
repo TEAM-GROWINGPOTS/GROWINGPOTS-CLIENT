@@ -1,6 +1,7 @@
 'use client';
 
 import { useRequirementAccordionScroll } from '@features/main/hooks/use-requirement-accordion-scroll';
+import type { RequirementScrollRequest } from '@features/main/types/requirement';
 import { cn } from '@shared/utils/cn';
 
 import { RequirementAccordion, type RequirementAccordionItem } from './requirement-accordion';
@@ -8,7 +9,8 @@ import { RequirementAccordion, type RequirementAccordionItem } from './requireme
 interface RequirementAccordionListProps {
   items: RequirementAccordionItem[];
   defaultValue?: string[];
-  scrollTargetKey?: string | null;
+  scrollRequest?: RequirementScrollRequest | null;
+  onScrollRequestChange?: (targetKey: string | null) => void;
   admissionYear?: number;
   className?: string;
 }
@@ -16,19 +18,13 @@ interface RequirementAccordionListProps {
 export const RequirementAccordionList = ({
   items,
   defaultValue,
-  scrollTargetKey,
+  scrollRequest,
+  onScrollRequestChange,
   admissionYear,
   className,
 }: RequirementAccordionListProps) => {
-  const {
-    scrollContainerRef,
-    itemRefs,
-    isAtBottom,
-    hasAutoScrollSpace,
-    isAutoScrollSpaceAnimated,
-    updateIsAtBottom,
-    handleManualScrollStart,
-  } = useRequirementAccordionScroll({ items, scrollTargetKey });
+  const { scrollContainerRef, scrollSpaceRef, itemRefs, isAtBottom, updateIsAtBottom, handleManualScrollStart } =
+    useRequirementAccordionScroll({ items, scrollRequest, onScrollRequestChange });
 
   return (
     <div className={cn('relative', className)}>
@@ -47,11 +43,9 @@ export const RequirementAccordionList = ({
           className="max-w-none"
         />
         <div
-          className={cn(
-            'shrink-0 overflow-hidden',
-            isAutoScrollSpaceAnimated && 'transition-[height] duration-300 ease-out',
-            hasAutoScrollSpace ? 'h-[533px]' : 'h-0',
-          )}
+          ref={scrollSpaceRef}
+          className="h-0 shrink-0 overflow-hidden transition-[height] duration-300 ease-out"
+          onTransitionEnd={updateIsAtBottom}
         />
       </div>
       {!isAtBottom && (
