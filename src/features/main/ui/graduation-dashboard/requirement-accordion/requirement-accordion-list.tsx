@@ -37,7 +37,7 @@ export const RequirementAccordionList = ({
     <div className={cn('relative', className)}>
       <div
         ref={scrollContainerRef}
-        className="h-[533px] [scrollbar-width:none] overflow-y-auto [&::-webkit-scrollbar]:hidden"
+        className="h-[533px] [scrollbar-width:none] overflow-y-auto overscroll-y-contain [&::-webkit-scrollbar]:hidden"
         onScroll={updateIsAtBottom}
         onScrollEnd={handleScrollEnd}
         onTouchMove={handleManualScrollStart}
