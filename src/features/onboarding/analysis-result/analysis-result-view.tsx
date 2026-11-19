@@ -1,5 +1,9 @@
 'use client';
 
+import { useCompleteOnboarding } from '@features/onboarding/hooks/use-complete-onboarding';
+import { useStudentCourses } from '@features/onboarding/hooks/use-student-courses';
+import { useUpdateStudentCourses } from '@features/onboarding/hooks/use-update-student-courses';
+import type { CourseInfo } from '@features/onboarding/types/course-info-table';
 import { Button } from '@shared/components/button/button';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { useDepartmentOptions } from '@shared/hooks/use-department-options';
@@ -8,10 +12,7 @@ import { useStudentProfile } from '@shared/hooks/use-student-profile';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useRef, useState } from 'react';
 
-import { useCompleteOnboarding } from '../hooks/use-complete-onboarding';
-import { useStudentCourses } from '../hooks/use-student-courses';
-import { useUpdateStudentCourses } from '../hooks/use-update-student-courses';
-import { type CourseInfo, CourseInfoTable, type CourseInfoTableRef } from './course-info-table/course-info-table';
+import { CourseInfoTable, type CourseInfoTableRef } from './course-info-table/course-info-table';
 import {
   mapCourseInfoToPutStudentCourses,
   mapStudentCoursesToCourseInfo,
@@ -42,6 +43,12 @@ export const AnalysisResultView = ({ isOnboardingCompleted = false }: AnalysisRe
   );
   const requirementItems = graduation ? mapGraduationResponseToCards(graduation) : [];
 
+  const saveCourses = (rows: CourseInfo[], onSuccess?: () => void) => {
+    if (!studentCourses) return;
+
+    updateStudentCourses({ courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses) }, { onSuccess });
+  };
+
   const handleEditToggleClick = () => {
     if (!isEditing) {
       if (!isCourseInfoValid) {
@@ -53,12 +60,9 @@ export const AnalysisResultView = ({ isOnboardingCompleted = false }: AnalysisRe
     }
 
     const rows = courseInfoTableRef.current?.getCourses();
-    if (!rows || !studentCourses) return;
+    if (!rows) return;
 
-    updateStudentCourses(
-      { courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses) },
-      { onSuccess: () => setIsEditing(false) },
-    );
+    saveCourses(rows, () => setIsEditing(false));
   };
 
   const handleCancelClick = () => {
@@ -75,9 +79,7 @@ export const AnalysisResultView = ({ isOnboardingCompleted = false }: AnalysisRe
   }, []);
 
   const handleDeleteRows = (remainingCourses: CourseInfo[]) => {
-    if (!studentCourses) return;
-
-    updateStudentCourses({ courses: mapCourseInfoToPutStudentCourses(remainingCourses, studentCourses.courses) });
+    saveCourses(remainingCourses);
   };
 
   const handlePdfReuploadClick = () => {
@@ -92,15 +94,10 @@ export const AnalysisResultView = ({ isOnboardingCompleted = false }: AnalysisRe
       return;
     }
 
-    updateStudentCourses(
-      { courses: mapCourseInfoToPutStudentCourses(rows, studentCourses.courses) },
-      {
-        onSuccess: async () => {
-          await completeOnboarding();
-          router.push('/graduation-dashboard');
-        },
-      },
-    );
+    saveCourses(rows, async () => {
+      await completeOnboarding();
+      router.push('/graduation-dashboard');
+    });
   };
 
   return (

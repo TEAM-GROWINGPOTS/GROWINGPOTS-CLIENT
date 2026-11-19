@@ -1,13 +1,9 @@
 'use client';
 
+import type { TableCellSelectOption } from '@features/onboarding/types/course-info-table';
 import Icon from '@shared/components/icon/icon';
 import { cn } from '@shared/utils/cn';
 import { type FocusEvent, type KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
-
-export interface TableCellSelectOption {
-  value: string;
-  label: string;
-}
 
 interface TableCellSelectProps {
   options: TableCellSelectOption[];

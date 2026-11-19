@@ -1,6 +1,6 @@
-import { TAKEN_SEMESTER_OPTIONS } from '../../constants/taken-semester';
-import type { PutStudentCourseItem, StudentCourse } from '../../types/course';
-import type { CourseInfo } from './course-info-table';
+import { TAKEN_SEMESTER_OPTIONS } from '@features/onboarding/constants/taken-semester';
+import type { PutStudentCourseItem, StudentCourse } from '@features/onboarding/types/course';
+import type { CourseInfo } from '@features/onboarding/types/course-info-table';
 
 export const mapStudentCoursesToCourseInfo = (courses: StudentCourse[]): CourseInfo[] =>
   courses.map((course) => ({

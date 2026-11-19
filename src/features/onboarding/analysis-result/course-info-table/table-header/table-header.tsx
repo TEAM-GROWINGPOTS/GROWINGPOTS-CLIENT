@@ -1,5 +1,5 @@
 import type { Column } from '@features/onboarding/types/course-info-table';
-import Icon from '@shared/components/icon/icon';
+import { Checkbox } from '@shared/components/checkbox/checkbox';
 import { cn } from '@shared/utils/cn';
 
 interface TableHeaderProps {
@@ -14,14 +14,7 @@ export const TableHeader = ({ columns, isEditing, isAllSelected, onSelectAllClic
     <tr className="bg-gray-50">
       {isEditing && (
         <th scope="col" className="px-8 py-4 text-left">
-          <button
-            type="button"
-            onClick={onSelectAllClick}
-            aria-label="전체 선택"
-            className="mx-auto flex size-20 items-center justify-center"
-          >
-            <Icon name={isAllSelected ? 'ic_checkbox_checked' : 'ic_checkbox_unchecked'} size={20} />
-          </button>
+          <Checkbox isChecked={isAllSelected} ariaLabel="전체 선택" className="mx-auto" onClick={onSelectAllClick} />
         </th>
       )}
       {columns.map(({ key, label }) => (

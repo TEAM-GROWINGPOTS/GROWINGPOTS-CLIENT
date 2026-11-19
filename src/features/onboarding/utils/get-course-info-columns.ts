@@ -1,6 +1,5 @@
-import type { TableCellSelectOption } from '@features/onboarding/analysis-result/course-info-table/table-cell/table-cell-select';
 import { COURSE_INFO_COLUMNS } from '@features/onboarding/constants/course-info-columns';
-import type { Column } from '@features/onboarding/types/course-info-table';
+import type { Column, TableCellSelectOption } from '@features/onboarding/types/course-info-table';
 
 export const getCourseInfoColumns = (
   departmentOptions: TableCellSelectOption[],

@@ -1,6 +1,7 @@
 export { Badge } from './badge/badge';
 export type { CarouselProps } from './carousel/carousel';
 export { Carousel } from './carousel/carousel';
+export { Checkbox } from './checkbox/checkbox';
 export { Chip } from './chip/chip';
 export { ClassCard } from './class-card/class-card';
 export type { IconButtonSize } from './icon-button/icon-button';

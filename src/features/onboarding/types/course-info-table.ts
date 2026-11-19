@@ -1,5 +1,22 @@
-import type { TableCellSelectOption } from '@features/onboarding/analysis-result/course-info-table/table-cell/table-cell-select';
 import type { COURSE_INFO_COLUMNS } from '@features/onboarding/constants/course-info-columns';
+
+export interface CourseInfo {
+  id: string;
+  courseId: number | null;
+  courseName: string;
+  department: string;
+  departmentId: number | null;
+  credit: string;
+  takenYear: number | null;
+  semester: string | null;
+  area: string;
+  areaId: number | null;
+}
+
+export interface TableCellSelectOption {
+  value: string;
+  label: string;
+}
 
 export interface Column {
   key: (typeof COURSE_INFO_COLUMNS)[number]['key'];

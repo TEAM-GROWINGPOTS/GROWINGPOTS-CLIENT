@@ -3,6 +3,7 @@
 import { useCollapsibleHeight } from '@features/onboarding/hooks/use-collapsible-height';
 import { useCourseRows } from '@features/onboarding/hooks/use-course-rows';
 import type { Division } from '@features/onboarding/types/course';
+import type { CourseInfo } from '@features/onboarding/types/course-info-table';
 import { getCourseInfoColumns } from '@features/onboarding/utils/get-course-info-columns';
 import { isCourseRowInvalid } from '@features/onboarding/utils/is-course-row-invalid';
 import { getCourses } from '@shared/apis/get-courses';
@@ -20,19 +21,6 @@ import { forwardRef, useImperativeHandle, useState } from 'react';
 
 import { TableHeader } from './table-header/table-header';
 import { TableRow } from './table-row/table-row';
-
-export interface CourseInfo {
-  id: string;
-  courseId: number | null;
-  courseName: string;
-  department: string;
-  departmentId: number | null;
-  credit: string;
-  takenYear: number | null;
-  semester: string | null;
-  area: string;
-  areaId: number | null;
-}
 
 interface CourseInfoTableProps {
   courses: CourseInfo[];
