@@ -6,14 +6,14 @@
 
 작업 요청 시 **아래 순서대로 진행한다.** 상세 규칙은 각 섹션에 따른다.
 
-| 단계         | 수행 내용                                                                                | 적용 섹션                                        |
-| ------------ | ---------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| 1. 요청/범위 | 요청 범위를 파악한다. 코드를 둘 위치(`app` / `features` / `shared`)를 결정한다           | **Project** > Overview, Folder Structure         |
-| 2. 조사      | 동일 feature/shared의 기존 패턴과 컨벤션을 먼저 살펴본다                                 | **Conventions**                                  |
-| 3. 사전 확인 | 패키지 추가 / `shared/` 구조 변경 등 해당 시 **구현 전에** 사용자에게 먼저 묻는다        | **Boundaries** > Ask First                       |
-| 4. 구현      | Naming / Code Style / API 규칙을 준수한다. Never 항목은 위반하지 않는다                  | **Conventions**, **Boundaries** > Never          |
-| 5. 검증      | `pnpm lint` → `pnpm build`를 실행한다. **Definition of Done**을 충족하고 diff를 점검한다 | **Project** > Commands, **Done**, **Boundaries** |
-| 6. 마무리    | 변경 사항을 요약해 완료를 보고한다. 커밋/PR은 **사용자가 요청할 때만** 작성한다          | **Conventions** > Git (Commit, Git hooks, PR)    |
+| 단계         | 수행 내용                                                                                                                                          | 적용 섹션                                        |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| 1. 요청/범위 | 요청 범위를 파악한다. 코드를 둘 위치(`app` / `features` / `shared`)를 결정한다                                                                     | **Project** > Overview, Folder Structure         |
+| 2. 조사      | 동일 feature/shared의 기존 패턴과 컨벤션을 먼저 살펴본다                                                                                           | **Conventions**                                  |
+| 3. 사전 확인 | 패키지 추가 / `shared/` 구조 변경 등 해당 시 **구현 전에** 사용자에게 먼저 묻는다                                                                  | **Boundaries** > Ask First                       |
+| 4. 구현      | 테스트 작성 → 실패 확인 → 최소 구현 → 리팩터 순서로 진행한다 (`tdd` 스킬). Naming / Code Style / API 규칙을 준수하고, Never 항목은 위반하지 않는다 | **Conventions**, **Boundaries** > Never          |
+| 5. 검증      | `pnpm lint` → `pnpm test:run` → `pnpm build`를 실행한다. **Definition of Done**을 충족하고 diff를 점검한다                                         | **Project** > Commands, **Done**, **Boundaries** |
+| 6. 마무리    | 변경 사항을 요약해 완료를 보고한다. 커밋/PR은 **사용자가 요청할 때만** 작성한다                                                                    | **Conventions** > Git (Commit, Git hooks, PR)    |
 
 ---
 
@@ -33,6 +33,7 @@
 | State           | Zustand                                              |
 | Server state    | TanStack Query v5                                    |
 | HTTP            | ky (`@shared/apis/`)                                 |
+| Test            | Vitest, Testing Library, MSW                         |
 | Package manager | **pnpm** (`npm`/`yarn` 금지)                         |
 | Lint / Format   | ESLint 9, Prettier 3, Husky, commitlint, lint-staged |
 
@@ -50,6 +51,7 @@ src/
     ├── components/    # Icon, Button 등 공통 UI
     ├── libs/          # query-client 등
     ├── styles/        # globals.css, tokens/, fonts
+    ├── test/          # setup, render, query-client, msw, factories (테스트 코드 전용)
     └── utils/         # cn 등
 public/svgs/           # SVG 원본 → sprite 생성
 ```
@@ -71,6 +73,10 @@ pnpm build            # sprite 생성 후 프로덕션 빌드
 pnpm start            # 빌드 결과 실행
 pnpm lint             # ESLint
 pnpm format           # Prettier 포맷
+pnpm test             # watch 모드 (사람용. 종료되지 않으므로 에이전트는 쓰지 않는다)
+pnpm test:run         # 전체 테스트 1회 실행 (CI)
+pnpm test:run <파일>  # 단일 파일 1회 실행 (에이전트)
+pnpm test:coverage    # 커버리지 리포트 (목표치는 두지 않는다)
 pnpm generate-sprite  # public/svgs → sprite (dev/build 전 자동 실행)
 ```
 
@@ -130,6 +136,18 @@ ESLint + Prettier를 적용한다. import는 `simple-import-sort`로 정렬하�
 - 서버 상태는 TanStack Query로 관리한다. `createQueryClient`는 `@shared/libs/query-client`, Provider는 `app/providers.tsx`에 둔다
 - env는 `NEXT_PUBLIC_API_BASE_URL`을 쓴다. `.env.local`은 수정 및 커밋하지 않는다
 
+### 🧪 Testing
+
+테스트를 작성할 때는 `tdd` 스킬(`.claude/skills/tdd/SKILL.md`)을 따른다.
+
+- 새 기능과 버그 수정은 Red → Green → Refactor로 진행한다
+- 기존 코드를 리팩터링할 때는 현재 동작을 기록하는 characterization test가 통과하는지 먼저 확인한다
+- 테스트 파일은 소스 옆에 둔다 (`map-planner.ts` → `map-planner.test.ts`)
+- `describe`는 대상 이름, `it`은 한국어 동작 문장으로 쓴다
+- 쿼리는 `getByRole` > `getByLabelText` > `getByText` 순으로 우선한다
+- API는 MSW로 mock한다. `fetch`나 `kyClient`를 직접 mock하지 않는다
+- `@shared/test/*`는 테스트 코드에서만 import한다
+
 ### 🌿 Git
 
 #### 💬 Commit
@@ -149,8 +167,8 @@ ESLint + Prettier를 적용한다. import는 `simple-import-sort`로 정렬하�
 | pre-commit | `git commit`        | staged `*.{ts,tsx}`에 lint-staged 실행 (eslint --fix → prettier --write) |
 | commit-msg | 커밋 메시지 작성 후 | commitlint로 `{type}: {subject}` 형식 검사                               |
 
-- hook은 **staged 파일만** 검사한다. 전체 검증은 Workflow **5단계**에서 `pnpm lint` / `pnpm build`를 직접 실행한다.
-- `pnpm build`는 hook에 포함되지 않는다.
+- hook은 **staged 파일만** 검사한다. 전체 검증은 Workflow **5단계**에서 `pnpm lint` / `pnpm test:run` / `pnpm build`를 직접 실행한다.
+- `pnpm test:run`과 `pnpm build`는 hook에 포함되지 않는다.
 
 #### 📤 PR
 
@@ -186,6 +204,7 @@ Conventions에 없는 **판단/금지** 사항이다.
 - `shared/` 구조/공통 API 시그니처 변경
 - route group / `next.config.ts` / `tsconfig.json` 변경
 - CI / Husky / commitlint 수정
+- 스펙이 바뀌어 기존 테스트의 기대값을 수정해야 할 때 (이유를 먼저 알린다)
 
 ### 🚫 Never
 
@@ -194,6 +213,8 @@ Conventions에 없는 **판단/금지** 사항이다.
 - feature 간 cross-import를 하거나 `app/`에 비즈니스 로직을 넣는다
 - `fetch`를 직접 호출한다 (request 래퍼를 우회한다)
 - `--no-verify`로 git hook을 우회한다
+- 요구사항 변경 없이 테스트를 통과시키려고 기대값을 수정한다
+- 실패하는 테스트를 `skip`하거나 삭제한다
 - 사용자 확인 없이 `git commit` / `git push` / force push를 한다
 - 요청 범위 밖 대규모 리팩터링을 한다
 
@@ -203,9 +224,9 @@ Conventions에 없는 **판단/금지** 사항이다.
 
 ### 🏁 Definition of Done
 
-코드 변경이 포함된 작업은 완료 보고 전 아래를 모두 충족한다. Git hook 통과와 별개로 **전체** `pnpm lint` / `pnpm build`를 직접 실행한다.
+코드 변경이 포함된 작업은 완료 보고 전 아래를 모두 충족한다. Git hook 통과와 별개로 **전체** `pnpm lint` / `pnpm test:run` / `pnpm build`를 직접 실행한다.
 
-- [ ] `pnpm lint` / `pnpm build`를 통과한다
+- [ ] `pnpm lint` / `pnpm test:run` / `pnpm build`를 통과한다
 - [ ] **Conventions** (Naming / Code Style / API / Git)를 준수한다
 - [ ] **Boundaries**를 위반하지 않는다 (env/secret diff 없음)
 
