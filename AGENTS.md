@@ -52,23 +52,39 @@
 src/
 ├── app/
 │   ├── layout.tsx, providers.tsx   # 루트 레이아웃/Provider
-│   └── (auth)/ (main)/ (onboarding)/
-├── features/{feature-name}/
-│   └── api/ components/ hooks/ types/
-└── shared/
-    ├── apis/          # kyClient, request, API 타입
-    ├── components/    # Icon, Button 등 공통 UI
-    ├── libs/          # query-client 등
-    ├── styles/        # globals.css, tokens/, fonts
-    └── utils/         # cn 등
-public/svgs/           # SVG 원본 → sprite 생성
+│   ├── page.tsx, not-found.tsx
+│   ├── (auth)/                     # login/
+│   ├── (main)/                     # graduation-dashboard/, semester-planner/, layout.tsx, error.tsx
+│   ├── (onboarding)/               # onboarding/, analysis-result/
+│   └── api/auth/                   # Route Handler: kakao/callback, logout, complete-onboarding
+├── features/{feature-name}/        # auth, main(졸업요건 대시보드), onboarding, semester-planner
+│   ├── apis/                       # API 함수
+│   ├── hooks/                      # Query/Mutation 훅, 화면 로직 훅
+│   ├── types/
+│   ├── constants/, utils/
+│   ├── contexts/                   # React Context (semester-planner)
+│   ├── ui/                         # 화면 컴포넌트 (onboarding·auth는 단계/화면 폴더를 feature 바로 아래에 둔다)
+│   └── index.ts                    # app에서 가져가는 컴포넌트 export
+├── shared/
+│   ├── apis/                       # kyClient, request, ENDPOINT, QUERY_KEY, auth-token, 공용 API 함수·타입
+│   ├── components/                 # Icon, Button, Modal, Toast 등 공통 UI (컴포넌트별 폴더)
+│   ├── constants/
+│   ├── hooks/                      # 2개 이상 feature에서 쓰는 훅
+│   ├── libs/                       # query-client
+│   ├── stores/                     # Zustand 스토어 (auth-store, side-navigation-store)
+│   ├── styles/                     # globals.css, tokens/, fonts
+│   └── utils/                      # cn 등
+├── types/                          # 전역 타입 선언 (kakao.d.ts)
+└── proxy.ts                        # 로그인·온보딩 완료 여부에 따른 라우트 리다이렉트
+public/svgs/                        # SVG 원본 → sprite 생성
 ```
 
-| 폴더        | 규칙                                                                      |
-| ----------- | ------------------------------------------------------------------------- |
-| `app/`      | 라우팅/레이아웃/Provider만 조립한다. 비즈니스 로직/API 호출은 넣지 않는다 |
-| `features/` | 도메인 단위로 격리한다. feature 간 직접 import는 하지 않는다              |
-| `shared/`   | 2개 이상 feature에서 쓰는 코드만 둔다                                     |
+| 폴더        | 규칙                                                                                                                  |
+| ----------- | --------------------------------------------------------------------------------------------------------------------- |
+| `app/`      | 라우팅/레이아웃/Provider만 조립한다. 비즈니스 로직/API 호출은 넣지 않는다                                             |
+| `app/api/`  | 서버에서만 할 수 있는 처리(카카오 토큰 교환, 인증·온보딩 쿠키 설정/삭제)만 Route Handler로 둔다. `app/` 규칙의 예외다 |
+| `features/` | 도메인 단위로 격리한다. feature 간 직접 import는 하지 않는다                                                          |
+| `shared/`   | 2개 이상 feature에서 쓰는 코드만 둔다                                                                                 |
 
 **Path alias:** `@app/`*, `@features/*`, `@shared/*`를 사용한다. 상대 경로 `../../`는 쓰지 않는다.
 
