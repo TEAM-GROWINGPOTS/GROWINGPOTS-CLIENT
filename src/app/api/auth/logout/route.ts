@@ -1,6 +1,18 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+  if (apiBase) {
+    try {
+      await fetch(`${apiBase}/api/v1/auth/logout`, {
+        method: 'POST',
+        headers: { Cookie: request.headers.get('cookie') ?? '' },
+      });
+    } catch {
+      // 세션이 이미 만료됐거나 백엔드 오류 시 무시하고 로그아웃 진행
+    }
+  }
+
   const redirectTo = request.nextUrl.searchParams.get('redirect') ?? '/login';
   const loginUrl = new URL('/login', request.url);
   loginUrl.searchParams.set('redirect', redirectTo === '/login' ? '' : redirectTo);

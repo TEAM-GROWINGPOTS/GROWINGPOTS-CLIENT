@@ -1,7 +1,5 @@
 'use client';
 
-import { clearAccessToken } from '@shared/apis/auth-token';
-import { AUTH_REQUEST_CONTEXT, kyClient } from '@shared/apis/ky-client';
 import Icon from '@shared/components/icon/icon';
 import { ConfirmModal } from '@shared/components/modal/confirm-modal';
 import { NavItem } from '@shared/components/nav-item/nav-item';
@@ -92,13 +90,8 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
     setIsLogoutModalOpen(true);
   };
 
-  const handleLogoutConfirm = async () => {
-    try {
-      await kyClient.post('api/v1/auth/logout', { context: AUTH_REQUEST_CONTEXT });
-    } finally {
-      clearAccessToken();
-      window.location.href = '/login';
-    }
+  const handleLogoutConfirm = () => {
+    window.location.href = '/api/auth/logout';
   };
 
   return (
