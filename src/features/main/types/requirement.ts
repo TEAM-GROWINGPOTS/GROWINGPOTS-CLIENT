@@ -12,7 +12,10 @@ export type RequirementCode =
   | 'ENGLISH_COURSE'
   | 'SW_CERT_COURSE';
 
-export type RequirementSemester = 'FIRST' | 'SECOND';
+// 같은 항목을 다시 클릭해도 effect가 재실행되도록 매번 새 객체로 생성
+export interface RequirementScrollRequest {
+  targetKey: string;
+}
 
 export interface RequirementAccordionItem extends GraduationCondition {
   majorName?: string | null;

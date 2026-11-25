@@ -13,12 +13,12 @@ export const GraduationDashboardContainer = () => {
     progressShortcuts,
     totalCredits = { current: 0, required: 0 },
     items,
-    scrollTargetKey,
+    scrollRequest,
     admissionYear,
     certs = [],
     gpa = 0,
     isError,
-    handleShortcutClick,
+    handleScrollRequestChange,
   } = useGraduationDashboard();
 
   if (isError) return null;
@@ -33,9 +33,9 @@ export const GraduationDashboardContainer = () => {
         shortcuts={progressShortcuts}
         totalCredits={totalCredits}
         items={items}
-        scrollTargetKey={scrollTargetKey}
+        scrollRequest={scrollRequest}
+        onScrollRequestChange={handleScrollRequestChange}
         admissionYear={admissionYear}
-        onShortcutClick={handleShortcutClick}
       />
     </div>
   );

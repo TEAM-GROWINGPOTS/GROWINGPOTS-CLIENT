@@ -1,4 +1,4 @@
-import type { RequirementAccordionItem } from '@features/main/types/requirement';
+import type { RequirementAccordionItem, RequirementScrollRequest } from '@features/main/types/requirement';
 import { getProgressGridItems } from '@features/main/utils/progress-grid';
 import type { GraduationResponse } from '@shared/apis/types/graduation';
 
@@ -14,9 +14,9 @@ interface GraduationDashboardSectionProps {
   shortcuts: RequirementAccordionItem[];
   totalCredits: GraduationResponse['summary']['totalCredits'];
   items: RequirementAccordionItem[];
-  scrollTargetKey: string | null;
+  scrollRequest: RequirementScrollRequest | null;
+  onScrollRequestChange: (targetKey: string | null) => void;
   admissionYear?: number;
-  onShortcutClick: (scrollKey?: string) => void;
 }
 
 export const GraduationDashboardSection = ({
@@ -26,9 +26,9 @@ export const GraduationDashboardSection = ({
   shortcuts,
   totalCredits,
   items,
-  scrollTargetKey,
+  scrollRequest,
+  onScrollRequestChange,
   admissionYear,
-  onShortcutClick,
 }: GraduationDashboardSectionProps) => {
   const progressGridItems = getProgressGridItems(shortcuts, totalCredits);
   const enabledScrollKeys = new Set(items.map(({ scrollKey }) => scrollKey).filter(Boolean));
@@ -44,12 +44,15 @@ export const GraduationDashboardSection = ({
       <div className="mt-29 grid grid-cols-2 gap-20">
         <GraduationProgressGrid
           items={interactiveProgressGridItems}
-          onSelectItem={({ scrollKey }) => onShortcutClick(scrollKey)}
+          onSelectItem={({ scrollKey }) => {
+            if (scrollKey) onScrollRequestChange(scrollKey);
+          }}
         />
         <RequirementAccordionList
           key={selectedTab}
           items={items}
-          scrollTargetKey={scrollTargetKey}
+          scrollRequest={scrollRequest}
+          onScrollRequestChange={onScrollRequestChange}
           admissionYear={admissionYear}
         />
       </div>
