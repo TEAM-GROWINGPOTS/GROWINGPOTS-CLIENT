@@ -1,10 +1,30 @@
 import '@testing-library/jest-dom/vitest';
 
-import { useAuthStore } from '@shared/stores/auth-store';
-import { useSideNavigationStore } from '@shared/stores/side-navigation-store';
 import { server } from '@shared/test/msw/server';
 import { cleanup } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
+import type { StateCreator } from 'zustand/vanilla';
+
+const { storeResetFns } = vi.hoisted(() => ({ storeResetFns: new Set<() => void>() }));
+
+// 모든 store를 만들어질 때 등록해 두고 테스트마다 초기 상태로 되돌린다. 새 store도 따로 등록할 필요가 없다.
+// zustand의 create도 내부에서 createStore를 쓰므로 createStore만 감싸면 두 방식이 모두 잡힌다.
+vi.mock('zustand/vanilla', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('zustand/vanilla')>();
+
+  const createResettableStore = <T>(stateCreator: StateCreator<T>) => {
+    const store = actual.createStore(stateCreator);
+    const initialState = store.getInitialState();
+    storeResetFns.add(() => store.setState(initialState, true));
+    return store;
+  };
+
+  return {
+    ...actual,
+    createStore: (<T>(stateCreator?: StateCreator<T>) =>
+      stateCreator ? createResettableStore(stateCreator) : createResettableStore) as typeof actual.createStore,
+  };
+});
 
 vi.mock('next/navigation', () => {
   const router = {
@@ -63,6 +83,5 @@ afterEach(() => {
   cleanup();
   server.resetHandlers();
   server.events.removeAllListeners();
-  useAuthStore.setState(useAuthStore.getInitialState(), true);
-  useSideNavigationStore.setState(useSideNavigationStore.getInitialState(), true);
+  storeResetFns.forEach((resetStore) => resetStore());
 });

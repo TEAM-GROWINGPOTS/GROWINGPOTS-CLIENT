@@ -19,5 +19,7 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     setupFiles: ['./src/shared/test/setup.ts'],
     clearMocks: true,
+    // zustand 내부의 zustand/vanilla import에도 setup.ts의 mock이 적용되도록 변환 대상에 넣는다.
+    server: { deps: { inline: ['zustand'] } },
   },
 });
