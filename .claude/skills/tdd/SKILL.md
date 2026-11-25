@@ -98,7 +98,8 @@ server.use(http.get(getApiUrl(ENDPOINT.GRADUATION.STATUS), () => new HttpRespons
 
 `setup.ts`가 다음을 이미 처리하므로 테스트에서 반복하지 않는다.
 
-- DOM cleanup, MSW 핸들러 초기화, Zustand store 초기화, mock 호출 기록 초기화
+- DOM cleanup, MSW 핸들러 초기화, mock 호출 기록 초기화
+- 모든 Zustand store 초기화 (`create`와 `createStore`로 만든 store를 모두 자동으로 등록하므로 새 store도 따로 추가할 필요가 없다)
 - `next/navigation`, `lottie-react` mock
 - `ResizeObserver`, `IntersectionObserver`, `matchMedia`, `scrollIntoView` 폴리필
 
