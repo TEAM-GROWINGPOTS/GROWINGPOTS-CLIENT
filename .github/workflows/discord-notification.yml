@@ -2,7 +2,7 @@ name: Automated Discord Notification
 
 on:
   pull_request:
-    types: [opened, reopened, closed]
+    types: [opened, closed]
 
   pull_request_review:
     types: [submitted]
@@ -129,11 +129,6 @@ jobs:
                 COLOR=3066993
                 DESC="$COMMON_DESC"
                 ;;
-              reopened)
-                TITLE="🔄 PR이 다시 열렸어요."
-                COLOR=3447003
-                DESC="$COMMON_DESC"
-                ;;
               closed)
                 if [ "$IS_MERGED" = "true" ]; then
                   TITLE="🎉 PR이 머지되었어요."
@@ -174,11 +169,11 @@ jobs:
               | length
             ')
 
-            [ "$APPROVED_REVIEW_COUNT" -ne 2 ] && exit 0
+            [ "$APPROVED_REVIEW_COUNT" -ne 1 ] && exit 0
 
             TITLE="✅ PR 머지 가능 상태가 되었어요"
             URL="$PR_URL"
-            DESC="**PR:** #$PR_NUMBER $PR_TITLE"$'\n'"**작성자:** @${PR_AUTHOR}"$'\n'"Approve 2명이 완료되었습니다."
+            DESC="**PR:** #$PR_NUMBER $PR_TITLE"$'\n'"**작성자:** @${PR_AUTHOR}"$'\n'"Approve가 완료되었습니다."
             AUTHOR="$REVIEWER"
             COLOR=5763719
 
