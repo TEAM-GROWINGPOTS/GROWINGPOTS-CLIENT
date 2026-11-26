@@ -94,15 +94,6 @@ export const SideNavigation = ({ academicInfo, initialIsCollapsed = false }: Sid
     window.location.href = '/api/auth/logout';
   };
 
-  useEffect(() => {
-    if (!isLogoutModalOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') handleLogoutConfirm();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isLogoutModalOpen]);
-
   return (
     <>
       <aside
